@@ -17,7 +17,6 @@
         <module>risk-management</module>
         <module>wallet</module>
         <module>trade-executor</module>
-        <module>app</module>
         <module>commons</module>
         <module>backtest-engine</module>
     </modules>
