@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.becker-freelance.trading</groupId>
+        <artifactId>trading-engine</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>trading-abstract-app</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>abstract-backtest-app</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.becker-freelance.trading</groupId>
+            <artifactId>strategy-engine</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.becker-freelance.trading</groupId>
+            <artifactId>app-commons</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.becker-freelance.trading</groupId>
+            <artifactId>datasource-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.becker-freelance.trading</groupId>
+            <artifactId>strategies-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+</project>

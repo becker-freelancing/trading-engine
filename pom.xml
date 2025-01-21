@@ -19,6 +19,7 @@
         <module>trade-executor</module>
         <module>commons</module>
         <module>backtest-engine</module>
+        <module>trading-abstract-app</module>
     </modules>
 
 
@@ -30,7 +31,6 @@
 
 
     <dependencies>
-
         <dependency>
             <groupId>org.ta4j</groupId>
             <artifactId>ta4j-core</artifactId>
