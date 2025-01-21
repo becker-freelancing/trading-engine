@@ -17,4 +17,12 @@
         <module>strategies-impl</module>
     </modules>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.becker.freelance</groupId>
+            <artifactId>money-management</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
 </project>
