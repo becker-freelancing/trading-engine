@@ -13,8 +13,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>api</module>
-        <module>strategies-impl</module>
+        <module>strategies-api</module>
     </modules>
 
     <dependencies>
