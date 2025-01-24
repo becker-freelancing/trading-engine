@@ -24,7 +24,7 @@ public class AbstractBacktestApp {
         PropertyAsker propertyAsker = new PropertyAsker();
         BaseStrategy strategy = propertyAsker.askProperty(BaseStrategy.loadAll(), BaseStrategy::getName, "Strategie");
         logger.info("\t\tAnzahl Permutationen {}", strategy.getParameters().permutate().size());
-        AppMode appMode = propertyAsker.askProperty(List.of(AppMode.values()), AppMode::toString, "AppMode");
+        AppMode appMode = propertyAsker.askProperty(AppMode.findAll(), AppMode::getDescription, "AppMode");
         Pair pair = propertyAsker.askProperty(List.of(Pair.values()), Pair::getTechnicalName, "Pair");
         Integer numThreads = propertyAsker.askProperty(List.of(1, 20, 40, 80), i -> Integer.toString(i), "Anzahl an Threads");
 

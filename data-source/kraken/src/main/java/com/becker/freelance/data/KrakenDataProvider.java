@@ -22,7 +22,7 @@ public class KrakenDataProvider extends DataProvider{
 
     @Override
     protected boolean supports(AppMode appMode) {
-        return AppMode.KRAKEN_DEMO.equals(appMode);
+        return "KRAKEN".equalsIgnoreCase(appMode.getDataSourceName()) && appMode.isDemo();
     }
 
     @Override

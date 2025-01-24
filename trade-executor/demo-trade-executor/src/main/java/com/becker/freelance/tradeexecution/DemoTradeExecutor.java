@@ -39,7 +39,7 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     protected boolean supports(AppMode appMode) {
-        return AppMode.KRAKEN_DEMO.equals(appMode);
+        return appMode.isDemo();
     }
 
     @Override
