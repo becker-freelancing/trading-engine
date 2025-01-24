@@ -18,14 +18,16 @@ public abstract class DataProvider {
 
     public static DataProvider getInstance(AppMode appMode){
         ServiceLoader<DataProvider> serviceLoader = ServiceLoader.load(DataProvider.class);
+        List<DataProvider> providers = serviceLoader.stream().map(ServiceLoader.Provider::get).filter(provider -> provider.supports(appMode)).toList();
 
-        for (DataProvider dataProvider : serviceLoader) {
-            if (dataProvider.supports(appMode)){
-                return dataProvider;
-            }
+        if (providers.size() > 1){
+            throw new IllegalStateException("Found multiple DataProvider for AppMode " + appMode.getDescription() + ": " + providers);
+        }
+        if (providers.isEmpty()) {
+            throw new IllegalArgumentException("AppMode " + appMode + " is not supported");
         }
 
-        throw new IllegalArgumentException("AppMode " + appMode + " is not supported");
+        return providers.get(0);
     }
 
     protected abstract boolean supports(AppMode appMode);

@@ -40,7 +40,7 @@ public class BacktestResultWriter {
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String strategyName = baseStrategy.getName();
         DateTimeFormatter fileDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
-        this.writePath = Path.of(PathUtil.fromRelativePath(".results\\" + strategyName + "\\" + strategyName + "__" + fileDateFormatter.format(appConfiguration.getStartTime()) + ".csv"));
+        this.writePath = Path.of(PathUtil.fromRelativePath(".results\\" + strategyName + "\\" + strategyName + "__" + fileDateFormatter.format(appConfiguration.startTime()) + ".csv"));
         if (!Files.exists(writePath)){
             try {
                 Files.createDirectories(writePath.getParent());
@@ -52,9 +52,9 @@ public class BacktestResultWriter {
         }
         DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
         this.baseString = String.format("%s,%s,%s,",
-                executionConfiguration.getPair(),
-                timeFormatter.format(executionConfiguration.getStartTime()),
-                timeFormatter.format(executionConfiguration.getEndTime())) + "%s,%s,%s," + executionConfiguration.getInitialWalletAmount() + ",%s,%s\n";
+                executionConfiguration.pair(),
+                timeFormatter.format(executionConfiguration.startTime()),
+                timeFormatter.format(executionConfiguration.endTime())) + "%s,%s,%s," + executionConfiguration.initialWalletAmount() + ",%s,%s\n";
 
         BacktestResultZipper.registerOnShutdown(writePath);
     }

@@ -10,13 +10,18 @@ public abstract class TradeExecutor {
 
     public static TradeExecutor find(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration){
         ServiceLoader<TradeExecutor> tradeExecutors = ServiceLoader.load(TradeExecutor.class);
-        for (TradeExecutor tradeExecutor : tradeExecutors) {
-            if (tradeExecutor.supports(appConfiguration.getAppMode())){
-                return tradeExecutor.construct(executionConfiguration);
-            }
+        AppMode appMode = appConfiguration.appMode();
+        List<TradeExecutor> executors = tradeExecutors.stream().map(ServiceLoader.Provider::get).filter(provider -> provider.supports(appMode)).toList();
+
+        if (executors.size() > 1){
+            throw new IllegalStateException("Found multiple TradeExecutor for AppMode " + appMode.getDescription() + ": " + executors);
         }
-        throw new IllegalArgumentException("No TradeExecutor found for " + appConfiguration.getAppMode());
-    }
+        if (executors.isEmpty()) {
+            throw new IllegalArgumentException("AppMode " + appMode.getDescription() + " is not supported");
+        }
+
+        return executors.get(0).construct(executionConfiguration);
+     }
 
     protected abstract TradeExecutor construct(ExecutionConfiguration executionConfiguration);
 

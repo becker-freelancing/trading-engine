@@ -15,10 +15,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 public class BacktestEngine {
 
@@ -37,7 +35,7 @@ public class BacktestEngine {
         this.appConfiguration = appConfiguration;
         this.executionConfiguration = executionConfiguration;
         this.baseStrategy = baseStrategy;
-        this.executor = Executors.newFixedThreadPool(appConfiguration.getNumThreads());
+        this.executor = Executors.newFixedThreadPool(appConfiguration.numThreads());
         resultWriter = new BacktestResultWriter(appConfiguration, executionConfiguration, baseStrategy);
     }
 
@@ -54,8 +52,8 @@ public class BacktestEngine {
 
     private void init() {
         try {
-            timeSeries = DataProvider.getInstance(appConfiguration.getAppMode())
-                    .readTimeSeries(executionConfiguration.getPair(), executionConfiguration.getStartTime(), executionConfiguration.getEndTime());
+            timeSeries = DataProvider.getInstance(appConfiguration.appMode())
+                    .readTimeSeries(executionConfiguration.pair(), executionConfiguration.startTime(), executionConfiguration.endTime());
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -75,7 +73,7 @@ public class BacktestEngine {
 
             StrategyEngine strategyEngine = new StrategyEngine(strategyForBacktest, tradeExecutor);
 
-            for (LocalDateTime timeKey : timeSeries.iterator(executionConfiguration.getStartTime(), executionConfiguration.getEndTime())) {
+            for (LocalDateTime timeKey : timeSeries.iterator(executionConfiguration.startTime(), executionConfiguration.endTime())) {
                 strategyEngine.executeForTime(timeSeries, timeKey);
             }
 

@@ -23,10 +23,10 @@ public class DemoTradeExecutor extends TradeExecutor {
     }
 
     private DemoTradeExecutor(ExecutionConfiguration executionConfiguration){
-        wallet = new Wallet(executionConfiguration.getInitialWalletAmount());
+        wallet = new Wallet(executionConfiguration.initialWalletAmount());
         openPositions = new ArrayList<>();
         closedTrades = new ArrayList<>();
-        pair = executionConfiguration.getPair();
+        pair = executionConfiguration.pair();
         tradingCalculator = new TradingCalculator(pair, executionConfiguration.getEurUsdTimeSeries());
         MarginCalculator marginCalculator = new MarginCalculator(pair, executionConfiguration.getEurUsdTimeSeries());
         positionCalculation = new PositionCalculation(tradingCalculator, marginCalculator);

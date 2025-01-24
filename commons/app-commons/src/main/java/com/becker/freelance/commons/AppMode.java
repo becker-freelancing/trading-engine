@@ -17,4 +17,5 @@ public interface AppMode {
     public default String getDescription(){
         return getDataSourceName() + "_" + (isDemo() ? "DEMO" : "LIVE");
     }
+
 }
