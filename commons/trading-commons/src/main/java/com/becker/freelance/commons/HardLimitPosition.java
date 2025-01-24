@@ -1,6 +1,8 @@
 package com.becker.freelance.commons;
 
 
+import com.becker.freelance.commons.pair.Pair;
+
 public class HardLimitPosition extends Position {
 
     public HardLimitPosition(double size, Direction direction, TimeSeriesEntry openPrice, Pair pair,

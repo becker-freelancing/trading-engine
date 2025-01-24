@@ -1,5 +1,6 @@
 package com.becker.freelance.commons;
 
+import com.becker.freelance.commons.pair.Pair;
 import org.ta4j.core.Bar;
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.BaseBar;
@@ -49,7 +50,7 @@ public class TimeSeries implements Iterable<LocalDateTime>{
     public Bar getEntryForTimeAsBar(LocalDateTime time) {
         if (!barData.containsKey(time)) {
             if (getMinTime().isAfter(time)){
-                throw new IllegalStateException("No data found for " + time + " in Timeseries " + pair.getTechnicalName());
+                throw new IllegalStateException("No data found for " + time + " in Timeseries " + pair.technicalName());
             }
             do {
                 time = time.minus(pair.toDuration());
@@ -80,7 +81,7 @@ public class TimeSeries implements Iterable<LocalDateTime>{
 
     public List<Double> getLastNCloseForTime(LocalDateTime endTime, int n) {
         List<Double> closes = new ArrayList<>();
-        LocalDateTime start = endTime.minus(Duration.ofMinutes(pair.getTimeInMinutes() * n));
+        LocalDateTime start = endTime.minus(Duration.ofMinutes(pair.timeInMinutes() * n));
 
         while (start.isBefore(endTime) || start.isEqual(endTime)) {
             closes.add(getEntryForTime(start).closeMid());
@@ -92,7 +93,7 @@ public class TimeSeries implements Iterable<LocalDateTime>{
 
     public List<TimeSeriesEntry> getLastNCloseForTimeAsEntry(LocalDateTime endTime, int n) {
         List<TimeSeriesEntry> closes = new ArrayList<>();
-        LocalDateTime start = endTime.minus(Duration.ofMinutes(pair.getTimeInMinutes() * n));
+        LocalDateTime start = endTime.minus(Duration.ofMinutes(pair.timeInMinutes() * n));
 
         while (start.isBefore(endTime) || start.isEqual(endTime)) {
             closes.add(getEntryForTime(start));
@@ -104,7 +105,7 @@ public class TimeSeries implements Iterable<LocalDateTime>{
 
     public BarSeries getLastNCloseForTimeAsBarSeries(LocalDateTime endTime, int n) {
         List<Bar> closes = new ArrayList<>();
-        LocalDateTime start = endTime.minus(Duration.ofMinutes(pair.getTimeInMinutes() * n));
+        LocalDateTime start = endTime.minus(Duration.ofMinutes(pair.timeInMinutes() * n));
 
         while (start.isBefore(endTime) || start.isEqual(endTime)) {
             closes.add(getEntryForTimeAsBar(start));
@@ -117,7 +118,7 @@ public class TimeSeries implements Iterable<LocalDateTime>{
     @Override
     public String toString() {
         return String.format("TimeSeries(For: %s, From: %s, To: %s, Entries: %d)",
-                pair.getTechnicalName(), getMinTime(), getMaxTime(), index.size());
+                pair.technicalName(), getMinTime(), getMaxTime(), index.size());
     }
 
     public Pair getPair() {

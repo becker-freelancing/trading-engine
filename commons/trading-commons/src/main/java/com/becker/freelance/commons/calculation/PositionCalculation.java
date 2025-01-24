@@ -1,6 +1,7 @@
 package com.becker.freelance.commons.calculation;
 
 import com.becker.freelance.commons.*;
+import com.becker.freelance.commons.pair.Pair;
 
 import java.util.ArrayList;
 import java.util.Comparator;

@@ -2,6 +2,7 @@ package com.becker.freelance.commons;
 
 
 import com.becker.freelance.commons.calculation.TradingCalculator;
+import com.becker.freelance.commons.pair.Pair;
 
 import java.time.LocalDateTime;
 
@@ -38,7 +39,7 @@ public abstract class Position {
     }
 
     public double profitPerPoint() {
-        return size * pair.getProfitPerPointForOneContract();
+        return size * pair.profitPerPointForOneContract();
     }
 
     public double currentPrice(TimeSeriesEntry currentPrice) {

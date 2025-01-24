@@ -4,6 +4,7 @@ import com.becker.freelance.commons.*;
 import com.becker.freelance.commons.calculation.MarginCalculator;
 import com.becker.freelance.commons.calculation.PositionCalculation;
 import com.becker.freelance.commons.calculation.TradingCalculator;
+import com.becker.freelance.commons.pair.Pair;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

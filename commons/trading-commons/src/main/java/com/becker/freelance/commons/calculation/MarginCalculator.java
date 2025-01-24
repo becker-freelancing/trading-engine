@@ -1,6 +1,6 @@
 package com.becker.freelance.commons.calculation;
 
-import com.becker.freelance.commons.Pair;
+import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.TimeSeries;
 import com.becker.freelance.commons.TimeSeriesEntry;
 
@@ -25,22 +25,22 @@ public class MarginCalculator {
     }
 
     public MarginCalculator(Pair pair, TimeSeries timeSeries) {
-        if (!timeSeries.getPair().equals(Pair.EURUSD_1)) {
+        if (!timeSeries.getPair().equals(Pair.eurUsd1())) {
             throw new IllegalArgumentException("No EUR/USD Time Series provided");
         }
         this.pair = pair;
-        this.leverageFactor = pair.getLeverageFactor();
+        this.leverageFactor = pair.leverageFactor();
 
-        if ("USD".equals(pair.getCounterCurrency())) {
+        if ("USD".equals(pair.counterCurrency())) {
             this.conversionRate = timeSeries;
             this.conversionFactor = this::eurusdConversion;
-        } else if ("EUR".equals(pair.getCounterCurrency())) {
+        } else if ("EUR".equals(pair.counterCurrency())) {
             this.conversionFactor = this::noopConversion;
         }
     }
 
     public double calcMargin(double size, TimeSeriesEntry openCourse) {
-        double marginCounterCurrency = size * leverageFactor * openCourse.closeMid() * pair.getSizeMultiplication();
+        double marginCounterCurrency = size * leverageFactor * openCourse.closeMid() * pair.sizeMultiplication();
         double conversionFactorValue = conversionFactor.apply(openCourse.getTime());
         return Math.round(marginCounterCurrency / conversionFactorValue * 100.0) / 100.0;
     }

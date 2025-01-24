@@ -1,6 +1,8 @@
 package com.becker.freelance.commons;
 
 
+import com.becker.freelance.commons.pair.Pair;
+
 public class TrailingStopPosition extends Position {
 
     private double trailingStepSize;

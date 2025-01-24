@@ -1,5 +1,7 @@
 package com.becker.freelance.commons;
 
+import com.becker.freelance.commons.pair.Pair;
+
 import java.time.LocalDateTime;
 
 public class TimeSeriesEntry {

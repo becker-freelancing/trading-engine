@@ -1,4 +1,4 @@
-package com.becker.freelance.appmode.impl;
+package com.becker.freelance.plugin.appmode;
 
 import com.becker.freelance.commons.AppMode;
 

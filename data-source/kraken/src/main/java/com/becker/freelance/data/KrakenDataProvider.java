@@ -1,7 +1,7 @@
 package com.becker.freelance.data;
 
 import com.becker.freelance.commons.AppMode;
-import com.becker.freelance.commons.Pair;
+import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.PathUtil;
 import com.becker.freelance.commons.TimeSeries;
 import com.opencsv.CSVReader;
@@ -27,8 +27,8 @@ public class KrakenDataProvider extends DataProvider{
 
     @Override
     public TimeSeries readTimeSeries(Pair pair, LocalDateTime from, LocalDateTime to) throws IOException {
-        logger.info("Start reading TimeSeries {}...", pair.getTechnicalName());
-        String filePath = PathUtil.fromRelativePath(".data\\" + pair.getFilename() + ".zip");
+        logger.info("Start reading TimeSeries {}...", pair.technicalName());
+        String filePath = PathUtil.fromRelativePath(".data\\" + getFilename(pair) + ".zip");
 
         // Read CSV from ZIP file
         ZipFile zipFile = new ZipFile(filePath);
@@ -41,8 +41,12 @@ public class KrakenDataProvider extends DataProvider{
             throw new IOException(e);
         }
         TimeSeries timeSeries = map(pair, from, to, rows, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        logger.info("Finished reading TimeSeries {}", pair.getTechnicalName());
+        logger.info("Finished reading TimeSeries {}", pair.technicalName());
         return timeSeries;
 
+    }
+
+    private String getFilename(Pair pair) {
+        return pair.baseCurrency() + pair.counterCurrency() + "_" + pair.timeInMinutes() + ".csv";
     }
 }

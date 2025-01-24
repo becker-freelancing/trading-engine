@@ -2,6 +2,7 @@ package com.becker.freelance.app;
 
 import com.becker.freelance.backtest.BacktestEngine;
 import com.becker.freelance.commons.*;
+import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.data.DataProvider;
 import com.becker.freelance.strategies.BaseStrategy;
 import org.slf4j.Logger;
@@ -35,12 +36,12 @@ public class AbstractBacktestApp implements Runnable{
         BaseStrategy strategy = propertyAsker.askProperty(BaseStrategy.loadAll(), BaseStrategy::getName, "Strategie");
         logger.info("\t\tAnzahl Permutationen {}", strategy.getParameters().permutate().size());
         AppMode appMode = propertyAsker.askProperty(AppMode.findAll(), AppMode::getDescription, "AppMode");
-        Pair pair = propertyAsker.askProperty(List.of(Pair.values()), Pair::getTechnicalName, "Pair");
+        Pair pair = propertyAsker.askProperty(Pair.allPairs(), Pair::technicalName, "Pair");
         Integer numThreads = propertyAsker.askProperty(List.of(1, 20, 40, 80), i -> Integer.toString(i), "Anzahl an Threads");
 
         TimeSeries eurusd = null;
         try {
-            eurusd = DataProvider.getInstance(appMode).readTimeSeries(Pair.EURUSD_1, fromTime.minusDays(1), toTime);
+            eurusd = DataProvider.getInstance(appMode).readTimeSeries(Pair.eurUsd1(), fromTime.minusDays(1), toTime);
         } catch (IOException e) {
             throw new IllegalStateException("Could not read Time Series EUR/USD M1", e);
         }
