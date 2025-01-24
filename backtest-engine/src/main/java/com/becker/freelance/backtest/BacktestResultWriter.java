@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class BacktestResultWriter {
 
-    private final String HEADER = "pair,from_time,to_time,min,max,cumulative,initial_wallet_amount,parameter,trades";
+    private final String HEADER = "pair,from_time,to_time,min,max,cumulative,initial_wallet_amount,parameter,trades\n";
 
     private final AppConfiguration appConfiguration;
     private final ExecutionConfiguration executionConfiguration;
@@ -52,7 +52,7 @@ public class BacktestResultWriter {
         }
         DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
         this.baseString = String.format("%s,%s,%s,",
-                executionConfiguration.pair(),
+                executionConfiguration.pair().technicalName(),
                 timeFormatter.format(executionConfiguration.startTime()),
                 timeFormatter.format(executionConfiguration.endTime())) + "%s,%s,%s," + executionConfiguration.initialWalletAmount() + ",%s,%s\n";
 
@@ -73,6 +73,10 @@ public class BacktestResultWriter {
         double sum = 0.;
         double min = Double.MAX_VALUE;
         double max = -min;
+        if (profits.isEmpty()){
+            min = 0;
+            max = 0;
+        }
         for (Double profit : profits) {
             sum += profit;
             if (sum > max) max = sum;

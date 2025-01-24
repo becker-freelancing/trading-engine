@@ -1,4 +1,4 @@
-package com.becker.freelance.commons;
+package com.becker.freelance.wallet;
 
 public class Wallet {
     private double amount;

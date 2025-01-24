@@ -1,6 +1,7 @@
 package com.becker.freelance.tradeexecution;
 
 import com.becker.freelance.commons.*;
+import com.becker.freelance.wallet.Wallet;
 
 import java.time.LocalDateTime;
 import java.util.List;

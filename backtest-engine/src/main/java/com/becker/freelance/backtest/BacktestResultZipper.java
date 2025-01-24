@@ -35,6 +35,7 @@ public class BacktestResultZipper {
 
 
     public void zipFile() {
+        logger.info("Saving Result file to {}", writePath);
         try (
                 FileOutputStream fos = new FileOutputStream(writePath.toFile());
                 ZstdCompressorOutputStream zos = new ZstdCompressorOutputStream(fos);
