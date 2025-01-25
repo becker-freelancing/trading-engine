@@ -57,7 +57,7 @@ public class BacktestEngine {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
-
+        Runtime.getRuntime().addShutdownHook(new Thread(executor::shutdownNow, "Shutdown-BacktestApp-0"));
     }
 
     private synchronized int getNextIteration(){
