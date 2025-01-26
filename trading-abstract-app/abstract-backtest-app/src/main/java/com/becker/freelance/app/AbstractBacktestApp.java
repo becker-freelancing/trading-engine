@@ -3,6 +3,7 @@ package com.becker.freelance.app;
 import com.becker.freelance.backtest.BacktestEngine;
 import com.becker.freelance.commons.*;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.data.DataProvider;
 import com.becker.freelance.strategies.BaseStrategy;
 import org.slf4j.Logger;

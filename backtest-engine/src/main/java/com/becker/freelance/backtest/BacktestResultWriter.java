@@ -3,7 +3,7 @@ package com.becker.freelance.backtest;
 import com.becker.freelance.commons.AppConfiguration;
 import com.becker.freelance.commons.ExecutionConfiguration;
 import com.becker.freelance.commons.PathUtil;
-import com.becker.freelance.commons.Trade;
+import com.becker.freelance.commons.position.Trade;
 import com.becker.freelance.strategies.BaseStrategy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

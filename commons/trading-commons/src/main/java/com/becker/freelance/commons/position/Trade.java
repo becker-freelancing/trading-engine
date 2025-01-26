@@ -1,6 +1,7 @@
-package com.becker.freelance.commons;
+package com.becker.freelance.commons.position;
 
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.signal.Direction;
 
 import java.time.LocalDateTime;
 

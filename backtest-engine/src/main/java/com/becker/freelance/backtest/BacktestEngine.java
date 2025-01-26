@@ -2,8 +2,8 @@ package com.becker.freelance.backtest;
 
 import com.becker.freelance.commons.AppConfiguration;
 import com.becker.freelance.commons.ExecutionConfiguration;
-import com.becker.freelance.commons.TimeSeries;
-import com.becker.freelance.commons.Trade;
+import com.becker.freelance.commons.timeseries.TimeSeries;
+import com.becker.freelance.commons.position.Trade;
 import com.becker.freelance.data.DataProvider;
 import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.strategies.BaseStrategy;

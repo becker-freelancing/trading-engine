@@ -1,7 +1,10 @@
 package com.becker.freelance.commons.calculation;
 
-import com.becker.freelance.commons.*;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.position.*;
+import com.becker.freelance.commons.signal.Direction;
+import com.becker.freelance.commons.signal.EntrySignal;
+import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.wallet.Wallet;
 
 import java.util.ArrayList;

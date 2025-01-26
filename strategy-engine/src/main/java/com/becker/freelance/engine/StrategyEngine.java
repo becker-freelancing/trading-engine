@@ -1,15 +1,14 @@
 package com.becker.freelance.engine;
 
-import com.becker.freelance.commons.*;
-import com.becker.freelance.commons.calculation.TradingCalculator;
-import com.becker.freelance.data.DataProvider;
+import com.becker.freelance.commons.signal.EntrySignal;
+import com.becker.freelance.commons.signal.ExitSignal;
+import com.becker.freelance.commons.timeseries.NoTimeSeriesEntryFoundException;
+import com.becker.freelance.commons.timeseries.TimeSeries;
+import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.strategies.BaseStrategy;
 import com.becker.freelance.tradeexecution.TradeExecutor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class StrategyEngine {

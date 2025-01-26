@@ -1,8 +1,10 @@
-package com.becker.freelance.commons;
+package com.becker.freelance.commons.position;
 
 
 import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.signal.Direction;
+import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 
 import java.time.LocalDateTime;
 

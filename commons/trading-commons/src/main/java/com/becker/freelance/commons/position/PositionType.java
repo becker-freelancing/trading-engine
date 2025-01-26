@@ -1,4 +1,4 @@
-package com.becker.freelance.commons;
+package com.becker.freelance.commons.position;
 
 public enum PositionType {
     TRAILING,

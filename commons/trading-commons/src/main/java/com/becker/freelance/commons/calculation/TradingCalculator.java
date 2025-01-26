@@ -1,9 +1,9 @@
 package com.becker.freelance.commons.calculation;
 
-import com.becker.freelance.commons.Direction;
+import com.becker.freelance.commons.signal.Direction;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.TimeSeries;
-import com.becker.freelance.commons.TimeSeriesEntry;
+import com.becker.freelance.commons.timeseries.TimeSeries;
+import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 
 import java.time.LocalDateTime;
 import java.util.function.Function;

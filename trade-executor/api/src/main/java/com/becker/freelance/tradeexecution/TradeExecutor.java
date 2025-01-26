@@ -1,6 +1,11 @@
 package com.becker.freelance.tradeexecution;
 
 import com.becker.freelance.commons.*;
+import com.becker.freelance.commons.position.Trade;
+import com.becker.freelance.commons.signal.EntrySignal;
+import com.becker.freelance.commons.signal.ExitSignal;
+import com.becker.freelance.commons.timeseries.TimeSeries;
+import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.wallet.Wallet;
 
 import java.time.LocalDateTime;

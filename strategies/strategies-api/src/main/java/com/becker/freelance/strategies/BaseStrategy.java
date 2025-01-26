@@ -1,9 +1,9 @@
 package com.becker.freelance.strategies;
 
 
-import com.becker.freelance.commons.EntrySignal;
-import com.becker.freelance.commons.ExitSignal;
-import com.becker.freelance.commons.TimeSeries;
+import com.becker.freelance.commons.signal.EntrySignal;
+import com.becker.freelance.commons.signal.ExitSignal;
+import com.becker.freelance.commons.timeseries.TimeSeries;
 
 import java.time.LocalDateTime;
 import java.util.*;

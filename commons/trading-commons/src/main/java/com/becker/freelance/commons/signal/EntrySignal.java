@@ -1,4 +1,6 @@
-package com.becker.freelance.commons;
+package com.becker.freelance.commons.signal;
+
+import com.becker.freelance.commons.position.PositionType;
 
 public class EntrySignal {
 
