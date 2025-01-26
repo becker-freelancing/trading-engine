@@ -36,8 +36,8 @@ public class TimeSeries implements Iterable<LocalDateTime>{
 
     public TimeSeriesEntry getEntryForTime(LocalDateTime time) {
         if (!data.containsKey(time)) {
-            if (index.stream().min(Comparator.naturalOrder()).get().isAfter(time)){
-                throw new IllegalArgumentException("No time found in Time Series " + pair + " before " + time);
+            if (getMinTime().isAfter(time)){
+                throw new NoTimeSeriesEntryFoundException(pair, time);
             }
             do {
                 time = time.minus(pair.toDuration());
@@ -50,7 +50,7 @@ public class TimeSeries implements Iterable<LocalDateTime>{
     public Bar getEntryForTimeAsBar(LocalDateTime time) {
         if (!barData.containsKey(time)) {
             if (getMinTime().isAfter(time)){
-                throw new IllegalStateException("No data found for " + time + " in Timeseries " + pair.technicalName());
+                throw new NoTimeSeriesEntryFoundException(pair, time);
             }
             do {
                 time = time.minus(pair.toDuration());

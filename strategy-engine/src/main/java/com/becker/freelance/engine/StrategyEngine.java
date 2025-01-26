@@ -26,12 +26,14 @@ public class StrategyEngine {
     }
 
     public void executeForTime(TimeSeries timeSeries, LocalDateTime time){
-        TimeSeriesEntry currentPrice = timeSeries.getEntryForTime(time);
+        try {
+            TimeSeriesEntry currentPrice = timeSeries.getEntryForTime(time);
 
-        closePositionsIfSlOrTpReached(currentPrice);
+            closePositionsIfSlOrTpReached(currentPrice);
 
-        shouldExit(currentPrice, timeSeries, time);
-        shouldEnter(currentPrice, timeSeries, time);
+            shouldExit(currentPrice, timeSeries, time);
+            shouldEnter(currentPrice, timeSeries, time);
+        } catch (NoTimeSeriesEntryFoundException ignored){}
     }
 
     private void shouldEnter(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time) {
