@@ -26,7 +26,7 @@ public class TimeSeries implements Iterable<LocalDateTime>{
         this.barData = data.entrySet().stream().parallel().map(entry -> {
             TimeSeriesEntry value = entry.getValue();
             return new BaseBar(pair.toDuration(), entry.getKey().atZone(utc),
-                    value.openMid(), value.highMid(), value.lowMid(), value.closeMid(), value.getVolume());
+                    value.getOpenMid(), value.getHighMid(), value.getLowMid(), value.getCloseMid(), value.volume());
         }).collect(Collectors.toMap(
                 bar -> bar.getEndTime().toLocalDateTime(),
                 bar -> bar
@@ -84,7 +84,7 @@ public class TimeSeries implements Iterable<LocalDateTime>{
         LocalDateTime start = endTime.minus(Duration.ofMinutes(pair.timeInMinutes() * n));
 
         while (start.isBefore(endTime) || start.isEqual(endTime)) {
-            closes.add(getEntryForTime(start).closeMid());
+            closes.add(getEntryForTime(start).getCloseMid());
             start = start.plus(pair.toDuration());
         }
 

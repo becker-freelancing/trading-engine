@@ -49,7 +49,7 @@ public abstract class DataProvider {
                             close, close, volume, trades, pair
                     );
                 })
-                .collect(Collectors.toMap(TimeSeriesEntry::getTime, entry -> entry, (existing, replacement) -> existing));
+                .collect(Collectors.toMap(TimeSeriesEntry::time, entry -> entry, (existing, replacement) -> existing));
 
 
         //FFill
@@ -71,11 +71,11 @@ public abstract class DataProvider {
             } else {
                 dataList.put(currentTime, new TimeSeriesEntry(
                         currentTime,
-                        currentEntry.getOpenBid(), currentEntry.getOpenAsk(),
-                        currentEntry.getHighBid(), currentEntry.getHighAsk(),
-                        currentEntry.getLowBid(), currentEntry.getLowAsk(),
-                        currentEntry.getCloseBid(), currentEntry.getCloseAsk(),
-                        currentEntry.getVolume(), currentEntry.getTrades(), currentEntry.getPair()
+                        currentEntry.openBid(), currentEntry.openAsk(),
+                        currentEntry.highBid(), currentEntry.highAsk(),
+                        currentEntry.lowBid(), currentEntry.lowAsk(),
+                        currentEntry.closeBid(), currentEntry.closeAsk(),
+                        currentEntry.volume(), currentEntry.trades(), currentEntry.pair()
                 ));
             }
         }

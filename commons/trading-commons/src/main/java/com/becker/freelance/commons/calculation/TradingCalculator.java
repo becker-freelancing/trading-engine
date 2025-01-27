@@ -20,7 +20,7 @@ public class TradingCalculator {
 
     private double eurUsdUmrechnung(LocalDateTime time) {
         TimeSeriesEntry entry = umrechnungsKurs.getEntryForTime(time);
-        double mid = (entry.getCloseAsk() + entry.getCloseBid()) / 2.0;
+        double mid = (entry.closeAsk() + entry.closeBid()) / 2.0;
         return mid;
     }
 
@@ -45,6 +45,6 @@ public class TradingCalculator {
         return new ProfitLossResult(Math.round(profitGegenwaehrung / umrechnungsFactorValue * 100.0) / 100.0, umrechnungsFactorValue);
     }
 
-        public record ProfitLossResult(double profit, double umrechnungsFactor) {
+        public record ProfitLossResult(double profit, double conversionRate) {
     }
 }

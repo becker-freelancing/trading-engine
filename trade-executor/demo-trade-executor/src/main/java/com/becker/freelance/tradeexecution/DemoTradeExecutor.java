@@ -53,24 +53,18 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public void closePositionsIfSlOrTpReached(TimeSeriesEntry currentPrice) {
-        for (Position position : new ArrayList<>(openPositions)) {
-            if (position.isTpReached(currentPrice) || position.isSlReached(currentPrice)) {
-                TradingCalculator.ProfitLossResult profitConversionRate = position.currentProfit(currentPrice, tradingCalculator);
-                closedTrades.add(positionCalculation.toTrade(profitConversionRate.umrechnungsFactor(), profitConversionRate.profit(), currentPrice.getPair(), position, currentPrice));
-                wallet.adjustAmount(profitConversionRate.profit());
-                wallet.removeMargin(position.getMargin());
-                openPositions.remove(position);
-            }
-        }
+        PositionCalculation.ClosePositionResults closePositionResults = positionCalculation.closePositionIfSlOrTpReached(openPositions, currentPrice, wallet);
+        openPositions = closePositionResults.positions();
+        closedTrades.addAll(closePositionResults.trades());
     }
 
     @Override
     public void exit(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, ExitSignal exitSignal) {
         PositionCalculation.ClosePositionResults closePositionResults;
         if (exitSignal.getDirectionToClose() == Direction.BUY){
-            closePositionResults = positionCalculation.closeAllBuyPositions(currentPrice, openPositions, currentPrice.getPair(), wallet);
+            closePositionResults = positionCalculation.closeAllBuyPositions(currentPrice, openPositions, currentPrice.pair(), wallet);
         } else {
-            closePositionResults = positionCalculation.closeAllSellPositions(currentPrice, openPositions, currentPrice.getPair(), wallet);
+            closePositionResults = positionCalculation.closeAllSellPositions(currentPrice, openPositions, currentPrice.pair(), wallet);
         }
         List<Trade> trades = closePositionResults.trades();
         openPositions = closePositionResults.positions();

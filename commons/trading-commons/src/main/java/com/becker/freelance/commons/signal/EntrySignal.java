@@ -4,34 +4,34 @@ import com.becker.freelance.commons.position.PositionType;
 
 public class EntrySignal {
 
-    private double amount;
+    private double size;
     private Direction direction;
     private double stopInPoints;
     private double limitInPoints;
     private PositionType positionType;
     private Double trailingStepSize;
 
-    public EntrySignal(double amount, Direction direction, double stopInPoints, double limitInPoints,
+    public EntrySignal(double size, Direction direction, double stopInPoints, double limitInPoints,
                        PositionType positionType) {
-        this.amount = amount;
+        this.size = size;
         this.direction = direction;
         this.stopInPoints = stopInPoints;
         this.limitInPoints = limitInPoints;
         this.positionType = positionType;
     }
 
-    public EntrySignal(double amount, Direction direction, double stopInPoints, double limitInPoints,
+    public EntrySignal(double size, Direction direction, double stopInPoints, double limitInPoints,
                        PositionType positionType, Double trailingStepSize) {
-        this(amount, direction, stopInPoints, limitInPoints, positionType);
+        this(size, direction, stopInPoints, limitInPoints, positionType);
         this.trailingStepSize = trailingStepSize;
     }
 
-    public double getAmount() {
-        return amount;
+    public double getSize() {
+        return size;
     }
 
-    public void setAmount(double amount) {
-        this.amount = amount;
+    public void setSize(double size) {
+        this.size = size;
     }
 
     public Direction getDirection() {

@@ -20,8 +20,7 @@ public class MarginCalculator {
 
     private double eurusdConversion(LocalDateTime time) {
         TimeSeriesEntry entry = conversionRate.getEntryForTime(time);
-        double mid = (entry.getCloseAsk() + entry.getCloseBid()) / 2.0;
-        return mid;
+        return entry.getCloseMid();
     }
 
     public MarginCalculator(Pair pair, TimeSeries timeSeries) {
@@ -40,8 +39,8 @@ public class MarginCalculator {
     }
 
     public double calcMargin(double size, TimeSeriesEntry openCourse) {
-        double marginCounterCurrency = size * leverageFactor * openCourse.closeMid() * pair.sizeMultiplication();
-        double conversionFactorValue = conversionFactor.apply(openCourse.getTime());
+        double marginCounterCurrency = size * leverageFactor * openCourse.getCloseMid() * pair.sizeMultiplication();
+        double conversionFactorValue = conversionFactor.apply(openCourse.time());
         return Math.round(marginCounterCurrency / conversionFactorValue * 100.0) / 100.0;
     }
 }

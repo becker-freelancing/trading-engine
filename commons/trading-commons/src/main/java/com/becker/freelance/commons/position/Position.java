@@ -7,12 +7,13 @@ import com.becker.freelance.commons.signal.Direction;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public abstract class Position {
     protected double size;
     protected Direction direction;
     protected Pair pair;
-    protected double openPrice;
+    protected TimeSeriesEntry openPrice;
     protected LocalDateTime openTime;
     protected double stopInPoints;
     protected double limitInPoints;
@@ -26,8 +27,8 @@ public abstract class Position {
         this.pair = pair;
         this.stopInPoints = Math.abs(stopInPoints);
         this.limitInPoints = Math.abs(limitInPoints);
-        this.openTime = openPrice.getTime();
-        this.openPrice = direction == Direction.BUY ? openPrice.getCloseAsk() : openPrice.getCloseBid();
+        this.openTime = openPrice.time();
+        this.openPrice = openPrice;
         this.positionType = positionType;
         this.margin = margin;
     }
@@ -37,7 +38,7 @@ public abstract class Position {
     public TradingCalculator.ProfitLossResult currentProfit(TimeSeriesEntry currentPrice, TradingCalculator tradingCalculator) {
         double price = currentPrice(currentPrice);
         double profitPerPoint = profitPerPoint();
-        return tradingCalculator.calcProfitLoss(openPrice, price, currentPrice.getTime(), direction, profitPerPoint);
+        return tradingCalculator.calcProfitLoss(getOpenPriceAsNumber(), price, currentPrice.time(), direction, profitPerPoint);
     }
 
     public double profitPerPoint() {
@@ -45,11 +46,11 @@ public abstract class Position {
     }
 
     public double currentPrice(TimeSeriesEntry currentPrice) {
-        return direction == Direction.BUY ? currentPrice.getCloseBid() : currentPrice.getCloseAsk();
+        return direction == Direction.BUY ? currentPrice.closeBid() : currentPrice.closeAsk();
     }
 
     public boolean isTpReached(TimeSeriesEntry currentPrice) {
-        double priceDifference = currentPrice(currentPrice) - openPrice;
+        double priceDifference = currentPrice(currentPrice) - getOpenPriceAsNumber();
         if (direction == Direction.BUY) {
             return priceDifference >= limitInPoints;
         } else {
@@ -58,7 +59,7 @@ public abstract class Position {
     }
 
     public boolean isSlReached(TimeSeriesEntry currentPrice) {
-        double priceDifference = currentPrice(currentPrice) - openPrice;
+        double priceDifference = currentPrice(currentPrice) - getOpenPriceAsNumber();
         if (direction == Direction.BUY) {
             return priceDifference <= -stopInPoints;
         } else {
@@ -82,7 +83,11 @@ public abstract class Position {
         return pair;
     }
 
-    public double getOpenPrice() {
+    public double getOpenPriceAsNumber() {
+        return direction == Direction.BUY ? openPrice.closeAsk() : openPrice.closeBid();
+    }
+
+    public TimeSeriesEntry getOpenPrice() {
         return openPrice;
     }
 
@@ -100,5 +105,18 @@ public abstract class Position {
 
     public PositionType getPositionType() {
         return positionType;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Position position = (Position) object;
+        return Double.compare(size, position.size) == 0 && Double.compare(stopInPoints, position.stopInPoints) == 0 && Double.compare(limitInPoints, position.limitInPoints) == 0 && Double.compare(margin, position.margin) == 0 && direction == position.direction && Objects.equals(pair, position.pair) && Objects.equals(openPrice, position.openPrice) && Objects.equals(openTime, position.openTime) && positionType == position.positionType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(size, direction, pair, openPrice, openTime, stopInPoints, limitInPoints, positionType, margin);
     }
 }
