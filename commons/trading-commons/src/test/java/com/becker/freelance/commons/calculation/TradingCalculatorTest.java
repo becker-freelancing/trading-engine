@@ -25,8 +25,7 @@ public class TradingCalculatorTest {
 
         when(timeSeries.getEntryForTime(any(LocalDateTime.class))).thenReturn(closeEntry);
         doReturn(PairMock.eurUsd()).when(timeSeries).getPair();
-        when(closeEntry.closeAsk()).thenReturn(1.055);
-        when(closeEntry.closeBid()).thenReturn(1.054);
+        when(closeEntry.getCloseMid()).thenReturn(1.0545);
     }
 
 
@@ -82,8 +81,7 @@ public class TradingCalculatorTest {
     public void testWithPaxgUsdSize1() {
         TradingCalculator calculator = new TradingCalculator(PairMock.gldUsd(), timeSeries);
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
-        when(closeEntry.closeAsk()).thenReturn(0.985);
-        when(closeEntry.closeBid()).thenReturn(0.99);
+        when(closeEntry.getCloseMid()).thenReturn(0.9875);
 
         double profitLoss = calculator.calcProfitLoss(2601.05, 2655.2, time, Direction.BUY, 10).profit();
         double umrechnungsFactor = calculator.calcProfitLoss(2601.05, 2655.2, time, Direction.BUY, 10).conversionRate();

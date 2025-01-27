@@ -18,8 +18,8 @@
         <module>wallet</module>
         <module>trade-executor</module>
         <module>commons</module>
-        <module>backtest-engine</module>
         <module>trading-abstract-app</module>
+        <module>backtest</module>
     </modules>
 
 
