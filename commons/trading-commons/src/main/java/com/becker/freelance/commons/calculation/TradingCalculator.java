@@ -20,8 +20,7 @@ public class TradingCalculator {
 
     private double eurUsdUmrechnung(LocalDateTime time) {
         TimeSeriesEntry entry = umrechnungsKurs.getEntryForTime(time);
-        double mid = (entry.closeAsk() + entry.closeBid()) / 2.0;
-        return mid;
+        return entry.getCloseMid();
     }
 
     public TradingCalculator(Pair pair, TimeSeries timeSeries) {

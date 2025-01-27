@@ -1,17 +1,24 @@
 package com.becker.freelance.commons.calculation;
 
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.position.*;
+import com.becker.freelance.commons.position.HardLimitPosition;
+import com.becker.freelance.commons.position.Position;
+import com.becker.freelance.commons.position.Trade;
+import com.becker.freelance.commons.position.TrailingStopPosition;
 import com.becker.freelance.commons.signal.Direction;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.wallet.Wallet;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 public class PositionCalculation {
+
+
+    public static record PositionCalculationResult(List<Position> positions, List<Trade> trades){}
 
     private final TradingCalculator tradingCalculator;
     private final MarginCalculator marginCalculator;
@@ -21,213 +28,176 @@ public class PositionCalculation {
         this.marginCalculator = marginCalculator;
     }
 
-    private List<Position> toPosition(EntrySignal entrySignal, TimeSeriesEntry timeSeriesEntry,
-                                     Wallet wallet) {
-        Position position;
-        if (entrySignal.getPositionType() == PositionType.HARD_LIMIT) {
-            position = toHardLimitPosition(entrySignal, timeSeriesEntry);
-        } else if (entrySignal.getPositionType() == PositionType.TRAILING) {
-            position = toTrailingStopPosition(entrySignal, timeSeriesEntry);
-        } else {
-            throw new IllegalArgumentException("Provided illegal position type: " + entrySignal.getPositionType());
+
+    public PositionCalculationResult openPosition(TimeSeriesEntry currentPrice, List<Position> positions, EntrySignal entrySignal, Wallet wallet) {
+        if (positions.isEmpty()){
+            return openSinglePosition(currentPrice, entrySignal, wallet);
         }
 
-        if (wallet.canOpen(position.getMargin())) {
-            wallet.addMargin(position.getMargin());
-            List<Position> positions = new ArrayList<>();
-            positions.add(position);
-            return positions;
-        } else {
-            return new ArrayList<>();
-        }
+
+        return switch (entrySignal.getDirection()){
+            case BUY -> openBuyPosition(currentPrice, positions, entrySignal, wallet);
+            case SELL -> openSellPosition(currentPrice, positions, entrySignal, wallet);
+        };
     }
 
-    private TrailingStopPosition toTrailingStopPosition(EntrySignal entrySignal, TimeSeriesEntry timeSeriesEntry) {
-        double margin = marginCalculator.calcMargin(entrySignal.getSize(), timeSeriesEntry);
-        return new TrailingStopPosition(entrySignal.getSize(), entrySignal.getDirection(),
-                timeSeriesEntry, timeSeriesEntry.pair(), entrySignal.getStopInPoints(),
-                entrySignal.getLimitInPoints(), entrySignal.getTrailingStepSize(), margin);
-    }
+    private PositionCalculationResult openSellPosition(TimeSeriesEntry currentPrice, List<Position> positions, EntrySignal entrySignal, Wallet wallet) {
+        Direction existingDirection = positions.get(0).getDirection();
 
-    private HardLimitPosition toHardLimitPosition(EntrySignal entrySignal, TimeSeriesEntry timeSeriesEntry) {
-        double margin = marginCalculator.calcMargin(entrySignal.getSize(), timeSeriesEntry);
-        return new HardLimitPosition(entrySignal.getSize(), entrySignal.getDirection(),
-                timeSeriesEntry, timeSeriesEntry.pair(), entrySignal.getStopInPoints(),
-                entrySignal.getLimitInPoints(), margin);
-    }
-
-    private List<Trade> closeAllPositions(TimeSeriesEntry timeSeriesEntry, List<Position> positions,
-                                         Pair pair, Wallet wallet) {
-        List<Trade> trades = new ArrayList<>();
-        for (Position position : positions) {
-            wallet.removeMargin(position.getMargin());
-            TradingCalculator.ProfitLossResult profitAndConversionRate = position.currentProfit(timeSeriesEntry, tradingCalculator);
-            double currentProfit = profitAndConversionRate.profit();
-            double conversionRate = profitAndConversionRate.conversionRate();
-            wallet.adjustAmount(currentProfit);
-            trades.add(toTrade(conversionRate, currentProfit, pair, position, timeSeriesEntry));
-        }
-        return trades;
+        return switch (existingDirection){
+            case BUY -> addBuyPositionToSellPositions(currentPrice, positions, entrySignal, wallet);
+            case SELL -> addSameDirectionPosition(currentPrice, positions, entrySignal, wallet);
+        };
     }
 
 
-    public ClosePositionResults closeAllBuyPositions(TimeSeriesEntry timeSeriesEntry, List<Position> positions, Pair pair, Wallet wallet) {
+    private PositionCalculationResult openBuyPosition(TimeSeriesEntry currentPrice, List<Position> positions, EntrySignal entrySignal, Wallet wallet) {
+        Direction existingDirection = positions.get(0).getDirection();
+
+        return switch (existingDirection){
+            case BUY -> addSameDirectionPosition(currentPrice, positions, entrySignal, wallet);
+            case SELL -> addBuyPositionToSellPositions(currentPrice, positions, entrySignal, wallet);//addSellPositionToBuyPositions(currentPrice, positions, entrySignal, wallet);
+        };
+    }
+
+    private PositionCalculationResult addBuyPositionToSellPositions(TimeSeriesEntry currentPrice, List<Position> positions, EntrySignal entrySignal, Wallet wallet) {
         List<Position> positionsToClose = new ArrayList<>();
-        List<Position> remainingPositions = new ArrayList<>();
-        for (Position position : positions) {
-            if (position.getDirection() == Direction.BUY){
+        double sizeToOpen = entrySignal.getSize();
+        boolean completelyEliminated = false;
+        boolean sizeToOpenEliminated = false;
+        Position positionToPartlyClose = null;
+        for (Position position : new ArrayList<>(positions)) {
+            double sizeAfterAdaption = sizeToOpen - position.getSize();
+            if (sizeAfterAdaption == 0){
                 positionsToClose.add(position);
-            } else {
-                remainingPositions.add(position);
-            }
-        }
-
-        List<Trade> trades = new ArrayList<>();
-        for (Position position : positionsToClose) {
-            wallet.removeMargin(position.getMargin());
-            TradingCalculator.ProfitLossResult profitAndConversionRate = position.currentProfit(timeSeriesEntry, tradingCalculator);
-            double currentProfit = profitAndConversionRate.profit();
-            double conversionRate = profitAndConversionRate.conversionRate();
-            wallet.adjustAmount(currentProfit);
-            trades.add(toTrade(conversionRate, currentProfit, pair, position, timeSeriesEntry));
-        }
-        return new ClosePositionResults(remainingPositions, trades);
-    }
-
-    public ClosePositionResults closeAllSellPositions(TimeSeriesEntry timeSeriesEntry, List<Position> positions, Pair pair, Wallet wallet) {
-        List<Position> positionsToClose = new ArrayList<>();
-        List<Position> remainingPositions = new ArrayList<>();
-        for (Position position : positions) {
-            if (position.getDirection() == Direction.SELL){
+                completelyEliminated = true;
+                sizeToOpen = sizeAfterAdaption;
+                break;
+            } else if (sizeAfterAdaption > 0) {
                 positionsToClose.add(position);
-            } else {
-                remainingPositions.add(position);
-            }
-        }
-
-        List<Trade> trades = new ArrayList<>();
-        for (Position position : positionsToClose) {
-            wallet.removeMargin(position.getMargin());
-            TradingCalculator.ProfitLossResult profitAndConversionRate = position.currentProfit(timeSeriesEntry, tradingCalculator);
-            double currentProfit = profitAndConversionRate.profit();
-            double conversionRate = profitAndConversionRate.conversionRate();
-            wallet.adjustAmount(currentProfit);
-            trades.add(toTrade(conversionRate, currentProfit, pair, position, timeSeriesEntry));
-        }
-        return new ClosePositionResults(remainingPositions, trades);
-    }
-
-    private Trade toTrade(double conversionRate, double currentProfit, Pair pair, Position position,
-                         TimeSeriesEntry timeSeriesEntry) {
-        return new Trade(position.getOpenTime(), timeSeriesEntry.time(), pair, currentProfit,
-                position.getOpenPriceAsNumber(), position.currentPrice(timeSeriesEntry), position.getSize(),
-                position.getDirection(), conversionRate, position.getPositionType());
-    }
-
-    private OpenPositionResult openSinglePosition(TimeSeriesEntry timeSeriesEntry, EntrySignal entrySignal,
-                                                 Wallet wallet) {
-        List<Position> position = toPosition(entrySignal, timeSeriesEntry, wallet);
-        return new OpenPositionResult(position, new ArrayList<>());
-    }
-
-    private OpenPositionResult openSameDirectionPositions(TimeSeriesEntry timeSeriesEntry, List<Position> positions,
-                                                         EntrySignal entrySignal,
-                                                         Wallet wallet) {
-        List<Position> position = toPosition(entrySignal, timeSeriesEntry, wallet);
-        positions.addAll(position);
-        return new OpenPositionResult(positions, new ArrayList<>());
-    }
-
-
-    private static record UeberhangResult(Double sizeToCompensate, Position ueberhang, List<Position> positionsToClose){}
-
-    private UeberhangResult getUeberhang(Double sizeToCompensate, List<Position> sortedPositions){
-        List<Position> positionsToClose = new ArrayList<>();
-        Position ueberhang = null;
-        for (Position position: sortedPositions){
-            double size = position.getSize();
-            if (sizeToCompensate - size >= 0){
-                sizeToCompensate -= size;
-                positionsToClose.add(position);
-            } else {
-                ueberhang = position;
+                sizeToOpen = sizeAfterAdaption;
+            } else if (sizeAfterAdaption < 0) {
+                sizeToOpenEliminated = true;
+                positionToPartlyClose = position;
                 break;
             }
         }
-        return new UeberhangResult(sizeToCompensate, ueberhang, positionsToClose);
-    }
 
-    private OpenPositionResult openOtherDirectionPositions(TimeSeriesEntry timeSeriesEntry, List<Position> positions,
-                                                          EntrySignal entrySignal,
-                                                          Wallet wallet) {
-        positions.sort(Comparator.comparing(Position::getOpenTime));
-
-        UeberhangResult ueberhangResult = getUeberhang(Double.valueOf(entrySignal.getSize()), positions);
-        List<Position> positionsToClose = ueberhangResult.positionsToClose();
-        Double sizeToCompensate = ueberhangResult.sizeToCompensate();
-
-        List<Position> remainingOpenPositions = positions.size() == 1 ? new ArrayList<>() : new ArrayList<>(positions.subList(positionsToClose.size(), positions.size()));
-
-        compensateUeberhang(positionsToClose, remainingOpenPositions, sizeToCompensate, timeSeriesEntry, ueberhangResult.ueberhang(), wallet);
-
-        List<Trade> closedPositions = closeAllPositions(timeSeriesEntry, positionsToClose, timeSeriesEntry.pair(), wallet);
-
-        return new OpenPositionResult(remainingOpenPositions, closedPositions);
-    }
-
-    private void compensateUeberhang(List<Position> positionsToClose, List<Position> remainingOpenPositions,
-                                    double sizeToCompensate, TimeSeriesEntry timeSeriesEntry, Position ueberhang,
-                                    Wallet wallet) {
-        if (sizeToCompensate > 0) {
-            double ueberhangClosingSize = ueberhang.getSize() - sizeToCompensate;
-            double ueberhangRemainingSize = ueberhang.getSize() - ueberhangClosingSize;
-            EntrySignal ueberhangEntrySignal = new EntrySignal(ueberhangRemainingSize, ueberhang.getDirection(),
-                    ueberhang.getStopInPoints(), ueberhang.getLimitInPoints(), ueberhang.getPositionType(),
-                    ueberhang instanceof TrailingStopPosition ? ((TrailingStopPosition) ueberhang).getTrailingStepSize() : null);
-
-            List<Position> ueberhangRemainingPosition = toPosition(ueberhangEntrySignal, timeSeriesEntry, wallet);
-            for (int i = ueberhangRemainingPosition.size() - 1; i >= 0; i--){
-                remainingOpenPositions.add(0, ueberhangRemainingPosition.get(i));
-            }
-
-            EntrySignal ueberhangCloseEntrySignal = new EntrySignal(ueberhangRemainingSize, ueberhang.getDirection(),
-                    ueberhang.getStopInPoints(), ueberhang.getLimitInPoints(), ueberhang.getPositionType(),
-                    ueberhang instanceof TrailingStopPosition ? ((TrailingStopPosition) ueberhang).getTrailingStepSize() : null);
-
-            List<Position> ueberhangClosePosition = toPosition(ueberhangCloseEntrySignal, timeSeriesEntry, wallet);
-            positionsToClose.addAll(ueberhangClosePosition);
-        }
-    }
-
-    public OpenPositionResult openPosition(TimeSeriesEntry timeSeriesEntry, List<Position> positions,
-                                           EntrySignal entrySignal, Wallet wallet) {
-        if (positions.isEmpty()) {
-            return openSinglePosition(timeSeriesEntry, entrySignal, wallet);
+        if (!completelyEliminated && !sizeToOpenEliminated && sizeToOpen > 0){
+            //Close all existing and open new position with remaining size
+            return closeAllExistingPositionsAndOpenNewPositionWithRemainingSize(currentPrice, positions, entrySignal, wallet, sizeToOpen);
+        } else if (completelyEliminated) {
+            //Close all positions and do not open a new position
+            return closePositions(currentPrice, positions, wallet);
+        } else if (sizeToOpenEliminated) {
+            // Close all Positions to close and partially close one position, but leave open
+            return closeAllPositionsAndCloseOnePartial(currentPrice, positions, wallet, positionToPartlyClose, sizeToOpen, positionsToClose);
         }
 
-        Position openPosition = positions.get(0);
-        if (openPosition.getDirection() == entrySignal.getDirection()) {
-            return openSameDirectionPositions(timeSeriesEntry, positions, entrySignal, wallet);
-        } else {
-            return openOtherDirectionPositions(timeSeriesEntry, positions, entrySignal, wallet);
-        }
+        throw new IllegalStateException("Could not open positions");
     }
 
-    public static record OpenPositionResult(List<Position> positions, List<Trade> trades){}
+    private PositionCalculationResult closeAllPositionsAndCloseOnePartial(TimeSeriesEntry currentPrice, List<Position> positions, Wallet wallet, Position positionToPartlyClose, double sizeToOpen, List<Position> positionsToClose) {
+        double partToClose = positionToPartlyClose.getSize() - sizeToOpen;
+        double partToRemainOpen = positionToPartlyClose.getSize() - partToClose;
+        Position partialClosePosition = clonePositionWithDifferentSize(positionToPartlyClose, partToClose);
+        Position partialOpenPosition = clonePositionWithDifferentSize(positionToPartlyClose, partToRemainOpen);
+        positionsToClose.add(partialClosePosition);
+        PositionCalculationResult closedPositionsResult = closePositions(currentPrice, positionsToClose, wallet);
 
-    public static record ClosePositionResults(List<Position> positions, List<Trade> trades){}
+        int indexOfPartialClosePosition = positions.indexOf(positionToPartlyClose);
+        List<Position> positionsToRemainOpen = positions.subList(indexOfPartialClosePosition + 1, positions.size());
+        positionsToRemainOpen.add(0, partialOpenPosition);
+        return new PositionCalculationResult(positionsToRemainOpen, closedPositionsResult.trades());
+    }
 
-    public ClosePositionResults closePositionIfSlOrTpReached(List<Position> openPositions, TimeSeriesEntry currentPrice, Wallet wallet){
+    private PositionCalculationResult closeAllExistingPositionsAndOpenNewPositionWithRemainingSize(TimeSeriesEntry currentPrice, List<Position> positions, EntrySignal entrySignal, Wallet wallet, double sizeToOpen) {
+        PositionCalculationResult positionCalculationResult = closePositions(currentPrice, positions, wallet);
+        entrySignal.setSize(sizeToOpen);
+        Optional<Position> newPosition = toPosition(currentPrice, entrySignal, wallet);
+        List<Position> openedPositions = new ArrayList<>();
+        newPosition.ifPresent(openedPositions::add);
+        return new PositionCalculationResult(openedPositions, positionCalculationResult.trades());
+    }
+
+    private Position clonePositionWithDifferentSize(Position position, double size) {
+        TimeSeriesEntry openPrice = position.getOpenPrice();
+        double margin = marginCalculator.calcMargin(size, openPrice);
+        return switch (position.getPositionType()){
+            case HARD_LIMIT -> new HardLimitPosition(size, position.getDirection(), openPrice, position.getPair(), position.getStopInPoints(), position.getLimitInPoints(), margin);
+            case TRAILING -> new TrailingStopPosition(size, position.getDirection(), openPrice, position.getPair(), position.getStopInPoints(), position.getLimitInPoints(), margin, ((TrailingStopPosition) position).getTrailingStepSize());
+        };
+    }
+
+    private PositionCalculationResult closePositions(TimeSeriesEntry currentPrice, List<Position> positions, Wallet wallet) {
         List<Trade> closedTrades = new ArrayList<>();
-        for (Position position : new ArrayList<>(openPositions)) {
-            if (position.isTpReached(currentPrice) || position.isSlReached(currentPrice)) {
-                TradingCalculator.ProfitLossResult profitConversionRate = position.currentProfit(currentPrice, tradingCalculator);
-                closedTrades.add(toTrade(profitConversionRate.conversionRate(), profitConversionRate.profit(), currentPrice.pair(), position, currentPrice));
-                wallet.adjustAmount(profitConversionRate.profit());
-                wallet.removeMargin(position.getMargin());
-                openPositions.remove(position);
-            }
+        for (Position position : positions) {
+            TradingCalculator.ProfitLossResult profitConversionRate = position.currentProfit(currentPrice, tradingCalculator);
+            closedTrades.add(toTrade(profitConversionRate.conversionRate(), profitConversionRate.profit(), currentPrice.pair(), position, currentPrice));
+            wallet.adjustAmount(profitConversionRate.profit());
+            wallet.removeMargin(position.getMargin());
         }
-        return new ClosePositionResults(openPositions, closedTrades);
+
+        return new PositionCalculationResult(new ArrayList<>(), closedTrades);
+    }
+
+    private Trade toTrade(double conversionRate, double profit, Pair pair, Position position, TimeSeriesEntry currentPrice) {
+        return new Trade(position.getOpenTime(), currentPrice.time(), pair, profit,
+                position.getOpenPriceAsNumber(), position.currentPrice(currentPrice), position.getSize(),
+                position.getDirection(), conversionRate, position.getPositionType());
+    }
+
+
+    private PositionCalculationResult addSameDirectionPosition(TimeSeriesEntry currentPrice, List<Position> positions, EntrySignal entrySignal, Wallet wallet) {
+        Optional<Position> position = toPosition(currentPrice, entrySignal, wallet);
+        List<Trade> trades = new ArrayList<>();
+        position.ifPresent(positions::add);
+        return new PositionCalculationResult(positions, trades);
+    }
+
+    private PositionCalculationResult openSinglePosition(TimeSeriesEntry currentPrice, EntrySignal entrySignal, Wallet wallet) {
+        Optional<Position> position = toPosition(currentPrice, entrySignal, wallet);
+        List<Position> positions = new ArrayList<>();
+        List<Trade> trades = new ArrayList<>();
+        position.ifPresent(positions::add);
+        return new PositionCalculationResult(positions, trades);
+    }
+
+    private Optional<Position> toPosition(TimeSeriesEntry currentPrice, EntrySignal entrySignal, Wallet wallet) {
+        double margin = marginCalculator.calcMargin(entrySignal.getSize(), currentPrice);
+        if (!wallet.canOpen(margin)){
+            return Optional.empty();
+        }
+        wallet.addMargin(margin);
+        return switch (entrySignal.getPositionType()) {
+            case HARD_LIMIT -> Optional.of(new HardLimitPosition(entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInPoints(), entrySignal.getLimitInPoints(), margin));
+            case TRAILING -> Optional.of(new TrailingStopPosition(entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInPoints(), entrySignal.getLimitInPoints(), entrySignal.getTrailingStepSize(), margin));
+        };
+    }
+
+
+    public PositionCalculationResult closePositionIfSlOrTpReached(TimeSeriesEntry currentPrice, List<Position> openPositions, Wallet wallet) {
+        Predicate<Position> criteria = position -> position.isSlReached(currentPrice) || position.isTpReached(currentPrice);
+        return closePositionsMatchingCriteria(openPositions, currentPrice, wallet, criteria);
+    }
+
+
+    public PositionCalculationResult closeAllBuyPositions(TimeSeriesEntry currentPrice, List<Position> openPositions, Wallet wallet) {
+        Predicate<Position> criteria = position -> Direction.BUY.equals(position.getDirection());
+        return closePositionsMatchingCriteria(openPositions, currentPrice, wallet, criteria);
+    }
+
+
+    public PositionCalculationResult closeAllSellPositions(TimeSeriesEntry currentPrice, List<Position> openPositions, Wallet wallet) {
+        Predicate<Position> criteria = position -> Direction.SELL.equals(position.getDirection());
+        return closePositionsMatchingCriteria(openPositions, currentPrice, wallet, criteria);
+    }
+
+    private PositionCalculationResult closePositionsMatchingCriteria(List<Position> positions, TimeSeriesEntry currentPrice, Wallet wallet, Predicate<Position> criteria){
+        List<Position> positionsToClose = positions.stream().filter(criteria).toList();
+        List<Position> remainingPositions = positions.stream().filter(position -> !positionsToClose.contains(position)).toList();
+        PositionCalculationResult closePositionsResult = closePositions(currentPrice, positionsToClose, wallet);
+
+        return new PositionCalculationResult(new ArrayList<>(remainingPositions), closePositionsResult.trades());
     }
 }

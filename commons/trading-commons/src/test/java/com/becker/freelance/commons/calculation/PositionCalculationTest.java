@@ -1,8 +1,9 @@
 package com.becker.freelance.commons.calculation;
 
-import com.becker.freelance.commons.calculation.PositionCalculation2.PositionCalculationResult;
+import com.becker.freelance.commons.calculation.PositionCalculation.PositionCalculationResult;
 import com.becker.freelance.commons.mock.PairMock;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.position.HardLimitPosition;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.position.PositionType;
 import com.becker.freelance.commons.position.Trade;
@@ -33,8 +34,9 @@ class PositionCalculationTest {
 
     private TradingCalculator tradingCalculator;
     private MarginCalculator marginCalculator;
-    private PositionCalculation2 positionCalculation;
+    private PositionCalculation positionCalculation;
     private TimeSeriesEntry currentPrice;
+    private TimeSeriesEntry otherPrice;
     private Wallet wallet;
     private EntrySignal buyEntrySignal;
     private EntrySignal buyEntrySignal2;
@@ -48,7 +50,15 @@ class PositionCalculationTest {
         currentPrice = mock(TimeSeriesEntry.class);
         doReturn(PairMock.eurUsd()).when(currentPrice).pair();
         doReturn(1.).when(currentPrice).getCloseMid();
+        doReturn(1.).when(currentPrice).closeAsk();
+        doReturn(1.).when(currentPrice).closeBid();
         doReturn(nextTime()).when(currentPrice).time();
+        otherPrice = mock(TimeSeriesEntry.class);
+        doReturn(PairMock.eurUsd()).when(otherPrice).pair();
+        doReturn(2.).when(otherPrice).getCloseMid();
+        doReturn(2.).when(otherPrice).closeAsk();
+        doReturn(2.).when(otherPrice).closeBid();
+        doReturn(nextTime()).when(otherPrice).time();
         wallet = new Wallet(10000);
         buyEntrySignal = new EntrySignal(1, Direction.BUY, 5, 7, PositionType.HARD_LIMIT);
         sellEntrySignal = new EntrySignal(1, Direction.SELL, 5, 7, PositionType.HARD_LIMIT);
@@ -56,15 +66,14 @@ class PositionCalculationTest {
         sellEntrySignal2 = new EntrySignal(2, Direction.SELL, 5, 7, PositionType.HARD_LIMIT);
         buyEntrySignal3 = new EntrySignal(3, Direction.BUY, 5, 7, PositionType.HARD_LIMIT);
         sellEntrySignal3 = new EntrySignal(3, Direction.SELL, 5, 7, PositionType.HARD_LIMIT);
-        tradingCalculator = mock(TradingCalculator.class);
-        doReturn(new TradingCalculator.ProfitLossResult(1., 1.)).when(tradingCalculator).calcProfitLoss(anyDouble(), anyDouble(), any(), any(), anyDouble());
         TimeSeries marginCalulationTimeSeries = mock(TimeSeries.class);
         TimeSeriesEntry entryForMarginCalculation = mock(TimeSeriesEntry.class);
         doReturn(entryForMarginCalculation).when(marginCalulationTimeSeries).getEntryForTime(any());
         doReturn(Pair.eurUsd1()).when(marginCalulationTimeSeries).getPair();
         doReturn(1.5).when(entryForMarginCalculation).getCloseMid();
+        tradingCalculator = new TradingCalculator(Pair.eurUsd1(), marginCalulationTimeSeries);
         marginCalculator = new MarginCalculator(Pair.eurUsd1(), marginCalulationTimeSeries);
-        positionCalculation = new PositionCalculation2(tradingCalculator, marginCalculator);
+        positionCalculation = new PositionCalculation(tradingCalculator, marginCalculator);
     }
 
     @Test
@@ -407,5 +416,50 @@ class PositionCalculationTest {
         assertEquals(0, positions.size());
 
         assertEquals(0, wallet.getMargin());
+    }
+
+    @Test
+    void closePositionIfSlOrTpReached(){
+        HardLimitPosition position1 = new HardLimitPosition(1., Direction.BUY, otherPrice, Pair.eurUsd1(), 1, 1, 20);
+        HardLimitPosition position2 = new HardLimitPosition(2., Direction.SELL, otherPrice, Pair.eurUsd1(), 1, 1, 20);
+        HardLimitPosition position3 = new HardLimitPosition(3., Direction.BUY, otherPrice, Pair.eurUsd1(), 20, 20, 20);
+        wallet.addMargin(60);
+
+        PositionCalculationResult calculationResult = positionCalculation.closePositionIfSlOrTpReached(currentPrice, List.of(position1, position2, position3), wallet);
+
+        assertEquals(2, calculationResult.trades().size());
+        assertEquals(1, calculationResult.positions().size());
+        assertEquals(676666.66, wallet.getAmount());
+        assertEquals(20, wallet.getMargin());
+    }
+
+    @Test
+    void closeAllBuyPositions(){
+        HardLimitPosition position1 = new HardLimitPosition(1., Direction.BUY, otherPrice, Pair.eurUsd1(), 1, 1, 20);
+        HardLimitPosition position2 = new HardLimitPosition(2., Direction.SELL, otherPrice, Pair.eurUsd1(), 1, 1, 20);
+        HardLimitPosition position3 = new HardLimitPosition(3., Direction.BUY, otherPrice, Pair.eurUsd1(), 20, 20, 20);
+        wallet.addMargin(60);
+
+        PositionCalculationResult calculationResult = positionCalculation.closeAllBuyPositions(currentPrice, List.of(position1, position2, position3), wallet);
+
+        assertEquals(2, calculationResult.trades().size());
+        assertEquals(1, calculationResult.positions().size());
+        assertEquals(-2656666.67, wallet.getAmount());
+        assertEquals(20, wallet.getMargin());
+    }
+
+    @Test
+    void closeAllSellPositions(){
+        HardLimitPosition position1 = new HardLimitPosition(1., Direction.BUY, otherPrice, Pair.eurUsd1(), 1, 1, 20);
+        HardLimitPosition position2 = new HardLimitPosition(2., Direction.SELL, otherPrice, Pair.eurUsd1(), 1, 1, 20);
+        HardLimitPosition position3 = new HardLimitPosition(3., Direction.BUY, otherPrice, Pair.eurUsd1(), 20, 20, 20);
+        wallet.addMargin(60);
+
+        PositionCalculationResult calculationResult = positionCalculation.closeAllSellPositions(currentPrice, List.of(position1, position2, position3), wallet);
+
+        assertEquals(1, calculationResult.trades().size());
+        assertEquals(2, calculationResult.positions().size());
+        assertEquals(1343333.33, wallet.getAmount());
+        assertEquals(40, wallet.getMargin());
     }
 }

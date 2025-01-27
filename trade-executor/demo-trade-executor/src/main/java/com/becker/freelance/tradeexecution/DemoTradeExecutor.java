@@ -3,6 +3,7 @@ package com.becker.freelance.tradeexecution;
 import com.becker.freelance.commons.*;
 import com.becker.freelance.commons.calculation.MarginCalculator;
 import com.becker.freelance.commons.calculation.PositionCalculation;
+import com.becker.freelance.commons.calculation.PositionCalculation.PositionCalculationResult;
 import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Position;
@@ -53,18 +54,18 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public void closePositionsIfSlOrTpReached(TimeSeriesEntry currentPrice) {
-        PositionCalculation.ClosePositionResults closePositionResults = positionCalculation.closePositionIfSlOrTpReached(openPositions, currentPrice, wallet);
+        PositionCalculationResult closePositionResults = positionCalculation.closePositionIfSlOrTpReached(openPositions, currentPrice, wallet);
         openPositions = closePositionResults.positions();
         closedTrades.addAll(closePositionResults.trades());
     }
 
     @Override
     public void exit(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, ExitSignal exitSignal) {
-        PositionCalculation.ClosePositionResults closePositionResults;
+        PositionCalculationResult closePositionResults;
         if (exitSignal.getDirectionToClose() == Direction.BUY){
-            closePositionResults = positionCalculation.closeAllBuyPositions(currentPrice, openPositions, currentPrice.pair(), wallet);
+            closePositionResults = positionCalculation.closeAllBuyPositions(currentPrice, openPositions, wallet);
         } else {
-            closePositionResults = positionCalculation.closeAllSellPositions(currentPrice, openPositions, currentPrice.pair(), wallet);
+            closePositionResults = positionCalculation.closeAllSellPositions(currentPrice, openPositions, wallet);
         }
         List<Trade> trades = closePositionResults.trades();
         openPositions = closePositionResults.positions();
@@ -73,7 +74,7 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public void entry(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, EntrySignal entrySignal) {
-        PositionCalculation.OpenPositionResult openPositionsResult = positionCalculation.openPosition(currentPrice, openPositions, entrySignal, wallet);
+        PositionCalculationResult openPositionsResult = positionCalculation.openPosition(currentPrice, openPositions, entrySignal, wallet);
         openPositions = openPositionsResult.positions();
         closedTrades.addAll(openPositionsResult.trades());
     }

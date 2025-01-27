@@ -56,7 +56,7 @@ public class PairMock implements Pair {
 
     @Override
     public double profitPerPointForOneContract() {
-        return 0;
+        return 10;
     }
 
     @Override
