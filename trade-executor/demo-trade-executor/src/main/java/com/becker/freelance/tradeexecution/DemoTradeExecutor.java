@@ -54,7 +54,7 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public void closePositionsIfSlOrTpReached(TimeSeriesEntry currentPrice) {
-        PositionCalculationResult closePositionResults = positionCalculation.closePositionIfSlOrTpReached(openPositions, currentPrice, wallet);
+        PositionCalculationResult closePositionResults = positionCalculation.closePositionIfSlOrTpReached(currentPrice, openPositions, wallet);
         openPositions = closePositionResults.positions();
         closedTrades.addAll(closePositionResults.trades());
     }
