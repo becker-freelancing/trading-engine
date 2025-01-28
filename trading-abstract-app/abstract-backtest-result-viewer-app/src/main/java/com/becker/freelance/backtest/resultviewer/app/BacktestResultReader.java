@@ -52,7 +52,7 @@ class BacktestResultReader {
         boolean add = false;
         for (int i = 7; i < values.length; i++) {
             if (values[i].equals("\"[]\"")){
-                return "\"[]\"";
+                return "[]";
             }
             if (values[i].startsWith("\"[{")) {
                 add = true;

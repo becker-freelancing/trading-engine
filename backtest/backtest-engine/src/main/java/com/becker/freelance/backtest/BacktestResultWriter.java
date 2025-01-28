@@ -3,6 +3,7 @@ package com.becker.freelance.backtest;
 import com.becker.freelance.commons.AppConfiguration;
 import com.becker.freelance.commons.ExecutionConfiguration;
 import com.becker.freelance.commons.PathUtil;
+import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Trade;
 import com.becker.freelance.strategies.BaseStrategy;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,32 +16,42 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
 public class BacktestResultWriter {
 
-    private final String HEADER = "pair,from_time,to_time,min,max,cumulative,initial_wallet_amount,parameter,trades\n";
+    private static final String HEADER = "pair,from_time,to_time,min,max,cumulative,initial_wallet_amount,parameter,trades\n";
 
-    private final AppConfiguration appConfiguration;
-    private final ExecutionConfiguration executionConfiguration;
-    private final BaseStrategy baseStrategy;
     private final Path writePath;
     private final String baseString;
 
     private final ObjectMapper objectMapper;
 
     public BacktestResultWriter(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, BaseStrategy baseStrategy){
-        this.appConfiguration = appConfiguration;
-        this.executionConfiguration = executionConfiguration;
-        this.baseStrategy = baseStrategy;
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String strategyName = baseStrategy.getName();
         DateTimeFormatter fileDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
-        this.writePath = Path.of(PathUtil.fromRelativePath(".results\\" + strategyName + "\\" + strategyName + "__" + fileDateFormatter.format(appConfiguration.startTime()) + ".csv"));
+        this.writePath = Path.of(formatFilePath(appConfiguration.startTime(), executionConfiguration.pair(), strategyName, fileDateFormatter));
+        prepareCsvFile();
+        this.baseString = formatBaseString(executionConfiguration);
+
+        BacktestResultZipper.registerOnShutdown(writePath);
+    }
+
+    private static String formatBaseString(ExecutionConfiguration executionConfiguration) {
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
+        return String.format("%s,%s,%s,",
+                executionConfiguration.pair().technicalName(),
+                timeFormatter.format(executionConfiguration.startTime()),
+                timeFormatter.format(executionConfiguration.endTime())) + "%s,%s,%s," + executionConfiguration.initialWalletAmount() + ",%s,%s\n";
+    }
+
+    private void prepareCsvFile() {
         if (!Files.exists(writePath)){
             try {
                 Files.createDirectories(writePath.getParent());
@@ -50,13 +61,11 @@ public class BacktestResultWriter {
                 throw new IllegalStateException("Could not create Result File " + writePath);
             }
         }
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
-        this.baseString = String.format("%s,%s,%s,",
-                executionConfiguration.pair().technicalName(),
-                timeFormatter.format(executionConfiguration.startTime()),
-                timeFormatter.format(executionConfiguration.endTime())) + "%s,%s,%s," + executionConfiguration.initialWalletAmount() + ",%s,%s\n";
+    }
 
-        BacktestResultZipper.registerOnShutdown(writePath);
+    private String formatFilePath(LocalDateTime startTime, Pair pair, String strategyName, DateTimeFormatter fileDateFormatter) {
+        String pairName = pair.technicalName().replaceAll("/", "_").replaceAll(" ", "_");
+        return PathUtil.fromRelativePath(".results\\" + strategyName + "\\" + pairName + "__" + strategyName + "__" + fileDateFormatter.format(startTime) + ".csv");
     }
 
     private void writeHeader() throws IOException {

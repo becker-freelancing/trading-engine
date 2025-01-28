@@ -50,7 +50,9 @@ class BacktestResultPlotter implements Runnable {
         chart.getStyler().setLegendPosition(Styler.LegendPosition.OutsideE);
 
         for (int i = 0; i < data.size(); i++) {
-            chart.addSeries(legends.get(i), data.get(i));
+            if (!data.get(i).isEmpty()) {
+                chart.addSeries(legends.get(i), data.get(i));
+            }
         }
 
         return chart;
