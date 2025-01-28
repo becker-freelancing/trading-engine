@@ -1,5 +1,6 @@
 package com.becker.freelance.backtest.resultviewer.app;
 
+import com.becker.freelance.backtest.commons.BacktestResultContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

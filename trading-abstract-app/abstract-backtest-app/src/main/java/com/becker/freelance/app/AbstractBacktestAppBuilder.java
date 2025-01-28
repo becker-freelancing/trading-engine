@@ -4,9 +4,14 @@ import java.time.LocalDateTime;
 
 public class AbstractBacktestAppBuilder {
 
+    public static AbstractBacktestAppBuilder builder(){
+        return new AbstractBacktestAppBuilder();
+    }
+
     private Double initialWalletAmount;
     private LocalDateTime fromTime;
     private LocalDateTime toTime;
+    private boolean continueMode;
 
     AbstractBacktestAppBuilder(){}
 
@@ -25,7 +30,17 @@ public class AbstractBacktestAppBuilder {
         return this;
     }
 
-    public AbstractBacktestApp build(){
+    public AbstractBacktestAppBuilder continueMode(){
+        this.continueMode = true;
+        return this;
+    }
+
+    public Runnable build(){
+
+        if (continueMode){
+            return new AbstractBacktestContinueApp();
+        }
+
         if (initialWalletAmount == null){
             throw new IllegalStateException("InitialWalletAmount can not be null");
         }

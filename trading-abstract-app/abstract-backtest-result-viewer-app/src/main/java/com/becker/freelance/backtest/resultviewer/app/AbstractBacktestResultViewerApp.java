@@ -1,5 +1,7 @@
 package com.becker.freelance.backtest.resultviewer.app;
 
+import com.becker.freelance.backtest.commons.BacktestResultContent;
+import com.becker.freelance.backtest.commons.BacktestResultReader;
 import com.becker.freelance.commons.PathUtil;
 import com.becker.freelance.strategies.BaseStrategy;
 import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream;

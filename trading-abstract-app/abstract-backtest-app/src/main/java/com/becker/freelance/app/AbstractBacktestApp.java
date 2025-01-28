@@ -13,32 +13,30 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class AbstractBacktestApp implements Runnable{
+class AbstractBacktestApp implements Runnable{
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractBacktestApp.class);
 
-    public static AbstractBacktestAppBuilder builder(){
-        return new AbstractBacktestAppBuilder();
-    }
 
     private final Double initialWalletAmount;
     private final LocalDateTime fromTime;
     private final LocalDateTime toTime;
+    private final BacktestAppInitiatingUtil appInitiatingUtil;
 
     AbstractBacktestApp(Double initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime) {
         this.initialWalletAmount = initialWalletAmount;
         this.fromTime = fromTime;
         this.toTime = toTime;
+        this.appInitiatingUtil = new BacktestAppInitiatingUtil();
     }
 
     @Override
     public void run() {
-        PropertyAsker propertyAsker = new PropertyAsker();
-        BaseStrategy strategy = propertyAsker.askProperty(BaseStrategy.loadAll(), BaseStrategy::getName, "Strategie");
+        BaseStrategy strategy = appInitiatingUtil.askStrategy();
         logger.info("\t\tAnzahl Permutationen {}", strategy.getParameters().permutate().size());
-        AppMode appMode = propertyAsker.askProperty(AppMode.findAll(), AppMode::getDescription, "AppMode");
-        Pair pair = propertyAsker.askProperty(Pair.allPairs(), Pair::technicalName, "Pair");
-        Integer numThreads = propertyAsker.askProperty(List.of(1, 20, 40, 80), i -> Integer.toString(i), "Anzahl an Threads");
+        AppMode appMode = appInitiatingUtil.askAppMode();
+        Pair pair = appInitiatingUtil.askPair();
+        Integer numThreads = appInitiatingUtil.askNumberOfThreads();
 
         TimeSeries eurusd = null;
         try {

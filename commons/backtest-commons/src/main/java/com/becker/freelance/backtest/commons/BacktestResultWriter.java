@@ -1,6 +1,7 @@
-package com.becker.freelance.backtest;
+package com.becker.freelance.backtest.commons;
 
 import com.becker.freelance.commons.AppConfiguration;
+import com.becker.freelance.commons.AppMode;
 import com.becker.freelance.commons.ExecutionConfiguration;
 import com.becker.freelance.commons.PathUtil;
 import com.becker.freelance.commons.pair.Pair;
@@ -23,7 +24,8 @@ import java.util.Map;
 
 public class BacktestResultWriter {
 
-    private static final String HEADER = "pair,from_time,to_time,min,max,cumulative,initial_wallet_amount,parameter,trades\n";
+    private static final String HEADER = "pair,app_mode,from_time,to_time,min,max,cumulative,initial_wallet_amount,parameter,trades\n";
+    private static final DateTimeFormatter FILE_NAME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
 
     private final Path writePath;
     private final String baseString;
@@ -31,22 +33,25 @@ public class BacktestResultWriter {
     private final ObjectMapper objectMapper;
 
     public BacktestResultWriter(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, BaseStrategy baseStrategy){
+        this(appConfiguration, executionConfiguration, Path.of(formatFilePath(appConfiguration.startTime(), executionConfiguration.pair(), baseStrategy.getName(), FILE_NAME_FORMATTER)));
+
+    }
+
+    public BacktestResultWriter(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, Path writePath){
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        String strategyName = baseStrategy.getName();
-        DateTimeFormatter fileDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
-        this.writePath = Path.of(formatFilePath(appConfiguration.startTime(), executionConfiguration.pair(), strategyName, fileDateFormatter));
+        this.writePath = writePath;
         prepareCsvFile();
-        this.baseString = formatBaseString(executionConfiguration);
+        this.baseString = formatBaseString(appConfiguration, executionConfiguration);
 
         BacktestResultZipper.registerOnShutdown(writePath);
     }
 
-    private static String formatBaseString(ExecutionConfiguration executionConfiguration) {
+    private static String formatBaseString(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration) {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
-        return String.format("%s,%s,%s,",
-                executionConfiguration.pair().technicalName(),
+        return String.format("%s,%s,%s,%s,",
+                executionConfiguration.pair().technicalName(), appConfiguration.appMode().getDescription(),
                 timeFormatter.format(executionConfiguration.startTime()),
                 timeFormatter.format(executionConfiguration.endTime())) + "%s,%s,%s," + executionConfiguration.initialWalletAmount() + ",%s,%s\n";
     }
@@ -63,7 +68,7 @@ public class BacktestResultWriter {
         }
     }
 
-    private String formatFilePath(LocalDateTime startTime, Pair pair, String strategyName, DateTimeFormatter fileDateFormatter) {
+    private static String formatFilePath(LocalDateTime startTime, Pair pair, String strategyName, DateTimeFormatter fileDateFormatter) {
         String pairName = pair.technicalName().replaceAll("/", "_").replaceAll(" ", "_");
         return PathUtil.fromRelativePath(".results\\" + strategyName + "\\" + pairName + "__" + strategyName + "__" + fileDateFormatter.format(startTime) + ".csv");
     }

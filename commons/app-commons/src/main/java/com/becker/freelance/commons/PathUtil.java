@@ -18,4 +18,12 @@ public class PathUtil {
     public static String fromRelativePath(String path){
         return getBasePath() + FileSystems.getDefault().getSeparator() + path;
     }
+
+    public static String rootResultDir(){
+        return fromRelativePath(".results\\");
+    }
+
+    public static String resultDirForStrategy(String strategyName){
+        return rootResultDir() + strategyName + "\\";
+    }
 }

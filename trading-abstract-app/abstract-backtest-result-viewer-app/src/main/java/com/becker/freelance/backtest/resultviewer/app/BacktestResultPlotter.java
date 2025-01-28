@@ -1,5 +1,6 @@
 package com.becker.freelance.backtest.resultviewer.app;
 
+import com.becker.freelance.backtest.commons.BacktestResultContent;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;

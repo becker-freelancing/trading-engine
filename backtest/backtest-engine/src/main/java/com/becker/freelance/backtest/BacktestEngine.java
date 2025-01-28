@@ -1,9 +1,10 @@
 package com.becker.freelance.backtest;
 
+import com.becker.freelance.backtest.commons.BacktestResultWriter;
 import com.becker.freelance.commons.AppConfiguration;
 import com.becker.freelance.commons.ExecutionConfiguration;
-import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.position.Trade;
+import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.data.DataProvider;
 import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.strategies.BaseStrategy;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -27,21 +29,35 @@ public class BacktestEngine {
     private final BaseStrategy baseStrategy;
     private final ExecutorService executor;
     private final BacktestResultWriter resultWriter;
+    private final ParameterFilter parameterFilter;
     private int currentIteration = 0;
     private int requiredIterations;
     private TimeSeries timeSeries;
 
     public BacktestEngine(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, BaseStrategy baseStrategy) {
+        this(appConfiguration, executionConfiguration, baseStrategy, ParameterFilter.allOkFilter(), null);
+    }
+
+    public BacktestEngine(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, BaseStrategy baseStrategy, ParameterFilter parameterFilter, Path writePath) {
         this.appConfiguration = appConfiguration;
         this.executionConfiguration = executionConfiguration;
         this.baseStrategy = baseStrategy;
         this.executor = Executors.newFixedThreadPool(appConfiguration.numThreads());
-        resultWriter = new BacktestResultWriter(appConfiguration, executionConfiguration, baseStrategy);
+        if (writePath == null) {
+            resultWriter = new BacktestResultWriter(appConfiguration, executionConfiguration, baseStrategy);
+        } else {
+            resultWriter = new BacktestResultWriter(appConfiguration, executionConfiguration, writePath);
+        }
+        this.parameterFilter = parameterFilter;
     }
 
     public void run() {
         init();
-        List<Map<String, Double>> parameters = baseStrategy.getParameters().permutate();
+        List<Map<String, Double>> parameters;
+        try (parameterFilter) {
+            parameters = baseStrategy.getParameters().permutate()
+                    .stream().filter(parameterFilter.getPredicate()).toList();
+        }
         requiredIterations = parameters.size();
         for (Map<String, Double> parameter : parameters) {
             executor.submit(() -> executeForParameter(parameter));
@@ -60,7 +76,7 @@ public class BacktestEngine {
         Runtime.getRuntime().addShutdownHook(new Thread(executor::shutdownNow, "Shutdown-BacktestApp-0"));
     }
 
-    private synchronized int getNextIteration(){
+    private synchronized int getNextIteration() {
         currentIteration += 1;
         return currentIteration;
     }
@@ -83,7 +99,7 @@ public class BacktestEngine {
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error("Error while executing backtest", e);
             executor.shutdownNow();
         }

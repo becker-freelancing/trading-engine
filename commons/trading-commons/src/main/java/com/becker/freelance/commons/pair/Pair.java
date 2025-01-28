@@ -16,6 +16,12 @@ public interface Pair {
                 .orElseThrow(() -> new IllegalStateException("No EUR/USD M1 found in " + pairs));
     }
 
+    public static Pair fromTechnicalName(String technicalName){
+        return allPairs().stream()
+                .filter(p -> technicalName.equals(p.technicalName()))
+                .findAny().orElseThrow(() -> new IllegalArgumentException("Could not find Pair with technical name " + technicalName));
+    }
+
     public static List<Pair> allPairs(){
         return PairProvider.allPairs();
     }
