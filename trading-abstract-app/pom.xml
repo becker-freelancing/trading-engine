@@ -15,6 +15,7 @@
 
     <modules>
         <module>abstract-backtest-app</module>
+        <module>abstract-backtest-result-viewer-app</module>
     </modules>
 
     <dependencies>
