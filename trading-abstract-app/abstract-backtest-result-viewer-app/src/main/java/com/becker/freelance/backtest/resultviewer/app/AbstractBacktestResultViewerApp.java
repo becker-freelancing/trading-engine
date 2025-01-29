@@ -3,19 +3,14 @@ package com.becker.freelance.backtest.resultviewer.app;
 import com.becker.freelance.backtest.commons.BacktestResultContent;
 import com.becker.freelance.backtest.commons.BacktestResultReader;
 import com.becker.freelance.commons.PathUtil;
+import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.BaseStrategy;
-import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -52,8 +47,8 @@ public class AbstractBacktestResultViewerApp implements Runnable {
 
 
 
-    private Set<BacktestResultContent> filterForBest(Set<BacktestResultContent> backtestResultContents, Function<BacktestResultContent, Double> extractor) {
-        Double best = backtestResultContents.stream().map(extractor).max(Comparator.naturalOrder()).orElse(0.);
+    private Set<BacktestResultContent> filterForBest(Set<BacktestResultContent> backtestResultContents, Function<BacktestResultContent, Decimal> extractor) {
+        Decimal best = backtestResultContents.stream().map(extractor).max(Comparator.naturalOrder()).orElse(Decimal.ZERO);
         return backtestResultContents.stream().filter(result -> Objects.equals(extractor.apply(result), best)).collect(Collectors.toSet());
     }
 

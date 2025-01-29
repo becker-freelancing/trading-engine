@@ -1,5 +1,9 @@
 package com.becker.freelance.backtest.commons;
 
+import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.math.Decimal;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +25,14 @@ public class BacktestResultReader {
     private static final Logger logger = LoggerFactory.getLogger(BacktestResultReader.class);
 
     private final Path resultPath;
+    private final ObjectMapper objectMapper;
 
     public BacktestResultReader(Path resultPath) {
         this.resultPath = resultPath;
+        this.objectMapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Pair.class, new PairDeserializer());
+        objectMapper.registerModule(module);
     }
 
     public Set<BacktestResultContent> readCsvContent() {
@@ -34,9 +43,9 @@ public class BacktestResultReader {
 
     private BacktestResultContent toBacktestResultContent(String line) {
         String[] split = line.split(",");
-        return new BacktestResultContent(
+        return new BacktestResultContent(objectMapper,
                 split[0], split[1], LocalDateTime.parse(split[2]), LocalDateTime.parse(split[3]),
-                Double.parseDouble(split[4]), Double.parseDouble(split[5]), Double.parseDouble(split[6]), Double.parseDouble(split[7]),
+                new Decimal(split[4]), new Decimal(split[5]), new Decimal(split[6]), new Decimal(split[7]),
                 parseParameters(split), parseTrades(split)
         );
     }
@@ -44,26 +53,26 @@ public class BacktestResultReader {
     public String parseParameters(String[] values) {
         List<String> params = new ArrayList<>();
         for (int i = 8; i < values.length; i++) {
-            if (values[i].startsWith("\"[{")) {
+            if (values[i].startsWith("[{")) {
                 break;
             }
             params.add(values[i]);
         }
         String parametersJson = String.join(", ", params).replaceAll("\"\"", "\"");
-        return parametersJson.substring(1, parametersJson.length() - 1);
+        return parametersJson;
     }
 
     public String parseTrades(String[] values) {
         List<String> params = new ArrayList<>();
         boolean add = false;
         for (int i = 7; i < values.length; i++) {
-            if (values[i].equals("\"[]\"")){
+            if (values[i].equals("[]")){
                 return "[]";
             }
-            if (values[i].startsWith("\"[{")) {
+            if (values[i].startsWith("[{")) {
                 add = true;
             }
-            if (values[i].contains("}]\"")){
+            if (values[i].contains("}]")){
                 params.add(values[i]);
                 break;
             }
@@ -72,7 +81,7 @@ public class BacktestResultReader {
             }
         }
         String tradesJson = String.join(", ", params).replaceAll("\"\"", "\"");
-        return tradesJson.substring(1, tradesJson.length() - 1);
+        return tradesJson;
     }
 
     private static Stream<String> readLines(Path resultPath) {

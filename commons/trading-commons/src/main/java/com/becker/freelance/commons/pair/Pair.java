@@ -2,7 +2,7 @@ package com.becker.freelance.commons.pair;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.ServiceLoader;
+import com.becker.freelance.math.Decimal;
 
 public interface Pair {
 
@@ -28,12 +28,12 @@ public interface Pair {
 
     public String baseCurrency();
     public String counterCurrency();
-    public double sizeMultiplication();
-    public double leverageFactor();
-    public double profitPerPointForOneContract();
-    public double minOrderSize();
-    public double minStop();
-    public double minLimit();
+    public Decimal sizeMultiplication();
+    public Decimal leverageFactor();
+    public Decimal profitPerPointForOneContract();
+    public Decimal minOrderSize();
+    public Decimal minStop();
+    public Decimal minLimit();
     public String technicalName();
     public default Duration toDuration(){
         return Duration.ofMinutes(timeInMinutes());

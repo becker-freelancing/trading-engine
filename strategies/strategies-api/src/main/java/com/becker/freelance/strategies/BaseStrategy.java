@@ -4,6 +4,7 @@ package com.becker.freelance.strategies;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
+import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -33,7 +34,7 @@ public abstract class BaseStrategy {
     }
 
 
-    public BaseStrategy(Map<String, Double> parameters) {
+    public BaseStrategy(Map<String, Decimal> parameters) {
         initiatedForParameter = true;
     }
 
@@ -41,9 +42,9 @@ public abstract class BaseStrategy {
 
     public abstract Optional<ExitSignal> shouldExit(TimeSeries timeSeries, LocalDateTime time);
 
-    public abstract BaseStrategy forParameters(Map<String, Double> parameters);
+    public abstract BaseStrategy forParameters(Map<String, Decimal> parameters);
 
-    public int minNumberOfBarsRequired(Map<String, Double> parameters) {
+    public int minNumberOfBarsRequired(Map<String, Decimal> parameters) {
         return 0;
     }
 

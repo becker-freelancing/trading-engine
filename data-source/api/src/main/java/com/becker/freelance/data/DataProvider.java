@@ -4,6 +4,7 @@ import com.becker.freelance.commons.AppMode;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
+import com.becker.freelance.math.Decimal;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -38,12 +39,12 @@ public abstract class DataProvider {
 
         Map<LocalDateTime, TimeSeriesEntry> dataList = rows.stream().skip(1).parallel().map(row -> {
                     LocalDateTime time = LocalDateTime.parse(row[0], formatter);
-                    double open = Double.parseDouble(row[1]);
-                    double high = Double.parseDouble(row[2]);
-                    double low = Double.parseDouble(row[3]);
-                    double close = Double.parseDouble(row[4]);
-                    double volume = Double.parseDouble(row[5]);
-                    double trades = Double.parseDouble(row[6]);
+                    Decimal open = new Decimal(row[1]);
+                    Decimal high = new Decimal(row[2]);
+                    Decimal low = new Decimal(row[3]);
+                    Decimal close = new Decimal(row[4]);
+                    Decimal volume = new Decimal(row[5]);
+                    Decimal trades = new Decimal(row[6]);
                     return new TimeSeriesEntry(
                             time, open, open, high, high, low, low,
                             close, close, volume, trades, pair

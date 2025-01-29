@@ -5,25 +5,25 @@ import com.becker.freelance.commons.*;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.data.DataProvider;
+import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.BaseStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
 
 class AbstractBacktestApp implements Runnable{
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractBacktestApp.class);
 
 
-    private final Double initialWalletAmount;
+    private final Decimal initialWalletAmount;
     private final LocalDateTime fromTime;
     private final LocalDateTime toTime;
     private final BacktestAppInitiatingUtil appInitiatingUtil;
 
-    AbstractBacktestApp(Double initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime) {
+    AbstractBacktestApp(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime) {
         this.initialWalletAmount = initialWalletAmount;
         this.fromTime = fromTime;
         this.toTime = toTime;

@@ -5,16 +5,12 @@ import com.becker.freelance.backtest.ExcludeExistingParametersFilter;
 import com.becker.freelance.backtest.commons.BacktestResultContent;
 import com.becker.freelance.backtest.commons.BacktestResultReader;
 import com.becker.freelance.backtest.commons.BacktestResultZipper;
-import com.becker.freelance.commons.AppConfiguration;
-import com.becker.freelance.commons.AppMode;
-import com.becker.freelance.commons.ExecutionConfiguration;
-import com.becker.freelance.commons.PathUtil;
+import com.becker.freelance.commons.*;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.data.DataProvider;
+import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.BaseStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,7 +26,7 @@ import java.util.stream.Stream;
 class AbstractBacktestContinueApp implements Runnable{
 
     private final BacktestAppInitiatingUtil appInitiatingUtil;
-    private Double initialWalletAmount;
+    private Decimal initialWalletAmount;
     private LocalDateTime fromTime;
     private LocalDateTime toTime;
     private AppMode appMode;
@@ -56,7 +52,7 @@ class AbstractBacktestContinueApp implements Runnable{
         Set<BacktestResultContent> backtestResultContents = new BacktestResultReader(resultPath).readCsvContent();
         parseAppParameter(backtestResultContents);
         Path resultWriteFile = unzipResultFile(resultPath);
-        Set<Map<String, Double>> parameters = backtestResultContents.stream().map(BacktestResultContent::parameters).collect(Collectors.toSet());
+        Set<Map<String, Decimal>> parameters = backtestResultContents.stream().map(BacktestResultContent::parameters).collect(Collectors.toSet());
 
         TimeSeries eurusd = readEurUsdTimeSeries(appMode);
 

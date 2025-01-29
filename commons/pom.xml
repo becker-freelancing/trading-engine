@@ -16,6 +16,7 @@
         <module>trading-commons</module>
         <module>app-commons</module>
         <module>backtest-commons</module>
+        <module>math-commons</module>
     </modules>
 
 </project>

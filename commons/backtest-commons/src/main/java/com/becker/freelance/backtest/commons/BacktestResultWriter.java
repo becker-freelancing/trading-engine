@@ -1,11 +1,9 @@
 package com.becker.freelance.backtest.commons;
 
-import com.becker.freelance.commons.AppConfiguration;
-import com.becker.freelance.commons.AppMode;
-import com.becker.freelance.commons.ExecutionConfiguration;
-import com.becker.freelance.commons.PathUtil;
+import com.becker.freelance.commons.*;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Trade;
+import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.BaseStrategy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +11,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public class BacktestResultWriter {
 
@@ -40,6 +40,9 @@ public class BacktestResultWriter {
     public BacktestResultWriter(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, Path writePath){
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(Pair.class, new PairSerializer());
+        objectMapper.registerModule(module);
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         this.writePath = writePath;
         prepareCsvFile();
@@ -77,24 +80,24 @@ public class BacktestResultWriter {
         Files.writeString(writePath, HEADER);
     }
 
-    public synchronized void writeResult(List<Trade> trades, Map<String, Double> parameter) throws IOException {
+    public synchronized void writeResult(List<Trade> trades, Map<String, Decimal> parameter) throws IOException {
         String line = buildLine(trades, parameter);
         Files.writeString(writePath, line, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
     }
 
-    private String buildLine(List<Trade> trades, Map<String, Double> parameter) {
-        List<Double> profits = trades.stream().map(Trade::getProfitInEuro).toList();
-        double sum = 0.;
-        double min = Double.MAX_VALUE;
-        double max = -min;
+    private String buildLine(List<Trade> trades, Map<String, Decimal> parameter) {
+        List<Decimal> profits = trades.stream().map(Trade::getProfitInEuro).toList();
+        Decimal sum = Decimal.ZERO;
+        Decimal min = new Decimal(Double.MAX_VALUE);
+        Decimal max = min.multiply(new BigDecimal("-1"));
         if (profits.isEmpty()){
-            min = 0;
-            max = 0;
+            min = Decimal.ZERO;
+            max = Decimal.ZERO;
         }
-        for (Double profit : profits) {
-            sum += profit;
-            if (sum > max) max = sum;
-            if (sum < min) min = sum;
+        for (BigDecimal profit : profits) {
+            sum = sum.add(profit);
+            if (sum.isGreaterThan(max)) max = sum;
+            if (sum.isLessThan(min)) min = sum;
         }
 
         String line = String.format(baseString,
@@ -105,15 +108,15 @@ public class BacktestResultWriter {
 
     private String map(List<Trade> trades) {
         try {
-            return "\"" + objectMapper.writeValueAsString(trades) + "\"";
+            return objectMapper.writeValueAsString(trades);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    private String map(Map<String, Double> parameter) {
+    private String map(Map<String, Decimal> parameter) {
         try {
-            return "\"" + objectMapper.writeValueAsString(parameter) + "\"";
+            return objectMapper.writeValueAsString(parameter);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         }

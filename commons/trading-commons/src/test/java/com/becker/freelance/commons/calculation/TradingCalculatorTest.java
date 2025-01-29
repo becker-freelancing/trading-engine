@@ -7,6 +7,7 @@ import com.becker.freelance.commons.mock.PairMock;
 import com.becker.freelance.commons.signal.Direction;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
+import com.becker.freelance.math.Decimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +26,7 @@ public class TradingCalculatorTest {
 
         when(timeSeries.getEntryForTime(any(LocalDateTime.class))).thenReturn(closeEntry);
         doReturn(PairMock.eurUsd()).when(timeSeries).getPair();
-        when(closeEntry.getCloseMid()).thenReturn(1.0545);
+        when(closeEntry.getCloseMid()).thenReturn(new Decimal("1.0545"));
     }
 
 
@@ -34,11 +35,11 @@ public class TradingCalculatorTest {
         TradingCalculator calculator = new TradingCalculator(PairMock.eurUsd(), timeSeries);
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
-        double profitLoss = calculator.calcProfitLoss(1.04876, 1.29864, time, Direction.BUY, 10).profit();
-        double umrechnungsFactor = calculator.calcProfitLoss(1.04876, 1.29864, time, Direction.BUY, 10).conversionRate();
+        Decimal profitLoss = calculator.calcProfitLoss(new Decimal("1.04876"), new Decimal("1.29864"), time, Direction.BUY, Decimal.TEN).profit();
+        Decimal umrechnungsFactor = calculator.calcProfitLoss(new Decimal("1.04876"), new Decimal("1.29864"), time, Direction.BUY, Decimal.TEN).conversionRate();
 
-        assertEquals(236965.38, profitLoss, 0.1);
-        assertEquals(1.0545, umrechnungsFactor, 0.1);
+        assertEquals(new Decimal("236965.38"), profitLoss);
+        assertEquals(new Decimal("1.0545"), umrechnungsFactor);
     }
 
     @Test
@@ -46,11 +47,11 @@ public class TradingCalculatorTest {
         TradingCalculator calculator = new TradingCalculator(PairMock.eurUsd(), timeSeries);
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
-        double profitLoss = calculator.calcProfitLoss(1.04876, 1.29864, time, Direction.SELL, 1).profit();
-        double umrechnungsFactor = calculator.calcProfitLoss(1.04876, 1.29864, time, Direction.SELL, 1).conversionRate();
+        Decimal profitLoss = calculator.calcProfitLoss(new Decimal("1.04876"), new Decimal("1.29864"), time, Direction.SELL, Decimal.ONE).profit();
+        Decimal umrechnungsFactor = calculator.calcProfitLoss(new Decimal("1.04876"), new Decimal("1.29864"), time, Direction.SELL, Decimal.ONE).conversionRate();
 
-        assertEquals(-23696.538, profitLoss, 0.1);
-        assertEquals(1.0545, umrechnungsFactor, 0.1);
+        assertEquals(new Decimal("-23696.538"), profitLoss);
+        assertEquals(new Decimal("1.0545"), umrechnungsFactor);
     }
 
     @Test
@@ -58,11 +59,11 @@ public class TradingCalculatorTest {
         TradingCalculator calculator = new TradingCalculator(PairMock.ethEur(), timeSeries);
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
-        double profitLoss = calculator.calcProfitLoss(3361.1, 3351.5, time, Direction.SELL, 1).profit();
-        double umrechnungsFactor = calculator.calcProfitLoss(3361.1, 3351.5, time, Direction.SELL, 1).conversionRate();
+        Decimal profitLoss = calculator.calcProfitLoss(new Decimal("3361.1"), new Decimal("3351.5"), time, Direction.SELL, Decimal.ONE).profit();
+        Decimal umrechnungsFactor = calculator.calcProfitLoss(new Decimal("3361.1"), new Decimal("3351.5"), time, Direction.SELL, Decimal.ONE).conversionRate();
 
-        assertEquals(9.6, profitLoss, 0.1);
-        assertEquals(1, umrechnungsFactor, 0.1);
+        assertEquals(new Decimal("9.6"), profitLoss);
+        assertEquals(Decimal.ONE, umrechnungsFactor);
     }
 
     @Test
@@ -70,24 +71,24 @@ public class TradingCalculatorTest {
         TradingCalculator calculator = new TradingCalculator(PairMock.ethEur(), timeSeries);
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
-        double profitLoss = calculator.calcProfitLoss(3361.1, 3351.5, time, Direction.BUY, 0.1).profit();
-        double umrechnungsFactor = calculator.calcProfitLoss(3361.1, 3351.5, time, Direction.BUY, 0.1).conversionRate();
+        Decimal profitLoss = calculator.calcProfitLoss(new Decimal("3361.1"), new Decimal("3351.5"), time, Direction.BUY, new Decimal("0.1")).profit();
+        Decimal umrechnungsFactor = calculator.calcProfitLoss(new Decimal("3361.1"), new Decimal("3351.5"), time, Direction.BUY, new Decimal("0.1")).conversionRate();
 
-        assertEquals(-0.96, profitLoss, 0.1);
-        assertEquals(1, umrechnungsFactor, 0.1);
+        assertEquals(new Decimal("-0.96"), profitLoss);
+        assertEquals(Decimal.ONE, umrechnungsFactor);
     }
 
     @Test
     public void testWithPaxgUsdSize1() {
         TradingCalculator calculator = new TradingCalculator(PairMock.gldUsd(), timeSeries);
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
-        when(closeEntry.getCloseMid()).thenReturn(0.9875);
+        when(closeEntry.getCloseMid()).thenReturn(new Decimal("0.9875"));
 
-        double profitLoss = calculator.calcProfitLoss(2601.05, 2655.2, time, Direction.BUY, 10).profit();
-        double umrechnungsFactor = calculator.calcProfitLoss(2601.05, 2655.2, time, Direction.BUY, 10).conversionRate();
+        Decimal profitLoss = calculator.calcProfitLoss(new Decimal("2601.05"), new Decimal("2655.2"), time, Direction.BUY, Decimal.TEN).profit();
+        Decimal umrechnungsFactor = calculator.calcProfitLoss(new Decimal("2601.05"), new Decimal("2655.2"), time, Direction.BUY, Decimal.TEN).conversionRate();
 
-        assertEquals(548.35, profitLoss, 0.1);
-        assertEquals(0.9875, umrechnungsFactor, 0.1);
+        assertEquals(new Decimal("548.35"), profitLoss);
+        assertEquals(new Decimal("0.9875"), umrechnungsFactor);
     }
 
     @Test
@@ -95,10 +96,10 @@ public class TradingCalculatorTest {
         TradingCalculator calculator = new TradingCalculator(PairMock.xbtEur(), timeSeries);
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
-        double profitLoss = calculator.calcProfitLoss(68752.35, 72015.6, time, Direction.SELL, 1).profit();
-        double umrechnungsFactor = calculator.calcProfitLoss(68752.35, 72015.6, time, Direction.SELL, 1).conversionRate();
+        Decimal profitLoss = calculator.calcProfitLoss(new Decimal("68752.35"), new Decimal("72015.6"), time, Direction.SELL, Decimal.ONE).profit();
+        Decimal umrechnungsFactor = calculator.calcProfitLoss(new Decimal("68752.35"), new Decimal("72015.6"), time, Direction.SELL, Decimal.ONE).conversionRate();
 
-        assertEquals(-3263.25, profitLoss, 0.1);
-        assertEquals(1, umrechnungsFactor, 0.1);
+        assertEquals(new Decimal("-3263.25"), profitLoss);
+        assertEquals(Decimal.ONE, umrechnungsFactor);
     }
 }

@@ -3,25 +3,26 @@ package com.becker.freelance.commons.timeseries;
 import com.becker.freelance.commons.pair.Pair;
 
 import java.time.LocalDateTime;
+import com.becker.freelance.math.Decimal;
 
-public record TimeSeriesEntry(LocalDateTime time, double openBid, double openAsk, double highBid, double highAsk,
-                              double lowBid, double lowAsk, double closeBid, double closeAsk, double volume,
-                              double trades, Pair pair) {
+public record TimeSeriesEntry(LocalDateTime time, Decimal openBid, Decimal openAsk, Decimal highBid, Decimal highAsk,
+                              Decimal lowBid, Decimal lowAsk, Decimal closeBid, Decimal closeAsk, Decimal volume,
+                              Decimal trades, Pair pair) {
 
-    public double getCloseMid() {
-        return (closeAsk + closeBid) / 2;
+    public Decimal getCloseMid() {
+        return closeAsk.add(closeBid).divide(Decimal.TWO);
     }
 
-    public double getOpenMid() {
-        return (openAsk + openBid) / 2;
+    public Decimal getOpenMid() {
+        return openAsk.add(openBid).divide(Decimal.TWO);
     }
 
-    public double getHighMid() {
-        return (highAsk + highBid) / 2;
+    public Decimal getHighMid() {
+        return highAsk.add(highBid).divide(Decimal.TWO);
     }
 
-    public double getLowMid() {
-        return (lowAsk + lowBid) / 2;
+    public Decimal getLowMid() {
+        return lowAsk.add(lowBid).divide(Decimal.TWO);
     }
 
     @Override
@@ -31,6 +32,6 @@ public record TimeSeriesEntry(LocalDateTime time, double openBid, double openAsk
     }
 
     public boolean isGreenCandle() {
-        return getCloseMid() > getOpenMid();
+        return getCloseMid().isGreaterThan(getOpenMid());
     }
 }

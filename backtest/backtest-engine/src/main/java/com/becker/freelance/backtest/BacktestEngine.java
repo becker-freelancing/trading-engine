@@ -7,6 +7,7 @@ import com.becker.freelance.commons.position.Trade;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.data.DataProvider;
 import com.becker.freelance.engine.StrategyEngine;
+import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.BaseStrategy;
 import com.becker.freelance.tradeexecution.TradeExecutor;
 import org.slf4j.Logger;
@@ -53,13 +54,13 @@ public class BacktestEngine {
 
     public void run() {
         init();
-        List<Map<String, Double>> parameters;
+        List<Map<String, Decimal>> parameters;
         try (parameterFilter) {
             parameters = baseStrategy.getParameters().permutate()
                     .stream().filter(parameterFilter.getPredicate()).toList();
         }
         requiredIterations = parameters.size();
-        for (Map<String, Double> parameter : parameters) {
+        for (Map<String, Decimal> parameter : parameters) {
             executor.submit(() -> executeForParameter(parameter));
         }
 
@@ -81,7 +82,7 @@ public class BacktestEngine {
         return currentIteration;
     }
 
-    private void executeForParameter(Map<String, Double> parameter) {
+    private void executeForParameter(Map<String, Decimal> parameter) {
         try {
             logger.info("Starting Permutation {} of {} - {}", getNextIteration(), this.requiredIterations, parameter);
             BaseStrategy strategyForBacktest = baseStrategy.forParameters(parameter);

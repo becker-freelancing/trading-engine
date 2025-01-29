@@ -8,25 +8,26 @@ import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import com.becker.freelance.math.Decimal;
 
 public abstract class Position {
-    protected double size;
+    protected Decimal size;
     protected Direction direction;
     protected Pair pair;
     protected TimeSeriesEntry openPrice;
     protected LocalDateTime openTime;
-    protected double stopInPoints;
-    protected double limitInPoints;
+    protected Decimal stopInPoints;
+    protected Decimal limitInPoints;
     protected PositionType positionType;
-    protected double margin;
+    protected Decimal margin;
 
-    public Position(double size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
-                    double stopInPoints, double limitInPoints, PositionType positionType, double margin) {
+    public Position(Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
+                    Decimal stopInPoints, Decimal limitInPoints, PositionType positionType, Decimal margin) {
         this.size = size;
         this.direction = direction;
         this.pair = pair;
-        this.stopInPoints = Math.abs(stopInPoints);
-        this.limitInPoints = Math.abs(limitInPoints);
+        this.stopInPoints = stopInPoints.abs();
+        this.limitInPoints = limitInPoints.abs();
         this.openTime = openPrice.time();
         this.openPrice = openPrice;
         this.positionType = positionType;
@@ -36,42 +37,44 @@ public abstract class Position {
     public abstract void adapt(TimeSeriesEntry currentPrice);
 
     public TradingCalculator.ProfitLossResult currentProfit(TimeSeriesEntry currentPrice, TradingCalculator tradingCalculator) {
-        double price = currentPrice(currentPrice);
-        double profitPerPoint = profitPerPoint();
+        Decimal price = currentPrice(currentPrice);
+        Decimal profitPerPoint = profitPerPoint();
         return tradingCalculator.calcProfitLoss(getOpenPriceAsNumber(), price, currentPrice.time(), direction, profitPerPoint);
     }
 
-    public double profitPerPoint() {
-        return size * pair.profitPerPointForOneContract();
+    public Decimal profitPerPoint() {
+        return size.multiply(pair.profitPerPointForOneContract());
     }
 
-    public double currentPrice(TimeSeriesEntry currentPrice) {
+    public Decimal currentPrice(TimeSeriesEntry currentPrice) {
         return direction == Direction.BUY ? currentPrice.closeBid() : currentPrice.closeAsk();
     }
 
     public boolean isTpReached(TimeSeriesEntry currentPrice) {
-        double priceDifference = currentPrice(currentPrice) - getOpenPriceAsNumber();
+        Decimal priceDifference = currentPrice(currentPrice).subtract(getOpenPriceAsNumber());
         if (direction == Direction.BUY) {
-            return priceDifference >= limitInPoints;
+            return priceDifference.isGreaterThan(limitInPoints) || priceDifference.isEqualTo(limitInPoints);
         } else {
-            return priceDifference <= -limitInPoints;
+            Decimal negativeLimit = limitInPoints.multiply(new Decimal("-1"));
+            return priceDifference.isLessThan(negativeLimit) || priceDifference.isEqualTo(negativeLimit);
         }
     }
 
     public boolean isSlReached(TimeSeriesEntry currentPrice) {
-        double priceDifference = currentPrice(currentPrice) - getOpenPriceAsNumber();
+        Decimal priceDifference = currentPrice(currentPrice).subtract(getOpenPriceAsNumber());
         if (direction == Direction.BUY) {
-            return priceDifference <= -stopInPoints;
+            Decimal negativeStop = stopInPoints.multiply(new Decimal("-1"));
+            return priceDifference.isLessThan(negativeStop) || priceDifference.isEqualTo(negativeStop);
         } else {
-            return priceDifference >= stopInPoints;
+            return priceDifference.isGreaterThan(stopInPoints) || priceDifference.isEqualTo(stopInPoints);
         }
     }
 
-    public double getMargin() {
+    public Decimal getMargin() {
         return margin;
     }
 
-    public double getSize() {
+    public Decimal getSize() {
         return size;
     }
 
@@ -83,7 +86,7 @@ public abstract class Position {
         return pair;
     }
 
-    public double getOpenPriceAsNumber() {
+    public Decimal getOpenPriceAsNumber() {
         return direction == Direction.BUY ? openPrice.closeAsk() : openPrice.closeBid();
     }
 
@@ -95,11 +98,11 @@ public abstract class Position {
         return openTime;
     }
 
-    public double getStopInPoints() {
+    public Decimal getStopInPoints() {
         return stopInPoints;
     }
 
-    public double getLimitInPoints() {
+    public Decimal getLimitInPoints() {
         return limitInPoints;
     }
 
@@ -109,10 +112,11 @@ public abstract class Position {
 
     @Override
     public boolean equals(Object object) {
+
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
         Position position = (Position) object;
-        return Double.compare(size, position.size) == 0 && Double.compare(stopInPoints, position.stopInPoints) == 0 && Double.compare(limitInPoints, position.limitInPoints) == 0 && Double.compare(margin, position.margin) == 0 && direction == position.direction && Objects.equals(pair, position.pair) && Objects.equals(openPrice, position.openPrice) && Objects.equals(openTime, position.openTime) && positionType == position.positionType;
+        return Objects.equals(size, position.size) && direction == position.direction && Objects.equals(pair, position.pair) && Objects.equals(openPrice, position.openPrice) && Objects.equals(openTime, position.openTime) && Objects.equals(stopInPoints, position.stopInPoints) && Objects.equals(limitInPoints, position.limitInPoints) && positionType == position.positionType && Objects.equals(margin, position.margin);
     }
 
     @Override

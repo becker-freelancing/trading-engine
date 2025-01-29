@@ -79,18 +79,6 @@ public class TimeSeries implements Iterable<LocalDateTime>{
         return new TimeSeries(pair, slicedData);
     }
 
-    public List<Double> getLastNCloseForTime(LocalDateTime endTime, int n) {
-        List<Double> closes = new ArrayList<>();
-        LocalDateTime start = endTime.minus(Duration.ofMinutes(pair.timeInMinutes() * n));
-
-        while (start.isBefore(endTime) || start.isEqual(endTime)) {
-            closes.add(getEntryForTime(start).getCloseMid());
-            start = start.plus(pair.toDuration());
-        }
-
-        return closes;
-    }
-
     public List<TimeSeriesEntry> getLastNCloseForTimeAsEntry(LocalDateTime endTime, int n) {
         List<TimeSeriesEntry> closes = new ArrayList<>();
         LocalDateTime start = endTime.minus(Duration.ofMinutes(pair.timeInMinutes() * n));
@@ -103,18 +91,6 @@ public class TimeSeries implements Iterable<LocalDateTime>{
         return closes;
     }
 
-    public BarSeries getLastNCloseForTimeAsBarSeries(LocalDateTime endTime, int n) {
-        List<Bar> closes = new ArrayList<>();
-        LocalDateTime start = endTime.minus(Duration.ofMinutes(pair.timeInMinutes() * n));
-
-        while (start.isBefore(endTime) || start.isEqual(endTime)) {
-            closes.add(getEntryForTimeAsBar(start));
-            start = start.plus(pair.toDuration());
-        }
-
-        return new BaseBarSeriesBuilder().withBars(closes).build();
-    }
-
     @Override
     public String toString() {
         return String.format("TimeSeries(For: %s, From: %s, To: %s, Entries: %d)",
@@ -123,10 +99,6 @@ public class TimeSeries implements Iterable<LocalDateTime>{
 
     public Pair getPair() {
         return pair;
-    }
-
-    public boolean containsBar(LocalDateTime time) {
-        return barData.containsKey(time);
     }
 
     public TimeSeriesEntry getLastEntryForTime(LocalDateTime time) {

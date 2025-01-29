@@ -1,6 +1,7 @@
 package com.becker.freelance.backtest.resultviewer.app;
 
 import com.becker.freelance.backtest.commons.BacktestResultContent;
+import com.becker.freelance.math.Decimal;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
@@ -33,14 +34,14 @@ class BacktestResultPlotter implements Runnable {
 
     private XYChart plotResults(Set<BacktestResultContent> backtestResultContents, String title) {
         List<String> legends = new ArrayList<>();
-        List<List<Double>> data = new ArrayList<>();
+        List<List<Decimal>> data = new ArrayList<>();
 
         backtestResultContents.forEach(resultContent -> {
-            List<Double> tradeProfits = resultContent.tradeProfits();
-            List<Double> series = new ArrayList<>();
-            double sum = 0;
-            for (Double tradeProfit : tradeProfits) {
-                sum += tradeProfit;
+            List<Decimal> tradeProfits = resultContent.tradeProfits();
+            List<Decimal> series = new ArrayList<>();
+            Decimal sum = Decimal.ZERO;
+            for (Decimal tradeProfit : tradeProfits) {
+                sum = sum.add(tradeProfit);
                 series.add(sum);
             }
             data.add(series);

@@ -1,17 +1,18 @@
 package com.becker.freelance.commons.signal;
 
 import com.becker.freelance.commons.position.PositionType;
+import com.becker.freelance.math.Decimal;
 
 public class EntrySignal {
 
-    private double size;
+    private Decimal size;
     private Direction direction;
-    private double stopInPoints;
-    private double limitInPoints;
+    private Decimal stopInPoints;
+    private Decimal limitInPoints;
     private PositionType positionType;
-    private Double trailingStepSize;
+    private Decimal trailingStepSize;
 
-    public EntrySignal(double size, Direction direction, double stopInPoints, double limitInPoints,
+    public EntrySignal(Decimal size, Direction direction, Decimal stopInPoints, Decimal limitInPoints,
                        PositionType positionType) {
         this.size = size;
         this.direction = direction;
@@ -20,17 +21,17 @@ public class EntrySignal {
         this.positionType = positionType;
     }
 
-    public EntrySignal(double size, Direction direction, double stopInPoints, double limitInPoints,
-                       PositionType positionType, Double trailingStepSize) {
+    public EntrySignal(Decimal size, Direction direction, Decimal stopInPoints, Decimal limitInPoints,
+                       PositionType positionType, Decimal trailingStepSize) {
         this(size, direction, stopInPoints, limitInPoints, positionType);
         this.trailingStepSize = trailingStepSize;
     }
 
-    public double getSize() {
+    public Decimal getSize() {
         return size;
     }
 
-    public void setSize(double size) {
+    public void setSize(Decimal size) {
         this.size = size;
     }
 
@@ -42,19 +43,19 @@ public class EntrySignal {
         this.direction = direction;
     }
 
-    public double getStopInPoints() {
+    public Decimal getStopInPoints() {
         return stopInPoints;
     }
 
-    public void setStopInPoints(double stopInPoints) {
+    public void setStopInPoints(Decimal stopInPoints) {
         this.stopInPoints = stopInPoints;
     }
 
-    public double getLimitInPoints() {
+    public Decimal getLimitInPoints() {
         return limitInPoints;
     }
 
-    public void setLimitInPoints(double limitInPoints) {
+    public void setLimitInPoints(Decimal limitInPoints) {
         this.limitInPoints = limitInPoints;
     }
 
@@ -66,11 +67,11 @@ public class EntrySignal {
         this.positionType = positionType;
     }
 
-    public Double getTrailingStepSize() {
+    public Decimal getTrailingStepSize() {
         return trailingStepSize;
     }
 
-    public void setTrailingStepSize(Double trailingStepSize) {
+    public void setTrailingStepSize(Decimal trailingStepSize) {
         this.trailingStepSize = trailingStepSize;
     }
 }

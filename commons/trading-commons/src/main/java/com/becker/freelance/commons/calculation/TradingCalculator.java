@@ -4,6 +4,7 @@ import com.becker.freelance.commons.signal.Direction;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
+import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
 import java.util.function.Function;
@@ -11,14 +12,14 @@ import java.util.function.Function;
 public class TradingCalculator {
 
     private TimeSeries umrechnungsKurs;
-    private Function<LocalDateTime, Double> umrechnungsFactor;
+    private Function<LocalDateTime, Decimal> umrechnungsFactor;
     private Pair pair;
 
-    private double noopUmrechnung(LocalDateTime time) {
-        return 1.0;
+    private Decimal noopUmrechnung(LocalDateTime time) {
+        return Decimal.ONE;
     }
 
-    private double eurUsdUmrechnung(LocalDateTime time) {
+    private Decimal eurUsdUmrechnung(LocalDateTime time) {
         TimeSeriesEntry entry = umrechnungsKurs.getEntryForTime(time);
         return entry.getCloseMid();
     }
@@ -37,13 +38,13 @@ public class TradingCalculator {
         }
     }
 
-    public ProfitLossResult calcProfitLoss(double open, double close, LocalDateTime closeTime, Direction direction, double profitPerPoint) {
-        double diff = close - open;
-        double profitGegenwaehrung = diff * profitPerPoint * direction.getFactor() * pair.sizeMultiplication();
-        double umrechnungsFactorValue = umrechnungsFactor.apply(closeTime);
-        return new ProfitLossResult(Math.round(profitGegenwaehrung / umrechnungsFactorValue * 100.0) / 100.0, umrechnungsFactorValue);
+    public ProfitLossResult calcProfitLoss(Decimal open, Decimal close, LocalDateTime closeTime, Direction direction, Decimal profitPerPoint) {
+        Decimal diff = close.subtract(open);
+        Decimal profitGegenwaehrung = diff.multiply(profitPerPoint).multiply(new Decimal(direction.getFactor())).multiply(pair.sizeMultiplication());
+        Decimal umrechnungsFactorValue = umrechnungsFactor.apply(closeTime);
+        return new ProfitLossResult(profitGegenwaehrung.divide(umrechnungsFactorValue).round(2), umrechnungsFactorValue);
     }
 
-        public record ProfitLossResult(double profit, double conversionRate) {
+        public record ProfitLossResult(Decimal profit, Decimal conversionRate) {
     }
 }

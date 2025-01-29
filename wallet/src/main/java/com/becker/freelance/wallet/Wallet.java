@@ -1,43 +1,42 @@
 package com.becker.freelance.wallet;
 
+import com.becker.freelance.math.Decimal;
+
 public class Wallet {
-    private double amount;
-    private double margin;
+    private Decimal amount;
+    private Decimal margin;
 
-    public Wallet(double initialAmount) {
+    public Wallet(Decimal initialAmount) {
         this.amount = initialAmount;
-        this.margin = 0;
+        this.margin = Decimal.ZERO;
     }
 
-    public Wallet() {
-        this(2000);
+
+    public Decimal getAvailableAmount() {
+        return amount.subtract(margin);
     }
 
-    public double getAvailableAmount() {
-        return amount - margin;
+    public boolean canOpen(Decimal requiredMargin) {
+        return getAvailableAmount().isGreaterThanOrEqualTo(requiredMargin);
     }
 
-    public boolean canOpen(double requiredMargin) {
-        return getAvailableAmount() >= requiredMargin;
+    public void addMargin(Decimal margin) {
+        this.margin = this.margin.add(margin);
     }
 
-    public void addMargin(double margin) {
-        this.margin += margin;
+    public void removeMargin(Decimal margin) {
+        this.margin = this.margin.subtract(margin);
     }
 
-    public void removeMargin(double margin) {
-        this.margin -= margin;
+    public void adjustAmount(Decimal diff) {
+        this.amount = this.amount.add(diff);
     }
 
-    public void adjustAmount(double diff) {
-        this.amount += diff;
-    }
-
-    public double getAmount() {
+    public Decimal getAmount() {
         return amount;
     }
 
-    public double getMargin() {
+    public Decimal getMargin() {
         return margin;
     }
 }

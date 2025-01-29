@@ -8,6 +8,7 @@ import com.becker.freelance.commons.position.TrailingStopPosition;
 import com.becker.freelance.commons.signal.Direction;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
+import com.becker.freelance.math.Decimal;
 import com.becker.freelance.wallet.Wallet;
 
 import java.util.ArrayList;
@@ -62,28 +63,28 @@ public class PositionCalculation {
 
     private PositionCalculationResult addBuyPositionToSellPositions(TimeSeriesEntry currentPrice, List<Position> positions, EntrySignal entrySignal, Wallet wallet) {
         List<Position> positionsToClose = new ArrayList<>();
-        double sizeToOpen = entrySignal.getSize();
+        Decimal sizeToOpen = entrySignal.getSize();
         boolean completelyEliminated = false;
         boolean sizeToOpenEliminated = false;
         Position positionToPartlyClose = null;
         for (Position position : new ArrayList<>(positions)) {
-            double sizeAfterAdaption = sizeToOpen - position.getSize();
-            if (sizeAfterAdaption == 0){
+            Decimal sizeAfterAdaption = sizeToOpen.subtract(position.getSize());
+            if (sizeAfterAdaption.isEqualToZero()){
                 positionsToClose.add(position);
                 completelyEliminated = true;
                 sizeToOpen = sizeAfterAdaption;
                 break;
-            } else if (sizeAfterAdaption > 0) {
+            } else if (sizeAfterAdaption.isGreaterThanZero()) {
                 positionsToClose.add(position);
                 sizeToOpen = sizeAfterAdaption;
-            } else if (sizeAfterAdaption < 0) {
+            } else if (sizeAfterAdaption.isLessThanZero()) {
                 sizeToOpenEliminated = true;
                 positionToPartlyClose = position;
                 break;
             }
         }
 
-        if (!completelyEliminated && !sizeToOpenEliminated && sizeToOpen > 0){
+        if (!completelyEliminated && !sizeToOpenEliminated && sizeToOpen.isGreaterThanZero()){
             //Close all existing and open new position with remaining size
             return closeAllExistingPositionsAndOpenNewPositionWithRemainingSize(currentPrice, positions, entrySignal, wallet, sizeToOpen);
         } else if (completelyEliminated) {
@@ -97,9 +98,9 @@ public class PositionCalculation {
         throw new IllegalStateException("Could not open positions");
     }
 
-    private PositionCalculationResult closeAllPositionsAndCloseOnePartial(TimeSeriesEntry currentPrice, List<Position> positions, Wallet wallet, Position positionToPartlyClose, double sizeToOpen, List<Position> positionsToClose) {
-        double partToClose = positionToPartlyClose.getSize() - sizeToOpen;
-        double partToRemainOpen = positionToPartlyClose.getSize() - partToClose;
+    private PositionCalculationResult closeAllPositionsAndCloseOnePartial(TimeSeriesEntry currentPrice, List<Position> positions, Wallet wallet, Position positionToPartlyClose, Decimal sizeToOpen, List<Position> positionsToClose) {
+        Decimal partToClose = positionToPartlyClose.getSize().subtract(sizeToOpen);
+        Decimal partToRemainOpen = positionToPartlyClose.getSize().subtract(partToClose);
         Position partialClosePosition = clonePositionWithDifferentSize(positionToPartlyClose, partToClose);
         Position partialOpenPosition = clonePositionWithDifferentSize(positionToPartlyClose, partToRemainOpen);
         positionsToClose.add(partialClosePosition);
@@ -111,7 +112,7 @@ public class PositionCalculation {
         return new PositionCalculationResult(positionsToRemainOpen, closedPositionsResult.trades());
     }
 
-    private PositionCalculationResult closeAllExistingPositionsAndOpenNewPositionWithRemainingSize(TimeSeriesEntry currentPrice, List<Position> positions, EntrySignal entrySignal, Wallet wallet, double sizeToOpen) {
+    private PositionCalculationResult closeAllExistingPositionsAndOpenNewPositionWithRemainingSize(TimeSeriesEntry currentPrice, List<Position> positions, EntrySignal entrySignal, Wallet wallet, Decimal sizeToOpen) {
         PositionCalculationResult positionCalculationResult = closePositions(currentPrice, positions, wallet);
         entrySignal.setSize(sizeToOpen);
         Optional<Position> newPosition = toPosition(currentPrice, entrySignal, wallet);
@@ -120,9 +121,9 @@ public class PositionCalculation {
         return new PositionCalculationResult(openedPositions, positionCalculationResult.trades());
     }
 
-    private Position clonePositionWithDifferentSize(Position position, double size) {
+    private Position clonePositionWithDifferentSize(Position position, Decimal size) {
         TimeSeriesEntry openPrice = position.getOpenPrice();
-        double margin = marginCalculator.calcMargin(size, openPrice);
+        Decimal margin = marginCalculator.calcMargin(size, openPrice);
         return switch (position.getPositionType()){
             case HARD_LIMIT -> new HardLimitPosition(size, position.getDirection(), openPrice, position.getPair(), position.getStopInPoints(), position.getLimitInPoints(), margin);
             case TRAILING -> new TrailingStopPosition(size, position.getDirection(), openPrice, position.getPair(), position.getStopInPoints(), position.getLimitInPoints(), margin, ((TrailingStopPosition) position).getTrailingStepSize());
@@ -141,7 +142,7 @@ public class PositionCalculation {
         return new PositionCalculationResult(new ArrayList<>(), closedTrades);
     }
 
-    private Trade toTrade(double conversionRate, double profit, Pair pair, Position position, TimeSeriesEntry currentPrice) {
+    private Trade toTrade(Decimal conversionRate, Decimal profit, Pair pair, Position position, TimeSeriesEntry currentPrice) {
         return new Trade(position.getOpenTime(), currentPrice.time(), pair, profit,
                 position.getOpenPriceAsNumber(), position.currentPrice(currentPrice), position.getSize(),
                 position.getDirection(), conversionRate, position.getPositionType());
@@ -164,7 +165,7 @@ public class PositionCalculation {
     }
 
     private Optional<Position> toPosition(TimeSeriesEntry currentPrice, EntrySignal entrySignal, Wallet wallet) {
-        double margin = marginCalculator.calcMargin(entrySignal.getSize(), currentPrice);
+        Decimal margin = marginCalculator.calcMargin(entrySignal.getSize(), currentPrice);
         if (!wallet.canOpen(margin)){
             return Optional.empty();
         }

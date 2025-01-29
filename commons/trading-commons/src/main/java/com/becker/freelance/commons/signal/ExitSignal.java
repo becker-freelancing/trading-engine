@@ -1,16 +1,17 @@
 package com.becker.freelance.commons.signal;
 
+import com.becker.freelance.math.Decimal;
 public class ExitSignal {
 
-    private double amount;
+    private Decimal amount;
     private Direction directionToClose;
 
-    public ExitSignal(double amount, Direction directionsToClose) {
+    public ExitSignal(Decimal amount, Direction directionsToClose) {
         this.amount = amount;
         this.directionToClose = directionsToClose;
     }
 
-    public double getAmount() {
+    public Decimal getAmount() {
         return amount;
     }
 

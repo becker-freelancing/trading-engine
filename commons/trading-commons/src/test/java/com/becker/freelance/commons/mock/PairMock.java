@@ -1,6 +1,7 @@
 package com.becker.freelance.commons.mock;
 
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.math.Decimal;
 
 import java.util.Objects;
 
@@ -24,14 +25,14 @@ public class PairMock implements Pair {
 
     private String baseCurrency;
     private String counterCurrency;
-    private double sizeMultiplication;
-    private double leverageFactor;
+    private Decimal sizeMultiplication;
+    private Decimal leverageFactor;
 
-    public PairMock(String baseCurrency, String counterCurrency, double sizeMultiplication, double leverageFactor) {
+    public PairMock(String baseCurrency, String counterCurrency, long sizeMultiplication, double leverageFactor) {
         this.baseCurrency = baseCurrency;
         this.counterCurrency = counterCurrency;
-        this.sizeMultiplication = sizeMultiplication;
-        this.leverageFactor = leverageFactor;
+        this.sizeMultiplication = new Decimal(sizeMultiplication);
+        this.leverageFactor = new Decimal(leverageFactor);
     }
 
     @Override
@@ -45,33 +46,33 @@ public class PairMock implements Pair {
     }
 
     @Override
-    public double sizeMultiplication() {
+    public Decimal sizeMultiplication() {
         return sizeMultiplication;
     }
 
     @Override
-    public double leverageFactor() {
+    public Decimal leverageFactor() {
         return leverageFactor;
     }
 
     @Override
-    public double profitPerPointForOneContract() {
-        return 10;
+    public Decimal profitPerPointForOneContract() {
+        return Decimal.TEN;
     }
 
     @Override
-    public double minOrderSize() {
-        return 0;
+    public Decimal minOrderSize() {
+        return Decimal.ZERO;
     }
 
     @Override
-    public double minStop() {
-        return 0;
+    public Decimal minStop() {
+        return Decimal.ZERO;
     }
 
     @Override
-    public double minLimit() {
-        return 0;
+    public Decimal minLimit() {
+        return Decimal.ZERO;
     }
 
     @Override

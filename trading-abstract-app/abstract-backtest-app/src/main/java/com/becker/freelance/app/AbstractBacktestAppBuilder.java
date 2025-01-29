@@ -1,5 +1,7 @@
 package com.becker.freelance.app;
 
+import com.becker.freelance.math.Decimal;
+
 import java.time.LocalDateTime;
 
 public class AbstractBacktestAppBuilder {
@@ -8,14 +10,14 @@ public class AbstractBacktestAppBuilder {
         return new AbstractBacktestAppBuilder();
     }
 
-    private Double initialWalletAmount;
+    private Decimal initialWalletAmount;
     private LocalDateTime fromTime;
     private LocalDateTime toTime;
     private boolean continueMode;
 
     AbstractBacktestAppBuilder(){}
 
-    public AbstractBacktestAppBuilder withInitialWalletAmount(Double initialWalletAmount) {
+    public AbstractBacktestAppBuilder withInitialWalletAmount(Decimal initialWalletAmount) {
         this.initialWalletAmount = initialWalletAmount;
         return this;
     }

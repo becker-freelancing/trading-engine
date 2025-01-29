@@ -11,6 +11,7 @@ import com.becker.freelance.commons.signal.Direction;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
+import com.becker.freelance.math.Decimal;
 import com.becker.freelance.wallet.Wallet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.*;
 
 class PositionCalculationTest {
 
-    static final double MARGIN_PER_POSITION = 2220.0;
+    static final Decimal MARGIN_PER_POSITION = new Decimal("2220.0");
 
     static LocalDateTime currentTime = LocalDateTime.of(2020, 1, 1, 0, 0, 0);
 
@@ -49,28 +50,28 @@ class PositionCalculationTest {
     void setUp() {
         currentPrice = mock(TimeSeriesEntry.class);
         doReturn(PairMock.eurUsd()).when(currentPrice).pair();
-        doReturn(1.).when(currentPrice).getCloseMid();
-        doReturn(1.).when(currentPrice).closeAsk();
-        doReturn(1.).when(currentPrice).closeBid();
+        doReturn(new Decimal("1.")).when(currentPrice).getCloseMid();
+        doReturn(new Decimal("1.")).when(currentPrice).closeAsk();
+        doReturn(new Decimal("1.")).when(currentPrice).closeBid();
         doReturn(nextTime()).when(currentPrice).time();
         otherPrice = mock(TimeSeriesEntry.class);
         doReturn(PairMock.eurUsd()).when(otherPrice).pair();
-        doReturn(2.).when(otherPrice).getCloseMid();
-        doReturn(2.).when(otherPrice).closeAsk();
-        doReturn(2.).when(otherPrice).closeBid();
+        doReturn(new Decimal("2.")).when(otherPrice).getCloseMid();
+        doReturn(new Decimal("2.")).when(otherPrice).closeAsk();
+        doReturn(new Decimal("2.")).when(otherPrice).closeBid();
         doReturn(nextTime()).when(otherPrice).time();
-        wallet = new Wallet(10000);
-        buyEntrySignal = new EntrySignal(1, Direction.BUY, 5, 7, PositionType.HARD_LIMIT);
-        sellEntrySignal = new EntrySignal(1, Direction.SELL, 5, 7, PositionType.HARD_LIMIT);
-        buyEntrySignal2 = new EntrySignal(2, Direction.BUY, 5, 7, PositionType.HARD_LIMIT);
-        sellEntrySignal2 = new EntrySignal(2, Direction.SELL, 5, 7, PositionType.HARD_LIMIT);
-        buyEntrySignal3 = new EntrySignal(3, Direction.BUY, 5, 7, PositionType.HARD_LIMIT);
-        sellEntrySignal3 = new EntrySignal(3, Direction.SELL, 5, 7, PositionType.HARD_LIMIT);
+        wallet = new Wallet(new Decimal("10000"));
+        buyEntrySignal = new EntrySignal(new Decimal("1"), Direction.BUY, new Decimal("5"), new Decimal("7"), PositionType.HARD_LIMIT);
+        sellEntrySignal = new EntrySignal(new Decimal("1"), Direction.SELL, new Decimal("5"), new Decimal("7"), PositionType.HARD_LIMIT);
+        buyEntrySignal2 = new EntrySignal(new Decimal("2"), Direction.BUY, new Decimal("5"), new Decimal("7"), PositionType.HARD_LIMIT);
+        sellEntrySignal2 = new EntrySignal(new Decimal("2"), Direction.SELL, new Decimal("5"), new Decimal("7"), PositionType.HARD_LIMIT);
+        buyEntrySignal3 = new EntrySignal(new Decimal("3"), Direction.BUY, new Decimal("5"), new Decimal("7"), PositionType.HARD_LIMIT);
+        sellEntrySignal3 = new EntrySignal(new Decimal("3"), Direction.SELL, new Decimal("5"), new Decimal("7"), PositionType.HARD_LIMIT);
         TimeSeries marginCalulationTimeSeries = mock(TimeSeries.class);
         TimeSeriesEntry entryForMarginCalculation = mock(TimeSeriesEntry.class);
         doReturn(entryForMarginCalculation).when(marginCalulationTimeSeries).getEntryForTime(any());
         doReturn(Pair.eurUsd1()).when(marginCalulationTimeSeries).getPair();
-        doReturn(1.5).when(entryForMarginCalculation).getCloseMid();
+        doReturn(new Decimal("1.5")).when(entryForMarginCalculation).getCloseMid();
         tradingCalculator = new TradingCalculator(Pair.eurUsd1(), marginCalulationTimeSeries);
         marginCalculator = new MarginCalculator(Pair.eurUsd1(), marginCalulationTimeSeries);
         positionCalculation = new PositionCalculation(tradingCalculator, marginCalculator);
@@ -88,7 +89,7 @@ class PositionCalculationTest {
 
         Position position = positions.get(0);
         assertEquals(Direction.BUY, position.getDirection());
-        assertEquals(1, position.getSize());
+        assertEquals(new Decimal("1"), position.getSize());
 
         assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
     }
@@ -105,7 +106,7 @@ class PositionCalculationTest {
 
         Position position = positions.get(0);
         assertEquals(Direction.SELL, position.getDirection());
-        assertEquals(1, position.getSize());
+        assertEquals(new Decimal("1"), position.getSize());
 
         assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
     }
@@ -123,12 +124,12 @@ class PositionCalculationTest {
         assertEquals(2, positions.size());
         Position position = positions.get(0);
         assertEquals(Direction.BUY, position.getDirection());
-        assertEquals(1, position.getSize());
+        assertEquals(new Decimal("1"), position.getSize());
         Position position2 = positions.get(1);
         assertEquals(Direction.BUY, position2.getDirection());
-        assertEquals(2, position2.getSize());
+        assertEquals(new Decimal("2"), position2.getSize());
 
-        assertEquals(3 * MARGIN_PER_POSITION, wallet.getMargin());
+        assertEquals(MARGIN_PER_POSITION.multiply(new Decimal("3")), wallet.getMargin());
     }
 
     @Test
@@ -144,12 +145,12 @@ class PositionCalculationTest {
 
         Position position = positions.get(0);
         assertEquals(Direction.SELL, position.getDirection());
-        assertEquals(1, position.getSize());
+        assertEquals(new Decimal("1"), position.getSize());
         Position position2 = positions.get(1);
         assertEquals(Direction.SELL, position2.getDirection());
-        assertEquals(2, position2.getSize());
+        assertEquals(new Decimal("2"), position2.getSize());
 
-        assertEquals(3 * MARGIN_PER_POSITION, wallet.getMargin());
+        assertEquals(MARGIN_PER_POSITION.multiply(new Decimal("3")), wallet.getMargin());
     }
 
     @Test
@@ -167,7 +168,7 @@ class PositionCalculationTest {
         assertEquals(1, positions.size());
         Position position = positions.get(0);
         assertEquals(Direction.BUY, position.getDirection());
-        assertEquals(1, position.getSize());
+        assertEquals(new Decimal("1"), position.getSize());
 
         assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
     }
@@ -187,7 +188,7 @@ class PositionCalculationTest {
         assertEquals(1, positions.size());
         Position position = positions.get(0);
         assertEquals(Direction.SELL, position.getDirection());
-        assertEquals(1, position.getSize());
+        assertEquals(new Decimal("1"), position.getSize());
 
         assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
     }
@@ -207,7 +208,7 @@ class PositionCalculationTest {
         assertEquals(1, positions.size());
         Position position = positions.get(0);
         assertEquals(Direction.SELL, position.getDirection());
-        assertEquals(1, position.getSize());
+        assertEquals(new Decimal("1"), position.getSize());
 
         assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
     }
@@ -227,7 +228,7 @@ class PositionCalculationTest {
         assertEquals(1, positions.size());
         Position position = positions.get(0);
         assertEquals(Direction.BUY, position.getDirection());
-        assertEquals(1, position.getSize());
+        assertEquals(new Decimal("1"), position.getSize());
 
         assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
     }
@@ -247,7 +248,7 @@ class PositionCalculationTest {
 
         assertEquals(0, positions.size());
 
-        assertEquals(0, wallet.getMargin());
+        assertEquals(Decimal.ZERO, wallet.getMargin());
     }
 
 
@@ -265,7 +266,7 @@ class PositionCalculationTest {
 
         assertEquals(0, positions.size());
 
-        assertEquals(0, wallet.getMargin());
+        assertEquals(Decimal.ZERO, wallet.getMargin());
     }
 
 
@@ -281,15 +282,15 @@ class PositionCalculationTest {
         assertEquals(2, trades.size());
         Trade trade = trades.get(0);
         assertEquals(Direction.BUY, trade.getDirection());
-        assertEquals(1, trade.getSize());
+        assertEquals(new Decimal("1"), trade.getSize());
         Trade trade2 = trades.get(1);
         assertEquals(Direction.BUY, trade2.getDirection());
-        assertEquals(1, trade2.getSize());
+        assertEquals(new Decimal("1"), trade2.getSize());
 
         assertEquals(1, positions.size());
         Position position = positions.get(0);
         assertEquals(Direction.BUY, position.getDirection());
-        assertEquals(1, position.getSize());
+        assertEquals(new Decimal("1"), position.getSize());
 
         assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
     }
@@ -307,15 +308,15 @@ class PositionCalculationTest {
         assertEquals(2, trades.size());
         Trade trade = trades.get(0);
         assertEquals(Direction.SELL, trade.getDirection());
-        assertEquals(1, trade.getSize());
+        assertEquals(new Decimal("1"), trade.getSize());
         Trade trade2 = trades.get(1);
         assertEquals(Direction.SELL, trade2.getDirection());
-        assertEquals(1, trade2.getSize());
+        assertEquals(new Decimal("1"), trade2.getSize());
 
         assertEquals(1, positions.size());
         Position position = positions.get(0);
         assertEquals(Direction.SELL, position.getDirection());
-        assertEquals(1, position.getSize());
+        assertEquals(new Decimal("1"), position.getSize());
 
         assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
     }
@@ -333,15 +334,15 @@ class PositionCalculationTest {
         assertEquals(2, trades.size());
         Trade trade = trades.get(0);
         assertEquals(Direction.BUY, trade.getDirection());
-        assertEquals(1, trade.getSize());
+        assertEquals(new Decimal("1"), trade.getSize());
         Trade trade2 = trades.get(0);
         assertEquals(Direction.BUY, trade2.getDirection());
-        assertEquals(1, trade2.getSize());
+        assertEquals(new Decimal("1"), trade2.getSize());
 
         assertEquals(1, positions.size());
         Position position = positions.get(0);
         assertEquals(Direction.SELL, position.getDirection());
-        assertEquals(1, position.getSize());
+        assertEquals(new Decimal("1"), position.getSize());
 
         assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
     }
@@ -359,15 +360,15 @@ class PositionCalculationTest {
         assertEquals(2, trades.size());
         Trade trade = trades.get(0);
         assertEquals(Direction.SELL, trade.getDirection());
-        assertEquals(1, trade.getSize());
+        assertEquals(new Decimal("1"), trade.getSize());
         Trade trade2 = trades.get(0);
         assertEquals(Direction.SELL, trade2.getDirection());
-        assertEquals(1, trade2.getSize());
+        assertEquals(new Decimal("1"), trade2.getSize());
 
         assertEquals(1, positions.size());
         Position position = positions.get(0);
         assertEquals(Direction.BUY, position.getDirection());
-        assertEquals(1, position.getSize());
+        assertEquals(new Decimal("1"), position.getSize());
 
         assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
     }
@@ -385,14 +386,14 @@ class PositionCalculationTest {
         assertEquals(2, trades.size());
         Trade trade = trades.get(0);
         assertEquals(Direction.BUY, trade.getDirection());
-        assertEquals(1, trade.getSize());
+        assertEquals(new Decimal("1"), trade.getSize());
         Trade trade2 = trades.get(0);
         assertEquals(Direction.BUY, trade2.getDirection());
-        assertEquals(1, trade2.getSize());
+        assertEquals(new Decimal("1"), trade2.getSize());
 
         assertEquals(0, positions.size());
 
-        assertEquals(0, wallet.getMargin());
+        assertEquals(new Decimal("0"), wallet.getMargin());
     }
 
 
@@ -408,58 +409,58 @@ class PositionCalculationTest {
         assertEquals(2, trades.size());
         Trade trade = trades.get(0);
         assertEquals(Direction.SELL, trade.getDirection());
-        assertEquals(1, trade.getSize());
+        assertEquals(new Decimal("1"), trade.getSize());
         Trade trade2 = trades.get(0);
         assertEquals(Direction.SELL, trade2.getDirection());
-        assertEquals(1, trade2.getSize());
+        assertEquals(new Decimal("1"), trade2.getSize());
 
         assertEquals(0, positions.size());
 
-        assertEquals(0, wallet.getMargin());
+        assertEquals(new Decimal("0"), wallet.getMargin());
     }
 
     @Test
     void closePositionIfSlOrTpReached(){
-        HardLimitPosition position1 = new HardLimitPosition(1., Direction.BUY, otherPrice, Pair.eurUsd1(), 1, 1, 20);
-        HardLimitPosition position2 = new HardLimitPosition(2., Direction.SELL, otherPrice, Pair.eurUsd1(), 1, 1, 20);
-        HardLimitPosition position3 = new HardLimitPosition(3., Direction.BUY, otherPrice, Pair.eurUsd1(), 20, 20, 20);
-        wallet.addMargin(60);
+        HardLimitPosition position1 = new HardLimitPosition(new Decimal("1."), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        HardLimitPosition position2 = new HardLimitPosition(new Decimal("2."), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        HardLimitPosition position3 = new HardLimitPosition(new Decimal("3."), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
+        wallet.addMargin(new Decimal("60"));
 
         PositionCalculationResult calculationResult = positionCalculation.closePositionIfSlOrTpReached(currentPrice, List.of(position1, position2, position3), wallet);
 
         assertEquals(2, calculationResult.trades().size());
         assertEquals(1, calculationResult.positions().size());
-        assertEquals(676666.66, wallet.getAmount());
-        assertEquals(20, wallet.getMargin());
+        assertEquals(new Decimal("676666.66"), wallet.getAmount());
+        assertEquals(new Decimal("20"), wallet.getMargin());
     }
 
     @Test
     void closeAllBuyPositions(){
-        HardLimitPosition position1 = new HardLimitPosition(1., Direction.BUY, otherPrice, Pair.eurUsd1(), 1, 1, 20);
-        HardLimitPosition position2 = new HardLimitPosition(2., Direction.SELL, otherPrice, Pair.eurUsd1(), 1, 1, 20);
-        HardLimitPosition position3 = new HardLimitPosition(3., Direction.BUY, otherPrice, Pair.eurUsd1(), 20, 20, 20);
-        wallet.addMargin(60);
+        HardLimitPosition position1 = new HardLimitPosition(new Decimal("1.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        HardLimitPosition position2 = new HardLimitPosition(new Decimal("2.0"), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        HardLimitPosition position3 = new HardLimitPosition(new Decimal("3.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
+        wallet.addMargin(new Decimal("60"));
 
         PositionCalculationResult calculationResult = positionCalculation.closeAllBuyPositions(currentPrice, List.of(position1, position2, position3), wallet);
 
         assertEquals(2, calculationResult.trades().size());
         assertEquals(1, calculationResult.positions().size());
-        assertEquals(-2656666.67, wallet.getAmount());
-        assertEquals(20, wallet.getMargin());
+        assertEquals(new Decimal("-2656666.67"), wallet.getAmount());
+        assertEquals(new Decimal("20"), wallet.getMargin());
     }
 
     @Test
     void closeAllSellPositions(){
-        HardLimitPosition position1 = new HardLimitPosition(1., Direction.BUY, otherPrice, Pair.eurUsd1(), 1, 1, 20);
-        HardLimitPosition position2 = new HardLimitPosition(2., Direction.SELL, otherPrice, Pair.eurUsd1(), 1, 1, 20);
-        HardLimitPosition position3 = new HardLimitPosition(3., Direction.BUY, otherPrice, Pair.eurUsd1(), 20, 20, 20);
-        wallet.addMargin(60);
+        HardLimitPosition position1 = new HardLimitPosition(new Decimal("1.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        HardLimitPosition position2 = new HardLimitPosition(new Decimal("2.0"), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        HardLimitPosition position3 = new HardLimitPosition(new Decimal("3.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
+        wallet.addMargin(new Decimal("60"));
 
         PositionCalculationResult calculationResult = positionCalculation.closeAllSellPositions(currentPrice, List.of(position1, position2, position3), wallet);
 
         assertEquals(1, calculationResult.trades().size());
         assertEquals(2, calculationResult.positions().size());
-        assertEquals(1343333.33, wallet.getAmount());
-        assertEquals(40, wallet.getMargin());
+        assertEquals(new Decimal("1343333.33"), wallet.getAmount());
+        assertEquals(new Decimal("40"), wallet.getMargin());
     }
 }

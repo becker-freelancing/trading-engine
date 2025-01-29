@@ -1,14 +1,16 @@
 package com.becker.freelance.strategies;
 
+import com.becker.freelance.math.Decimal;
+
 public class StrategyParameter {
 
     private String name;
-    private double defaultValue;
-    private double minValue;
-    private double maxValue;
-    private double stepSize;
+    private Decimal defaultValue;
+    private Decimal minValue;
+    private Decimal maxValue;
+    private Decimal stepSize;
 
-    public StrategyParameter(String name, double defaultValue, double minValue, double maxValue, double stepSize) {
+    public StrategyParameter(String name, Decimal defaultValue, Decimal minValue, Decimal maxValue, Decimal stepSize) {
         this.name = name;
         this.defaultValue = defaultValue;
         this.minValue = minValue;
@@ -16,23 +18,37 @@ public class StrategyParameter {
         this.stepSize = stepSize;
     }
 
+
+    public StrategyParameter(String name, Double defaultValue, Double minValue, Double maxValue, Double stepSize) {
+        this(name, new Decimal(defaultValue), new Decimal(minValue), new Decimal(maxValue), new Decimal(stepSize));
+    }
+
+    public StrategyParameter(String name, Integer defaultValue, Double minValue, Double maxValue, Double stepSize) {
+        this(name, defaultValue.doubleValue(), minValue, maxValue, stepSize);
+    }
+
+
+    public StrategyParameter(String name, Integer defaultValue, Integer minValue, Integer maxValue, Integer stepSize) {
+        this(name, new Decimal(defaultValue), new Decimal(minValue), new Decimal(maxValue), new Decimal(stepSize));
+    }
+
     public String getName() {
         return name;
     }
 
-    public double getDefaultValue() {
+    public Decimal getDefaultValue() {
         return defaultValue;
     }
 
-    public double getMinValue() {
+    public Decimal getMinValue() {
         return minValue;
     }
 
-    public double getMaxValue() {
+    public Decimal getMaxValue() {
         return maxValue;
     }
 
-    public double getStepSize() {
+    public Decimal getStepSize() {
         return stepSize;
     }
 }

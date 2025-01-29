@@ -4,25 +4,26 @@ import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.signal.Direction;
 
 import java.time.LocalDateTime;
+import com.becker.freelance.math.Decimal;
 
 public class Trade {
 
     private LocalDateTime openTime;
     private LocalDateTime closeTime;
     private Pair pair;
-    private double profitInEuro;
-    private double openLevel;
-    private double closeLevel;
-    private double size;
+    private Decimal profitInEuro;
+    private Decimal openLevel;
+    private Decimal closeLevel;
+    private Decimal size;
     private Direction direction;
-    private double conversionRate;
+    private Decimal conversionRate;
     private PositionType positionType;
 
     protected Trade(){}
 
-    public Trade(LocalDateTime openTime, LocalDateTime closeTime, Pair pair, double profitInEuro,
-                 double openLevel, double closeLevel, double size, Direction direction,
-                 double conversionRate, PositionType positionType) {
+    public Trade(LocalDateTime openTime, LocalDateTime closeTime, Pair pair, Decimal profitInEuro,
+                 Decimal openLevel, Decimal closeLevel, Decimal size, Direction direction,
+                 Decimal conversionRate, PositionType positionType) {
         this.openTime = openTime;
         this.closeTime = closeTime;
         this.pair = pair;
@@ -55,19 +56,19 @@ public class Trade {
         return pair;
     }
 
-    public double getProfitInEuro() {
+    public Decimal getProfitInEuro() {
         return profitInEuro;
     }
 
-    public double getOpenLevel() {
+    public Decimal getOpenLevel() {
         return openLevel;
     }
 
-    public double getCloseLevel() {
+    public Decimal getCloseLevel() {
         return closeLevel;
     }
 
-    public double getSize() {
+    public Decimal getSize() {
         return size;
     }
 
@@ -75,7 +76,7 @@ public class Trade {
         return direction;
     }
 
-    public double getConversionRate() {
+    public Decimal getConversionRate() {
         return conversionRate;
     }
 
