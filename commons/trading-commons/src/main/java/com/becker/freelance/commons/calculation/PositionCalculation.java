@@ -125,8 +125,8 @@ public class PositionCalculation {
         TimeSeriesEntry openPrice = position.getOpenPrice();
         Decimal margin = marginCalculator.calcMargin(size, openPrice);
         return switch (position.getPositionType()){
-            case HARD_LIMIT -> new HardLimitPosition(size, position.getDirection(), openPrice, position.getPair(), position.getStopInPoints(), position.getLimitInPoints(), margin);
-            case TRAILING -> new TrailingStopPosition(size, position.getDirection(), openPrice, position.getPair(), position.getStopInPoints(), position.getLimitInPoints(), margin, ((TrailingStopPosition) position).getTrailingStepSize());
+            case HARD_LIMIT -> HardLimitPosition.fromLevels(size, position.getDirection(), openPrice, position.getPair(), position.getStopLevel(), position.getLimitLevel(), margin);
+            case TRAILING -> TrailingStopPosition.fromLevels(size, position.getDirection(), openPrice, position.getPair(), position.getStopLevel(), position.getLimitLevel(), margin, ((TrailingStopPosition) position).getTrailingStepSize());
         };
     }
 
@@ -171,8 +171,8 @@ public class PositionCalculation {
         }
         wallet.addMargin(margin);
         return switch (entrySignal.getPositionType()) {
-            case HARD_LIMIT -> Optional.of(new HardLimitPosition(entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInPoints(), entrySignal.getLimitInPoints(), margin));
-            case TRAILING -> Optional.of(new TrailingStopPosition(entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInPoints(), entrySignal.getLimitInPoints(), entrySignal.getTrailingStepSize(), margin));
+            case HARD_LIMIT -> Optional.of(HardLimitPosition.fromDistances(entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInPoints(), entrySignal.getLimitInPoints(), margin));
+            case TRAILING -> Optional.of(TrailingStopPosition.fromDistances(entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInPoints(), entrySignal.getLimitInPoints(), entrySignal.getTrailingStepSize(), margin));
         };
     }
 

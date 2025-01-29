@@ -74,7 +74,7 @@ class MarginCalculatorTest {
         MarginCalculator calculator = new MarginCalculator(ethEur, timeSeries);
 
         Decimal margin = calculator.calcMargin(new Decimal("0.5"), close);
-        assertEquals(new Decimal("786.3"), margin);
+        assertEquals(new Decimal("786.30"), margin);
     }
 
     @Test

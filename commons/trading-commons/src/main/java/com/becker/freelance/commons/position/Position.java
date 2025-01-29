@@ -9,30 +9,62 @@ import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import com.becker.freelance.math.Decimal;
-import org.ta4j.core.Bar;
 
 public abstract class Position {
+
+    protected static Decimal getOpenPriceAsNumber(Direction direction, TimeSeriesEntry openPrice) {
+        return switch (direction){
+            case BUY -> openPrice.closeAsk();
+            case SELL -> openPrice.closeBid();
+        };
+    }
+
+    protected static Decimal getStopLevelFromDistance(Direction direction, TimeSeriesEntry openPrice, Decimal distance) {
+        return switch (direction){
+            case BUY -> getOpenPriceAsNumber(direction, openPrice).subtract(distance).max(Decimal.ZERO);
+            case SELL -> getOpenPriceAsNumber(direction, openPrice).add(distance);
+        };
+    }
+
+    protected static Decimal getLimitLevelFromDistance(Direction direction, TimeSeriesEntry openPrice, Decimal distance) {
+        return switch (direction){
+            case BUY -> getOpenPriceAsNumber(direction, openPrice).add(distance);
+            case SELL -> getOpenPriceAsNumber(direction, openPrice).subtract(distance).max(Decimal.ZERO);
+        };
+    }
+
     protected Decimal size;
     protected Direction direction;
     protected Pair pair;
     protected TimeSeriesEntry openPrice;
     protected LocalDateTime openTime;
-    protected Decimal stopInPoints;
-    protected Decimal limitInPoints;
+    protected Decimal stopLevel;
+    protected Decimal limitLevel;
     protected PositionType positionType;
     protected Decimal margin;
 
-    public Position(Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
-                    Decimal stopInPoints, Decimal limitInPoints, PositionType positionType, Decimal margin) {
+    Position(Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
+             Decimal stopLevel, Decimal limitLevel, PositionType positionType, Decimal margin) {
+        checkLevels(direction, stopLevel, limitLevel);
         this.size = size;
         this.direction = direction;
         this.pair = pair;
-        this.stopInPoints = stopInPoints.abs();
-        this.limitInPoints = limitInPoints.abs();
+        this.stopLevel = stopLevel.abs();
+        this.limitLevel = limitLevel.abs();
         this.openTime = openPrice.time();
         this.openPrice = openPrice;
         this.positionType = positionType;
         this.margin = margin;
+    }
+
+    private void checkLevels(Direction direction, Decimal stopLevel, Decimal limitLevel) {
+        if (direction == Direction.BUY && stopLevel.isGreaterThan(limitLevel)){
+            throw new IllegalArgumentException("For Buy Positions the stop level must be greater than the limit level");
+        }
+
+        if (direction == Direction.SELL && stopLevel.isLessThan(limitLevel)){
+            throw new IllegalArgumentException("For Sell Positions the stop level must be less than the limit level");
+        }
     }
 
     public abstract void adapt(TimeSeriesEntry currentPrice);
@@ -55,10 +87,19 @@ public abstract class Position {
     }
 
     public boolean isTpReached(TimeSeriesEntry currentPrice) {
-        Decimal priceDifference = currentTpPrice(currentPrice).subtract(getOpenPriceAsNumber());
+        Decimal currentTpPrice = currentTpPrice(currentPrice);
         return switch (direction) {
-            case BUY ->  priceDifference.isGreaterThan(limitInPoints) || priceDifference.isEqualTo(limitInPoints);
-            case SELL -> priceDifference.isLessThan(limitInPoints.negate()) || priceDifference.isEqualTo(limitInPoints.negate());
+            case BUY ->  currentTpPrice.isGreaterThanOrEqualTo(limitLevel);
+            case SELL -> currentTpPrice.isLessThanOrEqualTo(limitLevel);
+        };
+    }
+
+
+    public boolean isSlReached(TimeSeriesEntry currentPrice) {
+        Decimal currentSlPrice = currentSlPrice(currentPrice);
+        return switch (direction) {
+            case BUY -> currentSlPrice.isLessThanOrEqualTo(stopLevel);
+            case SELL -> currentSlPrice.isGreaterThanOrEqualTo(stopLevel);
         };
     }
 
@@ -77,13 +118,6 @@ public abstract class Position {
         };
     }
 
-    public boolean isSlReached(TimeSeriesEntry currentPrice) {
-        Decimal priceDifference = currentSlPrice(currentPrice).subtract(getOpenPriceAsNumber());
-        return switch (direction) {
-            case BUY -> priceDifference.isLessThan(stopInPoints.negate()) || priceDifference.isEqualTo(stopInPoints.negate());
-            case SELL -> priceDifference.isGreaterThan(stopInPoints) || priceDifference.isEqualTo(stopInPoints);
-        };
-    }
 
     public Decimal getMargin() {
         return margin;
@@ -102,10 +136,7 @@ public abstract class Position {
     }
 
     public Decimal getOpenPriceAsNumber() {
-        return switch (direction){
-            case BUY -> openPrice.closeAsk();
-            case SELL -> openPrice.closeBid();
-        };
+        return getOpenPriceAsNumber(direction, openPrice);
     }
 
     public TimeSeriesEntry getOpenPrice() {
@@ -116,12 +147,12 @@ public abstract class Position {
         return openTime;
     }
 
-    public Decimal getStopInPoints() {
-        return stopInPoints;
+    public Decimal getStopLevel() {
+        return stopLevel;
     }
 
-    public Decimal getLimitInPoints() {
-        return limitInPoints;
+    public Decimal getLimitLevel() {
+        return limitLevel;
     }
 
     public PositionType getPositionType() {
@@ -134,11 +165,11 @@ public abstract class Position {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
         Position position = (Position) object;
-        return Objects.equals(size, position.size) && direction == position.direction && Objects.equals(pair, position.pair) && Objects.equals(openPrice, position.openPrice) && Objects.equals(openTime, position.openTime) && Objects.equals(stopInPoints, position.stopInPoints) && Objects.equals(limitInPoints, position.limitInPoints) && positionType == position.positionType && Objects.equals(margin, position.margin);
+        return Objects.equals(size, position.size) && direction == position.direction && Objects.equals(pair, position.pair) && Objects.equals(openPrice, position.openPrice) && Objects.equals(openTime, position.openTime) && Objects.equals(stopLevel, position.stopLevel) && Objects.equals(limitLevel, position.limitLevel) && positionType == position.positionType && Objects.equals(margin, position.margin);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(size, direction, pair, openPrice, openTime, stopInPoints, limitInPoints, positionType, margin);
+        return Objects.hash(size, direction, pair, openPrice, openTime, stopLevel, limitLevel, positionType, margin);
     }
 }

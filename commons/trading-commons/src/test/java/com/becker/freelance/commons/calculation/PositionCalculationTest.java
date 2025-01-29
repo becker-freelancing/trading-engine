@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 
 class PositionCalculationTest {
 
-    static final Decimal MARGIN_PER_POSITION = new Decimal("2220.0");
+    static final Decimal MARGIN_PER_POSITION = new Decimal("2220.00");
 
     static LocalDateTime currentTime = LocalDateTime.of(2020, 1, 1, 0, 0, 0);
 
@@ -248,7 +248,7 @@ class PositionCalculationTest {
 
         assertEquals(0, positions.size());
 
-        assertEquals(Decimal.ZERO, wallet.getMargin());
+        assertEquals(new Decimal("0.00"), wallet.getMargin());
     }
 
 
@@ -266,7 +266,7 @@ class PositionCalculationTest {
 
         assertEquals(0, positions.size());
 
-        assertEquals(Decimal.ZERO, wallet.getMargin());
+        assertEquals(new Decimal("0.00"), wallet.getMargin());
     }
 
 
@@ -393,7 +393,7 @@ class PositionCalculationTest {
 
         assertEquals(0, positions.size());
 
-        assertEquals(new Decimal("0"), wallet.getMargin());
+        assertEquals(new Decimal("0.00"), wallet.getMargin());
     }
 
 
@@ -416,15 +416,19 @@ class PositionCalculationTest {
 
         assertEquals(0, positions.size());
 
-        assertEquals(new Decimal("0"), wallet.getMargin());
+        assertEquals(new Decimal("0.00"), wallet.getMargin());
     }
 
     @Test
     void closePositionIfSlOrTpReached(){
-        HardLimitPosition position1 = new HardLimitPosition(new Decimal("1."), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
-        HardLimitPosition position2 = new HardLimitPosition(new Decimal("2."), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
-        HardLimitPosition position3 = new HardLimitPosition(new Decimal("3."), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
+        Position position1 = HardLimitPosition.fromDistances(new Decimal("1."), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        Position position2 = HardLimitPosition.fromDistances(new Decimal("2."), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        Position position3 = HardLimitPosition.fromDistances(new Decimal("3."), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
         wallet.addMargin(new Decimal("60"));
+        when(currentPrice.lowBid()).thenReturn(new Decimal("1"));
+        when(currentPrice.lowAsk()).thenReturn(new Decimal("1"));
+        when(currentPrice.highAsk()).thenReturn(new Decimal("1"));
+        when(currentPrice.highBid()).thenReturn(new Decimal("1"));
 
         PositionCalculationResult calculationResult = positionCalculation.closePositionIfSlOrTpReached(currentPrice, List.of(position1, position2, position3), wallet);
 
@@ -436,9 +440,9 @@ class PositionCalculationTest {
 
     @Test
     void closeAllBuyPositions(){
-        HardLimitPosition position1 = new HardLimitPosition(new Decimal("1.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
-        HardLimitPosition position2 = new HardLimitPosition(new Decimal("2.0"), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
-        HardLimitPosition position3 = new HardLimitPosition(new Decimal("3.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
+        Position position1 = HardLimitPosition.fromDistances(new Decimal("1.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        Position position2 = HardLimitPosition.fromDistances(new Decimal("2.0"), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        Position position3 = HardLimitPosition.fromDistances(new Decimal("3.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
         wallet.addMargin(new Decimal("60"));
 
         PositionCalculationResult calculationResult = positionCalculation.closeAllBuyPositions(currentPrice, List.of(position1, position2, position3), wallet);
@@ -451,9 +455,9 @@ class PositionCalculationTest {
 
     @Test
     void closeAllSellPositions(){
-        HardLimitPosition position1 = new HardLimitPosition(new Decimal("1.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
-        HardLimitPosition position2 = new HardLimitPosition(new Decimal("2.0"), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
-        HardLimitPosition position3 = new HardLimitPosition(new Decimal("3.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
+        Position position1 = HardLimitPosition.fromDistances(new Decimal("1.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        Position position2 = HardLimitPosition.fromDistances(new Decimal("2.0"), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        Position position3 = HardLimitPosition.fromDistances(new Decimal("3.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
         wallet.addMargin(new Decimal("60"));
 
         PositionCalculationResult calculationResult = positionCalculation.closeAllSellPositions(currentPrice, List.of(position1, position2, position3), wallet);

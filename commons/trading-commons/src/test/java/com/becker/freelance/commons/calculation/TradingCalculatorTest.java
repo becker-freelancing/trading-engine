@@ -38,7 +38,7 @@ public class TradingCalculatorTest {
         Decimal profitLoss = calculator.calcProfitLoss(new Decimal("1.04876"), new Decimal("1.29864"), time, Direction.BUY, Decimal.TEN).profit();
         Decimal umrechnungsFactor = calculator.calcProfitLoss(new Decimal("1.04876"), new Decimal("1.29864"), time, Direction.BUY, Decimal.TEN).conversionRate();
 
-        assertEquals(new Decimal("236965.38"), profitLoss);
+        assertEquals(new Decimal("236965.39"), profitLoss);
         assertEquals(new Decimal("1.0545"), umrechnungsFactor);
     }
 
@@ -50,7 +50,7 @@ public class TradingCalculatorTest {
         Decimal profitLoss = calculator.calcProfitLoss(new Decimal("1.04876"), new Decimal("1.29864"), time, Direction.SELL, Decimal.ONE).profit();
         Decimal umrechnungsFactor = calculator.calcProfitLoss(new Decimal("1.04876"), new Decimal("1.29864"), time, Direction.SELL, Decimal.ONE).conversionRate();
 
-        assertEquals(new Decimal("-23696.538"), profitLoss);
+        assertEquals(new Decimal("-23696.54"), profitLoss);
         assertEquals(new Decimal("1.0545"), umrechnungsFactor);
     }
 
