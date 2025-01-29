@@ -143,4 +143,14 @@ public class Decimal extends BigDecimal {
     public Decimal multiply(int i) {
         return multiply(new Decimal(i));
     }
+
+    @Override
+    public Decimal max(BigDecimal val) {
+        return new Decimal(super.max(val));
+    }
+
+    @Override
+    public Decimal min(BigDecimal val) {
+        return new Decimal(super.min(val));
+    }
 }

@@ -9,6 +9,7 @@ import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import com.becker.freelance.math.Decimal;
+import org.ta4j.core.Bar;
 
 public abstract class Position {
     protected Decimal size;
@@ -47,27 +48,41 @@ public abstract class Position {
     }
 
     public Decimal currentPrice(TimeSeriesEntry currentPrice) {
-        return direction == Direction.BUY ? currentPrice.closeBid() : currentPrice.closeAsk();
+        return switch (direction){
+            case BUY -> currentPrice.closeBid();
+            case SELL -> currentPrice.closeAsk();
+        };
     }
 
     public boolean isTpReached(TimeSeriesEntry currentPrice) {
-        Decimal priceDifference = currentPrice(currentPrice).subtract(getOpenPriceAsNumber());
-        if (direction == Direction.BUY) {
-            return priceDifference.isGreaterThan(limitInPoints) || priceDifference.isEqualTo(limitInPoints);
-        } else {
-            Decimal negativeLimit = limitInPoints.multiply(new Decimal("-1"));
-            return priceDifference.isLessThan(negativeLimit) || priceDifference.isEqualTo(negativeLimit);
-        }
+        Decimal priceDifference = currentTpPrice(currentPrice).subtract(getOpenPriceAsNumber());
+        return switch (direction) {
+            case BUY ->  priceDifference.isGreaterThan(limitInPoints) || priceDifference.isEqualTo(limitInPoints);
+            case SELL -> priceDifference.isLessThan(limitInPoints.negate()) || priceDifference.isEqualTo(limitInPoints.negate());
+        };
+    }
+
+    private Decimal currentTpPrice(TimeSeriesEntry currentPrice) {
+        return switch (direction){
+            case BUY -> currentPrice.closeBid().max(currentPrice.highBid());
+            case SELL -> currentPrice.closeAsk().min(currentPrice.lowAsk());
+        };
+    }
+
+
+    private Decimal currentSlPrice(TimeSeriesEntry currentPrice) {
+        return switch (direction){
+            case BUY -> currentPrice.closeBid().min(currentPrice.lowBid());
+            case SELL -> currentPrice.closeAsk().max(currentPrice.highAsk());
+        };
     }
 
     public boolean isSlReached(TimeSeriesEntry currentPrice) {
-        Decimal priceDifference = currentPrice(currentPrice).subtract(getOpenPriceAsNumber());
-        if (direction == Direction.BUY) {
-            Decimal negativeStop = stopInPoints.multiply(new Decimal("-1"));
-            return priceDifference.isLessThan(negativeStop) || priceDifference.isEqualTo(negativeStop);
-        } else {
-            return priceDifference.isGreaterThan(stopInPoints) || priceDifference.isEqualTo(stopInPoints);
-        }
+        Decimal priceDifference = currentSlPrice(currentPrice).subtract(getOpenPriceAsNumber());
+        return switch (direction) {
+            case BUY -> priceDifference.isLessThan(stopInPoints.negate()) || priceDifference.isEqualTo(stopInPoints.negate());
+            case SELL -> priceDifference.isGreaterThan(stopInPoints) || priceDifference.isEqualTo(stopInPoints);
+        };
     }
 
     public Decimal getMargin() {
@@ -87,7 +102,10 @@ public abstract class Position {
     }
 
     public Decimal getOpenPriceAsNumber() {
-        return direction == Direction.BUY ? openPrice.closeAsk() : openPrice.closeBid();
+        return switch (direction){
+            case BUY -> openPrice.closeAsk();
+            case SELL -> openPrice.closeBid();
+        };
     }
 
     public TimeSeriesEntry getOpenPrice() {
