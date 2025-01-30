@@ -125,15 +125,15 @@ public class PositionCalculation {
         TimeSeriesEntry openPrice = position.getOpenPrice();
         Decimal margin = marginCalculator.calcMargin(size, openPrice);
         return switch (position.getPositionType()){
-            case HARD_LIMIT -> HardLimitPosition.fromLevels(size, position.getDirection(), openPrice, position.getPair(), position.getStopLevel(), position.getLimitLevel(), margin);
-            case TRAILING -> TrailingStopPosition.fromLevels(size, position.getDirection(), openPrice, position.getPair(), position.getStopLevel(), position.getLimitLevel(), margin, ((TrailingStopPosition) position).getTrailingStepSize());
+            case HARD_LIMIT -> HardLimitPosition.fromLevels(tradingCalculator, size, position.getDirection(), openPrice, position.getPair(), position.getStopLevel(), position.getLimitLevel(), margin);
+            case TRAILING -> TrailingStopPosition.fromLevels(tradingCalculator, size, position.getDirection(), openPrice, position.getPair(), position.getStopLevel(), position.getLimitLevel(), margin, ((TrailingStopPosition) position).getTrailingStepSizeInEuro());
         };
     }
 
     private PositionCalculationResult closePositions(TimeSeriesEntry currentPrice, List<Position> positions, Wallet wallet) {
         List<Trade> closedTrades = new ArrayList<>();
         for (Position position : positions) {
-            TradingCalculator.ProfitLossResult profitConversionRate = position.currentProfit(currentPrice, tradingCalculator);
+            TradingCalculator.ProfitLossResult profitConversionRate = position.currentProfit(currentPrice);
             closedTrades.add(toTrade(profitConversionRate.conversionRate(), profitConversionRate.profit(), currentPrice.pair(), position, currentPrice));
             wallet.adjustAmount(profitConversionRate.profit());
             wallet.removeMargin(position.getMargin());

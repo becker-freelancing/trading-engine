@@ -10,33 +10,75 @@ import com.becker.freelance.math.Decimal;
 public class TrailingStopPosition extends Position {
 
     public static Position fromDistancesInEuro(TradingCalculator tradingCalculator, Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
-                                               Decimal stopInPointsInEuros, Decimal limitInEuros, Decimal trailingStepSize, Decimal margin) {
+                                               Decimal stopInPointsInEuros, Decimal limitInEuros, Decimal trailingStepSizeInEuro, Decimal margin) {
 
         Decimal limitLevel = Position.getLimitLevelFromDistanceInEuro(tradingCalculator, direction, openPrice, limitInEuros, size, pair);
         Decimal stopLevel = Position.getStopLevelFromDistanceInEuro(tradingCalculator, direction, openPrice, stopInPointsInEuros, size, pair);
 
-        return fromLevels(size, direction, openPrice, pair, stopLevel, limitLevel, trailingStepSize, margin);
+        return fromLevels(tradingCalculator, size, direction, openPrice, pair, stopLevel, limitLevel, trailingStepSizeInEuro, margin);
     }
 
-    public static Position fromLevels(Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair, Decimal stopLevel, Decimal limitLevel, Decimal trailingStepSize, Decimal margin) {
-        return new TrailingStopPosition(size, direction, openPrice, pair, stopLevel, limitLevel, trailingStepSize, margin);
+    public static Position fromLevels(TradingCalculator tradingCalculator, Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair, Decimal stopLevel, Decimal limitLevel, Decimal trailingStepSizeInEuro, Decimal margin) {
+        return new TrailingStopPosition(tradingCalculator, size, direction, openPrice, pair, stopLevel, limitLevel, trailingStepSizeInEuro, margin);
     }
 
-    private Decimal trailingStepSize;
+    private Decimal trailingStepSizeInEuro;
+    private Decimal nextTrailingUpdateProfit;
+    private Decimal lastTrailingUpdateValue;
 
-    TrailingStopPosition(Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
-                         Decimal stopInPoints, Decimal limitInPoints, Decimal trailingStepSize, Decimal margin) {
-        super(size, direction, openPrice, pair, stopInPoints, limitInPoints, PositionType.TRAILING, margin);
-        this.trailingStepSize = trailingStepSize;
+    TrailingStopPosition(TradingCalculator tradingCalculator, Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
+                         Decimal stopLevel, Decimal limitLevel, Decimal trailingStepSizeInEuro, Decimal margin) {
+        super(tradingCalculator, size, direction, openPrice, pair, stopLevel, limitLevel, PositionType.TRAILING, margin);
+        this.trailingStepSizeInEuro = trailingStepSizeInEuro;
+        this.nextTrailingUpdateProfit = trailingStepSizeInEuro;
+        this.lastTrailingUpdateValue = openPrice.getCloseMid();
     }
 
     @Override
     public void adapt(TimeSeriesEntry currentPrice) {
-        // TODO: Implement trailing stop logic
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (direction == Direction.BUY){
+            updateForBuyPosition(currentPrice);
+        } else if (direction == Direction.SELL) {
+            updateForSellPosition(currentPrice);
+        } else {
+            throw new IllegalArgumentException("No Trailing implemented for Direction " + direction);
+        }
     }
 
-    public Decimal getTrailingStepSize() {
-        return trailingStepSize;
+    private void updateForBuyPosition(TimeSeriesEntry currentPrice) {
+        if (lastTrailingUpdateValue.isGreaterThanOrEqualTo(currentPrice.getCloseMid())){
+            return;
+        }
+
+        Decimal profit = currentProfit(currentPrice).profit();
+        if (profit.isLessThan(nextTrailingUpdateProfit)){
+            return;
+        }
+
+
+        nextTrailingUpdateProfit = profit.add(trailingStepSizeInEuro);
+        stopLevel = stopLevel.add(currentPrice.getCloseMid().subtract(lastTrailingUpdateValue).abs());
+        lastTrailingUpdateValue = currentPrice.getCloseMid();
+    }
+
+
+    private void updateForSellPosition(TimeSeriesEntry currentPrice) {
+        if (lastTrailingUpdateValue.isLessThanOrEqualTo(currentPrice.getCloseMid())){
+            return;
+        }
+
+        Decimal profit = currentProfit(currentPrice).profit();
+        if (profit.isLessThan(nextTrailingUpdateProfit)){
+            return;
+        }
+
+
+        nextTrailingUpdateProfit = profit.add(trailingStepSizeInEuro);
+        stopLevel = stopLevel.subtract(currentPrice.getCloseMid().subtract(lastTrailingUpdateValue).abs());
+        lastTrailingUpdateValue = currentPrice.getCloseMid();
+    }
+
+    public Decimal getTrailingStepSizeInEuro() {
+        return trailingStepSizeInEuro;
     }
 }

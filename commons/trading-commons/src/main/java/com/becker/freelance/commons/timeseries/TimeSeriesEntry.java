@@ -10,19 +10,19 @@ public record TimeSeriesEntry(LocalDateTime time, Decimal openBid, Decimal openA
                               Decimal trades, Pair pair) {
 
     public Decimal getCloseMid() {
-        return closeAsk.add(closeBid).divide(Decimal.TWO);
+        return closeAsk().add(closeBid()).divide(Decimal.TWO);
     }
 
     public Decimal getOpenMid() {
-        return openAsk.add(openBid).divide(Decimal.TWO);
+        return openAsk().add(openBid()).divide(Decimal.TWO);
     }
 
     public Decimal getHighMid() {
-        return highAsk.add(highBid).divide(Decimal.TWO);
+        return highAsk().add(highBid()).divide(Decimal.TWO);
     }
 
     public Decimal getLowMid() {
-        return lowAsk.add(lowBid).divide(Decimal.TWO);
+        return lowAsk().add(lowBid()).divide(Decimal.TWO);
     }
 
     @Override

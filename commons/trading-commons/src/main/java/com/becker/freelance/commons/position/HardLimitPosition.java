@@ -15,16 +15,16 @@ public class HardLimitPosition extends Position {
         Decimal limitLevel = Position.getLimitLevelFromDistanceInEuro(tradingCalculator, direction, openPrice, limitInEuros, size, pair);
         Decimal stopLevel = Position.getStopLevelFromDistanceInEuro(tradingCalculator, direction, openPrice, stopInEuros, size, pair);
 
-        return fromLevels(size, direction, openPrice, pair, stopLevel, limitLevel, margin);
+        return fromLevels(tradingCalculator, size, direction, openPrice, pair, stopLevel, limitLevel, margin);
     }
 
-    public static Position fromLevels(Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair, Decimal stopLevel, Decimal limitLevel, Decimal margin) {
-        return new HardLimitPosition(size, direction, openPrice, pair, stopLevel, limitLevel, margin);
+    public static Position fromLevels(TradingCalculator tradingCalculator, Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair, Decimal stopLevel, Decimal limitLevel, Decimal margin) {
+        return new HardLimitPosition(tradingCalculator, size, direction, openPrice, pair, stopLevel, limitLevel, margin);
     }
 
-    HardLimitPosition(Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
+    HardLimitPosition(TradingCalculator tradingCalculator, Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
                       Decimal stopLevel, Decimal limitLevel, Decimal margin) {
-        super(size, direction, openPrice, pair, stopLevel, limitLevel, PositionType.HARD_LIMIT, margin);
+        super(tradingCalculator, size, direction, openPrice, pair, stopLevel, limitLevel, PositionType.HARD_LIMIT, margin);
     }
 
     @Override

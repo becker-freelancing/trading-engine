@@ -19,6 +19,13 @@ public abstract class Position {
         };
     }
 
+    protected static Decimal getClosePriceAsNumber(Direction direction, TimeSeriesEntry openPrice) {
+        return switch (direction) {
+            case SELL -> openPrice.closeAsk();
+            case BUY -> openPrice.closeBid();
+        };
+    }
+
     protected static Decimal getStopLevelFromDistanceInEuro(TradingCalculator tradingCalculator, Direction direction, TimeSeriesEntry openPrice, Decimal distance, Decimal size, Pair pair) {
         Decimal openPriceAsNumber = getOpenPriceAsNumber(direction, openPrice);
         Decimal profitPerPoint = profitPerPoint(size, pair);
@@ -43,6 +50,7 @@ public abstract class Position {
         return size.multiply(pair.profitPerPointForOneContract()).multiply(pair.sizeMultiplication());
     }
 
+    protected TradingCalculator tradingCalculator;
     protected Decimal size;
     protected Direction direction;
     protected Pair pair;
@@ -53,9 +61,10 @@ public abstract class Position {
     protected PositionType positionType;
     protected Decimal margin;
 
-    Position(Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
+    Position(TradingCalculator tradingCalculator, Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
              Decimal stopLevel, Decimal limitLevel, PositionType positionType, Decimal margin) {
         checkLevels(direction, stopLevel, limitLevel);
+        this.tradingCalculator = tradingCalculator;
         this.size = size;
         this.direction = direction;
         this.pair = pair;
@@ -79,7 +88,7 @@ public abstract class Position {
 
     public abstract void adapt(TimeSeriesEntry currentPrice);
 
-    public TradingCalculator.ProfitLossResult currentProfit(TimeSeriesEntry currentPrice, TradingCalculator tradingCalculator) {
+    public TradingCalculator.ProfitLossResult currentProfit(TimeSeriesEntry currentPrice) {
         Decimal closePrice = currentPrice(currentPrice);
         Decimal profitPerPoint = profitPerPoint();
         return tradingCalculator.calcProfitLoss(getOpenPriceAsNumber(), closePrice, currentPrice.time(), direction, profitPerPoint);
@@ -121,7 +130,7 @@ public abstract class Position {
     }
 
 
-    private Decimal currentSlPrice(TimeSeriesEntry currentPrice) {
+    protected Decimal currentSlPrice(TimeSeriesEntry currentPrice) {
         return switch (direction) {
             case BUY -> currentPrice.closeBid().min(currentPrice.lowBid());
             case SELL -> currentPrice.closeAsk().max(currentPrice.highAsk());
