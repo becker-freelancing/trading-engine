@@ -171,8 +171,8 @@ public class PositionCalculation {
         }
         wallet.addMargin(margin);
         return switch (entrySignal.getPositionType()) {
-            case HARD_LIMIT -> Optional.of(HardLimitPosition.fromDistancesInEuros(tradingCalculator, entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInPoints(), entrySignal.getLimitInPoints(), margin));
-            case TRAILING -> Optional.of(TrailingStopPosition.fromDistancesInEuro(tradingCalculator, entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInPoints(), entrySignal.getLimitInPoints(), entrySignal.getTrailingStepSize(), margin));
+            case HARD_LIMIT -> Optional.of(HardLimitPosition.fromDistancesInEuros(tradingCalculator, entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInEuros(), entrySignal.getLimitInEuros(), margin));
+            case TRAILING -> Optional.of(TrailingStopPosition.fromDistancesInEuro(tradingCalculator, entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInEuros(), entrySignal.getLimitInEuros(), entrySignal.getTrailingStepSize(), margin));
         };
     }
 

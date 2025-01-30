@@ -52,6 +52,9 @@ public class Decimal extends BigDecimal {
 
     @Override
     public Decimal divide(BigDecimal divisor) {
+        if (isEqualToZero()){
+            return this;
+        }
         return new Decimal(super.divide(divisor, getMathContext(5)));
     }
 
@@ -107,6 +110,9 @@ public class Decimal extends BigDecimal {
     }
 
     public Decimal round(int precision){
+        if (isEqualToZero()){
+            return this;
+        }
         return new Decimal(super.round(getMathContext(precision)));
     }
 

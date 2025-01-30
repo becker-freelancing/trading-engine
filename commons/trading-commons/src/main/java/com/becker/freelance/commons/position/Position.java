@@ -47,7 +47,7 @@ public abstract class Position {
     }
 
     protected static Decimal profitPerPoint(Decimal size, Pair pair) {
-        return size.multiply(pair.profitPerPointForOneContract()).multiply(pair.sizeMultiplication());
+        return size.multiply(pair.profitPerPointForOneContract());
     }
 
     protected TradingCalculator tradingCalculator;
@@ -95,7 +95,7 @@ public abstract class Position {
     }
 
     public Decimal profitPerPoint() {
-        return size.multiply(pair.profitPerPointForOneContract()).multiply(pair.sizeMultiplication());
+        return Position.profitPerPoint(size, pair);
     }
 
     public Decimal currentPrice(TimeSeriesEntry currentPrice) {

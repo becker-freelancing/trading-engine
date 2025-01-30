@@ -57,7 +57,7 @@ public class PairMock implements Pair {
 
     @Override
     public Decimal profitPerPointForOneContract() {
-        return Decimal.TEN;
+        return Decimal.TEN.multiply(sizeMultiplication());
     }
 
     @Override

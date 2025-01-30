@@ -7,23 +7,23 @@ public class EntrySignal {
 
     private Decimal size;
     private Direction direction;
-    private Decimal stopInPoints;
-    private Decimal limitInPoints;
+    private Decimal stopInEuros;
+    private Decimal limitInEuros;
     private PositionType positionType;
     private Decimal trailingStepSize;
 
-    public EntrySignal(Decimal size, Direction direction, Decimal stopInPoints, Decimal limitInPoints,
+    public EntrySignal(Decimal size, Direction direction, Decimal stopInEuro, Decimal limitInEuro,
                        PositionType positionType) {
         this.size = size;
         this.direction = direction;
-        this.stopInPoints = stopInPoints;
-        this.limitInPoints = limitInPoints;
+        this.stopInEuros = stopInEuro;
+        this.limitInEuros = limitInEuro;
         this.positionType = positionType;
     }
 
-    public EntrySignal(Decimal size, Direction direction, Decimal stopInPoints, Decimal limitInPoints,
+    public EntrySignal(Decimal size, Direction direction, Decimal stopInEuros, Decimal limitInEuros,
                        PositionType positionType, Decimal trailingStepSize) {
-        this(size, direction, stopInPoints, limitInPoints, positionType);
+        this(size, direction, stopInEuros, limitInEuros, positionType);
         this.trailingStepSize = trailingStepSize;
     }
 
@@ -43,20 +43,20 @@ public class EntrySignal {
         this.direction = direction;
     }
 
-    public Decimal getStopInPoints() {
-        return stopInPoints;
+    public Decimal getStopInEuros() {
+        return stopInEuros;
     }
 
-    public void setStopInPoints(Decimal stopInPoints) {
-        this.stopInPoints = stopInPoints;
+    public void setStopInEuros(Decimal stopInEuros) {
+        this.stopInEuros = stopInEuros;
     }
 
-    public Decimal getLimitInPoints() {
-        return limitInPoints;
+    public Decimal getLimitInEuros() {
+        return limitInEuros;
     }
 
-    public void setLimitInPoints(Decimal limitInPoints) {
-        this.limitInPoints = limitInPoints;
+    public void setLimitInEuros(Decimal limitInEuros) {
+        this.limitInEuros = limitInEuros;
     }
 
     public PositionType getPositionType() {
