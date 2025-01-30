@@ -7,6 +7,8 @@ import com.becker.freelance.commons.position.Trade;
 import com.becker.freelance.commons.position.TrailingStopPosition;
 import com.becker.freelance.commons.signal.Direction;
 import com.becker.freelance.commons.signal.EntrySignal;
+import com.becker.freelance.commons.signal.EuroDistanceEntrySignal;
+import com.becker.freelance.commons.signal.LevelEntrySignal;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.wallet.Wallet;
@@ -170,10 +172,19 @@ public class PositionCalculation {
             return Optional.empty();
         }
         wallet.addMargin(margin);
-        return switch (entrySignal.getPositionType()) {
-            case HARD_LIMIT -> Optional.of(HardLimitPosition.fromDistancesInEuros(tradingCalculator, entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInEuros(), entrySignal.getLimitInEuros(), margin));
-            case TRAILING -> Optional.of(TrailingStopPosition.fromDistancesInEuro(tradingCalculator, entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInEuros(), entrySignal.getLimitInEuros(), entrySignal.getTrailingStepSize(), margin));
-        };
+        if (entrySignal instanceof EuroDistanceEntrySignal euroDistanceEntrySignal){
+            return switch (entrySignal.getPositionType()) {
+                case HARD_LIMIT -> Optional.of(HardLimitPosition.fromDistancesInEuros(tradingCalculator, entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), euroDistanceEntrySignal.getStopInEuros(), euroDistanceEntrySignal.getLimitInEuros(), margin));
+                case TRAILING -> Optional.of(TrailingStopPosition.fromDistancesInEuro(tradingCalculator, entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), euroDistanceEntrySignal.getStopInEuros(), euroDistanceEntrySignal.getLimitInEuros(), entrySignal.getTrailingStepSize(), margin));
+            };
+        } else if (entrySignal instanceof LevelEntrySignal levelEntrySignal){
+            return switch (entrySignal.getPositionType()) {
+                case HARD_LIMIT -> Optional.of(HardLimitPosition.fromLevels(tradingCalculator, entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), levelEntrySignal.getStopLevel(), levelEntrySignal.getLimitLevel(), margin));
+                case TRAILING -> Optional.of(TrailingStopPosition.fromLevels(tradingCalculator, entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), levelEntrySignal.getStopLevel(), levelEntrySignal.getLimitLevel(), entrySignal.getTrailingStepSize(), margin));
+            };
+        }
+
+        throw new IllegalStateException("Could not map EntrySignal of type " + entrySignal.getClass() + " to position");
     }
 
 

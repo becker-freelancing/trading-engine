@@ -10,7 +10,7 @@ import java.util.List;
 public class KrakenPairProvider implements PairProvider {
     @Override
     public List<Pair> get() {
-        return List.of( //TODO: Check Parameter
+        return List.of(
                 from("ETH", "EUR", 1, "ETH/EUR M1", 1.0, 0.2, 38.6, 1., 0.5, 1),
                 from("ETH", "EUR", 5, "ETH/EUR M5", 1.0, 0.2, 38.6, 1., 0.5, 1),
                 from("ETH", "EUR", 15, "ETH/EUR M15", 1.0, 0.2, 38.6, 1., 0.5, 1),

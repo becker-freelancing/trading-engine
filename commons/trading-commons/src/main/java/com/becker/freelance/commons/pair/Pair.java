@@ -41,5 +41,8 @@ public interface Pair {
     public default Duration toDuration(){
         return Duration.ofMinutes(timeInMinutes());
     }
+    public default Decimal priceDifferenceForNProfitInCounterCurrency(Decimal profit){
+        return profit.divide(profitPerPointForOneContract());
+    }
 
 }
