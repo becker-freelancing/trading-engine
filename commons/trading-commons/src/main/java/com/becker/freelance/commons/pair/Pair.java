@@ -2,6 +2,8 @@ package com.becker.freelance.commons.pair;
 
 import java.time.Duration;
 import java.util.List;
+
+import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.math.Decimal;
 
 public interface Pair {
@@ -35,9 +37,9 @@ public interface Pair {
     public Decimal minStop();
     public Decimal minLimit();
     public String technicalName();
+    public long timeInMinutes();
     public default Duration toDuration(){
         return Duration.ofMinutes(timeInMinutes());
     }
 
-    public long timeInMinutes();
 }

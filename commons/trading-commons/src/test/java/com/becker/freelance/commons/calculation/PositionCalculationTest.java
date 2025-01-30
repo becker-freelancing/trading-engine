@@ -421,9 +421,9 @@ class PositionCalculationTest {
 
     @Test
     void closePositionIfSlOrTpReached(){
-        Position position1 = HardLimitPosition.fromDistances(new Decimal("1."), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
-        Position position2 = HardLimitPosition.fromDistances(new Decimal("2."), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
-        Position position3 = HardLimitPosition.fromDistances(new Decimal("3."), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
+        Position position1 = HardLimitPosition.fromDistancesInEuros(tradingCalculator, new Decimal("1."), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        Position position2 = HardLimitPosition.fromDistancesInEuros(tradingCalculator, new Decimal("2."), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("100"), new Decimal("150"), new Decimal("20"));
+        Position position3 = HardLimitPosition.fromDistancesInEuros(tradingCalculator, new Decimal("3."), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
         wallet.addMargin(new Decimal("60"));
         when(currentPrice.lowBid()).thenReturn(new Decimal("1"));
         when(currentPrice.lowAsk()).thenReturn(new Decimal("1"));
@@ -434,15 +434,15 @@ class PositionCalculationTest {
 
         assertEquals(2, calculationResult.trades().size());
         assertEquals(1, calculationResult.positions().size());
-        assertEquals(new Decimal("676666.66"), wallet.getAmount());
+        assertEquals(new Decimal("-2656666.67"), wallet.getAmount());
         assertEquals(new Decimal("20"), wallet.getMargin());
     }
 
     @Test
     void closeAllBuyPositions(){
-        Position position1 = HardLimitPosition.fromDistances(new Decimal("1.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
-        Position position2 = HardLimitPosition.fromDistances(new Decimal("2.0"), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
-        Position position3 = HardLimitPosition.fromDistances(new Decimal("3.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
+        Position position1 = HardLimitPosition.fromDistancesInEuros(tradingCalculator, new Decimal("1.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        Position position2 = HardLimitPosition.fromDistancesInEuros(tradingCalculator, new Decimal("2.0"), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        Position position3 = HardLimitPosition.fromDistancesInEuros(tradingCalculator, new Decimal("3.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
         wallet.addMargin(new Decimal("60"));
 
         PositionCalculationResult calculationResult = positionCalculation.closeAllBuyPositions(currentPrice, List.of(position1, position2, position3), wallet);
@@ -455,9 +455,9 @@ class PositionCalculationTest {
 
     @Test
     void closeAllSellPositions(){
-        Position position1 = HardLimitPosition.fromDistances(new Decimal("1.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
-        Position position2 = HardLimitPosition.fromDistances(new Decimal("2.0"), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
-        Position position3 = HardLimitPosition.fromDistances(new Decimal("3.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
+        Position position1 = HardLimitPosition.fromDistancesInEuros(tradingCalculator, new Decimal("1.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        Position position2 = HardLimitPosition.fromDistancesInEuros(tradingCalculator, new Decimal("2.0"), Direction.SELL, otherPrice, Pair.eurUsd1(), new Decimal("1"), new Decimal("1"), new Decimal("20"));
+        Position position3 = HardLimitPosition.fromDistancesInEuros(tradingCalculator, new Decimal("3.0"), Direction.BUY, otherPrice, Pair.eurUsd1(), new Decimal("20"), new Decimal("20"), new Decimal("20"));
         wallet.addMargin(new Decimal("60"));
 
         PositionCalculationResult calculationResult = positionCalculation.closeAllSellPositions(currentPrice, List.of(position1, position2, position3), wallet);

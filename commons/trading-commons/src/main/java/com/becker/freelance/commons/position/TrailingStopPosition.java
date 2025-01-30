@@ -1,6 +1,7 @@
 package com.becker.freelance.commons.position;
 
 
+import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.signal.Direction;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
@@ -8,11 +9,11 @@ import com.becker.freelance.math.Decimal;
 
 public class TrailingStopPosition extends Position {
 
-    public static Position fromDistances(Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
-                                         Decimal stopInPoints, Decimal limitInPoints, Decimal trailingStepSize, Decimal margin){
+    public static Position fromDistancesInEuro(TradingCalculator tradingCalculator, Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
+                                               Decimal stopInPointsInEuros, Decimal limitInEuros, Decimal trailingStepSize, Decimal margin) {
 
-        Decimal limitLevel = Position.getLimitLevelFromDistance(direction, openPrice, limitInPoints);
-        Decimal stopLevel = Position.getStopLevelFromDistance(direction, openPrice, stopInPoints);
+        Decimal limitLevel = Position.getLimitLevelFromDistanceInEuro(tradingCalculator, direction, openPrice, limitInEuros, size, pair);
+        Decimal stopLevel = Position.getStopLevelFromDistanceInEuro(tradingCalculator, direction, openPrice, stopInPointsInEuros, size, pair);
 
         return fromLevels(size, direction, openPrice, pair, stopLevel, limitLevel, trailingStepSize, margin);
     }
@@ -24,7 +25,7 @@ public class TrailingStopPosition extends Position {
     private Decimal trailingStepSize;
 
     TrailingStopPosition(Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
-                                Decimal stopInPoints, Decimal limitInPoints, Decimal trailingStepSize, Decimal margin) {
+                         Decimal stopInPoints, Decimal limitInPoints, Decimal trailingStepSize, Decimal margin) {
         super(size, direction, openPrice, pair, stopInPoints, limitInPoints, PositionType.TRAILING, margin);
         this.trailingStepSize = trailingStepSize;
     }

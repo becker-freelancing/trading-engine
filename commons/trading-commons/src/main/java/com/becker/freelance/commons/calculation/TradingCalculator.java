@@ -12,7 +12,7 @@ import java.util.function.Function;
 public class TradingCalculator {
 
     private TimeSeries umrechnungsKurs;
-    private Function<LocalDateTime, Decimal> umrechnungsFactor;
+    private Function<LocalDateTime, Decimal> conversionRate;
     private Pair pair;
 
     private Decimal noopUmrechnung(LocalDateTime time) {
@@ -32,19 +32,25 @@ public class TradingCalculator {
 
         if ("USD".equals(pair.counterCurrency())) {
             this.umrechnungsKurs = timeSeries;
-            this.umrechnungsFactor = this::eurUsdUmrechnung;
+            this.conversionRate = this::eurUsdUmrechnung;
         } else if ("EUR".equals(pair.counterCurrency())) {
-            this.umrechnungsFactor = this::noopUmrechnung;
+            this.conversionRate = this::noopUmrechnung;
         }
     }
 
     public ProfitLossResult calcProfitLoss(Decimal open, Decimal close, LocalDateTime closeTime, Direction direction, Decimal profitPerPoint) {
         Decimal diff = close.subtract(open);
-        Decimal profitGegenwaehrung = diff.multiply(profitPerPoint).multiply(new Decimal(direction.getFactor())).multiply(pair.sizeMultiplication());
-        Decimal umrechnungsFactorValue = umrechnungsFactor.apply(closeTime);
-        return new ProfitLossResult(profitGegenwaehrung.divide(umrechnungsFactorValue).round(2), umrechnungsFactorValue);
+        Decimal profitCounterCurrency = diff.multiply(profitPerPoint).multiply(new Decimal(direction.getFactor()));
+        Decimal conversionRateFactor = conversionRate.apply(closeTime);
+        return new ProfitLossResult(profitCounterCurrency.divide(conversionRateFactor).round(2), conversionRateFactor);
     }
 
-        public record ProfitLossResult(Decimal profit, Decimal conversionRate) {
+    public Decimal calcDistanceInEurosFromDistanceInPointsAbsolute(Decimal distanceInEuros, Decimal size, LocalDateTime openTime, Decimal profitPerPoint){
+
+        Decimal conversionRateFactor = conversionRate.apply(openTime);
+        return distanceInEuros.multiply(conversionRateFactor).divide(profitPerPoint).round(8).abs();
+    }
+
+    public record ProfitLossResult(Decimal profit, Decimal conversionRate) {
     }
 }

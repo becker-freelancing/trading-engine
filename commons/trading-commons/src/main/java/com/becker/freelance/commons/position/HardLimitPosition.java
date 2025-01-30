@@ -1,6 +1,7 @@
 package com.becker.freelance.commons.position;
 
 
+import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.signal.Direction;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
@@ -8,11 +9,11 @@ import com.becker.freelance.math.Decimal;
 
 public class HardLimitPosition extends Position {
 
-    public static Position fromDistances(Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
-                                  Decimal stopInPoints, Decimal limitInPoints, Decimal margin){
+    public static Position fromDistancesInEuros(TradingCalculator tradingCalculator, Decimal size, Direction direction, TimeSeriesEntry openPrice, Pair pair,
+                                                Decimal stopInEuros, Decimal limitInEuros, Decimal margin){
 
-        Decimal limitLevel = Position.getLimitLevelFromDistance(direction, openPrice, limitInPoints);
-        Decimal stopLevel = Position.getStopLevelFromDistance(direction, openPrice, stopInPoints);
+        Decimal limitLevel = Position.getLimitLevelFromDistanceInEuro(tradingCalculator, direction, openPrice, limitInEuros, size, pair);
+        Decimal stopLevel = Position.getStopLevelFromDistanceInEuro(tradingCalculator, direction, openPrice, stopInEuros, size, pair);
 
         return fromLevels(size, direction, openPrice, pair, stopLevel, limitLevel, margin);
     }

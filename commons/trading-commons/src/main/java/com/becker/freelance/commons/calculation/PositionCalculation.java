@@ -57,7 +57,7 @@ public class PositionCalculation {
 
         return switch (existingDirection){
             case BUY -> addSameDirectionPosition(currentPrice, positions, entrySignal, wallet);
-            case SELL -> addBuyPositionToSellPositions(currentPrice, positions, entrySignal, wallet);//addSellPositionToBuyPositions(currentPrice, positions, entrySignal, wallet);
+            case SELL -> addBuyPositionToSellPositions(currentPrice, positions, entrySignal, wallet);
         };
     }
 
@@ -171,8 +171,8 @@ public class PositionCalculation {
         }
         wallet.addMargin(margin);
         return switch (entrySignal.getPositionType()) {
-            case HARD_LIMIT -> Optional.of(HardLimitPosition.fromDistances(entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInPoints(), entrySignal.getLimitInPoints(), margin));
-            case TRAILING -> Optional.of(TrailingStopPosition.fromDistances(entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInPoints(), entrySignal.getLimitInPoints(), entrySignal.getTrailingStepSize(), margin));
+            case HARD_LIMIT -> Optional.of(HardLimitPosition.fromDistancesInEuros(tradingCalculator, entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInPoints(), entrySignal.getLimitInPoints(), margin));
+            case TRAILING -> Optional.of(TrailingStopPosition.fromDistancesInEuro(tradingCalculator, entrySignal.getSize(), entrySignal.getDirection(), currentPrice, currentPrice.pair(), entrySignal.getStopInPoints(), entrySignal.getLimitInPoints(), entrySignal.getTrailingStepSize(), margin));
         };
     }
 

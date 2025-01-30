@@ -5,32 +5,42 @@ import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.signal.Direction;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
+import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-import com.becker.freelance.math.Decimal;
 
 public abstract class Position {
 
     protected static Decimal getOpenPriceAsNumber(Direction direction, TimeSeriesEntry openPrice) {
-        return switch (direction){
+        return switch (direction) {
             case BUY -> openPrice.closeAsk();
             case SELL -> openPrice.closeBid();
         };
     }
 
-    protected static Decimal getStopLevelFromDistance(Direction direction, TimeSeriesEntry openPrice, Decimal distance) {
-        return switch (direction){
-            case BUY -> getOpenPriceAsNumber(direction, openPrice).subtract(distance).max(Decimal.ZERO);
-            case SELL -> getOpenPriceAsNumber(direction, openPrice).add(distance);
+    protected static Decimal getStopLevelFromDistanceInEuro(TradingCalculator tradingCalculator, Direction direction, TimeSeriesEntry openPrice, Decimal distance, Decimal size, Pair pair) {
+        Decimal openPriceAsNumber = getOpenPriceAsNumber(direction, openPrice);
+        Decimal profitPerPoint = profitPerPoint(size, pair);
+        Decimal absDistanceInPoints = tradingCalculator.calcDistanceInEurosFromDistanceInPointsAbsolute(distance, size, openPrice.time(), profitPerPoint);
+        return switch (direction) {
+            case BUY -> openPriceAsNumber.subtract(absDistanceInPoints).max(Decimal.ZERO);
+            case SELL -> openPriceAsNumber.add(absDistanceInPoints);
         };
     }
 
-    protected static Decimal getLimitLevelFromDistance(Direction direction, TimeSeriesEntry openPrice, Decimal distance) {
-        return switch (direction){
-            case BUY -> getOpenPriceAsNumber(direction, openPrice).add(distance);
-            case SELL -> getOpenPriceAsNumber(direction, openPrice).subtract(distance).max(Decimal.ZERO);
+    protected static Decimal getLimitLevelFromDistanceInEuro(TradingCalculator tradingCalculator, Direction direction, TimeSeriesEntry openPrice, Decimal distance, Decimal size, Pair pair) {
+        Decimal openPriceAsNumber = getOpenPriceAsNumber(direction, openPrice);
+        Decimal profitPerPoint = profitPerPoint(size, pair);
+        Decimal absDistanceInPoints = tradingCalculator.calcDistanceInEurosFromDistanceInPointsAbsolute(distance, size, openPrice.time(), profitPerPoint);
+        return switch (direction) {
+            case BUY -> openPriceAsNumber.add(absDistanceInPoints);
+            case SELL -> openPriceAsNumber.subtract(distance).max(Decimal.ZERO);
         };
+    }
+
+    protected static Decimal profitPerPoint(Decimal size, Pair pair) {
+        return size.multiply(pair.profitPerPointForOneContract()).multiply(pair.sizeMultiplication());
     }
 
     protected Decimal size;
@@ -58,11 +68,11 @@ public abstract class Position {
     }
 
     private void checkLevels(Direction direction, Decimal stopLevel, Decimal limitLevel) {
-        if (direction == Direction.BUY && stopLevel.isGreaterThan(limitLevel)){
+        if (direction == Direction.BUY && stopLevel.isGreaterThan(limitLevel)) {
             throw new IllegalArgumentException("For Buy Positions the stop level must be greater than the limit level");
         }
 
-        if (direction == Direction.SELL && stopLevel.isLessThan(limitLevel)){
+        if (direction == Direction.SELL && stopLevel.isLessThan(limitLevel)) {
             throw new IllegalArgumentException("For Sell Positions the stop level must be less than the limit level");
         }
     }
@@ -70,17 +80,17 @@ public abstract class Position {
     public abstract void adapt(TimeSeriesEntry currentPrice);
 
     public TradingCalculator.ProfitLossResult currentProfit(TimeSeriesEntry currentPrice, TradingCalculator tradingCalculator) {
-        Decimal price = currentPrice(currentPrice);
+        Decimal closePrice = currentPrice(currentPrice);
         Decimal profitPerPoint = profitPerPoint();
-        return tradingCalculator.calcProfitLoss(getOpenPriceAsNumber(), price, currentPrice.time(), direction, profitPerPoint);
+        return tradingCalculator.calcProfitLoss(getOpenPriceAsNumber(), closePrice, currentPrice.time(), direction, profitPerPoint);
     }
 
     public Decimal profitPerPoint() {
-        return size.multiply(pair.profitPerPointForOneContract());
+        return size.multiply(pair.profitPerPointForOneContract()).multiply(pair.sizeMultiplication());
     }
 
     public Decimal currentPrice(TimeSeriesEntry currentPrice) {
-        return switch (direction){
+        return switch (direction) {
             case BUY -> currentPrice.closeBid();
             case SELL -> currentPrice.closeAsk();
         };
@@ -89,7 +99,7 @@ public abstract class Position {
     public boolean isTpReached(TimeSeriesEntry currentPrice) {
         Decimal currentTpPrice = currentTpPrice(currentPrice);
         return switch (direction) {
-            case BUY ->  currentTpPrice.isGreaterThanOrEqualTo(limitLevel);
+            case BUY -> currentTpPrice.isGreaterThanOrEqualTo(limitLevel);
             case SELL -> currentTpPrice.isLessThanOrEqualTo(limitLevel);
         };
     }
@@ -104,7 +114,7 @@ public abstract class Position {
     }
 
     private Decimal currentTpPrice(TimeSeriesEntry currentPrice) {
-        return switch (direction){
+        return switch (direction) {
             case BUY -> currentPrice.closeBid().max(currentPrice.highBid());
             case SELL -> currentPrice.closeAsk().min(currentPrice.lowAsk());
         };
@@ -112,7 +122,7 @@ public abstract class Position {
 
 
     private Decimal currentSlPrice(TimeSeriesEntry currentPrice) {
-        return switch (direction){
+        return switch (direction) {
             case BUY -> currentPrice.closeBid().min(currentPrice.lowBid());
             case SELL -> currentPrice.closeAsk().max(currentPrice.highAsk());
         };
