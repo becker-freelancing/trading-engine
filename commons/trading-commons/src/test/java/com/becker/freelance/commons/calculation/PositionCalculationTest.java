@@ -9,6 +9,7 @@ import com.becker.freelance.commons.position.PositionType;
 import com.becker.freelance.commons.position.Trade;
 import com.becker.freelance.commons.signal.Direction;
 import com.becker.freelance.commons.signal.EntrySignal;
+import com.becker.freelance.commons.signal.LevelEntrySignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
@@ -24,7 +25,7 @@ import static org.mockito.Mockito.*;
 
 class PositionCalculationTest {
 
-    static final Decimal MARGIN_PER_POSITION = new Decimal("2220.00");
+    static final Decimal MARGIN_PER_POSITION = new Decimal("22200.00");
 
     static LocalDateTime currentTime = LocalDateTime.of(2020, 1, 1, 0, 0, 0);
 
@@ -50,9 +51,9 @@ class PositionCalculationTest {
     void setUp() {
         currentPrice = mock(TimeSeriesEntry.class);
         doReturn(PairMock.eurUsd()).when(currentPrice).pair();
-        doReturn(new Decimal("1.")).when(currentPrice).getCloseMid();
-        doReturn(new Decimal("1.")).when(currentPrice).closeAsk();
-        doReturn(new Decimal("1.")).when(currentPrice).closeBid();
+        doReturn(new Decimal("10.")).when(currentPrice).getCloseMid();
+        doReturn(new Decimal("10.")).when(currentPrice).closeAsk();
+        doReturn(new Decimal("10.")).when(currentPrice).closeBid();
         doReturn(nextTime()).when(currentPrice).time();
         otherPrice = mock(TimeSeriesEntry.class);
         doReturn(PairMock.eurUsd()).when(otherPrice).pair();
@@ -60,13 +61,13 @@ class PositionCalculationTest {
         doReturn(new Decimal("2.")).when(otherPrice).closeAsk();
         doReturn(new Decimal("2.")).when(otherPrice).closeBid();
         doReturn(nextTime()).when(otherPrice).time();
-        wallet = new Wallet(new Decimal("10000"));
-        buyEntrySignal = new EntrySignal(new Decimal("1"), Direction.BUY, new Decimal("5"), new Decimal("7"), PositionType.HARD_LIMIT);
-        sellEntrySignal = new EntrySignal(new Decimal("1"), Direction.SELL, new Decimal("5"), new Decimal("7"), PositionType.HARD_LIMIT);
-        buyEntrySignal2 = new EntrySignal(new Decimal("2"), Direction.BUY, new Decimal("5"), new Decimal("7"), PositionType.HARD_LIMIT);
-        sellEntrySignal2 = new EntrySignal(new Decimal("2"), Direction.SELL, new Decimal("5"), new Decimal("7"), PositionType.HARD_LIMIT);
-        buyEntrySignal3 = new EntrySignal(new Decimal("3"), Direction.BUY, new Decimal("5"), new Decimal("7"), PositionType.HARD_LIMIT);
-        sellEntrySignal3 = new EntrySignal(new Decimal("3"), Direction.SELL, new Decimal("5"), new Decimal("7"), PositionType.HARD_LIMIT);
+        wallet = new Wallet(new Decimal("10000000"));
+        buyEntrySignal = new LevelEntrySignal(new Decimal("1"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionType.HARD_LIMIT);
+        sellEntrySignal = new LevelEntrySignal(new Decimal("1"), Direction.SELL, new Decimal("15"), new Decimal("3"), PositionType.HARD_LIMIT);
+        buyEntrySignal2 = new LevelEntrySignal(new Decimal("2"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionType.HARD_LIMIT);
+        sellEntrySignal2 = new LevelEntrySignal(new Decimal("2"), Direction.SELL, new Decimal("15"), new Decimal("3"), PositionType.HARD_LIMIT);
+        buyEntrySignal3 = new LevelEntrySignal(new Decimal("3"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionType.HARD_LIMIT);
+        sellEntrySignal3 = new LevelEntrySignal(new Decimal("3"), Direction.SELL, new Decimal("15"), new Decimal("3"), PositionType.HARD_LIMIT);
         TimeSeries marginCalulationTimeSeries = mock(TimeSeries.class);
         TimeSeriesEntry entryForMarginCalculation = mock(TimeSeriesEntry.class);
         doReturn(entryForMarginCalculation).when(marginCalulationTimeSeries).getEntryForTime(any());
@@ -429,12 +430,14 @@ class PositionCalculationTest {
         when(currentPrice.lowAsk()).thenReturn(new Decimal("1"));
         when(currentPrice.highAsk()).thenReturn(new Decimal("1"));
         when(currentPrice.highBid()).thenReturn(new Decimal("1"));
+        when(currentPrice.closeBid()).thenReturn(new Decimal("1.5"));
+        when(currentPrice.closeAsk()).thenReturn(new Decimal("1.5"));
 
         PositionCalculationResult calculationResult = positionCalculation.closePositionIfSlOrTpReached(currentPrice, List.of(position1, position2, position3), wallet);
 
         assertEquals(2, calculationResult.trades().size());
         assertEquals(1, calculationResult.positions().size());
-        assertEquals(new Decimal("-2656666.67"), wallet.getAmount());
+        assertEquals(new Decimal("8666666.67"), wallet.getAmount());
         assertEquals(new Decimal("20"), wallet.getMargin());
     }
 
@@ -449,7 +452,7 @@ class PositionCalculationTest {
 
         assertEquals(2, calculationResult.trades().size());
         assertEquals(1, calculationResult.positions().size());
-        assertEquals(new Decimal("-2656666.67"), wallet.getAmount());
+        assertEquals(new Decimal("31333333.33"), wallet.getAmount());
         assertEquals(new Decimal("20"), wallet.getMargin());
     }
 
@@ -464,7 +467,7 @@ class PositionCalculationTest {
 
         assertEquals(1, calculationResult.trades().size());
         assertEquals(2, calculationResult.positions().size());
-        assertEquals(new Decimal("1343333.33"), wallet.getAmount());
+        assertEquals(new Decimal("-666666.67"), wallet.getAmount());
         assertEquals(new Decimal("40"), wallet.getMargin());
     }
 }
