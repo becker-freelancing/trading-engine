@@ -22,7 +22,7 @@ public class TrailingStopPosition extends Position {
         return new TrailingStopPosition(tradingCalculator, size, direction, openPrice, pair, stopLevel, limitLevel, trailingStepSizeInEuro, margin);
     }
 
-    private Decimal trailingStepSizeInEuro;
+    private final Decimal trailingStepSizeInEuro;
     private Decimal nextTrailingUpdateProfit;
     private Decimal lastTrailingUpdateValue;
 

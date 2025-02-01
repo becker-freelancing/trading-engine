@@ -33,8 +33,8 @@ public class PermutableStrategyParameter {
         return true;
     }
 
-    private List<StrategyParameter> strategyParameter;
-    private Predicate<Map<String, Decimal>> parameterValidation;
+    private final List<StrategyParameter> strategyParameter;
+    private final Predicate<Map<String, Decimal>> parameterValidation;
 
     public PermutableStrategyParameter(List<StrategyParameter> strategyParameter) {
         this(strategyParameter, p -> true);

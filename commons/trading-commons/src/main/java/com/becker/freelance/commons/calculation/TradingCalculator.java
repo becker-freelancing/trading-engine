@@ -1,7 +1,7 @@
 package com.becker.freelance.commons.calculation;
 
-import com.becker.freelance.commons.signal.Direction;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.signal.Direction;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
@@ -13,7 +13,7 @@ public class TradingCalculator {
 
     private TimeSeries umrechnungsKurs;
     private Function<LocalDateTime, Decimal> conversionRate;
-    private Pair pair;
+    private final Pair pair;
 
     private Decimal noopUmrechnung(LocalDateTime time) {
         return Decimal.ONE;

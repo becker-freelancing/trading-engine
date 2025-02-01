@@ -7,8 +7,8 @@ public abstract class EntrySignal {
 
     private Decimal size;
     private Direction direction;
-    private PositionType positionType;
-    private Decimal trailingStepSize;
+    private final PositionType positionType;
+    private final Decimal trailingStepSize;
 
 
     EntrySignal(Decimal size, Direction direction, PositionType positionType, Decimal trailingStepSize) {

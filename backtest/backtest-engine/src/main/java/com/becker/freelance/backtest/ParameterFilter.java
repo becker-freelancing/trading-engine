@@ -1,8 +1,9 @@
 package com.becker.freelance.backtest;
 
+import com.becker.freelance.math.Decimal;
+
 import java.util.Map;
 import java.util.function.Predicate;
-import com.becker.freelance.math.Decimal;
 
 public interface ParameterFilter extends AutoCloseable{
 
@@ -20,7 +21,7 @@ public interface ParameterFilter extends AutoCloseable{
         };
     }
 
-    public Predicate<Map<String, Decimal>> getPredicate();
+    Predicate<Map<String, Decimal>> getPredicate();
 
     @Override
     void close();

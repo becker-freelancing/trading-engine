@@ -6,8 +6,8 @@ import com.becker.freelance.math.Decimal;
 public class LevelEntrySignal extends EntrySignal{
 
 
-    private Decimal stopLevel;
-    private Decimal limitLevel;
+    private final Decimal stopLevel;
+    private final Decimal limitLevel;
 
 
     public LevelEntrySignal(Decimal size, Direction direction, Decimal stopLevel, Decimal limitLevel,

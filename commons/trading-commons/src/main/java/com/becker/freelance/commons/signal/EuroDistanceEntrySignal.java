@@ -5,8 +5,8 @@ import com.becker.freelance.math.Decimal;
 
 public class EuroDistanceEntrySignal extends EntrySignal{
 
-    private Decimal stopInEuros;
-    private Decimal limitInEuros;
+    private final Decimal stopInEuros;
+    private final Decimal limitInEuros;
 
 
     public EuroDistanceEntrySignal(Decimal size, Direction direction, Decimal stopInEuros, Decimal limitInEuros,

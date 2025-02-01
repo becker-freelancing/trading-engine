@@ -12,8 +12,8 @@ public class MarginCalculator {
 
     private TimeSeries conversionRate;
     private Function<LocalDateTime, Decimal> conversionFactor;
-    private Decimal leverageFactor;
-    private Pair pair;
+    private final Decimal leverageFactor;
+    private final Pair pair;
 
     private Decimal noopConversion(LocalDateTime time) {
         return Decimal.ONE;

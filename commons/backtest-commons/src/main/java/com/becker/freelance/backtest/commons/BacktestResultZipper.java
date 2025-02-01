@@ -1,7 +1,5 @@
 package com.becker.freelance.backtest.commons;
 
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream;
 import org.apache.commons.compress.compressors.zstandard.ZstdCompressorOutputStream;
 import org.slf4j.Logger;
@@ -10,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 
 public class BacktestResultZipper {
 
@@ -51,7 +48,7 @@ public class BacktestResultZipper {
         try (
                 FileOutputStream fos = new FileOutputStream(writePath.toFile());
                 ZstdCompressorOutputStream zos = new ZstdCompressorOutputStream(fos);
-                FileInputStream fis = new FileInputStream(readPath.toFile());
+                FileInputStream fis = new FileInputStream(readPath.toFile())
         ) {
 
             byte[] buffer = new byte[8192];

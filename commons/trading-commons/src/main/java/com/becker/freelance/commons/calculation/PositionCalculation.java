@@ -21,7 +21,8 @@ import java.util.function.Predicate;
 public class PositionCalculation {
 
 
-    public static record PositionCalculationResult(List<Position> positions, List<Trade> trades){}
+    public record PositionCalculationResult(List<Position> positions, List<Trade> trades) {
+    }
 
     private final TradingCalculator tradingCalculator;
     private final MarginCalculator marginCalculator;

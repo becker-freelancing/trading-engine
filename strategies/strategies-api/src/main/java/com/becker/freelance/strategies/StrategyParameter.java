@@ -4,11 +4,11 @@ import com.becker.freelance.math.Decimal;
 
 public class StrategyParameter {
 
-    private String name;
-    private Decimal defaultValue;
-    private Decimal minValue;
-    private Decimal maxValue;
-    private Decimal stepSize;
+    private final String name;
+    private final Decimal defaultValue;
+    private final Decimal minValue;
+    private final Decimal maxValue;
+    private final Decimal stepSize;
 
     public StrategyParameter(String name, Decimal defaultValue, Decimal minValue, Decimal maxValue, Decimal stepSize) {
         this.name = name;

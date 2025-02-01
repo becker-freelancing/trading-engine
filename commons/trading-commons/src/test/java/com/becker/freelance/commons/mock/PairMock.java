@@ -23,10 +23,10 @@ public class PairMock implements Pair {
        return new PairMock("XBT", "EUR", 1, 0.5);
     }
 
-    private String baseCurrency;
-    private String counterCurrency;
-    private Decimal sizeMultiplication;
-    private Decimal leverageFactor;
+    private final String baseCurrency;
+    private final String counterCurrency;
+    private final Decimal sizeMultiplication;
+    private final Decimal leverageFactor;
 
     public PairMock(String baseCurrency, String counterCurrency, long sizeMultiplication, double leverageFactor) {
         this.baseCurrency = baseCurrency;
