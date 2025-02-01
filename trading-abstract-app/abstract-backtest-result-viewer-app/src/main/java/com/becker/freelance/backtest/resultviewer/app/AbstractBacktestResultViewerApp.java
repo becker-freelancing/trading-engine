@@ -11,7 +11,9 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,23 +35,57 @@ public class AbstractBacktestResultViewerApp implements Runnable {
         Path resultPath = askForResultPath();
 
         logger.info("Reading Results from {}...", resultPath);
-        Set<BacktestResultContent> backtestResultContents = new BacktestResultReader(resultPath).readCsvContent();
         logger.info("Reading Results finished");
         logger.info("Processing Results...");
-        Set<BacktestResultContent> bestMin = filterForBest(backtestResultContents, BacktestResultContent::min);
-        Set<BacktestResultContent> bestMax = filterForBest(backtestResultContents, BacktestResultContent::max);
-        Set<BacktestResultContent> bestCumulative = filterForBest(backtestResultContents, BacktestResultContent::cumulative);
-        BacktestResultContent baseData = backtestResultContents.stream().findAny().orElseThrow(() -> new IllegalStateException("No Results found"));
+
+        Set<BacktestResultContent> bestMin = getBestMin(resultPath);
+        Set<BacktestResultContent> bestCumulative = getBestCumulative(resultPath);
+        Set<BacktestResultContent> bestMax = getBestMax(resultPath);
+        BacktestResultContent baseData = getBaseData(resultPath);
+
+
 
         new BacktestResultConsoleWriter(bestCumulative, bestMax, bestMin, baseData).run();
         new BacktestResultPlotter(bestCumulative, bestMax, bestMin).run();
     }
 
+    private static BacktestResultContent getBaseData(Path resultPath) {
+        BacktestResultReader resultReader = new BacktestResultReader(resultPath);
+        BacktestResultContent baseData = resultReader.streamCsvContent().findAny().orElseThrow(() -> new IllegalStateException("No Results found"));
+        return baseData;
+    }
+
+    private static Set<BacktestResultContent> getBestMin(Path resultPath) {
+        BacktestResultReader resultReader = new BacktestResultReader(resultPath);
+        Decimal bestMinValue = resultReader.streamMinValues().max(Comparator.naturalOrder()).orElse(Decimal.ZERO);
+        Set<BacktestResultContent> bestMin = resultReader.streamCsvContentWithMinValue(bestMinValue).collect(Collectors.toSet());
+        return bestMin;
+    }
+
+    private static Set<BacktestResultContent> getBestCumulative(Path resultPath) {
+        BacktestResultReader resultReader = new BacktestResultReader(resultPath);
+        Decimal bestCumulativeValue = resultReader.streamCumulativeValues().max(Comparator.naturalOrder()).orElse(Decimal.ZERO);
+        Set<BacktestResultContent> bestCumulative = resultReader.streamCsvContentWithCumulativeValue(bestCumulativeValue).collect(Collectors.toSet());
+        return bestCumulative;
+    }
+
+    private static Set<BacktestResultContent> getBestMax(Path resultPath) {
+        BacktestResultReader resultReader = new BacktestResultReader(resultPath);
+        Decimal bestMaxValue = resultReader.streamMaxValues().max(Comparator.naturalOrder()).orElse(Decimal.ZERO);
+        Set<BacktestResultContent> bestMax = resultReader.streamCsvContentWithMaxValue(bestMaxValue).collect(Collectors.toSet());
+        return bestMax;
+    }
 
 
-    private Set<BacktestResultContent> filterForBest(Set<BacktestResultContent> backtestResultContents, Function<BacktestResultContent, Decimal> extractor) {
-        Decimal best = backtestResultContents.stream().map(extractor).max(Comparator.naturalOrder()).orElse(Decimal.ZERO);
-        return backtestResultContents.stream().filter(result -> Objects.equals(extractor.apply(result), best)).collect(Collectors.toSet());
+    private Set<BacktestResultContent> filterForBest(Stream<BacktestResultContent> backtestResultContents, Function<BacktestResultContent, Decimal> extractor) {
+        Stream.Builder<BacktestResultContent> findMaxStream = Stream.builder();
+        Stream.Builder<BacktestResultContent> findMaxElementsStream = Stream.builder();
+        backtestResultContents.forEach(result -> {
+            findMaxStream.add(result);
+            findMaxElementsStream.add(result);
+        });
+        Decimal best = findMaxStream.build().map(extractor).max(Comparator.naturalOrder()).orElse(Decimal.ZERO);
+        return findMaxElementsStream.build().filter(result -> Objects.equals(extractor.apply(result), best)).collect(Collectors.toSet());
     }
 
 

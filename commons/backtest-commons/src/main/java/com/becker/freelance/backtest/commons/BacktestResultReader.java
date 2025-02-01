@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,9 +37,61 @@ public class BacktestResultReader {
     }
 
     public Set<BacktestResultContent> readCsvContent() {
+        return streamCsvContent().collect(Collectors.toSet());
+    }
+
+    public Stream<BacktestResultContent> streamCsvContent() {
         logger.info("Reading Backtest Results from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
-        return lines.parallel().filter(line -> !line.startsWith("pair")).map(this::toBacktestResultContent).collect(Collectors.toSet());
+        return lines.parallel().filter(line -> !line.startsWith("pair")).map(this::toBacktestResultContent);
+    }
+
+    public Stream<BacktestResultContent> streamCsvContentWithMinValue(Decimal minValue) {
+        logger.info("Reading Backtest Results from {}", resultPath);
+        Stream<String> lines = readLines(resultPath);
+        return lines.parallel().filter(line -> !line.startsWith("pair")).filter(line -> {
+            String[] split = line.split(",");
+            Decimal currMin = new Decimal(split[4]);
+            return minValue.isEqualTo(currMin);
+        }).map(this::toBacktestResultContent);
+    }
+
+    public Stream<Decimal> streamMinValues(){
+        logger.info("Reading Min Result Values from {}", resultPath);
+        Stream<String> lines = readLines(resultPath);
+        return lines.filter(line -> !line.startsWith("pair")).map(line -> line.split(",")).map(split -> new Decimal(split[4]));
+    }
+
+    public Stream<BacktestResultContent> streamCsvContentWithMaxValue(Decimal maxValue) {
+        logger.info("Reading Backtest Results from {}", resultPath);
+        Stream<String> lines = readLines(resultPath);
+        return lines.parallel().filter(line -> !line.startsWith("pair")).filter(line -> {
+            String[] split = line.split(",");
+            Decimal currMin = new Decimal(split[5]);
+            return maxValue.isEqualTo(currMin);
+        }).map(this::toBacktestResultContent);
+    }
+
+    public Stream<Decimal> streamMaxValues(){
+        logger.info("Reading Max Result Values from {}", resultPath);
+        Stream<String> lines = readLines(resultPath);
+        return lines.filter(line -> !line.startsWith("pair")).map(line -> line.split(",")).map(split -> new Decimal(split[5]));
+    }
+
+    public Stream<BacktestResultContent> streamCsvContentWithCumulativeValue(Decimal cumulativeValue) {
+        logger.info("Reading Backtest Results from {}", resultPath);
+        Stream<String> lines = readLines(resultPath);
+        return lines.parallel().filter(line -> !line.startsWith("pair")).filter(line -> {
+            String[] split = line.split(",");
+            Decimal currMin = new Decimal(split[6]);
+            return cumulativeValue.isEqualTo(currMin);
+        }).map(this::toBacktestResultContent);
+    }
+
+    public Stream<Decimal> streamCumulativeValues(){
+        logger.info("Reading Cumulative Result Values from {}", resultPath);
+        Stream<String> lines = readLines(resultPath);
+        return lines.filter(line -> !line.startsWith("pair")).map(line -> line.split(",")).map(split -> new Decimal(split[6]));
     }
 
     private BacktestResultContent toBacktestResultContent(String line) {
@@ -84,7 +137,7 @@ public class BacktestResultReader {
         return tradesJson;
     }
 
-    private static Stream<String> readLines(Path resultPath) {
+    private Stream<String> readLines(Path resultPath) {
         try (
                 FileInputStream fis = new FileInputStream(resultPath.toFile());
                 ZstdCompressorInputStream zis = new ZstdCompressorInputStream(fis);
