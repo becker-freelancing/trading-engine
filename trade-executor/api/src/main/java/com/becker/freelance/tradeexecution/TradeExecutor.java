@@ -42,4 +42,6 @@ public abstract class TradeExecutor {
     public abstract List<Trade> getAllClosedTrades();
 
     public abstract Wallet getWallet();
+
+    public abstract void adaptPositions(TimeSeriesEntry currentPrice);
 }

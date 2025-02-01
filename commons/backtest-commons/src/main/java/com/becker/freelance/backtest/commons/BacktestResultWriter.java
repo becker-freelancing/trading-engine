@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 public class BacktestResultWriter {
 
     private static final String HEADER = "pair,app_mode,from_time,to_time,min,max,cumulative,initial_wallet_amount,parameter,trades\n";
-    private static final DateTimeFormatter FILE_NAME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
+    private static final DateTimeFormatter FILE_NAME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_kk-mm-ss");
 
     private final Path writePath;
     private final String baseString;

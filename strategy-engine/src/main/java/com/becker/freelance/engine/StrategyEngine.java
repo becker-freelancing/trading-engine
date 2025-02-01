@@ -28,11 +28,16 @@ public class StrategyEngine {
         try {
             TimeSeriesEntry currentPrice = timeSeries.getEntryForTime(time);
 
+            adaptPositions(currentPrice);
             closePositionsIfSlOrTpReached(currentPrice);
 
             shouldExit(currentPrice, timeSeries, time);
             shouldEnter(currentPrice, timeSeries, time);
         } catch (NoTimeSeriesEntryFoundException ignored){}
+    }
+
+    private void adaptPositions(TimeSeriesEntry currentPrice) {
+        tradeExecutor.adaptPositions(currentPrice);
     }
 
     private void shouldEnter(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time) {

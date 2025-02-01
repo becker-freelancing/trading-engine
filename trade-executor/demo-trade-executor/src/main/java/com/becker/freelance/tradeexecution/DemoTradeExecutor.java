@@ -88,4 +88,12 @@ public class DemoTradeExecutor extends TradeExecutor {
     public Wallet getWallet() {
         return wallet;
     }
+
+    @Override
+    public void adaptPositions(TimeSeriesEntry currentPrice) {
+        for (Position openPosition : openPositions) {
+            openPosition.adapt(currentPrice);
+        }
+
+    }
 }
