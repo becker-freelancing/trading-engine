@@ -146,6 +146,11 @@ public class PositionCalculation {
     }
 
     private Trade toTrade(Decimal conversionRate, Decimal profit, Pair pair, Position position, TimeSeriesEntry currentPrice) {
+        if (position instanceof TrailingStopPosition trailingStopPosition) {
+            return new Trade(position.getOpenTime(), currentPrice.time(), pair, profit,
+                    position.getOpenPriceAsNumber(), position.currentPrice(currentPrice), position.getSize(),
+                    position.getDirection(), conversionRate, position.getPositionType(), trailingStopPosition.getTrailingStepSizeInEuro());
+        }
         return new Trade(position.getOpenTime(), currentPrice.time(), pair, profit,
                 position.getOpenPriceAsNumber(), position.currentPrice(currentPrice), position.getSize(),
                 position.getDirection(), conversionRate, position.getPositionType());
