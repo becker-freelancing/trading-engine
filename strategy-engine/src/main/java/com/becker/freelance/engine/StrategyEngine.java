@@ -7,11 +7,15 @@ import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.strategies.BaseStrategy;
 import com.becker.freelance.tradeexecution.TradeExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 public class StrategyEngine {
+
+    private final Logger logger = LoggerFactory.getLogger(StrategyEngine.class);
 
     private final BaseStrategy strategy;
     private final TradeExecutor tradeExecutor;
@@ -33,7 +37,9 @@ public class StrategyEngine {
 
             shouldExit(currentPrice, timeSeries, time);
             shouldEnter(currentPrice, timeSeries, time);
-        } catch (NoTimeSeriesEntryFoundException ignored){}
+        } catch (NoTimeSeriesEntryFoundException e) {
+            logger.error("Error while executing Strategy {}", strategy.getClass().getName(), e);
+        }
     }
 
     private void adaptPositions(TimeSeriesEntry currentPrice) {

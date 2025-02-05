@@ -2,9 +2,7 @@ package com.becker.freelance.commons.timeseries;
 
 import com.becker.freelance.commons.pair.Pair;
 import org.ta4j.core.Bar;
-import org.ta4j.core.BarSeries;
 import org.ta4j.core.BaseBar;
-import org.ta4j.core.BaseBarSeriesBuilder;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -89,6 +87,24 @@ public class TimeSeries implements Iterable<LocalDateTime>{
         }
 
         return closes;
+    }
+
+    public Optional<List<TimeSeriesEntry>> getLastNCloseForTimeAsEntryIfExist(LocalDateTime endTime, int n) {
+        try {
+
+            List<TimeSeriesEntry> closes = new ArrayList<>();
+            LocalDateTime start = endTime.minus(Duration.ofMinutes(pair.timeInMinutes() * n));
+
+            while (start.isBefore(endTime) || start.isEqual(endTime)) {
+                closes.add(getEntryForTime(start));
+                start = start.plus(pair.toDuration());
+            }
+
+            return Optional.of(closes);
+
+        } catch (NoTimeSeriesEntryFoundException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
