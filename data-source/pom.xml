@@ -13,6 +13,7 @@
     <modules>
         <module>api</module>
         <module>kraken</module>
+        <module>hist-data</module>
     </modules>
 
     <artifactId>data-source</artifactId>
