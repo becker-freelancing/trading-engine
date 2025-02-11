@@ -1,6 +1,8 @@
 package com.becker.freelance.commons;
 
-import java.nio.file.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class PathUtil {
 
@@ -25,5 +27,9 @@ public class PathUtil {
 
     public static String resultDirForStrategy(String strategyName){
         return rootResultDir() + strategyName + "\\";
+    }
+
+    public static String fromModelsDir(String name) {
+        return fromRelativePath("models\\" + name);
     }
 }
