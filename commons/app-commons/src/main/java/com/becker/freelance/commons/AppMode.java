@@ -1,7 +1,10 @@
 package com.becker.freelance.commons;
 
+import com.becker.freelance.commons.pair.Pair;
+
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.function.Predicate;
 
 public interface AppMode {
 
@@ -24,4 +27,5 @@ public interface AppMode {
         return getDataSourceName() + "_" + (isDemo() ? "DEMO" : "LIVE");
     }
 
+    Predicate<Pair> containingPairs();
 }

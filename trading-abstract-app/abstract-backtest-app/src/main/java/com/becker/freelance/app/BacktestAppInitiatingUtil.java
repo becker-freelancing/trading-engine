@@ -2,11 +2,8 @@ package com.becker.freelance.app;
 
 import com.becker.freelance.commons.AppMode;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.timeseries.TimeSeries;
-import com.becker.freelance.data.DataProvider;
 import com.becker.freelance.strategies.BaseStrategy;
 
-import java.io.IOException;
 import java.util.List;
 
 class BacktestAppInitiatingUtil {
@@ -31,8 +28,9 @@ class BacktestAppInitiatingUtil {
         return numThreads;
     }
 
-    public Pair askPair() {
-        Pair pair = propertyAsker.askProperty(Pair.allPairs(), Pair::technicalName, "Pair");
+    public Pair askPair(AppMode appMode) {
+        List<Pair> pairs = Pair.allPairs().stream().filter(appMode.containingPairs()).distinct().toList();
+        Pair pair = propertyAsker.askProperty(pairs, Pair::technicalName, "Pair");
         return pair;
     }
 

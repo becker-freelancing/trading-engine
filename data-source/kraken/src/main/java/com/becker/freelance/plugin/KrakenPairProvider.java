@@ -1,4 +1,4 @@
-package com.becker.freelance.plugin.pair;
+package com.becker.freelance.plugin;
 
 import com.becker.freelance.commons.pair.AbstractPair;
 import com.becker.freelance.commons.pair.Pair;

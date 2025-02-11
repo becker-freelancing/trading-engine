@@ -1,7 +1,9 @@
 package com.becker.freelance.app;
 
 import com.becker.freelance.backtest.BacktestEngine;
-import com.becker.freelance.commons.*;
+import com.becker.freelance.commons.AppConfiguration;
+import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.ExecutionConfiguration;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.data.DataProvider;
@@ -35,7 +37,7 @@ class AbstractBacktestApp implements Runnable{
         BaseStrategy strategy = appInitiatingUtil.askStrategy();
         logger.info("\t\tAnzahl Permutationen {}", strategy.getParameters().permutate().size());
         AppMode appMode = appInitiatingUtil.askAppMode();
-        Pair pair = appInitiatingUtil.askPair();
+        Pair pair = appInitiatingUtil.askPair(appMode);
         Integer numThreads = appInitiatingUtil.askNumberOfThreads();
 
         TimeSeries eurusd = null;
