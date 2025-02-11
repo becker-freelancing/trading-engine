@@ -22,7 +22,7 @@ public class PathUtil {
     }
 
     public static String rootResultDir(){
-        return fromRelativePath(".results\\");
+        return fromRelativePath("results\\");
     }
 
     public static String resultDirForStrategy(String strategyName){

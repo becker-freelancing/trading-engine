@@ -1,6 +1,8 @@
 package com.becker.freelance.backtest.commons;
 
-import com.becker.freelance.commons.*;
+import com.becker.freelance.commons.AppConfiguration;
+import com.becker.freelance.commons.ExecutionConfiguration;
+import com.becker.freelance.commons.PathUtil;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Trade;
 import com.becker.freelance.math.Decimal;
@@ -8,6 +10,7 @@ import com.becker.freelance.strategies.BaseStrategy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
@@ -20,7 +23,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public class BacktestResultWriter {
 
@@ -73,7 +75,7 @@ public class BacktestResultWriter {
 
     private static String formatFilePath(LocalDateTime startTime, Pair pair, String strategyName, DateTimeFormatter fileDateFormatter) {
         String pairName = pair.technicalName().replaceAll("/", "_").replaceAll(" ", "_");
-        return PathUtil.fromRelativePath(".results\\" + strategyName + "\\" + pairName + "__" + strategyName + "__" + fileDateFormatter.format(startTime) + ".csv");
+        return PathUtil.fromRelativePath("results\\" + strategyName + "\\" + pairName + "__" + strategyName + "__" + fileDateFormatter.format(startTime) + ".csv");
     }
 
     private void writeHeader() throws IOException {

@@ -52,7 +52,7 @@ public class KrakenDataProvider extends DataProvider{
     @Override
     public TimeSeries readTimeSeries(Pair pair, LocalDateTime from, LocalDateTime to) throws IOException {
         logger.info("Start reading TimeSeries {}...", pair.technicalName());
-        String filePath = PathUtil.fromRelativePath(".data\\" + getFilename(pair) + ".zip");
+        String filePath = PathUtil.fromRelativePath("data\\" + getFilename(pair) + ".zip");
 
         // Read CSV from ZIP file
         ZipFile zipFile = new ZipFile(filePath);

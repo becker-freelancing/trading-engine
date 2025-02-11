@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
 
@@ -29,10 +30,14 @@ public class HistDataDataProvider extends DataProvider {
         return "HISTDATA".equalsIgnoreCase(appMode.getDataSourceName()) && appMode.isDemo();
     }
 
-    protected Map<LocalDateTime, TimeSeriesEntry> mapWithSpread(List<String[]> rows, Pair pair) {
+    protected Map<LocalDateTime, TimeSeriesEntry> mapWithSpread(List<String[]> rows, Pair pair, LocalDateTime from, LocalDateTime to) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime beforeFrom = from.minusDays(3);
         return rows.stream().skip(1).parallel().map(row -> {
                     LocalDateTime time = LocalDateTime.parse(row[0], formatter);
+                    if (time.isBefore(beforeFrom) || time.isAfter(to)) {
+                        return null;
+                    }
                     Decimal openBid = new Decimal(row[1]);
                     Decimal openAsk = new Decimal(row[2]);
                     Decimal highBid = new Decimal(row[3]);
@@ -45,7 +50,7 @@ public class HistDataDataProvider extends DataProvider {
                             time, openBid, openAsk, highBid, highAsk, lowBid, lowAsk,
                             closeBid, closeAsk, Decimal.ZERO, Decimal.ZERO, pair
                     );
-                })
+                }).filter(Objects::nonNull)
                 .collect(Collectors.toMap(TimeSeriesEntry::time, entry -> entry, (existing, replacement) -> existing));
 
     }
@@ -65,7 +70,7 @@ public class HistDataDataProvider extends DataProvider {
         } catch (CsvException e) {
             throw new IOException(e);
         }
-        Map<LocalDateTime, TimeSeriesEntry> entries = mapWithSpread(rows, pair);
+        Map<LocalDateTime, TimeSeriesEntry> entries = mapWithSpread(rows, pair, from, to);
         TimeSeries timeSeries = map(pair, from, to, entries);
         logger.info("Finished reading TimeSeries {}", pair.technicalName());
         return timeSeries;
