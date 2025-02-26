@@ -8,12 +8,13 @@ import com.becker.freelance.strategies.BaseStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,7 +23,7 @@ public class AbstractBacktestResultViewerApp implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractBacktestResultViewerApp.class);
 
-    private static final String RESULTS_DIR_NAME = ".results\\";
+    private static final String RESULTS_DIR_NAME = "results\\";
     private static final String FILE_ENDING = ".zst";
 
 

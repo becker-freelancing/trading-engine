@@ -55,4 +55,8 @@ public interface Pair {
         return profit.divide(profitPerPointForOneContract()).divide(size);
     }
 
+    default String shortName() {
+        return baseCurrency() + counterCurrency() + "_" + timeInMinutes();
+    }
+
 }
