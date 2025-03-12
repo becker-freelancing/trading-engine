@@ -17,6 +17,7 @@
         <module>app-commons</module>
         <module>backtest-commons</module>
         <module>math-commons</module>
+        <module>ta-indicators</module>
     </modules>
 
 </project>

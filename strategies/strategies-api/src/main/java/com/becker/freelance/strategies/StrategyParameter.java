@@ -32,6 +32,10 @@ public class StrategyParameter {
         this(name, new Decimal(defaultValue), new Decimal(minValue), new Decimal(maxValue), new Decimal(stepSize));
     }
 
+    public StrategyParameter(String name, Integer value) {
+        this(name, value, value, value, value);
+    }
+
     public String getName() {
         return name;
     }
