@@ -1,6 +1,7 @@
 package com.becker.freelance.tradeexecution;
 
-import com.becker.freelance.commons.*;
+import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.ExecutionConfiguration;
 import com.becker.freelance.commons.calculation.MarginCalculator;
 import com.becker.freelance.commons.calculation.PositionCalculation;
 import com.becker.freelance.commons.calculation.PositionCalculation.PositionCalculationResult;
@@ -94,6 +95,10 @@ public class DemoTradeExecutor extends TradeExecutor {
         for (Position openPosition : openPositions) {
             openPosition.adapt(currentPrice);
         }
+    }
 
+    @Override
+    public boolean isPositionOpen() {
+        return !openPositions.isEmpty();
     }
 }

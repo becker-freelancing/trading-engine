@@ -1,18 +1,21 @@
 package com.becker.freelance.tradeexecution;
 
-import com.becker.freelance.commons.*;
+import com.becker.freelance.commons.AppConfiguration;
+import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.ExecutionConfiguration;
 import com.becker.freelance.commons.position.Trade;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
+import com.becker.freelance.opentrades.OpenPositionRequestor;
 import com.becker.freelance.wallet.Wallet;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ServiceLoader;
 
-public abstract class TradeExecutor {
+public abstract class TradeExecutor implements OpenPositionRequestor {
 
     public static TradeExecutor find(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration){
         ServiceLoader<TradeExecutor> tradeExecutors = ServiceLoader.load(TradeExecutor.class);

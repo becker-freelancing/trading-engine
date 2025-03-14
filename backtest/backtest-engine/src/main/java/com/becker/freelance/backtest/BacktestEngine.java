@@ -102,8 +102,9 @@ public class BacktestEngine {
     private void executeForParameter(Map<String, Decimal> parameter) {
         try {
             logger.info("Starting Permutation {} of {} - {}", getNextIteration(), this.requiredIterations, parameter);
-            BaseStrategy strategyForBacktest = baseStrategy.forParameters(parameter);
             TradeExecutor tradeExecutor = TradeExecutor.find(appConfiguration, executionConfiguration);
+            BaseStrategy strategyForBacktest = baseStrategy.forParameters(parameter)
+                    .withOpenPositionRequestor(tradeExecutor);
             StrategyEngine strategyEngine = new StrategyEngine(strategyForBacktest, tradeExecutor);
 
             for (LocalDateTime timeKey : timeSeries.iterator(executionConfiguration.startTime(), executionConfiguration.endTime())) {

@@ -13,6 +13,7 @@
     <modules>
         <module>demo-trade-executor</module>
         <module>api</module>
+        <module>open-positions-api</module>
     </modules>
     <artifactId>trade-executor</artifactId>
 

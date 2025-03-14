@@ -5,6 +5,7 @@ import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.math.Decimal;
+import com.becker.freelance.opentrades.OpenPositionRequestor;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -27,12 +28,12 @@ public abstract class BaseStrategy {
     protected String name;
     protected PermutableStrategyParameter parameters;
     private boolean initiatedForParameter = false;
+    private OpenPositionRequestor openPositionRequestor;
 
     public BaseStrategy(String name, PermutableStrategyParameter parameters) {
         this.name = name;
         this.parameters = parameters;
     }
-
 
     public BaseStrategy(Map<String, Decimal> parameters) {
         initiatedForParameter = true;
@@ -58,5 +59,14 @@ public abstract class BaseStrategy {
 
     public boolean isInitiatedForParameter() {
         return initiatedForParameter;
+    }
+
+    public OpenPositionRequestor getOpenPositionRequestor() {
+        return openPositionRequestor;
+    }
+
+    public BaseStrategy withOpenPositionRequestor(OpenPositionRequestor openPositionRequestor) {
+        this.openPositionRequestor = openPositionRequestor;
+        return this;
     }
 }
