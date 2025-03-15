@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -59,7 +58,10 @@ public class BacktestResultReader {
     public Stream<Decimal> streamMinValues(){
         logger.info("Reading Min Result Values from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
-        return lines.filter(line -> !line.startsWith("pair")).map(line -> line.split(",")).map(split -> new Decimal(split[4]));
+        return lines.filter(line -> !line.startsWith("pair"))
+                .map(line -> line.split(","))
+                .filter(split -> !split[9].equals("[]"))
+                .map(split -> new Decimal(split[4]));
     }
 
     public Stream<BacktestResultContent> streamCsvContentWithMaxValue(Decimal maxValue) {
@@ -75,7 +77,10 @@ public class BacktestResultReader {
     public Stream<Decimal> streamMaxValues(){
         logger.info("Reading Max Result Values from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
-        return lines.filter(line -> !line.startsWith("pair")).map(line -> line.split(",")).map(split -> new Decimal(split[5]));
+        return lines.filter(line -> !line.startsWith("pair"))
+                .map(line -> line.split(","))
+                .filter(split -> !split[9].equals("[]"))
+                .map(split -> new Decimal(split[5]));
     }
 
     public Stream<BacktestResultContent> streamCsvContentWithCumulativeValue(Decimal cumulativeValue) {
@@ -91,7 +96,10 @@ public class BacktestResultReader {
     public Stream<Decimal> streamCumulativeValues(){
         logger.info("Reading Cumulative Result Values from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
-        return lines.filter(line -> !line.startsWith("pair")).map(line -> line.split(",")).map(split -> new Decimal(split[6]));
+        return lines.filter(line -> !line.startsWith("pair"))
+                .map(line -> line.split(","))
+                .filter(split -> !split[9].equals("[]"))
+                .map(split -> new Decimal(split[6]));
     }
 
     private BacktestResultContent toBacktestResultContent(String line) {
