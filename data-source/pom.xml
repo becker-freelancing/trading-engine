@@ -14,6 +14,7 @@
         <module>api</module>
         <module>kraken</module>
         <module>hist-data</module>
+        <module>binance</module>
     </modules>
 
     <artifactId>data-source</artifactId>
