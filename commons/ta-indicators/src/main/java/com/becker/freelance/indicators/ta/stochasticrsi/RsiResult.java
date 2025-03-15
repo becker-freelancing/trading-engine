@@ -1,4 +1,4 @@
-package com.becker.freelance.indicators.ta;
+package com.becker.freelance.indicators.ta.stochasticrsi;
 
 import org.ta4j.core.num.DecimalNum;
 import org.ta4j.core.num.Num;
