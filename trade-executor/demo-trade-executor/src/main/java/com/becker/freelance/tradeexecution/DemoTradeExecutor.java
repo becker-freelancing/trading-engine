@@ -98,7 +98,7 @@ public class DemoTradeExecutor extends TradeExecutor {
     }
 
     @Override
-    public boolean isPositionOpen() {
-        return !openPositions.isEmpty();
+    public boolean isPositionOpen(Pair pair) {
+        return openPositions.stream().anyMatch(pos -> pair.equals(pos.getPair()));
     }
 }

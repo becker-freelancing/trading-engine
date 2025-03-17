@@ -13,5 +13,12 @@ public enum Direction {
     public int getFactor() {
         return factor;
     }
+
+    public Direction negate() {
+        return switch (this) {
+            case BUY -> SELL;
+            case SELL -> BUY;
+        };
+    }
 }
 

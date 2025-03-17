@@ -45,6 +45,10 @@ public class Decimal extends BigDecimal {
         return new Decimal(super.add(augend));
     }
 
+    public Decimal add(double augend) {
+        return add(BigDecimal.valueOf(augend));
+    }
+
     @Override
     public Decimal multiply(BigDecimal multiplicand) {
         return new Decimal(super.multiply(multiplicand));
