@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class BacktestResultWriter {
 
-    private static final String HEADER = "pair,app_mode,from_time,to_time,min,max,cumulative,initial_wallet_amount,parameter,trades\n";
+    private static final String HEADER = "pairs,app_mode,from_time,to_time,min,max,cumulative,initial_wallet_amount,parameter,trades\n";
     private static final DateTimeFormatter FILE_NAME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_kk-mm-ss");
 
     private final Path writePath;
@@ -34,12 +34,15 @@ public class BacktestResultWriter {
 
     private final ObjectMapper objectMapper;
 
-    public BacktestResultWriter(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, BaseStrategy baseStrategy){
-        this(appConfiguration, executionConfiguration, Path.of(formatFilePath(appConfiguration.startTime(), executionConfiguration.pair(), baseStrategy.getName(), FILE_NAME_FORMATTER)));
+    public BacktestResultWriter(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, BaseStrategy baseStrategy) {
+        this(appConfiguration,
+                executionConfiguration,
+                Path.of(formatFilePath(appConfiguration.startTime(), executionConfiguration.pairs(), baseStrategy.getName()))
+        );
 
     }
 
-    public BacktestResultWriter(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, Path writePath){
+    public BacktestResultWriter(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, Path writePath) {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         SimpleModule module = new SimpleModule();
@@ -48,34 +51,43 @@ public class BacktestResultWriter {
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         this.writePath = writePath;
         prepareCsvFile();
-        this.baseString = formatBaseString(appConfiguration, executionConfiguration);
+        this.baseString = formatBaseString(appConfiguration, executionConfiguration, objectMapper);
 
         BacktestResultZipper.registerOnShutdown(writePath);
     }
 
-    private static String formatBaseString(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration) {
+    private static String formatBaseString(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, ObjectMapper objectMapper) {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
-        return String.format("%s,%s,%s,%s,",
-                executionConfiguration.pair().technicalName(), appConfiguration.appMode().getDescription(),
-                timeFormatter.format(executionConfiguration.startTime()),
-                timeFormatter.format(executionConfiguration.endTime())) + "%s,%s,%s," + executionConfiguration.initialWalletAmount() + ",%s,%s\n";
+        try {
+            return String.format("%s,%s,%s,%s,",
+                    objectMapper.writeValueAsString(executionConfiguration.pairs()), appConfiguration.appMode().getDescription(),
+                    timeFormatter.format(executionConfiguration.startTime()),
+                    timeFormatter.format(executionConfiguration.endTime())) + "%s,%s,%s," + executionConfiguration.initialWalletAmount() + ",%s,%s\n";
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Could not process " + executionConfiguration.pairs() + " to JSON string", e);
+        }
+    }
+
+    private static String formatFilePath(LocalDateTime startTime, List<Pair> pairs, String strategyName) {
+        String pairName;
+        if (pairs.size() == 1) {
+            pairName = pairs.get(0).technicalName().replaceAll("/", "_").replaceAll(" ", "_");
+        } else {
+            pairName = "MULTIPLE_PAIR";
+        }
+        return PathUtil.fromRelativePath("results\\" + strategyName + "\\" + pairName + "__" + strategyName + "__" + BacktestResultWriter.FILE_NAME_FORMATTER.format(startTime) + ".csv");
     }
 
     private void prepareCsvFile() {
-        if (!Files.exists(writePath)){
+        if (!Files.exists(writePath)) {
             try {
                 Files.createDirectories(writePath.getParent());
                 Files.createFile(writePath);
                 writeHeader();
-            } catch (IOException e){
+            } catch (IOException e) {
                 throw new IllegalStateException("Could not create Result File " + writePath);
             }
         }
-    }
-
-    private static String formatFilePath(LocalDateTime startTime, Pair pair, String strategyName, DateTimeFormatter fileDateFormatter) {
-        String pairName = pair.technicalName().replaceAll("/", "_").replaceAll(" ", "_");
-        return PathUtil.fromRelativePath("results\\" + strategyName + "\\" + pairName + "__" + strategyName + "__" + fileDateFormatter.format(startTime) + ".csv");
     }
 
     private void writeHeader() throws IOException {
@@ -92,7 +104,7 @@ public class BacktestResultWriter {
         Decimal sum = Decimal.ZERO;
         Decimal min = new Decimal(Double.MAX_VALUE);
         Decimal max = min.multiply(new BigDecimal("-1"));
-        if (profits.isEmpty()){
+        if (profits.isEmpty()) {
             min = Decimal.ZERO;
             max = Decimal.ZERO;
         }

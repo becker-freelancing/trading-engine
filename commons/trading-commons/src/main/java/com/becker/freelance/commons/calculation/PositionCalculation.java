@@ -136,7 +136,7 @@ public class PositionCalculation {
     private PositionCalculationResult closePositions(TimeSeriesEntry currentPrice, List<Position> positions, Wallet wallet) {
         List<Trade> closedTrades = new ArrayList<>();
         for (Position position : positions) {
-            TradingCalculator.ProfitLossResult profitConversionRate = position.currentProfit(currentPrice);
+            TradingCalculator.ProfitLossResult profitConversionRate = position.closeProfit(currentPrice);
             closedTrades.add(toTrade(profitConversionRate.conversionRate(), profitConversionRate.profit(), currentPrice.pair(), position, currentPrice));
             wallet.adjustAmount(profitConversionRate.profit());
             wallet.removeMargin(position.getMargin());

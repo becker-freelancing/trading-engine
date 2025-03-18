@@ -5,7 +5,10 @@ import com.becker.freelance.backtest.ExcludeExistingParametersFilter;
 import com.becker.freelance.backtest.commons.BacktestResultContent;
 import com.becker.freelance.backtest.commons.BacktestResultReader;
 import com.becker.freelance.backtest.commons.BacktestResultZipper;
-import com.becker.freelance.commons.*;
+import com.becker.freelance.commons.AppConfiguration;
+import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.ExecutionConfiguration;
+import com.becker.freelance.commons.PathUtil;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.data.DataProvider;
@@ -30,7 +33,7 @@ class AbstractBacktestContinueApp implements Runnable{
     private LocalDateTime fromTime;
     private LocalDateTime toTime;
     private AppMode appMode;
-    private Pair pair;
+    private List<Pair> pairs;
 
     AbstractBacktestContinueApp() {
         this.appInitiatingUtil = new BacktestAppInitiatingUtil();
@@ -58,7 +61,7 @@ class AbstractBacktestContinueApp implements Runnable{
 
 
         AppConfiguration appConfiguration = new AppConfiguration(appMode, numThreads, LocalDateTime.now());
-        ExecutionConfiguration executionConfiguration = new ExecutionConfiguration(pair, initialWalletAmount, eurusd, fromTime, toTime);
+        ExecutionConfiguration executionConfiguration = new ExecutionConfiguration(pairs, initialWalletAmount, eurusd, fromTime, toTime);
 
         BacktestEngine backtestEngine = new BacktestEngine(appConfiguration, executionConfiguration, strategy, new ExcludeExistingParametersFilter(parameters), resultWriteFile);
         backtestEngine.run();
@@ -74,7 +77,7 @@ class AbstractBacktestContinueApp implements Runnable{
         fromTime = result.fromTime();
         toTime = result.toTime();
         initialWalletAmount = result.initialWalletAmount();
-        pair = Pair.fromTechnicalName(result.pair());
+        pairs = result.parsePairs();
         appMode = AppMode.fromDescription(result.appMode());
     }
 

@@ -7,11 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
-import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 class BacktestResultConsoleWriter implements Runnable{
 
@@ -56,7 +52,7 @@ class BacktestResultConsoleWriter implements Runnable{
         LocalDateTime toTime = baseData.toTime();
         long daysBetween = ChronoUnit.DAYS.between(fromTime, toTime);
         logger.info("=========================================== Basisdaten ===========================================");
-        logger.info("Pair: {}", baseData.pair());
+        logger.info("Pairs: {}", baseData.parsePairs());
         logger.info("Testzeitraum: {} - {} ({} Tage)", fromTime.format(DateTimeFormatter.ISO_DATE_TIME), toTime.format(DateTimeFormatter.ISO_DATE_TIME), daysBetween);
         logger.info("=========================================== Strategien ===========================================");
     }

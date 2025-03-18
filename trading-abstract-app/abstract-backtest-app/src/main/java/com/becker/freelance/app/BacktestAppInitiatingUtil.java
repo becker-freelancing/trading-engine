@@ -21,16 +21,14 @@ class BacktestAppInitiatingUtil {
     }
 
 
-
-
     public Integer askNumberOfThreads() {
         Integer numThreads = propertyAsker.askProperty(List.of(1, 20, 40, 80), i -> Integer.toString(i), "Anzahl an Threads");
         return numThreads;
     }
 
-    public Pair askPair(AppMode appMode) {
+    public List<Pair> askPair(AppMode appMode) {
         List<Pair> pairs = Pair.allPairs().stream().filter(appMode.containingPairs()).distinct().toList();
-        Pair pair = propertyAsker.askProperty(pairs, Pair::technicalName, "Pair");
+        List<Pair> pair = propertyAsker.askMultipleProperty(pairs, Pair::technicalName, "Pair (Oder für mehrere gleichzeitig mit Komma getrennt)");
         return pair;
     }
 

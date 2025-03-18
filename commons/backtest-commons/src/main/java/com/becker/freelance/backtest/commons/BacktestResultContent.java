@@ -1,5 +1,6 @@
 package com.becker.freelance.backtest.commons;
 
+import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.math.Decimal;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
@@ -12,7 +13,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public record BacktestResultContent(ObjectMapper objectMapper, String pair, String appMode, LocalDateTime fromTime, LocalDateTime toTime, Decimal min, Decimal max, Decimal cumulative, Decimal initialWalletAmount, String parametersJson, String tradesJson) {
+public record BacktestResultContent(ObjectMapper objectMapper, String pairs, String appMode, LocalDateTime fromTime,
+                                    LocalDateTime toTime, Decimal min, Decimal max, Decimal cumulative,
+                                    Decimal initialWalletAmount, String parametersJson, String tradesJson) {
 
     public List<Decimal> tradeProfits() {
         JSONArray trades = new JSONArray(tradesJson());
@@ -40,6 +43,10 @@ public record BacktestResultContent(ObjectMapper objectMapper, String pair, Stri
                         Map.Entry::getKey,
                         Map.Entry::getValue
                 ));
+    }
+
+    public List<Pair> parsePairs() {
+        return objectMapper.convertValue(pairs, List.class);
     }
 
 }

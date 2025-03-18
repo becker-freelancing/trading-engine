@@ -19,10 +19,11 @@ import com.becker.freelance.wallet.Wallet;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class DemoTradeExecutor extends TradeExecutor {
 
-    private Wallet wallet;
+    private Supplier<Wallet> wallet;
     private List<Position> openPositions;
     private List<Trade> closedTrades;
     private PositionCalculation positionCalculation;
@@ -33,19 +34,20 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     }
 
-    private DemoTradeExecutor(ExecutionConfiguration executionConfiguration){
-        wallet = new Wallet(executionConfiguration.initialWalletAmount());
+    private DemoTradeExecutor(ExecutionConfiguration executionConfiguration, Pair pair) {
+        Wallet wallet = new Wallet(executionConfiguration.initialWalletAmount());
+        this.wallet = () -> wallet;
         openPositions = new ArrayList<>();
         closedTrades = new ArrayList<>();
-        pair = executionConfiguration.pair();
+        this.pair = pair;
         tradingCalculator = new TradingCalculator(pair, executionConfiguration.getEurUsdTimeSeries());
         MarginCalculator marginCalculator = new MarginCalculator(pair, executionConfiguration.getEurUsdTimeSeries());
         positionCalculation = new PositionCalculation(tradingCalculator, marginCalculator);
     }
 
     @Override
-    protected TradeExecutor construct(ExecutionConfiguration executionConfiguration) {
-        return new DemoTradeExecutor(executionConfiguration);
+    protected TradeExecutor construct(ExecutionConfiguration executionConfiguration, Pair pair) {
+        return new DemoTradeExecutor(executionConfiguration, pair);
     }
 
     @Override
@@ -55,7 +57,7 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public void closePositionsIfSlOrTpReached(TimeSeriesEntry currentPrice) {
-        PositionCalculationResult closePositionResults = positionCalculation.closePositionIfSlOrTpReached(currentPrice, openPositions, wallet);
+        PositionCalculationResult closePositionResults = positionCalculation.closePositionIfSlOrTpReached(currentPrice, openPositions, wallet.get());
         openPositions = closePositionResults.positions();
         closedTrades.addAll(closePositionResults.trades());
     }
@@ -64,9 +66,9 @@ public class DemoTradeExecutor extends TradeExecutor {
     public void exit(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, ExitSignal exitSignal) {
         PositionCalculationResult closePositionResults;
         if (exitSignal.getDirectionToClose() == Direction.BUY){
-            closePositionResults = positionCalculation.closeAllBuyPositions(currentPrice, openPositions, wallet);
+            closePositionResults = positionCalculation.closeAllBuyPositions(currentPrice, openPositions, wallet.get());
         } else {
-            closePositionResults = positionCalculation.closeAllSellPositions(currentPrice, openPositions, wallet);
+            closePositionResults = positionCalculation.closeAllSellPositions(currentPrice, openPositions, wallet.get());
         }
         List<Trade> trades = closePositionResults.trades();
         openPositions = closePositionResults.positions();
@@ -75,7 +77,7 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public void entry(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, EntrySignal entrySignal) {
-        PositionCalculationResult openPositionsResult = positionCalculation.openPosition(currentPrice, openPositions, entrySignal, wallet);
+        PositionCalculationResult openPositionsResult = positionCalculation.openPosition(currentPrice, openPositions, entrySignal, wallet.get());
         openPositions = openPositionsResult.positions();
         closedTrades.addAll(openPositionsResult.trades());
     }
@@ -87,7 +89,7 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public Wallet getWallet() {
-        return wallet;
+        return wallet.get();
     }
 
     @Override
@@ -100,5 +102,15 @@ public class DemoTradeExecutor extends TradeExecutor {
     @Override
     public boolean isPositionOpen(Pair pair) {
         return openPositions.stream().anyMatch(pos -> pair.equals(pos.getPair()));
+    }
+
+    @Override
+    protected void setWallet(Supplier<Wallet> wallet) {
+        this.wallet = wallet;
+    }
+
+    @Override
+    protected Pair getPair() {
+        return pair;
     }
 }

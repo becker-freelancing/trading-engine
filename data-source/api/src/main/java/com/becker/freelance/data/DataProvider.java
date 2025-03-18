@@ -35,7 +35,6 @@ public abstract class DataProvider {
 
     protected TimeSeries map(Pair pair, LocalDateTime fromTime, LocalDateTime toTime, Map<LocalDateTime, TimeSeriesEntry> dataList) {
 
-
         //FFill
         LocalDateTime firstBeforeFromTime = dataList.keySet().stream()
                 .filter(time -> time.isBefore(fromTime))

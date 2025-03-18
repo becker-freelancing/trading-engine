@@ -36,7 +36,7 @@ class ExecutionConfigurationTest {
 
     @Test
     void pair() {
-        assertEquals(pair, configuration.pair());
+        assertEquals(pair, configuration.pairs());
     }
 
     @Test

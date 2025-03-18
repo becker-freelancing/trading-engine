@@ -42,13 +42,13 @@ public class BacktestResultReader {
     public Stream<BacktestResultContent> streamCsvContent() {
         logger.info("Reading Backtest Results from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
-        return lines.parallel().filter(line -> !line.startsWith("pair")).map(this::toBacktestResultContent);
+        return lines.parallel().filter(line -> !line.startsWith("pairs")).map(this::toBacktestResultContent);
     }
 
     public Stream<BacktestResultContent> streamCsvContentWithMinValue(Decimal minValue) {
         logger.info("Reading Backtest Results from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
-        return lines.parallel().filter(line -> !line.startsWith("pair")).filter(line -> {
+        return lines.parallel().filter(line -> !line.startsWith("pairs")).filter(line -> {
             String[] split = line.split(",");
             Decimal currMin = new Decimal(split[4]);
             return minValue.isEqualTo(currMin);
@@ -58,7 +58,7 @@ public class BacktestResultReader {
     public Stream<Decimal> streamMinValues(){
         logger.info("Reading Min Result Values from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
-        return lines.filter(line -> !line.startsWith("pair"))
+        return lines.filter(line -> !line.startsWith("pairs"))
                 .map(line -> line.split(","))
                 .filter(split -> !split[9].equals("[]"))
                 .map(split -> new Decimal(split[4]));
@@ -67,7 +67,7 @@ public class BacktestResultReader {
     public Stream<BacktestResultContent> streamCsvContentWithMaxValue(Decimal maxValue) {
         logger.info("Reading Backtest Results from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
-        return lines.parallel().filter(line -> !line.startsWith("pair")).filter(line -> {
+        return lines.parallel().filter(line -> !line.startsWith("pairs")).filter(line -> {
             String[] split = line.split(",");
             Decimal currMin = new Decimal(split[5]);
             return maxValue.isEqualTo(currMin);
@@ -77,7 +77,7 @@ public class BacktestResultReader {
     public Stream<Decimal> streamMaxValues(){
         logger.info("Reading Max Result Values from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
-        return lines.filter(line -> !line.startsWith("pair"))
+        return lines.filter(line -> !line.startsWith("pairs"))
                 .map(line -> line.split(","))
                 .filter(split -> !split[9].equals("[]"))
                 .map(split -> new Decimal(split[5]));
@@ -86,7 +86,7 @@ public class BacktestResultReader {
     public Stream<BacktestResultContent> streamCsvContentWithCumulativeValue(Decimal cumulativeValue) {
         logger.info("Reading Backtest Results from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
-        return lines.parallel().filter(line -> !line.startsWith("pair")).filter(line -> {
+        return lines.parallel().filter(line -> !line.startsWith("pairs")).filter(line -> {
             String[] split = line.split(",");
             Decimal currMin = new Decimal(split[6]);
             return cumulativeValue.isEqualTo(currMin);
@@ -96,7 +96,7 @@ public class BacktestResultReader {
     public Stream<Decimal> streamCumulativeValues(){
         logger.info("Reading Cumulative Result Values from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
-        return lines.filter(line -> !line.startsWith("pair"))
+        return lines.filter(line -> !line.startsWith("pairs"))
                 .map(line -> line.split(","))
                 .filter(split -> !split[9].equals("[]"))
                 .map(split -> new Decimal(split[6]));

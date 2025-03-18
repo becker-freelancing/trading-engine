@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 class AbstractBacktestApp implements Runnable{
 
@@ -37,7 +38,7 @@ class AbstractBacktestApp implements Runnable{
         BaseStrategy strategy = appInitiatingUtil.askStrategy();
         logger.info("\t\tAnzahl Permutationen {}", strategy.getParameters().permutate().size());
         AppMode appMode = appInitiatingUtil.askAppMode();
-        Pair pair = appInitiatingUtil.askPair(appMode);
+        List<Pair> pairs = appInitiatingUtil.askPair(appMode);
         Integer numThreads = appInitiatingUtil.askNumberOfThreads();
 
         TimeSeries eurusd = null;
@@ -49,7 +50,7 @@ class AbstractBacktestApp implements Runnable{
 
 
         AppConfiguration appConfiguration = new AppConfiguration(appMode, numThreads, LocalDateTime.now());
-        ExecutionConfiguration executionConfiguration = new ExecutionConfiguration(pair, initialWalletAmount, eurusd, fromTime, toTime);
+        ExecutionConfiguration executionConfiguration = new ExecutionConfiguration(pairs, initialWalletAmount, eurusd, fromTime, toTime);
 
         BacktestEngine backtestEngine = new BacktestEngine(appConfiguration, executionConfiguration, strategy);
         backtestEngine.run();

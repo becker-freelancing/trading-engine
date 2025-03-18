@@ -94,6 +94,17 @@ public abstract class Position {
         return tradingCalculator.calcProfitLoss(getOpenPriceAsNumber(), closePrice, currentPrice.time(), direction, profitPerPoint);
     }
 
+
+    public TradingCalculator.ProfitLossResult closeProfit(TimeSeriesEntry currentPrice) {
+        if (isTpReached(currentPrice)) {
+            return tradingCalculator.calcProfitLoss(getOpenPriceAsNumber(), limitLevel, currentPrice.time(), direction, profitPerPoint());
+        } else if (isSlReached(currentPrice)) {
+            return tradingCalculator.calcProfitLoss(getOpenPriceAsNumber(), stopLevel, currentPrice.time(), direction, profitPerPoint());
+        }
+
+        throw new IllegalStateException("Either Stop or Limit reached.");
+    }
+
     public Decimal profitPerPoint() {
         return Position.profitPerPoint(size, pair);
     }

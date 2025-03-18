@@ -3,6 +3,7 @@ package com.becker.freelance.backtest;
 import com.becker.freelance.backtest.commons.BacktestResultWriter;
 import com.becker.freelance.commons.AppConfiguration;
 import com.becker.freelance.commons.ExecutionConfiguration;
+import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Trade;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.data.DataProvider;
@@ -15,11 +16,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class BacktestEngine {
 
@@ -36,7 +38,7 @@ public class BacktestEngine {
     private final DataProvider dataProvider;
     private int currentIteration = 0;
     private int requiredIterations;
-    private TimeSeries timeSeries;
+    private Map<Pair, TimeSeries> timeSeries;
 
 
     public BacktestEngine(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, BaseStrategy baseStrategy, ParameterFilter parameterFilter, Path writePath) {
@@ -86,11 +88,18 @@ public class BacktestEngine {
     }
 
     private void init() {
-        try {
-            timeSeries = dataProvider.readTimeSeries(executionConfiguration.pair(), executionConfiguration.startTime(), executionConfiguration.endTime());
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+        timeSeries = executionConfiguration.pairs().stream()
+                .map(pair -> {
+                    try {
+                        return dataProvider.readTimeSeries(pair, executionConfiguration.startTime(), executionConfiguration.endTime());
+                    } catch (IOException e) {
+                        throw new IllegalStateException(e);
+                    }
+                })
+                .collect(Collectors.toMap(
+                        TimeSeries::getPair,
+                        t -> t
+                ));
         Runtime.getRuntime().addShutdownHook(new Thread(executor::shutdownNow, "Shutdown-BacktestApp-0"));
     }
 
@@ -103,13 +112,12 @@ public class BacktestEngine {
         try {
             logger.info("Starting Permutation {} of {} - {}", getNextIteration(), this.requiredIterations, parameter);
             TradeExecutor tradeExecutor = TradeExecutor.find(appConfiguration, executionConfiguration);
-            BaseStrategy strategyForBacktest = baseStrategy.forParameters(parameter)
-                    .withOpenPositionRequestor(tradeExecutor);
-            StrategyEngine strategyEngine = new StrategyEngine(strategyForBacktest, tradeExecutor);
 
-            for (LocalDateTime timeKey : timeSeries.iterator(executionConfiguration.startTime(), executionConfiguration.endTime())) {
-                strategyEngine.executeForTime(timeSeries, timeKey);
-            }
+            Supplier<BaseStrategy> strategySupplier = () -> baseStrategy.forParameters(parameter).withOpenPositionRequestor(tradeExecutor);
+
+            StrategyEngine strategyEngine = new StrategyEngine(timeSeries, strategySupplier, tradeExecutor);
+
+            strategyEngine.execute();
 
             List<Trade> allClosedTrades = tradeExecutor.getAllClosedTrades();
             try {
