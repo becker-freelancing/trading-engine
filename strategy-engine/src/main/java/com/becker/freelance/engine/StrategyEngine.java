@@ -38,16 +38,17 @@ public class StrategyEngine {
     public void execute() {
         Iterator<LocalDateTime> times = timeSeries.values().stream().findFirst().map(TimeSeries::iterator).orElseThrow(IllegalStateException::new);
         Set<Pair> pairs = timeSeries.keySet();
-
-        while (times.hasNext()) {
-            LocalDateTime time = times.next();
-
+        Set<LocalDateTime> allTimes = new HashSet<>();
+        timeSeries.values().stream().map(TimeSeries::allTimes).forEach(allTimes::addAll);
+        allTimes.stream().sorted(Comparator.naturalOrder()).forEach(time -> {
             for (Pair pair : pairs) {
                 TimeSeries currentSeries = timeSeries.get(pair);
-                BaseStrategy strategy = strategies.get(pair);
-                executeForTime(currentSeries, time, strategy);
+                if (currentSeries.hasTime(time)) {
+                    BaseStrategy strategy = strategies.get(pair);
+                    executeForTime(currentSeries, time, strategy);
+                }
             }
-        }
+        });
     }
 
     public void executeForTime(TimeSeries timeSeries, LocalDateTime time, BaseStrategy strategy) {

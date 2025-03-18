@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class BacktestResultWriter {
 
-    private static final String HEADER = "pairs,app_mode,from_time,to_time,min,max,cumulative,initial_wallet_amount,parameter,trades\n";
+    private static final String HEADER = "pairs;app_mode;from_time;to_time;min;max;cumulative;initial_wallet_amount;parameter;trades\n";
     private static final DateTimeFormatter FILE_NAME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_kk-mm-ss");
 
     private final Path writePath;
@@ -59,10 +59,10 @@ public class BacktestResultWriter {
     private static String formatBaseString(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, ObjectMapper objectMapper) {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
         try {
-            return String.format("%s,%s,%s,%s,",
+            return String.format("%s;%s;%s;%s;",
                     objectMapper.writeValueAsString(executionConfiguration.pairs()), appConfiguration.appMode().getDescription(),
                     timeFormatter.format(executionConfiguration.startTime()),
-                    timeFormatter.format(executionConfiguration.endTime())) + "%s,%s,%s," + executionConfiguration.initialWalletAmount() + ",%s,%s\n";
+                    timeFormatter.format(executionConfiguration.endTime())) + "%s;%s;%s;" + executionConfiguration.initialWalletAmount() + ";%s;%s\n";
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Could not process " + executionConfiguration.pairs() + " to JSON string", e);
         }

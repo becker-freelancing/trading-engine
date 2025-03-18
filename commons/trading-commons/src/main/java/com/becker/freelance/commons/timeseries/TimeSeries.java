@@ -129,4 +129,12 @@ public class TimeSeries implements Iterable<LocalDateTime>{
     public Collection<LocalDateTime> iterator(LocalDateTime minTime, LocalDateTime maxTime) {
         return index.stream().filter(t -> minTime.isBefore(t) && maxTime.isAfter(t)).sorted(Comparator.naturalOrder()).toList();
     }
+
+    public Set<LocalDateTime> allTimes() {
+        return index;
+    }
+
+    public boolean hasTime(LocalDateTime time) {
+        return index.contains(time);
+    }
 }
