@@ -102,7 +102,7 @@ public abstract class Position {
             return tradingCalculator.calcProfitLoss(getOpenPriceAsNumber(), stopLevel, currentPrice.time(), direction, profitPerPoint());
         }
 
-        throw new IllegalStateException("Either Stop or Limit reached.");
+        return currentProfit(currentPrice);
     }
 
     public Decimal profitPerPoint() {

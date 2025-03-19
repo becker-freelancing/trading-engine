@@ -2,6 +2,8 @@ package com.becker.freelance.backtest.commons;
 
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.math.Decimal;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -46,7 +48,12 @@ public record BacktestResultContent(ObjectMapper objectMapper, String pairs, Str
     }
 
     public List<Pair> parsePairs() {
-        return objectMapper.convertValue(pairs, List.class);
+        try {
+            return objectMapper.readValue(pairs, new TypeReference<List<Pair>>() {
+            });
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Could not parse Pairs", e);
+        }
     }
 
 }

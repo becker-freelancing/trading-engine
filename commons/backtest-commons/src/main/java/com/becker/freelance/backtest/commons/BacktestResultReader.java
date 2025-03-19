@@ -30,7 +30,7 @@ public class BacktestResultReader {
     public BacktestResultReader(Path resultPath) {
         this.resultPath = resultPath;
         this.objectMapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
+        SimpleModule module = new SimpleModule(Pair.class.getName());
         module.addDeserializer(Pair.class, new PairDeserializer());
         objectMapper.registerModule(module);
     }
@@ -49,7 +49,7 @@ public class BacktestResultReader {
         logger.info("Reading Backtest Results from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
         return lines.parallel().filter(line -> !line.startsWith("pairs")).filter(line -> {
-            String[] split = line.split(",");
+            String[] split = line.split(";");
             Decimal currMin = new Decimal(split[4]);
             return minValue.isEqualTo(currMin);
         }).map(this::toBacktestResultContent);
@@ -59,7 +59,7 @@ public class BacktestResultReader {
         logger.info("Reading Min Result Values from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
         return lines.filter(line -> !line.startsWith("pairs"))
-                .map(line -> line.split(","))
+                .map(line -> line.split(";"))
                 .filter(split -> !split[9].equals("[]"))
                 .map(split -> new Decimal(split[4]));
     }
@@ -68,7 +68,7 @@ public class BacktestResultReader {
         logger.info("Reading Backtest Results from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
         return lines.parallel().filter(line -> !line.startsWith("pairs")).filter(line -> {
-            String[] split = line.split(",");
+            String[] split = line.split(";");
             Decimal currMin = new Decimal(split[5]);
             return maxValue.isEqualTo(currMin);
         }).map(this::toBacktestResultContent);
@@ -78,7 +78,7 @@ public class BacktestResultReader {
         logger.info("Reading Max Result Values from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
         return lines.filter(line -> !line.startsWith("pairs"))
-                .map(line -> line.split(","))
+                .map(line -> line.split(";"))
                 .filter(split -> !split[9].equals("[]"))
                 .map(split -> new Decimal(split[5]));
     }
@@ -87,7 +87,7 @@ public class BacktestResultReader {
         logger.info("Reading Backtest Results from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
         return lines.parallel().filter(line -> !line.startsWith("pairs")).filter(line -> {
-            String[] split = line.split(",");
+            String[] split = line.split(";");
             Decimal currMin = new Decimal(split[6]);
             return cumulativeValue.isEqualTo(currMin);
         }).map(this::toBacktestResultContent);
@@ -97,13 +97,13 @@ public class BacktestResultReader {
         logger.info("Reading Cumulative Result Values from {}", resultPath);
         Stream<String> lines = readLines(resultPath);
         return lines.filter(line -> !line.startsWith("pairs"))
-                .map(line -> line.split(","))
+                .map(line -> line.split(";"))
                 .filter(split -> !split[9].equals("[]"))
                 .map(split -> new Decimal(split[6]));
     }
 
     private BacktestResultContent toBacktestResultContent(String line) {
-        String[] split = line.split(",");
+        String[] split = line.split(";");
         return new BacktestResultContent(objectMapper,
                 split[0], split[1], LocalDateTime.parse(split[2]), LocalDateTime.parse(split[3]),
                 new Decimal(split[4]), new Decimal(split[5]), new Decimal(split[6]), new Decimal(split[7]),

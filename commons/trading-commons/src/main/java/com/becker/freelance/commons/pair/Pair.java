@@ -20,7 +20,7 @@ public interface Pair {
     static Pair fromTechnicalName(String technicalName) {
         return allPairs().stream()
                 .filter(p -> technicalName.equals(p.technicalName()))
-                .findAny().orElseThrow(() -> new IllegalArgumentException("Could not find Pair with technical name " + technicalName));
+                .findAny().orElseThrow(() -> new IllegalArgumentException("Could not find Pair with technical name " + technicalName + " in " + allPairs()));
     }
 
     static List<Pair> allPairs() {
