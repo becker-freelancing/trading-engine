@@ -19,7 +19,7 @@ class AppConfigurationTest {
         appMode = Mockito.mock(AppMode.class);
         startTime = LocalDateTime.of(2020, 1, 1, 0, 0);
         configuration = new AppConfiguration(
-                appMode, 10, startTime
+                appMode, startTime
         );
     }
 
@@ -29,12 +29,7 @@ class AppConfigurationTest {
     }
 
     @Test
-    void numThreads() {
-        assertEquals(10, configuration.numThreads());
-    }
-
-    @Test
     void startTime() {
-        assertEquals(startTime, configuration.startTime());
+        assertEquals(startTime, configuration.applicationStartTime());
     }
 }

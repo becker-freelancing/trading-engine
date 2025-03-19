@@ -1,7 +1,7 @@
 package com.becker.freelance.tradeexecution;
 
+import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.commons.AppMode;
-import com.becker.freelance.commons.ExecutionConfiguration;
 import com.becker.freelance.commons.calculation.MarginCalculator;
 import com.becker.freelance.commons.calculation.PositionCalculation;
 import com.becker.freelance.commons.calculation.PositionCalculation.PositionCalculationResult;
@@ -14,7 +14,7 @@ import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
-import com.becker.freelance.wallet.Wallet;
+import com.becker.freelance.wallet.BacktestWallet;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 
 public class DemoTradeExecutor extends TradeExecutor {
 
-    private Supplier<Wallet> wallet;
+    private Supplier<BacktestWallet> wallet;
     private List<Position> openPositions;
     private List<Trade> closedTrades;
     private PositionCalculation positionCalculation;
@@ -34,20 +34,20 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     }
 
-    private DemoTradeExecutor(ExecutionConfiguration executionConfiguration, Pair pair) {
-        Wallet wallet = new Wallet(executionConfiguration.initialWalletAmount());
+    private DemoTradeExecutor(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair) {
+        BacktestWallet wallet = new BacktestWallet(backtestExecutionConfiguration.initialWalletAmount());
         this.wallet = () -> wallet;
         openPositions = new ArrayList<>();
         closedTrades = new ArrayList<>();
         this.pair = pair;
-        tradingCalculator = new TradingCalculator(pair, executionConfiguration.getEurUsdTimeSeries());
-        MarginCalculator marginCalculator = new MarginCalculator(pair, executionConfiguration.getEurUsdTimeSeries());
+        tradingCalculator = new TradingCalculator(pair, backtestExecutionConfiguration.getEurUsdTimeSeries());
+        MarginCalculator marginCalculator = new MarginCalculator(pair, backtestExecutionConfiguration.getEurUsdTimeSeries());
         positionCalculation = new PositionCalculation(tradingCalculator, marginCalculator);
     }
 
     @Override
-    protected TradeExecutor construct(ExecutionConfiguration executionConfiguration, Pair pair) {
-        return new DemoTradeExecutor(executionConfiguration, pair);
+    protected TradeExecutor construct(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair) {
+        return new DemoTradeExecutor(backtestExecutionConfiguration, pair);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class DemoTradeExecutor extends TradeExecutor {
     }
 
     @Override
-    public Wallet getWallet() {
+    public BacktestWallet getWallet() {
         return wallet.get();
     }
 
@@ -105,7 +105,7 @@ public class DemoTradeExecutor extends TradeExecutor {
     }
 
     @Override
-    protected void setWallet(Supplier<Wallet> wallet) {
+    protected void setWallet(Supplier<BacktestWallet> wallet) {
         this.wallet = wallet;
     }
 

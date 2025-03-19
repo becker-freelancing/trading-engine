@@ -1,4 +1,4 @@
-package com.becker.freelance.commons;
+package com.becker.freelance.backtest.configuration;
 
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
@@ -8,25 +8,26 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ExecutionConfigurationTest {
+class BacktestExecutionConfigurationTest {
 
 
-    ExecutionConfiguration configuration;
+    BacktestExecutionConfiguration configuration;
     LocalDateTime startTime;
     LocalDateTime endTime;
-    Pair pair;
+    List<Pair> pair;
     TimeSeries timeSeries;
 
     @BeforeEach
     void setUp() {
         startTime = LocalDateTime.of(2020, 1, 1, 0, 0);
         endTime = LocalDateTime.of(2021, 1, 1, 0, 0);
-        pair = Mockito.mock(Pair.class);
+        pair = List.of(Mockito.mock(Pair.class));
         timeSeries = Mockito.mock(TimeSeries.class);
-        configuration = new ExecutionConfiguration(pair, Decimal.DOUBLE_MAX, timeSeries, startTime, endTime);
+        configuration = new BacktestExecutionConfiguration(pair, Decimal.DOUBLE_MAX, timeSeries, startTime, endTime, 10);
     }
 
     @Test

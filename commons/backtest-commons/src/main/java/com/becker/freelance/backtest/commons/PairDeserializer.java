@@ -1,5 +1,6 @@
 package com.becker.freelance.backtest.commons;
 
+import com.becker.freelance.commons.AppMode;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.math.Decimal;
 import com.fasterxml.jackson.core.JsonParser;
@@ -76,6 +77,11 @@ class PairDeserializer extends JsonDeserializer<Pair> {
 
         @Override
         public long timeInMinutes() {
+            throw new UnsupportedOperationException("BugFix must be done");
+        }
+
+        @Override
+        public boolean isExecutableInAppMode(AppMode appMode) {
             throw new UnsupportedOperationException("BugFix must be done");
         }
     }

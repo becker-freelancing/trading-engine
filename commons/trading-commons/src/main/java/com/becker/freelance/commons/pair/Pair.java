@@ -1,5 +1,6 @@
 package com.becker.freelance.commons.pair;
 
+import com.becker.freelance.commons.AppMode;
 import com.becker.freelance.math.Decimal;
 
 import java.time.Duration;
@@ -58,5 +59,7 @@ public interface Pair {
     default String shortName() {
         return baseCurrency() + counterCurrency() + "_" + timeInMinutes();
     }
+
+    boolean isExecutableInAppMode(AppMode appMode);
 
 }

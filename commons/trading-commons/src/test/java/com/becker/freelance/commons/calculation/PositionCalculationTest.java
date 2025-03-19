@@ -13,7 +13,6 @@ import com.becker.freelance.commons.signal.LevelEntrySignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
-import com.becker.freelance.wallet.Wallet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -54,6 +53,10 @@ class PositionCalculationTest {
         doReturn(new Decimal("10.")).when(currentPrice).getCloseMid();
         doReturn(new Decimal("10.")).when(currentPrice).closeAsk();
         doReturn(new Decimal("10.")).when(currentPrice).closeBid();
+        doReturn(currentPrice.closeAsk()).when(currentPrice).lowAsk();
+        doReturn(currentPrice.closeBid()).when(currentPrice).lowBid();
+        doReturn(currentPrice.closeAsk()).when(currentPrice).highAsk();
+        doReturn(currentPrice.closeBid()).when(currentPrice).highBid();
         doReturn(nextTime()).when(currentPrice).time();
         otherPrice = mock(TimeSeriesEntry.class);
         doReturn(PairMock.eurUsd()).when(otherPrice).pair();
@@ -61,7 +64,7 @@ class PositionCalculationTest {
         doReturn(new Decimal("2.")).when(otherPrice).closeAsk();
         doReturn(new Decimal("2.")).when(otherPrice).closeBid();
         doReturn(nextTime()).when(otherPrice).time();
-        wallet = new Wallet(new Decimal("10000000"));
+        wallet = new WalletMock(new Decimal("10000000"));
         buyEntrySignal = new LevelEntrySignal(new Decimal("1"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionType.HARD_LIMIT);
         sellEntrySignal = new LevelEntrySignal(new Decimal("1"), Direction.SELL, new Decimal("15"), new Decimal("3"), PositionType.HARD_LIMIT);
         buyEntrySignal2 = new LevelEntrySignal(new Decimal("2"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionType.HARD_LIMIT);
@@ -437,7 +440,7 @@ class PositionCalculationTest {
 
         assertEquals(2, calculationResult.trades().size());
         assertEquals(1, calculationResult.positions().size());
-        assertEquals(new Decimal("8666666.67"), wallet.getAmount());
+        assertEquals(new Decimal("9999979.00"), wallet.getAmount());
         assertEquals(new Decimal("20"), wallet.getMargin());
     }
 
@@ -452,7 +455,7 @@ class PositionCalculationTest {
 
         assertEquals(2, calculationResult.trades().size());
         assertEquals(1, calculationResult.positions().size());
-        assertEquals(new Decimal("31333333.33"), wallet.getAmount());
+        assertEquals(new Decimal("10000021.00"), wallet.getAmount());
         assertEquals(new Decimal("20"), wallet.getMargin());
     }
 
@@ -467,7 +470,7 @@ class PositionCalculationTest {
 
         assertEquals(1, calculationResult.trades().size());
         assertEquals(2, calculationResult.positions().size());
-        assertEquals(new Decimal("-666666.67"), wallet.getAmount());
+        assertEquals(new Decimal("9999999.00"), wallet.getAmount());
         assertEquals(new Decimal("40"), wallet.getMargin());
     }
 }

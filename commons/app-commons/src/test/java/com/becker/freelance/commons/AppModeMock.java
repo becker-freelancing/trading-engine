@@ -1,8 +1,6 @@
 package com.becker.freelance.commons;
 
-import com.becker.freelance.commons.pair.Pair;
 
-import java.util.function.Predicate;
 
 public class AppModeMock implements AppMode {
     @Override
@@ -16,7 +14,8 @@ public class AppModeMock implements AppMode {
     }
 
     @Override
-    public Predicate<Pair> containingPairs() {
-        return p -> true;
+    public boolean isEqual(AppMode other) {
+        return false;
     }
+
 }

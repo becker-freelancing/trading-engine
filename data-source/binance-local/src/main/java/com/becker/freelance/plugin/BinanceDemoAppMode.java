@@ -1,19 +1,9 @@
 package com.becker.freelance.plugin;
 
 import com.becker.freelance.commons.AppMode;
-import com.becker.freelance.commons.pair.Pair;
-
-import java.util.Set;
-import java.util.function.Predicate;
 
 public class BinanceDemoAppMode implements AppMode {
 
-
-    private final Set<Pair> allPairs;
-
-    public BinanceDemoAppMode() {
-        allPairs = Set.of(new BinancePairProvider().get().toArray(new Pair[0]));
-    }
 
     @Override
     public boolean isDemo() {
@@ -26,7 +16,17 @@ public class BinanceDemoAppMode implements AppMode {
     }
 
     @Override
-    public Predicate<Pair> containingPairs() {
-        return allPairs::contains;
+    public boolean isEqual(AppMode other) {
+        return getDataSourceName().equals(other.getDataSourceName()) && isDemo() == other.isDemo();
     }
+
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        AppMode that = (AppMode) object;
+        return isEqual(that);
+    }
+
 }

@@ -4,7 +4,6 @@ import com.becker.freelance.commons.AppMode;
 import com.becker.freelance.commons.pair.Pair;
 
 import java.util.Set;
-import java.util.function.Predicate;
 
 public class HistDataDemoAppMode implements AppMode {
 
@@ -25,7 +24,16 @@ public class HistDataDemoAppMode implements AppMode {
     }
 
     @Override
-    public Predicate<Pair> containingPairs() {
-        return allPairs::contains;
+    public boolean isEqual(AppMode other) {
+        return getDataSourceName().equals(other.getDataSourceName()) && isDemo() == other.isDemo();
+    }
+
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        AppMode that = (AppMode) object;
+        return isEqual(that);
     }
 }

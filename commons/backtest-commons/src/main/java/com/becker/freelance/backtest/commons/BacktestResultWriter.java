@@ -1,12 +1,11 @@
 package com.becker.freelance.backtest.commons;
 
+import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
+import com.becker.freelance.backtest.util.PathUtil;
 import com.becker.freelance.commons.AppConfiguration;
-import com.becker.freelance.commons.ExecutionConfiguration;
-import com.becker.freelance.commons.PathUtil;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Trade;
 import com.becker.freelance.math.Decimal;
-import com.becker.freelance.strategies.BaseStrategy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -34,15 +33,15 @@ public class BacktestResultWriter {
 
     private final ObjectMapper objectMapper;
 
-    public BacktestResultWriter(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, BaseStrategy baseStrategy) {
+    public BacktestResultWriter(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, String strategyName) {
         this(appConfiguration,
-                executionConfiguration,
-                Path.of(formatFilePath(appConfiguration.startTime(), executionConfiguration.pairs(), baseStrategy.getName()))
+                backtestExecutionConfiguration,
+                Path.of(formatFilePath(appConfiguration.applicationStartTime(), backtestExecutionConfiguration.pairs(), strategyName))
         );
 
     }
 
-    public BacktestResultWriter(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, Path writePath) {
+    public BacktestResultWriter(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, Path writePath) {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         SimpleModule module = new SimpleModule();
@@ -51,20 +50,20 @@ public class BacktestResultWriter {
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         this.writePath = writePath;
         prepareCsvFile();
-        this.baseString = formatBaseString(appConfiguration, executionConfiguration, objectMapper);
+        this.baseString = formatBaseString(appConfiguration, backtestExecutionConfiguration, objectMapper);
 
         BacktestResultZipper.registerOnShutdown(writePath);
     }
 
-    private static String formatBaseString(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, ObjectMapper objectMapper) {
+    private static String formatBaseString(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, ObjectMapper objectMapper) {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
         try {
             return String.format("%s;%s;%s;%s;",
-                    objectMapper.writeValueAsString(executionConfiguration.pairs()), appConfiguration.appMode().getDescription(),
-                    timeFormatter.format(executionConfiguration.startTime()),
-                    timeFormatter.format(executionConfiguration.endTime())) + "%s;%s;%s;" + executionConfiguration.initialWalletAmount() + ";%s;%s\n";
+                    objectMapper.writeValueAsString(backtestExecutionConfiguration.pairs()), appConfiguration.appMode().getDescription(),
+                    timeFormatter.format(backtestExecutionConfiguration.startTime()),
+                    timeFormatter.format(backtestExecutionConfiguration.endTime())) + "%s;%s;%s;" + backtestExecutionConfiguration.initialWalletAmount() + ";%s;%s\n";
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Could not process " + executionConfiguration.pairs() + " to JSON string", e);
+            throw new IllegalStateException("Could not process " + backtestExecutionConfiguration.pairs() + " to JSON string", e);
         }
     }
 

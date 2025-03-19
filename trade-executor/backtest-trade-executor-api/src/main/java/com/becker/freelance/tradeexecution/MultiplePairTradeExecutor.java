@@ -1,14 +1,14 @@
 package com.becker.freelance.tradeexecution;
 
+import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.commons.AppMode;
-import com.becker.freelance.commons.ExecutionConfiguration;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Trade;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
-import com.becker.freelance.wallet.Wallet;
+import com.becker.freelance.wallet.BacktestWallet;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -17,10 +17,10 @@ import java.util.function.Supplier;
 class MultiplePairTradeExecutor extends TradeExecutor {
 
     private Map<Pair, TradeExecutor> tradeExecutors;
-    private Wallet wallet;
+    private BacktestWallet wallet;
 
-    public MultiplePairTradeExecutor(List<TradeExecutor> tradeExecutorsForPairs, ExecutionConfiguration executionConfiguration) {
-        this.wallet = new Wallet(executionConfiguration.initialWalletAmount());
+    public MultiplePairTradeExecutor(List<TradeExecutor> tradeExecutorsForPairs, BacktestExecutionConfiguration backtestExecutionConfiguration) {
+        this.wallet = new BacktestWallet(backtestExecutionConfiguration.initialWalletAmount());
         tradeExecutors = new HashMap<>();
         tradeExecutorsForPairs.stream()
                 .peek(tradeExecutor -> tradeExecutor.setWallet(getWalletSupplier()))
@@ -28,7 +28,7 @@ class MultiplePairTradeExecutor extends TradeExecutor {
     }
 
     @Override
-    protected TradeExecutor construct(ExecutionConfiguration executionConfiguration, Pair pair) {
+    protected TradeExecutor construct(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair) {
         throw new UnsupportedOperationException("MultiplePairTradeExecutor must be constructed explicitly");
     }
 
@@ -74,16 +74,16 @@ class MultiplePairTradeExecutor extends TradeExecutor {
     }
 
     @Override
-    public Wallet getWallet() {
+    public BacktestWallet getWallet() {
         return wallet;
     }
 
     @Override
-    protected void setWallet(Supplier<Wallet> wallet) {
+    protected void setWallet(Supplier<BacktestWallet> wallet) {
         this.wallet = wallet.get();
     }
 
-    private Supplier<Wallet> getWalletSupplier() {
+    private Supplier<BacktestWallet> getWalletSupplier() {
         return () -> wallet;
     }
 

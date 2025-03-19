@@ -1,8 +1,8 @@
 package com.becker.freelance.backtest;
 
 import com.becker.freelance.backtest.commons.BacktestResultWriter;
+import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.commons.AppConfiguration;
-import com.becker.freelance.commons.ExecutionConfiguration;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Trade;
 import com.becker.freelance.commons.timeseries.TimeSeries;
@@ -30,7 +30,7 @@ public class BacktestEngine {
 
     private final AppConfiguration appConfiguration;
 
-    private final ExecutionConfiguration executionConfiguration;
+    private final BacktestExecutionConfiguration backtestExecutionConfiguration;
     private final BaseStrategy baseStrategy;
     private final ExecutorService executor;
     private final BacktestResultWriter resultWriter;
@@ -41,24 +41,24 @@ public class BacktestEngine {
     private Map<Pair, TimeSeries> timeSeries;
 
 
-    public BacktestEngine(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, BaseStrategy baseStrategy, ParameterFilter parameterFilter, Path writePath) {
+    public BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, BaseStrategy baseStrategy, ParameterFilter parameterFilter, Path writePath) {
         this(appConfiguration,
-                executionConfiguration,
+                backtestExecutionConfiguration,
                 baseStrategy,
-                Executors.newFixedThreadPool(appConfiguration.numThreads()),
-                getBacktestResultWriter(appConfiguration, executionConfiguration, baseStrategy, writePath),
+                Executors.newFixedThreadPool(backtestExecutionConfiguration.numberOfThreads()),
+                getBacktestResultWriter(appConfiguration, backtestExecutionConfiguration, baseStrategy, writePath),
                 parameterFilter,
                 DataProvider.getInstance(appConfiguration.appMode())
         );
     }
 
-    public BacktestEngine(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, BaseStrategy baseStrategy) {
-        this(appConfiguration, executionConfiguration, baseStrategy, ParameterFilter.allOkFilter(), null);
+    public BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, BaseStrategy baseStrategy) {
+        this(appConfiguration, backtestExecutionConfiguration, baseStrategy, ParameterFilter.allOkFilter(), null);
     }
 
-    protected BacktestEngine(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, BaseStrategy baseStrategy, ExecutorService executor, BacktestResultWriter resultWriter, ParameterFilter parameterFilter, DataProvider dataProvider) {
+    protected BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, BaseStrategy baseStrategy, ExecutorService executor, BacktestResultWriter resultWriter, ParameterFilter parameterFilter, DataProvider dataProvider) {
         this.appConfiguration = appConfiguration;
-        this.executionConfiguration = executionConfiguration;
+        this.backtestExecutionConfiguration = backtestExecutionConfiguration;
         this.baseStrategy = baseStrategy;
         this.executor = executor;
         this.resultWriter = resultWriter;
@@ -66,12 +66,12 @@ public class BacktestEngine {
         this.dataProvider = dataProvider;
     }
 
-    private static BacktestResultWriter getBacktestResultWriter(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, BaseStrategy baseStrategy, Path writePath) {
+    private static BacktestResultWriter getBacktestResultWriter(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, BaseStrategy baseStrategy, Path writePath) {
         final BacktestResultWriter resultWriter;
         if (writePath == null) {
-            resultWriter = new BacktestResultWriter(appConfiguration, executionConfiguration, baseStrategy);
+            resultWriter = new BacktestResultWriter(appConfiguration, backtestExecutionConfiguration, baseStrategy.getName());
         } else {
-            resultWriter = new BacktestResultWriter(appConfiguration, executionConfiguration, writePath);
+            resultWriter = new BacktestResultWriter(appConfiguration, backtestExecutionConfiguration, writePath);
         }
         return resultWriter;
     }
@@ -92,10 +92,10 @@ public class BacktestEngine {
     }
 
     private void init() {
-        timeSeries = executionConfiguration.pairs().stream()
+        timeSeries = backtestExecutionConfiguration.pairs().stream()
                 .map(pair -> {
                     try {
-                        return dataProvider.readTimeSeries(pair, executionConfiguration.startTime(), executionConfiguration.endTime());
+                        return dataProvider.readTimeSeries(pair, backtestExecutionConfiguration.startTime(), backtestExecutionConfiguration.endTime());
                     } catch (IOException e) {
                         throw new IllegalStateException(e);
                     }
@@ -115,7 +115,7 @@ public class BacktestEngine {
     private void executeForParameter(Map<String, Decimal> parameter) {
         try {
             logger.info("Starting Permutation {} of {} - {}", getNextIteration(), this.requiredIterations, parameter);
-            TradeExecutor tradeExecutor = TradeExecutor.find(appConfiguration, executionConfiguration);
+            TradeExecutor tradeExecutor = TradeExecutor.find(appConfiguration, backtestExecutionConfiguration);
 
             Supplier<BaseStrategy> strategySupplier = () -> baseStrategy.forParameters(parameter).withOpenPositionRequestor(tradeExecutor);
 

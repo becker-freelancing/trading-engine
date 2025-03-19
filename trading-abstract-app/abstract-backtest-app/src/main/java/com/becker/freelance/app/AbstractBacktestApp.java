@@ -1,9 +1,9 @@
 package com.becker.freelance.app;
 
 import com.becker.freelance.backtest.BacktestEngine;
+import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.commons.AppConfiguration;
 import com.becker.freelance.commons.AppMode;
-import com.becker.freelance.commons.ExecutionConfiguration;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.data.DataProvider;
@@ -49,10 +49,10 @@ class AbstractBacktestApp implements Runnable{
         }
 
 
-        AppConfiguration appConfiguration = new AppConfiguration(appMode, numThreads, LocalDateTime.now());
-        ExecutionConfiguration executionConfiguration = new ExecutionConfiguration(pairs, initialWalletAmount, eurusd, fromTime, toTime);
+        AppConfiguration appConfiguration = new AppConfiguration(appMode, LocalDateTime.now());
+        BacktestExecutionConfiguration backtestExecutionConfiguration = new BacktestExecutionConfiguration(pairs, initialWalletAmount, eurusd, fromTime, toTime, numThreads);
 
-        BacktestEngine backtestEngine = new BacktestEngine(appConfiguration, executionConfiguration, strategy);
+        BacktestEngine backtestEngine = new BacktestEngine(appConfiguration, backtestExecutionConfiguration, strategy);
         backtestEngine.run();
     }
 

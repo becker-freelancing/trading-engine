@@ -12,7 +12,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>demo-trade-executor</module>
-        <module>trade-executor-api</module>
+        <module>backtest-trade-executor-api</module>
         <module>open-positions-api</module>
     </modules>
     <artifactId>trade-executor</artifactId>

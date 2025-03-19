@@ -1,5 +1,6 @@
 package com.becker.freelance.plugin;
 
+import com.becker.freelance.commons.AppMode;
 import com.becker.freelance.commons.pair.AbstractPair;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.pair.PairProvider;
@@ -45,7 +46,19 @@ public class BinancePairProvider implements PairProvider {
 
     private Pair from(String baseCurrency, String counterCurrency, long timeInMinutes, String technicalName, Double profitPerPointForOneContract,
                       Double minOrderSize, Double minStop, Double minLimit, Double leverageFactor, long sizeMultiplication) {
-        return new AbstractPair(baseCurrency, counterCurrency, timeInMinutes, technicalName, new Decimal(profitPerPointForOneContract), new Decimal(minOrderSize),
+        return new BinancePair(baseCurrency, counterCurrency, timeInMinutes, technicalName, new Decimal(profitPerPointForOneContract), new Decimal(minOrderSize),
                 new Decimal(minStop), new Decimal(minLimit), new Decimal(leverageFactor), new Decimal(sizeMultiplication));
+    }
+
+    private static class BinancePair extends AbstractPair {
+
+        public BinancePair(String baseCurrency, String counterCurrency, long timeInMinutes, String technicalName, Decimal profitPerPointForOneContract, Decimal minOrderSize, Decimal minStop, Decimal minLimit, Decimal leverageFactor, Decimal sizeMultiplication) {
+            super(baseCurrency, counterCurrency, timeInMinutes, technicalName, profitPerPointForOneContract, minOrderSize, minStop, minLimit, leverageFactor, sizeMultiplication);
+        }
+
+        @Override
+        public boolean isExecutableInAppMode(AppMode appMode) {
+            return new BinanceDemoAppMode().isEqual(appMode);
+        }
     }
 }

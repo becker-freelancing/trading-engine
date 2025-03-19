@@ -1,5 +1,6 @@
 package com.becker.freelance.commons.mock;
 
+import com.becker.freelance.commons.AppMode;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.math.Decimal;
 
@@ -83,6 +84,11 @@ public class PairMock implements Pair {
     @Override
     public long timeInMinutes() {
         return 1;
+    }
+
+    @Override
+    public boolean isExecutableInAppMode(AppMode appMode) {
+        return false;
     }
 
     @Override

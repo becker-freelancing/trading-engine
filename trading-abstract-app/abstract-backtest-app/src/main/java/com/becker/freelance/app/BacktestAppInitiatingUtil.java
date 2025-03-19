@@ -27,7 +27,7 @@ class BacktestAppInitiatingUtil {
     }
 
     public List<Pair> askPair(AppMode appMode) {
-        List<Pair> pairs = Pair.allPairs().stream().filter(appMode.containingPairs()).distinct().toList();
+        List<Pair> pairs = Pair.allPairs().stream().filter(pair -> pair.isExecutableInAppMode(appMode)).distinct().toList();
         List<Pair> pair = propertyAsker.askMultipleProperty(pairs, Pair::technicalName, "Pair (Oder für mehrere gleichzeitig mit Komma getrennt)");
         return pair;
     }

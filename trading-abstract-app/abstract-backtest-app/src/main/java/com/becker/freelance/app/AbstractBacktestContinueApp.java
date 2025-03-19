@@ -5,10 +5,10 @@ import com.becker.freelance.backtest.ExcludeExistingParametersFilter;
 import com.becker.freelance.backtest.commons.BacktestResultContent;
 import com.becker.freelance.backtest.commons.BacktestResultReader;
 import com.becker.freelance.backtest.commons.BacktestResultZipper;
+import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
+import com.becker.freelance.backtest.util.PathUtil;
 import com.becker.freelance.commons.AppConfiguration;
 import com.becker.freelance.commons.AppMode;
-import com.becker.freelance.commons.ExecutionConfiguration;
-import com.becker.freelance.commons.PathUtil;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.data.DataProvider;
@@ -60,10 +60,10 @@ class AbstractBacktestContinueApp implements Runnable{
         TimeSeries eurusd = readEurUsdTimeSeries(appMode);
 
 
-        AppConfiguration appConfiguration = new AppConfiguration(appMode, numThreads, LocalDateTime.now());
-        ExecutionConfiguration executionConfiguration = new ExecutionConfiguration(pairs, initialWalletAmount, eurusd, fromTime, toTime);
+        AppConfiguration appConfiguration = new AppConfiguration(appMode, LocalDateTime.now());
+        BacktestExecutionConfiguration backtestExecutionConfiguration = new BacktestExecutionConfiguration(pairs, initialWalletAmount, eurusd, fromTime, toTime, numThreads);
 
-        BacktestEngine backtestEngine = new BacktestEngine(appConfiguration, executionConfiguration, strategy, new ExcludeExistingParametersFilter(parameters), resultWriteFile);
+        BacktestEngine backtestEngine = new BacktestEngine(appConfiguration, backtestExecutionConfiguration, strategy, new ExcludeExistingParametersFilter(parameters), resultWriteFile);
         backtestEngine.run();
     }
 

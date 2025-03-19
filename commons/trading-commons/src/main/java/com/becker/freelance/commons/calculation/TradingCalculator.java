@@ -13,7 +13,6 @@ public class TradingCalculator {
 
     private TimeSeries umrechnungsKurs;
     private Function<LocalDateTime, Decimal> conversionRate;
-    private final Pair pair;
 
     private Decimal noopUmrechnung(LocalDateTime time) {
         return Decimal.ONE;
@@ -28,7 +27,6 @@ public class TradingCalculator {
         if (!timeSeries.getPair().equals(Pair.eurUsd1())) {
             throw new IllegalArgumentException("No EUR/USD Time Series provided");
         }
-        this.pair = pair;
 
         if ("USD".equals(pair.counterCurrency())) {
             this.umrechnungsKurs = timeSeries;

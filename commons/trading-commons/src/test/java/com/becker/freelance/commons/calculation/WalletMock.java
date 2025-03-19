@@ -1,12 +1,12 @@
-package com.becker.freelance.wallet;
+package com.becker.freelance.commons.calculation;
 
 import com.becker.freelance.math.Decimal;
 
-public class Wallet {
+public class WalletMock implements Wallet {
     private Decimal amount;
     private Decimal margin;
 
-    public Wallet(Decimal initialAmount) {
+    public WalletMock(Decimal initialAmount) {
         this.amount = initialAmount;
         this.margin = Decimal.ZERO;
     }
@@ -24,6 +24,16 @@ public class Wallet {
         this.margin = this.margin.add(margin);
     }
 
+    @Override
+    public Decimal getMargin() {
+        return margin;
+    }
+
+    @Override
+    public Decimal getAmount() {
+        return amount;
+    }
+
     public void removeMargin(Decimal margin) {
         this.margin = this.margin.subtract(margin);
     }
@@ -32,11 +42,4 @@ public class Wallet {
         this.amount = this.amount.add(diff);
     }
 
-    public Decimal getAmount() {
-        return amount;
-    }
-
-    public Decimal getMargin() {
-        return margin;
-    }
 }
