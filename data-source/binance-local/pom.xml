@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>datasource-binance</artifactId>
+    <artifactId>binance-local</artifactId>
 
     <dependencies>
         <dependency>

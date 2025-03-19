@@ -11,10 +11,10 @@
 
     <packaging>pom</packaging>
     <modules>
-        <module>api</module>
-        <module>kraken</module>
-        <module>hist-data</module>
-        <module>binance</module>
+        <module>datasource-api</module>
+        <module>kraken-local</module>
+        <module>hist-data-local</module>
+        <module>binance-local</module>
     </modules>
 
     <artifactId>data-source</artifactId>
