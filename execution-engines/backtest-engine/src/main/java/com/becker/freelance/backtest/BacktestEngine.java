@@ -42,8 +42,12 @@ public class BacktestEngine {
 
 
     public BacktestEngine(AppConfiguration appConfiguration, ExecutionConfiguration executionConfiguration, BaseStrategy baseStrategy, ParameterFilter parameterFilter, Path writePath) {
-        this(appConfiguration, executionConfiguration, baseStrategy, Executors.newFixedThreadPool(appConfiguration.numThreads()),
-                getBacktestResultWriter(appConfiguration, executionConfiguration, baseStrategy, writePath), parameterFilter,
+        this(appConfiguration,
+                executionConfiguration,
+                baseStrategy,
+                Executors.newFixedThreadPool(appConfiguration.numThreads()),
+                getBacktestResultWriter(appConfiguration, executionConfiguration, baseStrategy, writePath),
+                parameterFilter,
                 DataProvider.getInstance(appConfiguration.appMode())
         );
     }

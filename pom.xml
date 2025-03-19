@@ -19,7 +19,7 @@
         <module>trade-executor</module>
         <module>commons</module>
         <module>trading-abstract-app</module>
-        <module>backtest</module>
+        <module>execution-engines</module>
     </modules>
 
 
