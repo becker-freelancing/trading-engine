@@ -1,4 +1,4 @@
-package com.becker.freelance.wallet;
+package com.becker.freelance.backtest.wallet;
 
 import com.becker.freelance.commons.calculation.Wallet;
 import com.becker.freelance.math.Decimal;

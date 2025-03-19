@@ -15,7 +15,6 @@
         <module>strategies</module>
         <module>money-management</module>
         <module>risk-management</module>
-        <module>wallet</module>
         <module>trade-executor</module>
         <module>commons</module>
         <module>trading-abstract-app</module>
