@@ -4,5 +4,5 @@ import java.time.LocalDateTime;
 
 public interface Synchronizeable {
 
-    public void synchronize(LocalDateTime time);
+    void synchronize(LocalDateTime time);
 }

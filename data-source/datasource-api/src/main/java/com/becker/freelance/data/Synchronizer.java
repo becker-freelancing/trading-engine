@@ -5,9 +5,9 @@ import java.util.Optional;
 
 public interface Synchronizer {
 
-    public void addSubscibor(Synchronizeable synchronizeable);
+    void addSubscibor(Synchronizeable synchronizeable);
 
-    public Optional<LocalDateTime> minTime();
+    Optional<LocalDateTime> minTime();
 
-    public Optional<LocalDateTime> maxTime();
+    Optional<LocalDateTime> maxTime();
 }

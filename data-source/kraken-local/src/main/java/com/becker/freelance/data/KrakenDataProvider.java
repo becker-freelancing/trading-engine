@@ -22,7 +22,7 @@ public class KrakenDataProvider extends DataProvider{
     private static final Logger logger = LoggerFactory.getLogger(KrakenDataProvider.class);
     private static final RowMappingInfo MAPPING_INFO = new RowMappingInfo(true, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 6);
 
-    private Pair pair;
+    private final Pair pair;
 
     public KrakenDataProvider(Pair pair) {
         this.pair = pair;

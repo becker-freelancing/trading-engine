@@ -9,23 +9,23 @@ import java.util.Optional;
 
 public interface TimeSeries {
 
-    public TimeSeriesEntry getEntryForTime(LocalDateTime time);
+    TimeSeriesEntry getEntryForTime(LocalDateTime time);
 
 
-    public Bar getEntryForTimeAsBar(LocalDateTime time);
+    Bar getEntryForTimeAsBar(LocalDateTime time);
 
-    public LocalDateTime getMinTime();
+    LocalDateTime getMinTime();
 
-    public LocalDateTime getMaxTime();
+    LocalDateTime getMaxTime();
 
-    public Optional<List<TimeSeriesEntry>> getLastNCloseForTimeAsEntryIfExist(LocalDateTime endTime, int n);
+    Optional<List<TimeSeriesEntry>> getLastNCloseForTimeAsEntryIfExist(LocalDateTime endTime, int n);
 
     @Override
-    public String toString();
+    String toString();
 
-    public Pair getPair();
+    Pair getPair();
 
-    public TimeSeriesEntry getLastEntryForTime(LocalDateTime time);
+    TimeSeriesEntry getLastEntryForTime(LocalDateTime time);
 
-    public boolean hasTime(LocalDateTime time);
+    boolean hasTime(LocalDateTime time);
 }

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 public class StrategyDataSubscriber implements DataSubscriber {
 
-    private StrategyEngine strategyEngine;
+    private final StrategyEngine strategyEngine;
 
     public StrategyDataSubscriber(StrategyEngine strategyEngine) {
         this.strategyEngine = strategyEngine;

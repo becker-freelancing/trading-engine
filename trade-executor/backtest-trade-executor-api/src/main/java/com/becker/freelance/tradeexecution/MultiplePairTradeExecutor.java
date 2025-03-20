@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 
 class MultiplePairTradeExecutor extends TradeExecutor {
 
-    private Map<Pair, TradeExecutor> tradeExecutors;
+    private final Map<Pair, TradeExecutor> tradeExecutors;
     private BacktestWallet wallet;
 
     public MultiplePairTradeExecutor(List<TradeExecutor> tradeExecutorsForPairs, BacktestExecutionConfiguration backtestExecutionConfiguration) {

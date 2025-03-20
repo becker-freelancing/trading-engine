@@ -6,6 +6,6 @@ import java.time.LocalDateTime;
 
 public interface DataSubscriber {
 
-    public void consume(TimeSeries timeSeries, LocalDateTime time);
+    void consume(TimeSeries timeSeries, LocalDateTime time);
 
 }
