@@ -11,7 +11,7 @@ import com.becker.freelance.commons.AppConfiguration;
 import com.becker.freelance.commons.AppMode;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
-import com.becker.freelance.data.DataProvider;
+import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.BaseStrategy;
 
@@ -82,12 +82,7 @@ class AbstractBacktestContinueApp implements Runnable{
     }
 
     private TimeSeries readEurUsdTimeSeries(AppMode appMode) {
-        TimeSeries eurusd = null;
-        try {
-            eurusd = DataProvider.getInstance(appMode).readTimeSeries(Pair.eurUsd1(), fromTime.minusDays(1), toTime);
-        } catch (IOException e) {
-            throw new IllegalStateException("Could not read Time Series EUR/USD M1", e);
-        }
-        return eurusd;
+
+        return DataProviderFactory.find(appMode).createDataProvider(Pair.eurUsd1()).readTimeSeries(fromTime.minusDays(1), toTime);
     }
 }

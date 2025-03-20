@@ -1,17 +1,8 @@
 package com.becker.freelance.plugin;
 
 import com.becker.freelance.commons.AppMode;
-import com.becker.freelance.commons.pair.Pair;
-
-import java.util.Set;
 
 public class KrakenDemoAppMode implements AppMode {
-
-    private final Set<Pair> allPairs;
-
-    public KrakenDemoAppMode() {
-        allPairs = Set.of(new KrakenPairProvider().get().toArray(new Pair[0]));
-    }
 
     @Override
     public boolean isDemo() {

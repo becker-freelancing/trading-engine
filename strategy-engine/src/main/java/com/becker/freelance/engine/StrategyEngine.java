@@ -1,6 +1,5 @@
 package com.becker.freelance.engine;
 
-import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.NoTimeSeriesEntryFoundException;
@@ -12,43 +11,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class StrategyEngine {
 
     private final Logger logger = LoggerFactory.getLogger(StrategyEngine.class);
 
-    private final Map<Pair, TimeSeries> timeSeries;
-    private final Map<Pair, BaseStrategy> strategies;
+    private final BaseStrategy strategy;
     private final TradeExecutor tradeExecutor;
 
-    public StrategyEngine(Map<Pair, TimeSeries> timeSeries, Supplier<BaseStrategy> strategySupplier, TradeExecutor tradeExecutor) {
+    public StrategyEngine(Supplier<BaseStrategy> strategySupplier, TradeExecutor tradeExecutor) {
         if (!strategySupplier.get().isInitiatedForParameter()) {
             throw new IllegalArgumentException("Strategy must be initiated for parameters but wasn't");
         }
         this.tradeExecutor = tradeExecutor;
-        this.timeSeries = timeSeries;
-        this.strategies = new HashMap<>();
-        timeSeries.keySet().forEach(pair -> {
-            strategies.put(pair, strategySupplier.get());
-        });
-    }
-
-    public void execute() {
-        Iterator<LocalDateTime> times = timeSeries.values().stream().findFirst().map(TimeSeries::iterator).orElseThrow(IllegalStateException::new);
-        Set<Pair> pairs = timeSeries.keySet();
-        Set<LocalDateTime> allTimes = new HashSet<>();
-        timeSeries.values().stream().map(TimeSeries::allTimes).forEach(allTimes::addAll);
-        allTimes.stream().sorted(Comparator.naturalOrder()).forEach(time -> {
-            for (Pair pair : pairs) {
-                TimeSeries currentSeries = timeSeries.get(pair);
-                if (currentSeries.hasTime(time)) {
-                    BaseStrategy strategy = strategies.get(pair);
-                    executeForTime(currentSeries, time, strategy);
-                }
-            }
-        });
+        this.strategy = strategySupplier.get().withOpenPositionRequestor(tradeExecutor);
     }
 
     public void executeForTime(TimeSeries timeSeries, LocalDateTime time, BaseStrategy strategy) {
@@ -83,4 +61,7 @@ public class StrategyEngine {
         tradeExecutor.closePositionsIfSlOrTpReached(currentPrice);
     }
 
+    public void update(TimeSeries timeSeries, LocalDateTime time) {
+        executeForTime(timeSeries, time, strategy);
+    }
 }

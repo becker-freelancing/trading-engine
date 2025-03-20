@@ -15,6 +15,7 @@
         <module>kraken-local</module>
         <module>hist-data-local</module>
         <module>binance-local</module>
+        <module>datasource-csv</module>
     </modules>
 
     <artifactId>data-source</artifactId>

@@ -1,37 +1,18 @@
 package com.becker.freelance.data;
 
-import com.becker.freelance.commons.AppMode;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.timeseries.CompleteTimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
 public abstract class DataProvider {
 
-    public static DataProvider getInstance(AppMode appMode){
-        ServiceLoader<DataProvider> serviceLoader = ServiceLoader.load(DataProvider.class);
-        List<DataProvider> providers = serviceLoader.stream().map(ServiceLoader.Provider::get).filter(provider -> provider.supports(appMode)).toList();
-
-        if (providers.size() > 1){
-            throw new IllegalStateException("Found multiple DataProvider for AppMode " + appMode.getDescription() + ": " + providers);
-        }
-        if (providers.isEmpty()) {
-            throw new IllegalArgumentException("AppMode " + appMode + " is not supported");
-        }
-
-        return providers.get(0);
-    }
-
-    protected abstract boolean supports(AppMode appMode);
-
-    public abstract TimeSeries readTimeSeries(Pair pair, LocalDateTime from, LocalDateTime to) throws IOException;
+    public abstract TimeSeries readTimeSeries(LocalDateTime from, LocalDateTime to);
 
     protected TimeSeries map(Pair pair, LocalDateTime fromTime, LocalDateTime toTime, Map<LocalDateTime, TimeSeriesEntry> dataList) {
 
@@ -65,7 +46,7 @@ public abstract class DataProvider {
 
 
         // Create TimeSeries object and return
-        return new TimeSeries(pair, dataList);
+        return new CompleteTimeSeries(pair, dataList);
     }
 
 }

@@ -3,14 +3,9 @@ package com.becker.freelance.backtest;
 import com.becker.freelance.backtest.commons.BacktestResultWriter;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.commons.AppConfiguration;
-import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Trade;
-import com.becker.freelance.commons.timeseries.TimeSeries;
-import com.becker.freelance.data.DataProvider;
-import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.BaseStrategy;
-import com.becker.freelance.tradeexecution.TradeExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class BacktestEngine {
 
@@ -29,16 +25,16 @@ public class BacktestEngine {
 
 
     private final AppConfiguration appConfiguration;
-
     private final BacktestExecutionConfiguration backtestExecutionConfiguration;
     private final BaseStrategy baseStrategy;
     private final ExecutorService executor;
     private final BacktestResultWriter resultWriter;
     private final ParameterFilter parameterFilter;
-    private final DataProvider dataProvider;
+    private final BiConsumer<List<Trade>, Map<String, Decimal>> onBacktestFinishedCallback;
+    private final Consumer<Exception> onExceptionCallback;
+
     private int currentIteration = 0;
     private int requiredIterations;
-    private Map<Pair, TimeSeries> timeSeries;
 
 
     public BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, BaseStrategy baseStrategy, ParameterFilter parameterFilter, Path writePath) {
@@ -47,23 +43,24 @@ public class BacktestEngine {
                 baseStrategy,
                 Executors.newFixedThreadPool(backtestExecutionConfiguration.numberOfThreads()),
                 getBacktestResultWriter(appConfiguration, backtestExecutionConfiguration, baseStrategy, writePath),
-                parameterFilter,
-                DataProvider.getInstance(appConfiguration.appMode())
+                parameterFilter
         );
+
     }
 
     public BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, BaseStrategy baseStrategy) {
         this(appConfiguration, backtestExecutionConfiguration, baseStrategy, ParameterFilter.allOkFilter(), null);
     }
 
-    protected BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, BaseStrategy baseStrategy, ExecutorService executor, BacktestResultWriter resultWriter, ParameterFilter parameterFilter, DataProvider dataProvider) {
+    protected BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, BaseStrategy baseStrategy, ExecutorService executor, BacktestResultWriter resultWriter, ParameterFilter parameterFilter) {
         this.appConfiguration = appConfiguration;
         this.backtestExecutionConfiguration = backtestExecutionConfiguration;
         this.baseStrategy = baseStrategy;
         this.executor = executor;
         this.resultWriter = resultWriter;
         this.parameterFilter = parameterFilter;
-        this.dataProvider = dataProvider;
+        this.onBacktestFinishedCallback = this::writeBacktestResult;
+        this.onExceptionCallback = this::shutdownNowOnException;
     }
 
     private static BacktestResultWriter getBacktestResultWriter(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, BaseStrategy baseStrategy, Path writePath) {
@@ -77,7 +74,7 @@ public class BacktestEngine {
     }
 
     public void run() {
-        init();
+        addShutdownHook();
         List<Map<String, Decimal>> parameters;
         try (parameterFilter) {
             parameters = baseStrategy.getParameters().permutate()
@@ -85,25 +82,22 @@ public class BacktestEngine {
         }
         requiredIterations = parameters.size();
         for (Map<String, Decimal> parameter : parameters) {
-            executor.submit(() -> executeForParameter(parameter));
+            Supplier<BaseStrategy> strategySupplier = () -> baseStrategy.forParameters(parameter);
+
+            BacktestExecutor backtestExecutor = new BacktestExecutor(appConfiguration,
+                    backtestExecutionConfiguration,
+                    onBacktestFinishedCallback,
+                    onExceptionCallback,
+                    parameter,
+                    strategySupplier);
+
+            executor.submit(() -> execute(backtestExecutor));
         }
 
         executor.shutdown();
     }
 
-    private void init() {
-        timeSeries = backtestExecutionConfiguration.pairs().stream()
-                .map(pair -> {
-                    try {
-                        return dataProvider.readTimeSeries(pair, backtestExecutionConfiguration.startTime(), backtestExecutionConfiguration.endTime());
-                    } catch (IOException e) {
-                        throw new IllegalStateException(e);
-                    }
-                })
-                .collect(Collectors.toMap(
-                        TimeSeries::getPair,
-                        t -> t
-                ));
+    private void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(executor::shutdownNow, "Shutdown-BacktestApp-0"));
     }
 
@@ -112,26 +106,21 @@ public class BacktestEngine {
         return currentIteration;
     }
 
-    private void executeForParameter(Map<String, Decimal> parameter) {
+    private void execute(BacktestExecutor backtestExecutor) {
+        logger.info("Starting Permutation {} of {} - {}", getNextIteration(), this.requiredIterations, backtestExecutor.getParameter());
+        backtestExecutor.run();
+    }
+
+    private void writeBacktestResult(List<Trade> allClosedTrades, Map<String, Decimal> parameter) {
         try {
-            logger.info("Starting Permutation {} of {} - {}", getNextIteration(), this.requiredIterations, parameter);
-            TradeExecutor tradeExecutor = TradeExecutor.find(appConfiguration, backtestExecutionConfiguration);
-
-            Supplier<BaseStrategy> strategySupplier = () -> baseStrategy.forParameters(parameter).withOpenPositionRequestor(tradeExecutor);
-
-            StrategyEngine strategyEngine = new StrategyEngine(timeSeries, strategySupplier, tradeExecutor);
-
-            strategyEngine.execute();
-
-            List<Trade> allClosedTrades = tradeExecutor.getAllClosedTrades();
-            try {
-                resultWriter.writeResult(allClosedTrades, parameter);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        } catch (Exception e) {
-            logger.error("Error while executing backtest", e);
-            executor.shutdownNow();
+            resultWriter.writeResult(allClosedTrades, parameter);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
+    }
+
+    private void shutdownNowOnException(Exception e) {
+        logger.error("Error while executing backtest", e);
+        executor.shutdownNow();
     }
 }
