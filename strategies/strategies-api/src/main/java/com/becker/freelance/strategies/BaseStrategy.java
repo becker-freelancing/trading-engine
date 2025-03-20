@@ -20,11 +20,6 @@ public abstract class BaseStrategy {
                 .toList();
     }
 
-    public static BaseStrategy loadByName(String name){
-        List<BaseStrategy> all = loadAll();
-        return all.stream().filter(str -> str.getName().equals(name)).findAny().orElseThrow(() -> new IllegalArgumentException("Could not find Strategy " + name + " in " + all));
-    }
-
     protected String name;
     protected PermutableStrategyParameter parameters;
     private boolean initiatedForParameter = false;
@@ -44,10 +39,6 @@ public abstract class BaseStrategy {
     public abstract Optional<ExitSignal> shouldExit(TimeSeries timeSeries, LocalDateTime time);
 
     public abstract BaseStrategy forParameters(Map<String, Decimal> parameters);
-
-    public int minNumberOfBarsRequired(Map<String, Decimal> parameters) {
-        return 0;
-    }
 
     public String getName() {
         return name;

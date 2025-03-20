@@ -29,10 +29,6 @@ public class PermutableStrategyParameter {
         return internalPermute(result, strategyParameter);
     }
 
-    public static boolean allValidValidation(Map<String, Decimal> parameter) {
-        return true;
-    }
-
     private final List<StrategyParameter> strategyParameter;
     private final Predicate<Map<String, Decimal>> parameterValidation;
 
