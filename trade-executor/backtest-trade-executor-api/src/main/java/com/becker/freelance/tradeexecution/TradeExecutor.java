@@ -27,6 +27,21 @@ public abstract class TradeExecutor implements OpenPositionRequestor {
         return new MultiplePairTradeExecutor(tradeExecutorsForPairs, backtestExecutionConfiguration);
     }
 
+    public static TradeExecutor find(AppConfiguration appConfiguration, Pair pair) {
+        ServiceLoader<TradeExecutor> tradeExecutors = ServiceLoader.load(TradeExecutor.class);
+        AppMode appMode = appConfiguration.appMode();
+        List<TradeExecutor> executors = tradeExecutors.stream().map(ServiceLoader.Provider::get).filter(provider -> provider.supports(appMode)).toList();
+
+        if (executors.size() > 1) {
+            throw new IllegalStateException("Found multiple TradeExecutor for AppMode " + appMode.getDescription() + ": " + executors);
+        }
+        if (executors.isEmpty()) {
+            throw new IllegalArgumentException("AppMode " + appMode.getDescription() + " is not supported");
+        }
+
+        return executors.get(0).construct(pair);
+    }
+
     private static TradeExecutor findForPair(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair) {
         ServiceLoader<TradeExecutor> tradeExecutors = ServiceLoader.load(TradeExecutor.class);
         AppMode appMode = appConfiguration.appMode();
@@ -41,6 +56,8 @@ public abstract class TradeExecutor implements OpenPositionRequestor {
 
         return executors.get(0).construct(backtestExecutionConfiguration, pair);
      }
+
+    protected abstract TradeExecutor construct(Pair pair);
 
     protected abstract TradeExecutor construct(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair);
 

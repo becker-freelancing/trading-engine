@@ -14,6 +14,7 @@
 
     <modules>
         <module>backtest-engine</module>
+        <module>remote-backtest-engine</module>
     </modules>
 
 </project>

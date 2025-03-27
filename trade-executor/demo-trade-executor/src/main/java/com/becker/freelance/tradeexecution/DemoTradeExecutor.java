@@ -51,6 +51,11 @@ public class DemoTradeExecutor extends TradeExecutor {
     }
 
     @Override
+    protected TradeExecutor construct(Pair pair) {
+        throw new UnsupportedOperationException("DemoTrade Executor needs BacktestConfiguration for construction");
+    }
+
+    @Override
     protected boolean supports(AppMode appMode) {
         return appMode.isDemo();
     }

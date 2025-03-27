@@ -11,7 +11,6 @@ public interface TimeSeries {
 
     TimeSeriesEntry getEntryForTime(LocalDateTime time);
 
-
     Bar getEntryForTimeAsBar(LocalDateTime time);
 
     LocalDateTime getMinTime();
@@ -28,4 +27,6 @@ public interface TimeSeries {
     TimeSeriesEntry getLastEntryForTime(LocalDateTime time);
 
     boolean hasTime(LocalDateTime time);
+
+    void addEntry(TimeSeriesEntry timeSeriesEntry);
 }

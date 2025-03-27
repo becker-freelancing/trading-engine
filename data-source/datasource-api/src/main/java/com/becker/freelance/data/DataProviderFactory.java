@@ -28,5 +28,9 @@ public abstract class DataProviderFactory {
 
     public abstract SubscribableDataProvider createSubscribableDataProvider(Pair pair, Synchronizer synchronizer);
 
+    public SubscribableDataProvider createSubscribableDataProvider(Pair pair) {
+        throw new UnsupportedOperationException("Synchronizer needed for construction");
+    }
+
     public abstract DataProvider createDataProvider(Pair pair);
 }

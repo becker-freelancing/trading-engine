@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 public class CompleteTimeSeries implements TimeSeries {
 
+    private static final ZoneId UTC = ZoneId.of("UTC");
+
     private final Set<LocalDateTime> index;
     private final Pair pair;
     private final Map<LocalDateTime, TimeSeriesEntry> data;
@@ -19,19 +21,34 @@ public class CompleteTimeSeries implements TimeSeries {
 
     public CompleteTimeSeries(Pair pair, Map<LocalDateTime, TimeSeriesEntry> data) {
         this.pair = pair;
-        this.data = data;
-        this.index = data.keySet();
-        ZoneId utc = ZoneId.of("UTC");
-        this.barData = data.entrySet().stream().parallel().map(entry -> {
+        this.data = new HashMap<>(data);
+        this.index = new HashSet<>(data.keySet());
+        this.barData = new HashMap<>(data.entrySet().stream().parallel().map(entry -> {
             TimeSeriesEntry value = entry.getValue();
-            return new BaseBar(pair.toDuration(), entry.getKey().atZone(utc),
-                    value.getOpenMid(), value.getHighMid(), value.getLowMid(), value.getCloseMid(), value.volume());
+            return mapBaseBar(pair, entry.getKey(), value);
         }).collect(Collectors.toMap(
                 bar -> bar.getEndTime().toLocalDateTime(),
                 bar -> bar
-        ));
+        )));
     }
 
+    private static BaseBar mapBaseBar(Pair pair, LocalDateTime time, TimeSeriesEntry value) {
+        return new BaseBar(pair.toDuration(), time.atZone(UTC),
+                value.getOpenMid(), value.getHighMid(), value.getLowMid(), value.getCloseMid(), value.volume());
+    }
+
+
+    @Override
+    public void addEntry(TimeSeriesEntry timeSeriesEntry) {
+        Pair pair1 = timeSeriesEntry.pair();
+        if (!pair.equals(pair1)) {
+            return;
+        }
+        LocalDateTime time = timeSeriesEntry.time();
+        index.add(time);
+        data.put(time, timeSeriesEntry);
+        barData.put(time, mapBaseBar(pair1, time, timeSeriesEntry));
+    }
 
     public TimeSeriesEntry getEntryForTime(LocalDateTime time) {
         if (!data.containsKey(time)) {
@@ -101,4 +118,5 @@ public class CompleteTimeSeries implements TimeSeries {
     public boolean hasTime(LocalDateTime time) {
         return index.contains(time);
     }
+
 }

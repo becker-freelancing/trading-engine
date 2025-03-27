@@ -25,6 +25,9 @@ public interface AppMode {
         return getDataSourceName() + "_" + (isDemo() ? "DEMO" : "LIVE");
     }
 
+    default void onSelection() {
+    }
+
     /**
      * Muss auch in equals Methode benutzt werden
      *

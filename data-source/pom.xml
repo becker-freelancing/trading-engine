@@ -16,6 +16,7 @@
         <module>hist-data-local</module>
         <module>binance-local</module>
         <module>datasource-csv</module>
+        <module>datasource-capitalcom</module>
     </modules>
 
     <artifactId>data-source</artifactId>

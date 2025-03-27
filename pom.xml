@@ -19,6 +19,7 @@
         <module>commons</module>
         <module>trading-abstract-app</module>
         <module>execution-engines</module>
+        <module>broker-connectors</module>
     </modules>
 
 

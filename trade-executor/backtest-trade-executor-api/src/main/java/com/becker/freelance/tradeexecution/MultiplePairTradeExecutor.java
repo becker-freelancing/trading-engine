@@ -33,6 +33,11 @@ class MultiplePairTradeExecutor extends TradeExecutor {
     }
 
     @Override
+    protected TradeExecutor construct(Pair pair) {
+        throw new UnsupportedOperationException("MultiplePairTradeExecutor must be constructed explicitly");
+    }
+
+    @Override
     protected boolean supports(AppMode appMode) {
         return tradeExecutors.values().stream()
                 .map(executor -> executor.supports(appMode))
