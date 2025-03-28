@@ -16,18 +16,22 @@ class PingService {
     private static Logger logger = LoggerFactory.getLogger(PingService.class);
 
     private static PingService instance;
-    private final Session session;
-    private boolean pinging;
+
+    private Session session;
+    private ScheduledExecutorService executorService;
     public PingService(Session session) {
         this.session = session;
+        this.executorService = Executors.newScheduledThreadPool(1);
         pinging = false;
     }
+    private boolean pinging;
 
     public static PingService getInstance(Session session) {
         if (instance == null) {
             instance = new PingService(session);
         }
 
+        instance.setSession(session);
         return instance;
     }
 
@@ -36,9 +40,20 @@ class PingService {
             return;
         }
 
-        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        if (executorService.isShutdown()) {
+            executorService = Executors.newScheduledThreadPool(1);
+        }
+        executorService.scheduleAtFixedRate(this::ping, 20, 30, TimeUnit.SECONDS);
+        pinging = true;
+    }
 
-        scheduledExecutorService.scheduleAtFixedRate(this::ping, 1, 5, TimeUnit.MINUTES);
+    public void stopAutoPinging() {
+        if (!pinging) {
+            return;
+        }
+
+        executorService.shutdownNow();
+        pinging = false;
     }
 
     private void ping() {
@@ -59,5 +74,9 @@ class PingService {
         } catch (IOException e) {
             logger.error("Error at executing ping", e);
         }
+    }
+
+    private void setSession(Session session) {
+        this.session = session;
     }
 }

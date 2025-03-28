@@ -3,15 +3,17 @@ package com.becker.freelance.capital.util;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.pair.PairProvider;
 
+import java.util.Optional;
+
 public class PairConverter {
 
-    public Pair convert(String capitalPair, String capitalResolution) {
+    public Optional<Pair> convert(String capitalPair, String capitalResolution) {
         int durationInMinutes = mapCapitalResolution(capitalResolution);
         return PairProvider.allPairs().stream()
                 .filter(pair -> pair.timeInMinutes() == durationInMinutes)
                 .filter(pair -> capitalPair.contains(pair.baseCurrency()))
                 .filter(pair -> capitalPair.contains(pair.counterCurrency()))
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("Could not map pair " + capitalPair + " with resolution " + capitalResolution));
+                .findFirst();
     }
 
     private int mapCapitalResolution(String capitalResolution) {

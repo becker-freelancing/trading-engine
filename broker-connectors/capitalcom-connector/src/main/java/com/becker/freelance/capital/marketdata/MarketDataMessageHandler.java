@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 class MarketDataMessageHandler implements MessageHandler.Whole<String> {
@@ -59,9 +60,12 @@ class MarketDataMessageHandler implements MessageHandler.Whole<String> {
 
     private void consumeAskPrice(OHLCMessage ohlcMessage) {
         Payload payload = ohlcMessage.getPayload();
-        Pair pair = PAIR_CONVERTER.convert(payload.getEpic(), payload.getResolution());
+        Optional<Pair> pair = PAIR_CONVERTER.convert(payload.getEpic(), payload.getResolution());
+        if (pair.isEmpty()) {
+            return;
+        }
         LocalDateTime closeTime = map(payload.getT());
-        AskMarketData askMarketData = new AskMarketData(pair, closeTime, new Decimal(payload.getO()), new Decimal(payload.getH()), new Decimal(payload.getL()), new Decimal(payload.getC()));
+        AskMarketData askMarketData = new AskMarketData(pair.get(), closeTime, new Decimal(payload.getO()), new Decimal(payload.getH()), new Decimal(payload.getL()), new Decimal(payload.getC()));
         askConsumer.accept(askMarketData);
     }
 
@@ -73,9 +77,12 @@ class MarketDataMessageHandler implements MessageHandler.Whole<String> {
 
     private void consumeBidPrice(OHLCMessage ohlcMessage) {
         Payload payload = ohlcMessage.getPayload();
-        Pair pair = PAIR_CONVERTER.convert(payload.getEpic(), payload.getResolution());
+        Optional<Pair> pair = PAIR_CONVERTER.convert(payload.getEpic(), payload.getResolution());
+        if (pair.isEmpty()) {
+            return;
+        }
         LocalDateTime closeTime = map(payload.getT());
-        BidMarketData bidMarketData = new BidMarketData(pair, closeTime, new Decimal(payload.getO()), new Decimal(payload.getH()), new Decimal(payload.getL()), new Decimal(payload.getC()));
+        BidMarketData bidMarketData = new BidMarketData(pair.get(), closeTime, new Decimal(payload.getO()), new Decimal(payload.getH()), new Decimal(payload.getL()), new Decimal(payload.getC()));
         bidConsumer.accept(bidMarketData);
     }
 

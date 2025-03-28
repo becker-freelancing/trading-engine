@@ -19,18 +19,23 @@ class MarketDataSocket {
 
     private static final Logger logger = LoggerFactory.getLogger(MarketDataSocket.class);
 
-    private final Map<LocalDateTime, BidMarketData> bidMarketDataCache;
-    private final Map<LocalDateTime, AskMarketData> askMarketDataCache;
-    private final Set<MarketDataListener> marketDataListeners;
+    private final Map<Pair, Map<LocalDateTime, BidMarketData>> bidMarketDataCache;
+    private final Map<Pair, Map<LocalDateTime, AskMarketData>> askMarketDataCache;
+    private final Map<Pair, Set<MarketDataListener>> marketDataListeners;
     private final MarketDataEndpoint marketDataEndpoint;
-    private final Pair pair;
+    private final Set<Pair> pair;
     private boolean isListening;
 
-    public MarketDataSocket(Pair pair) {
+    public MarketDataSocket(Set<Pair> pair, Map<Pair, Set<MarketDataListener>> listeners) {
         this.pair = pair;
         this.bidMarketDataCache = new HashMap<>();
         this.askMarketDataCache = new HashMap<>();
-        marketDataListeners = new HashSet<>();
+        marketDataListeners = listeners;
+        pair.forEach(p -> {
+            bidMarketDataCache.put(p, new HashMap<>());
+            askMarketDataCache.put(p, new HashMap<>());
+            marketDataListeners.computeIfAbsent(p, pa -> new HashSet<>());
+        });
         marketDataEndpoint = new MarketDataEndpoint(this::onBidData, this::onAskData, this::onClose, this::onOpen);
         isListening = false;
     }
@@ -65,19 +70,28 @@ class MarketDataSocket {
         marketDataEndpoint.subscribeOHLC(conversationContext, pair);
     }
 
+
+    public void stopListening() throws IOException {
+        if (!isListening) {
+            return;
+        }
+        ConversationContext conversationContext = ConversationContextHolder.getConversationContext();
+        marketDataEndpoint.unsubscribeOHLC(conversationContext, pair);
+    }
+
     public void addListener(MarketDataListener listener) {
-        marketDataListeners.add(listener);
+        marketDataListeners.get(listener.supportedPair()).add(listener);
     }
 
     private void onBidData(BidMarketData bidMarketData) {
         LocalDateTime closeTime = bidMarketData.closeTime();
         synchronized (askMarketDataCache) {
-            if (askMarketDataCache.containsKey(closeTime)) {
-                AskMarketData askMarketData = askMarketDataCache.get(closeTime);
+            if (askMarketDataCache.get(bidMarketData.pair()).containsKey(closeTime)) {
+                AskMarketData askMarketData = askMarketDataCache.get(bidMarketData.pair()).get(closeTime);
                 notifyListener(askMarketData, bidMarketData, closeTime);
-                askMarketDataCache.remove(closeTime);
+                askMarketDataCache.get(askMarketData.pair()).remove(closeTime);
             } else {
-                bidMarketDataCache.put(closeTime, bidMarketData);
+                bidMarketDataCache.get(bidMarketData.pair()).put(closeTime, bidMarketData);
             }
         }
     }
@@ -85,12 +99,12 @@ class MarketDataSocket {
     private void onAskData(AskMarketData askMarketData) {
         LocalDateTime closeTime = askMarketData.closeTime();
         synchronized (bidMarketDataCache) {
-            if (bidMarketDataCache.containsKey(closeTime)) {
-                BidMarketData bidMarketData = bidMarketDataCache.get(closeTime);
+            if (bidMarketDataCache.get(askMarketData.pair()).containsKey(closeTime)) {
+                BidMarketData bidMarketData = bidMarketDataCache.get(askMarketData.pair()).get(closeTime);
                 notifyListener(askMarketData, bidMarketData, closeTime);
-                bidMarketDataCache.remove(closeTime);
+                bidMarketDataCache.get(askMarketData.pair()).remove(closeTime);
             } else {
-                askMarketDataCache.put(closeTime, askMarketData);
+                askMarketDataCache.get(askMarketData.pair()).put(closeTime, askMarketData);
             }
         }
     }
@@ -102,6 +116,14 @@ class MarketDataSocket {
                 bidMarketData.lowBid(), askMarketData.lowAsk(),
                 bidMarketData.closeBid(), askMarketData.closeAsk());
 
-        marketDataListeners.forEach(consumer -> consumer.onMarketData(marketData));
+        marketDataListeners.get(marketData.pair()).forEach(consumer -> consumer.onMarketData(marketData));
+    }
+
+    public Set<Pair> pairs() {
+        return pair;
+    }
+
+    public Map<Pair, Set<MarketDataListener>> listener() {
+        return marketDataListeners;
     }
 }

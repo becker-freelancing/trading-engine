@@ -5,6 +5,14 @@ public final class Constants {
     public static final String CLIENT_SSO_TOKEN_NAME = "CST";
     public static final String ACCOUNT_SSO_TOKEN_NAME = "X-SECURITY-TOKEN";
 
+    public static final String SESSION = "/session";
+    public static final String ACCOUNTS = "/accounts";
+    public static final String MARKET_NAVIGATION = "/marketnavigation";
+    public static final String MARKETS = "/markets";
+    public static final String POSITIONS = "/positions";
+    public static final String ORDERS = "/workingorders";
+    public static final String CONNECT = "connect";
+
     public static final String API = "/api";
     public static final String V_1 = "/v1";
     public static final String API_V1 = API.concat(V_1);
@@ -23,12 +31,5 @@ public final class Constants {
     public static final String API_V1_WATCHLISTS = API_V1.concat("/watchlists");
     public static final String API_V1_HISTORY = API_V1.concat("/history");
     public static final String API_V1_HISTORY_TRANSACTIONS = API_V1_HISTORY.concat("/transactions");
-    public static final String SESSION = "/session";
-    public static final String ACCOUNTS = "/accounts";
-    public static final String MARKET_NAVIGATION = "/marketnavigation";
-    public static final String MARKETS = "/markets";
-    public static final String POSITIONS = "/positions";
-    public static final String ORDERS = "/workingorders";
-    public static final String CONNECT = "connect";
 
 }

@@ -20,7 +20,10 @@ public class CapitalPairProvider implements PairProvider {
                 from("BTC", "USD", 30, "BTC/USD M30", 1., 0.0001, 60., 0.05, 2., 2),
                 from("BTC", "USD", 60, "BTC/USD H1", 1., 0.0001, 60., 0.05, 2., 2),
                 from("BTC", "USD", 240, "BTC/USD H4", 1., 0.0001, 60., 0.05, 2., 2),
-                from("BTC", "USD", 1440, "BTC/USD D1", 1., 0.0001, 60., 0.05, 2., 2)
+                from("BTC", "USD", 1440, "BTC/USD D1", 1., 0.0001, 60., 0.05, 2., 2),
+
+                from("ETH", "USD", 1, "ETH/USD M1", 1., 0.0001, 60., 0.05, 2., 2)
+
         );
     }
 

@@ -1,9 +1,9 @@
 package com.becker.freelance.commons.timeseries;
 
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
-import com.becker.freelance.math.Decimal;
 
 public record TimeSeriesEntry(LocalDateTime time, Decimal openBid, Decimal openAsk, Decimal highBid, Decimal highAsk,
                               Decimal lowBid, Decimal lowAsk, Decimal closeBid, Decimal closeAsk, Decimal volume,
@@ -27,8 +27,8 @@ public record TimeSeriesEntry(LocalDateTime time, Decimal openBid, Decimal openA
 
     @Override
     public String toString() {
-        return String.format("TimeSeriesEntry(Time: %s, Open: %f, High: %f, Low: %f, Close: %f, Volume: %f, Trades: %f)",
-                time, openAsk, highAsk, lowAsk, closeAsk, volume, trades);
+        return String.format("TimeSeriesEntry(Time: %s, Pair: %s, Open: %f, High: %f, Low: %f, Close: %f, Volume: %f, Trades: %f)",
+                time, pair.technicalName(), openAsk, highAsk, lowAsk, closeAsk, volume, trades);
     }
 
     public boolean isGreenCandle() {

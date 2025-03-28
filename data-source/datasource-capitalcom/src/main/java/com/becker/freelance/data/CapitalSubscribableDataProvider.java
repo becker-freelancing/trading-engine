@@ -49,6 +49,11 @@ public class CapitalSubscribableDataProvider extends SubscribableDataProvider im
         subscribers.forEach(subscribers -> subscribers.consume(timeSeries, entry.time()));
     }
 
+    @Override
+    public Pair supportedPair() {
+        return pair;
+    }
+
     private TimeSeries createNewTimeSeries() {
         return new CompleteTimeSeries(pair, Map.of());
     }
