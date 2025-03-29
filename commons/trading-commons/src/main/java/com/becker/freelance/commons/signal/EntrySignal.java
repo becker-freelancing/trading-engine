@@ -1,46 +1,35 @@
 package com.becker.freelance.commons.signal;
 
+import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.PositionType;
+import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
-public abstract class EntrySignal {
+import java.time.LocalDateTime;
 
-    private Decimal size;
-    private Direction direction;
-    private final PositionType positionType;
-    private final Decimal trailingStepSize;
+public interface EntrySignal {
 
+    public Decimal getSize();
 
-    EntrySignal(Decimal size, Direction direction, PositionType positionType, Decimal trailingStepSize) {
-        this.size = size;
-        this.direction = direction;
-        this.positionType = positionType;
-        this.trailingStepSize = trailingStepSize;
+    public Direction getDirection();
+
+    public Pair getPair();
+
+    public TimeSeriesEntry getOpenPrice();
+
+    public PositionType positionType();
+
+    public default Decimal getOpenPriceForDirection() {
+        return switch (getDirection()) {
+            case SELL -> getOpenPrice().closeBid();
+            case BUY -> getOpenPrice().closeAsk();
+        };
     }
 
-    public Decimal getSize() {
-        return size;
+    public default LocalDateTime getOpenTime() {
+        return getOpenPrice().time();
     }
 
-    public void setSize(Decimal size) {
-        this.size = size;
-    }
-
-    public Direction getDirection() {
-        return direction;
-    }
-
-    public void setDirection(Direction direction) {
-        this.direction = direction;
-    }
-
-    public PositionType getPositionType() {
-        return positionType;
-    }
-
-    public Decimal getTrailingStepSize() {
-        return trailingStepSize;
-    }
-
+    public void visit(EntrySignalVisitor visitor);
 }
-

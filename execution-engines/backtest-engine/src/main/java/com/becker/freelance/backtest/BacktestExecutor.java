@@ -3,7 +3,7 @@ package com.becker.freelance.backtest;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.commons.AppConfiguration;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.position.Trade;
+import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.data.SubscribableDataProvider;
 import com.becker.freelance.engine.StrategyEngine;

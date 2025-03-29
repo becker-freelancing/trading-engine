@@ -1,4 +1,4 @@
-package com.becker.freelance.commons.signal;
+package com.becker.freelance.commons.position;
 
 public enum Direction {
     BUY(1),

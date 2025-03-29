@@ -1,5 +1,6 @@
-package com.becker.freelance.commons.calculation;
+package com.becker.freelance.tradeexecution.calculation.calculation;
 
+import com.becker.freelance.commons.wallet.Wallet;
 import com.becker.freelance.math.Decimal;
 
 public class WalletMock implements Wallet {

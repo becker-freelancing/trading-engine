@@ -62,4 +62,8 @@ public interface Pair {
 
     boolean isExecutableInAppMode(AppMode appMode);
 
+    default boolean isEuroCounterCurrency() {
+        return "EUR".equals(counterCurrency());
+    }
+
 }

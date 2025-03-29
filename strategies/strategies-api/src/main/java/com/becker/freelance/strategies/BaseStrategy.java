@@ -2,6 +2,7 @@ package com.becker.freelance.strategies;
 
 
 import com.becker.freelance.commons.signal.EntrySignal;
+import com.becker.freelance.commons.signal.EntrySignalFactory;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.math.Decimal;
@@ -24,6 +25,7 @@ public abstract class BaseStrategy {
     protected PermutableStrategyParameter parameters;
     private boolean initiatedForParameter = false;
     private OpenPositionRequestor openPositionRequestor;
+    protected EntrySignalFactory entrySignalFactory;
 
     public BaseStrategy(String name, PermutableStrategyParameter parameters) {
         this.name = name;
@@ -32,6 +34,7 @@ public abstract class BaseStrategy {
 
     public BaseStrategy(Map<String, Decimal> parameters) {
         initiatedForParameter = true;
+        entrySignalFactory = new EntrySignalFactory();
     }
 
     public abstract Optional<EntrySignal> shouldEnter(TimeSeries timeSeries, LocalDateTime time);

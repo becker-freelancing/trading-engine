@@ -4,17 +4,23 @@ import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguratio
 import com.becker.freelance.backtest.wallet.BacktestWallet;
 import com.becker.freelance.commons.AppMode;
 import com.becker.freelance.commons.calculation.MarginCalculator;
-import com.becker.freelance.commons.calculation.PositionCalculation;
-import com.becker.freelance.commons.calculation.PositionCalculation.PositionCalculationResult;
 import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
-import com.becker.freelance.commons.position.Trade;
-import com.becker.freelance.commons.signal.Direction;
+import com.becker.freelance.commons.position.PositionFactory;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
+import com.becker.freelance.commons.trade.Trade;
+import com.becker.freelance.tradeexecution.calculation.MarginCalculatorImpl;
+import com.becker.freelance.tradeexecution.calculation.PositionAdaptor;
+import com.becker.freelance.tradeexecution.calculation.PositionCalculation;
+import com.becker.freelance.tradeexecution.calculation.PositionCalculation.PositionCalculationResult;
+import com.becker.freelance.tradeexecution.calculation.TradingCalculatorImpl;
+import com.becker.freelance.tradeexecution.position.DemoEntrySignalVisitor;
+import com.becker.freelance.tradeexecution.position.DemoPositionFactory;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,8 +33,9 @@ public class DemoTradeExecutor extends TradeExecutor {
     private List<Position> openPositions;
     private List<Trade> closedTrades;
     private PositionCalculation positionCalculation;
-    private TradingCalculator tradingCalculator;
     private Pair pair;
+    private PositionFactory positionFactory;
+    private PositionAdaptor positionAdaptor;
 
     public DemoTradeExecutor(){
 
@@ -40,9 +47,11 @@ public class DemoTradeExecutor extends TradeExecutor {
         openPositions = new ArrayList<>();
         closedTrades = new ArrayList<>();
         this.pair = pair;
-        tradingCalculator = new TradingCalculator(pair, backtestExecutionConfiguration.getEurUsdTimeSeries());
-        MarginCalculator marginCalculator = new MarginCalculator(pair, backtestExecutionConfiguration.getEurUsdTimeSeries());
+        TradingCalculator tradingCalculator = new TradingCalculatorImpl(backtestExecutionConfiguration.getEurUsdTimeSeries());
+        MarginCalculator marginCalculator = new MarginCalculatorImpl(backtestExecutionConfiguration.getEurUsdTimeSeries());
         positionCalculation = new PositionCalculation(tradingCalculator, marginCalculator);
+        positionFactory = new DemoPositionFactory(backtestExecutionConfiguration.eurUsd());
+        positionAdaptor = new PositionAdaptor();
     }
 
     @Override
@@ -82,7 +91,10 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public void entry(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, EntrySignal entrySignal) {
-        PositionCalculationResult openPositionsResult = positionCalculation.openPosition(currentPrice, openPositions, entrySignal, wallet.get());
+        DemoEntrySignalVisitor demoEntrySignalVisitor = new DemoEntrySignalVisitor(positionFactory);
+        entrySignal.visit(demoEntrySignalVisitor);
+        Position position = demoEntrySignalVisitor.getPosition();
+        PositionCalculationResult openPositionsResult = positionCalculation.openPosition(currentPrice, openPositions, position, wallet.get());
         openPositions = openPositionsResult.positions();
         closedTrades.addAll(openPositionsResult.trades());
     }
@@ -99,9 +111,7 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public void adaptPositions(TimeSeriesEntry currentPrice) {
-        for (Position openPosition : openPositions) {
-            openPosition.adapt(currentPrice);
-        }
+        openPositions = positionAdaptor.adapt(currentPrice, openPositions);
     }
 
     @Override

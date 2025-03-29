@@ -1,4 +1,4 @@
-package com.becker.freelance.commons.mock;
+package com.becker.freelance.tradeexecution.calculation.mock;
 
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.pair.PairProvider;

@@ -54,6 +54,11 @@ public class CapitalSubscribableDataProvider extends SubscribableDataProvider im
         return pair;
     }
 
+    @Override
+    public TimeSeries getCurrentTimeSeries() {
+        return TIME_SERIES_HOLDER.getOrRead(pair, this::createNewTimeSeries);
+    }
+
     private TimeSeries createNewTimeSeries() {
         return new CompleteTimeSeries(pair, Map.of());
     }

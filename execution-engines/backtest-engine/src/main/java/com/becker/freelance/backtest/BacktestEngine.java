@@ -3,7 +3,7 @@ package com.becker.freelance.backtest;
 import com.becker.freelance.backtest.commons.BacktestResultWriter;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.commons.AppConfiguration;
-import com.becker.freelance.commons.position.Trade;
+import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.BaseStrategy;
 import org.slf4j.Logger;

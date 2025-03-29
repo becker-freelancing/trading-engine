@@ -25,6 +25,10 @@ public record TimeSeriesEntry(LocalDateTime time, Decimal openBid, Decimal openA
         return lowAsk().add(lowBid()).divide(Decimal.TWO);
     }
 
+    public Decimal getCloseSpread() {
+        return closeBid().subtract(closeAsk());
+    }
+
     @Override
     public String toString() {
         return String.format("TimeSeriesEntry(Time: %s, Pair: %s, Open: %f, High: %f, Low: %f, Close: %f, Volume: %f, Trades: %f)",

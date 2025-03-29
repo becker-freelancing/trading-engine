@@ -2,11 +2,11 @@ package com.becker.freelance.commons.signal;
 
 import com.becker.freelance.math.Decimal;
 
-public interface LevelEntrySignal extends EntrySignal {
+public interface DistanceEntrySignal extends EntrySignal {
 
-    public Decimal getStopLevel();
+    public Decimal getStopDistance();
 
-    public Decimal getLimitLevel();
+    public Decimal getLimitDistance();
 
     @Override
     default void visit(EntrySignalVisitor visitor) {

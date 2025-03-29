@@ -1,7 +1,8 @@
-package com.becker.freelance.commons.position;
+package com.becker.freelance.commons.trade;
 
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.signal.Direction;
+import com.becker.freelance.commons.position.Direction;
+import com.becker.freelance.commons.position.PositionType;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
@@ -18,7 +19,6 @@ public class Trade {
     private Direction direction;
     private Decimal conversionRate;
     private PositionType positionType;
-    private Decimal trailingStep;
 
     protected Trade(){}
 
@@ -35,20 +35,6 @@ public class Trade {
         this.direction = direction;
         this.conversionRate = conversionRate;
         this.positionType = positionType;
-    }
-
-    public Trade(LocalDateTime openTime, LocalDateTime closeTime, Pair pair, Decimal profitInEuro, Decimal openLevel, Decimal closeLevel, Decimal size, Direction direction, Decimal conversionRate, PositionType positionType, Decimal trailingStep) {
-        this.openTime = openTime;
-        this.closeTime = closeTime;
-        this.pair = pair;
-        this.profitInEuro = profitInEuro;
-        this.openLevel = openLevel;
-        this.closeLevel = closeLevel;
-        this.size = size;
-        this.direction = direction;
-        this.conversionRate = conversionRate;
-        this.positionType = positionType;
-        this.trailingStep = trailingStep;
     }
 
     @Override
@@ -99,7 +85,4 @@ public class Trade {
         return positionType;
     }
 
-    public Decimal getTrailingStep() {
-        return trailingStep;
-    }
 }

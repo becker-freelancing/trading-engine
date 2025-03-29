@@ -5,11 +5,11 @@ import com.becker.freelance.backtest.wallet.BacktestWallet;
 import com.becker.freelance.commons.AppConfiguration;
 import com.becker.freelance.commons.AppMode;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.position.Trade;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
+import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
 
 import java.time.LocalDateTime;

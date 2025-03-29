@@ -4,7 +4,7 @@ import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguratio
 import com.becker.freelance.backtest.util.PathUtil;
 import com.becker.freelance.commons.AppConfiguration;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.position.Trade;
+import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
