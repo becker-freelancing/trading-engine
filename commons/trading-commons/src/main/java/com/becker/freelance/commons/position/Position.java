@@ -29,6 +29,8 @@ public interface Position extends Cloneable {
 
     public Position clone();
 
+    public String getId();
+
     public default Position cloneWithSize(Decimal size) {
         Position clone = clone();
         clone.setSize(size);

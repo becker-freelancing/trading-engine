@@ -45,7 +45,6 @@ public class CapitalSubscribableDataProvider extends SubscribableDataProvider im
         TimeSeriesEntry entry = map(marketData);
         TimeSeries timeSeries = TIME_SERIES_HOLDER.getOrRead(pair, this::createNewTimeSeries);
         timeSeries.addEntry(entry);
-        System.out.println(entry);
         subscribers.forEach(subscribers -> subscribers.consume(timeSeries, entry.time()));
     }
 

@@ -79,11 +79,6 @@ class MultiplePairTradeExecutor extends TradeExecutor {
     }
 
     @Override
-    public BacktestWallet getWallet() {
-        return wallet;
-    }
-
-    @Override
     protected void setWallet(Supplier<BacktestWallet> wallet) {
         this.wallet = wallet.get();
     }

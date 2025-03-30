@@ -13,7 +13,7 @@ public final class Constants {
     public static final String ORDERS = "/workingorders";
     public static final String CONNECT = "connect";
 
-    public static final String API = "/api";
+    public static final String API = "api";
     public static final String V_1 = "/v1";
     public static final String API_V1 = API.concat(V_1);
     public static final String API_V1_SESSION = API_V1.concat(SESSION);

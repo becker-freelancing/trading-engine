@@ -15,6 +15,7 @@ import com.becker.freelance.tradeexecution.calculation.MarginCalculatorImpl;
 import com.becker.freelance.tradeexecution.calculation.TradingCalculatorImpl;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class DemoPositionFactory implements PositionFactory {
 
@@ -146,6 +147,7 @@ public class DemoPositionFactory implements PositionFactory {
         private final MarginCalculator marginCalculator;
         private final PositionType positionType;
         private final TimeSeries eurUsd;
+        private final String id;
         private Decimal size;
         private Decimal stopLevel;
         private Decimal initialStopLevel;
@@ -162,6 +164,7 @@ public class DemoPositionFactory implements PositionFactory {
             this.eurUsd = eurUsd;
             this.stopLevel = stopLevel;
             this.initialStopLevel = initialStopLevel;
+            this.id = UUID.randomUUID().toString();
         }
 
         @Override
@@ -232,6 +235,11 @@ public class DemoPositionFactory implements PositionFactory {
         }
 
         @Override
+        public String getId() {
+            return id;
+        }
+
+        @Override
         public Decimal initialStopLevel() {
             return initialStopLevel;
         }
@@ -243,6 +251,7 @@ public class DemoPositionFactory implements PositionFactory {
         private final MarginCalculator marginCalculator;
         private final PositionType positionType;
         private final TimeSeries eurUsd;
+        private final String id;
         private Decimal size;
 
         public StopLimitPositionImpl(LevelEntrySignal entrySignal, PositionType positionType, TimeSeries eurUsd) {
@@ -255,6 +264,7 @@ public class DemoPositionFactory implements PositionFactory {
             this.size = size;
             this.marginCalculator = new MarginCalculatorImpl(eurUsd);
             this.eurUsd = eurUsd;
+            this.id = UUID.randomUUID().toString();
         }
 
         @Override
@@ -315,6 +325,11 @@ public class DemoPositionFactory implements PositionFactory {
                     size,
                     eurUsd
             );
+        }
+
+        @Override
+        public String getId() {
+            return id;
         }
     }
 }

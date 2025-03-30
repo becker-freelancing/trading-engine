@@ -71,8 +71,6 @@ public abstract class TradeExecutor implements OpenPositionRequestor {
 
     public abstract List<Trade> getAllClosedTrades();
 
-    public abstract BacktestWallet getWallet();
-
     public abstract void adaptPositions(TimeSeriesEntry currentPrice);
 
     protected abstract Pair getPair();

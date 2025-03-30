@@ -79,7 +79,7 @@ public class DemoTradeExecutor extends TradeExecutor {
     @Override
     public void exit(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, ExitSignal exitSignal) {
         PositionCalculationResult closePositionResults;
-        if (exitSignal.getDirectionToClose() == Direction.BUY){
+        if (exitSignal.directionToClose() == Direction.BUY) {
             closePositionResults = positionCalculation.closeAllBuyPositions(currentPrice, openPositions, wallet.get());
         } else {
             closePositionResults = positionCalculation.closeAllSellPositions(currentPrice, openPositions, wallet.get());
@@ -102,11 +102,6 @@ public class DemoTradeExecutor extends TradeExecutor {
     @Override
     public List<Trade> getAllClosedTrades() {
         return closedTrades;
-    }
-
-    @Override
-    public BacktestWallet getWallet() {
-        return wallet.get();
     }
 
     @Override
