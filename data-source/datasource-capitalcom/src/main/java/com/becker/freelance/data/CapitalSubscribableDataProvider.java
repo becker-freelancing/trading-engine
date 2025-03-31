@@ -1,7 +1,7 @@
 package com.becker.freelance.data;
 
-import com.becker.freelance.capital.marketdata.MarketData;
-import com.becker.freelance.capital.marketdata.MarketDataListener;
+import com.becker.freelance.broker.marketdata.MarketData;
+import com.becker.freelance.broker.marketdata.MarketDataListener;
 import com.becker.freelance.capital.marketdata.MarketDataSocketRegistry;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.CompleteTimeSeries;

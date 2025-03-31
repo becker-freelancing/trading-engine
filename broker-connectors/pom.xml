@@ -11,9 +11,11 @@
 
     <artifactId>broker-connectors</artifactId>
     <packaging>pom</packaging>
+
     <modules>
-        <module>broker-connector-api</module>
         <module>capitalcom-connector</module>
+        <module>bybit-connector</module>
+        <module>broker-connector-api</module>
     </modules>
 
 </project>

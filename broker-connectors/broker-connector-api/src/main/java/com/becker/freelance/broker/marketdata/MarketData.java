@@ -1,4 +1,4 @@
-package com.becker.freelance.capital.marketdata;
+package com.becker.freelance.broker.marketdata;
 
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.math.Decimal;
