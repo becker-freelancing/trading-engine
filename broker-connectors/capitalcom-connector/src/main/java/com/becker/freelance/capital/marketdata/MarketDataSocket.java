@@ -5,6 +5,7 @@ import com.becker.freelance.broker.marketdata.MarketDataListener;
 import com.becker.freelance.capital.env.ConversationContext;
 import com.becker.freelance.capital.env.ConversationContextHolder;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.math.Decimal;
 import jakarta.websocket.DeploymentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +117,7 @@ class MarketDataSocket {
                 bidMarketData.openBid(), askMarketData.openAsk(),
                 bidMarketData.highBid(), askMarketData.highAsk(),
                 bidMarketData.lowBid(), askMarketData.lowAsk(),
-                bidMarketData.closeBid(), askMarketData.closeAsk());
+                bidMarketData.closeBid(), askMarketData.closeAsk(), Decimal.ZERO);
 
         marketDataListeners.get(marketData.pair()).forEach(consumer -> consumer.onMarketData(marketData));
     }

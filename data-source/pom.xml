@@ -12,6 +12,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>datasource-api</module>
+        <module>datasource-bybit</module>
         <module>kraken-local</module>
         <module>hist-data-local</module>
         <module>binance-local</module>

@@ -15,6 +15,7 @@
         <module>backtest-trade-executor-api</module>
         <module>open-positions-api</module>
         <module>capital-trade-executor</module>
+        <module>bybit-trade-executor</module>
     </modules>
     <artifactId>trade-executor</artifactId>
 
