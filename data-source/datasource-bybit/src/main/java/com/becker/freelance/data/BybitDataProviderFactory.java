@@ -1,6 +1,7 @@
 package com.becker.freelance.data;
 
 import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.plugin.BybitDemoAppMode;
 
@@ -24,5 +25,10 @@ public class BybitDataProviderFactory extends DataProviderFactory {
     @Override
     public DataProvider createDataProvider(Pair pair) {
         throw new UnsupportedOperationException("No DataProvider available for ByBit");
+    }
+
+    @Override
+    public EurUsdRequestor createEurUsdRequestor() {
+        return new BybitEurUsdRequestor();
     }
 }

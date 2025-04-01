@@ -25,11 +25,6 @@ public class BinanceSubscribableDataProvider extends SubscribableDataProvider {
     }
 
     @Override
-    public TimeSeries getCurrentTimeSeries() {
-        return timeSeries;
-    }
-
-    @Override
     public void addSubscriber(DataSubscriber subscriber) {
         subscribers.add(subscriber);
     }

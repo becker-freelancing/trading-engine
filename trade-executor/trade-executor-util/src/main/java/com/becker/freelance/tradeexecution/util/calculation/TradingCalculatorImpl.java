@@ -1,19 +1,19 @@
-package com.becker.freelance.tradeexecution.calculation;
+package com.becker.freelance.tradeexecution.util.calculation;
 
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.calculation.ProfitLossCalculation;
 import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Position;
-import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
 
 public class TradingCalculatorImpl implements TradingCalculator {
 
-    private TimeSeries eurUsd;
+    private final EurUsdRequestor eurUsd;
 
-    public TradingCalculatorImpl(TimeSeries eurUsd) {
+    public TradingCalculatorImpl(EurUsdRequestor eurUsd) {
         this.eurUsd = eurUsd;
     }
 
@@ -24,8 +24,7 @@ public class TradingCalculatorImpl implements TradingCalculator {
 
     @Override
     public Decimal getDistanceByAmount(Pair pair, Decimal size, Decimal amount) {
-        Decimal distance = amount.divide(size.multiply(pair.profitPerPointForOneContract()));
-        return distance;
+        return amount.divide(size.multiply(pair.profitPerPointForOneContract()));
     }
 
     @Override
@@ -33,7 +32,7 @@ public class TradingCalculatorImpl implements TradingCalculator {
         Decimal diff = currentPrice.subtract(position.getOpenPrice());
         Decimal profitPerPoint = getProfitPerPoint(position.getPair(), position.getSize());
         Decimal profitCounterCurrency = diff.multiply(profitPerPoint).multiply(new Decimal(position.getDirection().getFactor()));
-        Decimal conversionRate = position.getPair().isEuroCounterCurrency() ? Decimal.ONE : eurUsd.getEntryForTime(time).getCloseMid();
+        Decimal conversionRate = position.getPair().isEuroCounterCurrency() ? Decimal.ONE : eurUsd.getEurUsdForTime(time).getCloseMid();
         Decimal profitEuro = profitCounterCurrency.divide(conversionRate).round(2);
         return new ProfitLossCalculation(conversionRate, profitEuro, currentPrice);
     }

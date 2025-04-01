@@ -1,5 +1,6 @@
 package com.becker.freelance.tradeexecution.calculation.calculation;
 
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.calculation.MarginCalculator;
 import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.position.Direction;
@@ -17,9 +18,9 @@ import com.becker.freelance.math.Decimal;
 import com.becker.freelance.tradeexecution.calculation.MarginCalculatorImpl;
 import com.becker.freelance.tradeexecution.calculation.PositionCalculation;
 import com.becker.freelance.tradeexecution.calculation.PositionCalculation.PositionCalculationResult;
-import com.becker.freelance.tradeexecution.calculation.TradingCalculatorImpl;
 import com.becker.freelance.tradeexecution.calculation.mock.PairMock;
 import com.becker.freelance.tradeexecution.position.DemoPositionFactory;
+import com.becker.freelance.tradeexecution.util.calculation.TradingCalculatorImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -85,12 +86,13 @@ class PositionCalculationTest {
         doReturn(new Decimal("1.5")).when(entryForMarginCalculation).closeAsk();
         doReturn(new Decimal("1.5")).when(entryForMarginCalculation).closeBid();
         doCallRealMethod().when(entryForMarginCalculation).getCloseMid();
-        tradingCalculator = new TradingCalculatorImpl(marginCalulationTimeSeries);
-        marginCalculator = new MarginCalculatorImpl(marginCalulationTimeSeries);
+        EurUsdRequestor eurUsdRequestor = time -> entryForMarginCalculation;
+        tradingCalculator = new TradingCalculatorImpl(eurUsdRequestor);
+        marginCalculator = new MarginCalculatorImpl(eurUsdRequestor);
         positionCalculation = new PositionCalculation(tradingCalculator, marginCalculator);
 
         entrySignalFactory = new EntrySignalFactory();
-        demoPositionFactory = new DemoPositionFactory(marginCalulationTimeSeries);
+        demoPositionFactory = new DemoPositionFactory(eurUsdRequestor);
         buyPosition = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("1"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionType.HARD_LIMIT, entryForMarginCalculation));
         sellPosition = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("1"), Direction.SELL, new Decimal("15"), new Decimal("3"), PositionType.HARD_LIMIT, entryForMarginCalculation));
         buyPosition2 = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("2"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionType.HARD_LIMIT, entryForMarginCalculation));

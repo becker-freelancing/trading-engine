@@ -3,6 +3,7 @@ package com.becker.freelance.tradeexecution;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.backtest.wallet.BacktestWallet;
 import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.calculation.MarginCalculator;
 import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
@@ -11,6 +12,7 @@ import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.position.PositionFactory;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
+import com.becker.freelance.commons.signal.LevelEntrySignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
@@ -18,9 +20,9 @@ import com.becker.freelance.tradeexecution.calculation.MarginCalculatorImpl;
 import com.becker.freelance.tradeexecution.calculation.PositionAdaptor;
 import com.becker.freelance.tradeexecution.calculation.PositionCalculation;
 import com.becker.freelance.tradeexecution.calculation.PositionCalculation.PositionCalculationResult;
-import com.becker.freelance.tradeexecution.calculation.TradingCalculatorImpl;
-import com.becker.freelance.tradeexecution.position.DemoEntrySignalVisitor;
 import com.becker.freelance.tradeexecution.position.DemoPositionFactory;
+import com.becker.freelance.tradeexecution.util.calculation.TradingCalculatorImpl;
+import com.becker.freelance.tradeexecution.util.signal.EntrySignalConverter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,31 +38,32 @@ public class DemoTradeExecutor extends TradeExecutor {
     private Pair pair;
     private PositionFactory positionFactory;
     private PositionAdaptor positionAdaptor;
+    private TradingCalculator tradingCalculator;
 
     public DemoTradeExecutor(){
 
     }
 
-    private DemoTradeExecutor(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair) {
+    private DemoTradeExecutor(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair, EurUsdRequestor eurUsdRequestor) {
         BacktestWallet wallet = new BacktestWallet(backtestExecutionConfiguration.initialWalletAmount());
         this.wallet = () -> wallet;
         openPositions = new ArrayList<>();
         closedTrades = new ArrayList<>();
         this.pair = pair;
-        TradingCalculator tradingCalculator = new TradingCalculatorImpl(backtestExecutionConfiguration.getEurUsdTimeSeries());
-        MarginCalculator marginCalculator = new MarginCalculatorImpl(backtestExecutionConfiguration.getEurUsdTimeSeries());
+        tradingCalculator = new TradingCalculatorImpl(eurUsdRequestor);
+        MarginCalculator marginCalculator = new MarginCalculatorImpl(eurUsdRequestor);
         positionCalculation = new PositionCalculation(tradingCalculator, marginCalculator);
-        positionFactory = new DemoPositionFactory(backtestExecutionConfiguration.eurUsd());
+        positionFactory = new DemoPositionFactory(eurUsdRequestor);
         positionAdaptor = new PositionAdaptor();
     }
 
     @Override
-    protected TradeExecutor construct(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair) {
-        return new DemoTradeExecutor(backtestExecutionConfiguration, pair);
+    protected TradeExecutor construct(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair, EurUsdRequestor eurUsdRequestor) {
+        return new DemoTradeExecutor(backtestExecutionConfiguration, pair, backtestExecutionConfiguration.getEurUsdRequestor());
     }
 
     @Override
-    protected TradeExecutor construct(Pair pair) {
+    protected TradeExecutor construct(Pair pair, EurUsdRequestor eurUsdRequestor) {
         throw new UnsupportedOperationException("DemoTrade Executor needs BacktestConfiguration for construction");
     }
 
@@ -91,12 +94,20 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public void entry(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, EntrySignal entrySignal) {
-        DemoEntrySignalVisitor demoEntrySignalVisitor = new DemoEntrySignalVisitor(positionFactory);
-        entrySignal.visit(demoEntrySignalVisitor);
-        Position position = demoEntrySignalVisitor.getPosition();
+        EntrySignalConverter entrySignalConverter = new EntrySignalConverter(tradingCalculator);
+        entrySignal.visit(entrySignalConverter);
+        LevelEntrySignal levelEntrySignal = entrySignalConverter.getConvertion();
+        Position position = toPosition(levelEntrySignal);
         PositionCalculationResult openPositionsResult = positionCalculation.openPosition(currentPrice, openPositions, position, wallet.get());
         openPositions = openPositionsResult.positions();
         closedTrades.addAll(openPositionsResult.trades());
+    }
+
+    private Position toPosition(LevelEntrySignal entrySignal) {
+        return switch (entrySignal.positionType()) {
+            case HARD_LIMIT -> positionFactory.createStopLimitPosition(entrySignal);
+            case TRAILING -> positionFactory.createTrailingPosition(entrySignal);
+        };
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguratio
 import com.becker.freelance.backtest.wallet.BacktestWallet;
 import com.becker.freelance.capital.trades.TradeController;
 import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.signal.*;
 import com.becker.freelance.commons.timeseries.TimeSeries;
@@ -26,12 +27,12 @@ public class CapitalTradeExecutor extends TradeExecutor {
     }
 
     @Override
-    protected TradeExecutor construct(Pair pair) {
+    protected TradeExecutor construct(Pair pair, EurUsdRequestor eurUsdRequestor) {
         return new CapitalTradeExecutor(pair);
     }
 
     @Override
-    protected TradeExecutor construct(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair) {
+    protected TradeExecutor construct(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair, EurUsdRequestor eurUsdRequestor) {
         throw new UnsupportedOperationException("Not supported");
     }
 
@@ -58,8 +59,8 @@ public class CapitalTradeExecutor extends TradeExecutor {
                     entrySignal.getDirection(),
                     currentPrice.pair(),
                     entrySignal.getSize(),
-                    levelEntrySignal.getStopLevel(),
-                    levelEntrySignal.getLimitLevel()
+                    levelEntrySignal.stopLevel(),
+                    levelEntrySignal.limitLevel()
             );
         } else if (entrySignal instanceof DistanceEntrySignal distanceEntrySignal) {
             tradeController.createPositionStopLimitDistance(

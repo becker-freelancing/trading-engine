@@ -16,6 +16,7 @@
         <module>open-positions-api</module>
         <module>capital-trade-executor</module>
         <module>bybit-trade-executor</module>
+        <module>trade-executor-util</module>
     </modules>
     <artifactId>trade-executor</artifactId>
 

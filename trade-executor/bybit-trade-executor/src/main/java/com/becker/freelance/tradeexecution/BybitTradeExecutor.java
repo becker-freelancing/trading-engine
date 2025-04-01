@@ -2,13 +2,19 @@ package com.becker.freelance.tradeexecution;
 
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.backtest.wallet.BacktestWallet;
-import com.becker.freelance.capital.trades.TradeController;
+import com.becker.freelance.bybit.trades.TradeController;
 import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
+import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.signal.*;
+import com.becker.freelance.commons.signal.EntrySignal;
+import com.becker.freelance.commons.signal.ExitSignal;
+import com.becker.freelance.commons.signal.LevelEntrySignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
+import com.becker.freelance.tradeexecution.util.calculation.TradingCalculatorImpl;
+import com.becker.freelance.tradeexecution.util.signal.EntrySignalConverter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,21 +23,23 @@ import java.util.function.Supplier;
 public class BybitTradeExecutor extends TradeExecutor {
 
     private TradeController tradeController;
+    private TradingCalculator tradingCalculator;
 
     public BybitTradeExecutor() {
     }
 
-    public BybitTradeExecutor(Pair pair) {
+    public BybitTradeExecutor(Pair pair, EurUsdRequestor eurUsdRequestor) {
         tradeController = new TradeController();
+        tradingCalculator = new TradingCalculatorImpl(eurUsdRequestor);
     }
 
     @Override
-    protected TradeExecutor construct(Pair pair) {
-        return new BybitTradeExecutor(pair);
+    protected TradeExecutor construct(Pair pair, EurUsdRequestor eurUsdRequestor) {
+        return new BybitTradeExecutor(pair, eurUsdRequestor);
     }
 
     @Override
-    protected TradeExecutor construct(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair) {
+    protected TradeExecutor construct(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair, EurUsdRequestor eurUsdRequestor) {
         throw new UnsupportedOperationException("Not supported");
     }
 
@@ -47,48 +55,23 @@ public class BybitTradeExecutor extends TradeExecutor {
 
     @Override
     public void exit(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, ExitSignal exitSignal) {
-        System.out.println("EXIT");
-        if (true) {
-            return;
-        }
-        tradeController.closePositions(exitSignal);
+        tradeController.closePositions(currentPrice.pair(), exitSignal);
     }
 
     @Override
     public void entry(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, EntrySignal entrySignal) {
 
-        System.out.println("ENTRY");
-        if (true) {
-            return;
-        }
+        EntrySignalConverter entrySignalConverter = new EntrySignalConverter(tradingCalculator);
+        entrySignal.visit(entrySignalConverter);
+        LevelEntrySignal levelEntrySignal = entrySignalConverter.getConvertion();
 
-        if (entrySignal instanceof LevelEntrySignal levelEntrySignal) {
-            tradeController.createPositionStopLimitLevel(
-                    entrySignal.getDirection(),
-                    currentPrice.pair(),
-                    entrySignal.getSize(),
-                    levelEntrySignal.getStopLevel(),
-                    levelEntrySignal.getLimitLevel()
-            );
-        } else if (entrySignal instanceof DistanceEntrySignal distanceEntrySignal) {
-            tradeController.createPositionStopLimitDistance(
-                    entrySignal.getDirection(),
-                    currentPrice.pair(),
-                    entrySignal.getSize(),
-                    distanceEntrySignal.getStopDistance(),
-                    distanceEntrySignal.getLimitDistance()
-            );
-        } else if (entrySignal instanceof AmountEntrySignal amountEntrySignal) {
-            tradeController.createPositionStopLimitAmount(
-                    entrySignal.getDirection(),
-                    currentPrice.pair(),
-                    entrySignal.getSize(),
-                    amountEntrySignal.getStopAmount(),
-                    amountEntrySignal.getLimitAmount()
-            );
-        } else {
-            throw new UnsupportedOperationException("Could not open position by EntrySignal " + entrySignal.getClass());
-        }
+        tradeController.createPositionStopLimitLevel(
+                levelEntrySignal.getDirection(),
+                currentPrice.pair(),
+                levelEntrySignal.getSize(),
+                levelEntrySignal.stopLevel(),
+                levelEntrySignal.limitLevel()
+        );
     }
 
     @Override

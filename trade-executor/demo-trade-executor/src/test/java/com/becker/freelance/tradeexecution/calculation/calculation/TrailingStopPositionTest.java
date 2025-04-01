@@ -45,7 +45,7 @@ class TrailingStopPositionTest {
         TimeSeriesEntry openPriceSell = buildEntry(new Decimal("6100"));
 
         EntrySignalFactory entrySignalFactory = new EntrySignalFactory();
-        DemoPositionFactory positionFactory = new DemoPositionFactory(timeSeries);
+        DemoPositionFactory positionFactory = new DemoPositionFactory(time -> closeEntry);
         buyPosition = positionFactory.createTrailingPosition((LevelEntrySignal) entrySignalFactory.fromLevel(Decimal.ONE, Direction.BUY, new Decimal("1.02"), new Decimal("1.08"), PositionType.TRAILING, openPrice));
         sellPosition = positionFactory.createTrailingPosition((LevelEntrySignal) entrySignalFactory.fromLevel(Decimal.ONE, Direction.SELL, new Decimal("6200"), new Decimal("6000"), PositionType.TRAILING, openPriceSell));
     }

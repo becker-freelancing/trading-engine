@@ -41,11 +41,6 @@ public class KrakenSubscribableDataProvider extends SubscribableDataProvider {
     }
 
     @Override
-    public TimeSeries getCurrentTimeSeries() {
-        return timeSeries;
-    }
-
-    @Override
     public void synchronize(LocalDateTime time) {
         if (timeSeries == null) {
             this.timeSeries = TIME_SERIES_HOLDER.getOrRead(pair, this::readTimeSeries);

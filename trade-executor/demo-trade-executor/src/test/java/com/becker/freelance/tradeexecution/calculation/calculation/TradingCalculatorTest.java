@@ -1,15 +1,15 @@
 package com.becker.freelance.tradeexecution.calculation.calculation;
 
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.calculation.ProfitLossCalculation;
 import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
-import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
-import com.becker.freelance.tradeexecution.calculation.TradingCalculatorImpl;
 import com.becker.freelance.tradeexecution.calculation.mock.PairMock;
+import com.becker.freelance.tradeexecution.util.calculation.TradingCalculatorImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,24 +20,23 @@ import static org.mockito.Mockito.*;
 
 public class TradingCalculatorTest {
 
-    private TimeSeries timeSeries;
+    private EurUsdRequestor eurUsdRequestor;
 
     private TimeSeriesEntry closeEntry;
 
     @BeforeEach
     public void setUp() {
-        timeSeries = mock(TimeSeries.class);
+        eurUsdRequestor = mock(EurUsdRequestor.class);
         closeEntry = mock(TimeSeriesEntry.class);
 
-        when(timeSeries.getEntryForTime(any(LocalDateTime.class))).thenReturn(closeEntry);
-        doReturn(PairMock.eurUsd()).when(timeSeries).getPair();
+        when(eurUsdRequestor.getEurUsdForTime(any(LocalDateTime.class))).thenReturn(closeEntry);
         when(closeEntry.getCloseMid()).thenReturn(new Decimal("1.0545"));
     }
 
 
     @Test
     public void testWithEurUsdSize1() {
-        TradingCalculator calculator = new TradingCalculatorImpl(timeSeries);
+        TradingCalculator calculator = new TradingCalculatorImpl(eurUsdRequestor);
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
         Position position = getPosition(new Decimal("1.04876"), PairMock.eurUsd(), Decimal.TEN, Direction.BUY);
@@ -51,7 +50,7 @@ public class TradingCalculatorTest {
 
     @Test
     public void testWithEurUsdSize0_5() {
-        TradingCalculator calculator = new TradingCalculatorImpl(timeSeries);
+        TradingCalculator calculator = new TradingCalculatorImpl(eurUsdRequestor);
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
         Position position = getPosition(new Decimal("1.04876"), PairMock.eurUsd(), Decimal.ONE, Direction.SELL);
@@ -65,7 +64,7 @@ public class TradingCalculatorTest {
 
     @Test
     public void testWithEthEurSize1() {
-        TradingCalculator calculator = new TradingCalculatorImpl(timeSeries);
+        TradingCalculator calculator = new TradingCalculatorImpl(eurUsdRequestor);
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
         Position position = getPosition(new Decimal("3361.1"), PairMock.ethEur(), Decimal.ONE, Direction.SELL);
@@ -79,7 +78,7 @@ public class TradingCalculatorTest {
 
     @Test
     public void testWithEthEurSize0_5() {
-        TradingCalculator calculator = new TradingCalculatorImpl(timeSeries);
+        TradingCalculator calculator = new TradingCalculatorImpl(eurUsdRequestor);
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
         Position position = getPosition(new Decimal("3361.1"), PairMock.ethEur(), new Decimal("0.1"), Direction.BUY);
@@ -93,7 +92,7 @@ public class TradingCalculatorTest {
 
     @Test
     public void testWithPaxgUsdSize1() {
-        TradingCalculator calculator = new TradingCalculatorImpl(timeSeries);
+        TradingCalculator calculator = new TradingCalculatorImpl(eurUsdRequestor);
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
         when(closeEntry.getCloseMid()).thenReturn(new Decimal("0.9875"));
 
@@ -108,7 +107,7 @@ public class TradingCalculatorTest {
 
     @Test
     public void testWithXbtEurSize1() {
-        TradingCalculator calculator = new TradingCalculatorImpl(timeSeries);
+        TradingCalculator calculator = new TradingCalculatorImpl(eurUsdRequestor);
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
         Position position = getPosition(new Decimal("68752.35"), PairMock.xbtEur(), Decimal.ONE, Direction.SELL);
@@ -131,7 +130,7 @@ public class TradingCalculatorTest {
 
     @Test
     void calcDistanceInEurosFromDistanceInPointsAbsoluteForEurUsd(){
-        TradingCalculator calculator = new TradingCalculatorImpl(timeSeries);
+        TradingCalculator calculator = new TradingCalculatorImpl(eurUsdRequestor);
 
         Decimal distance = calculator.getDistanceByAmount(PairMock.eurUsd(), new Decimal("2"), new Decimal("5"));
 
@@ -140,7 +139,7 @@ public class TradingCalculatorTest {
 
     @Test
     void calcDistanceInEurosFromDistanceInPointsAbsoluteForXbtEur(){
-        TradingCalculator calculator = new TradingCalculatorImpl(timeSeries);
+        TradingCalculator calculator = new TradingCalculatorImpl(eurUsdRequestor);
 
         Decimal distance = calculator.getDistanceByAmount(PairMock.xbtEur(), new Decimal("1"), new Decimal("100"));
 
@@ -149,7 +148,7 @@ public class TradingCalculatorTest {
 
     @Test
     void calcDistanceInEurosFromDistanceInPointsAbsoluteForXbtEurSize0_5(){
-        TradingCalculator calculator = new TradingCalculatorImpl(timeSeries);
+        TradingCalculator calculator = new TradingCalculatorImpl(eurUsdRequestor);
 
         Decimal distance = calculator.getDistanceByAmount(PairMock.xbtEur(), new Decimal("0.5"), new Decimal("100"));
 

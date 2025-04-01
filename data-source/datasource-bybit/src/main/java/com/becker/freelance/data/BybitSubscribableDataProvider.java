@@ -8,6 +8,8 @@ import com.becker.freelance.commons.timeseries.CompleteTimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
@@ -15,6 +17,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class BybitSubscribableDataProvider extends SubscribableDataProvider implements MarketDataListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(BybitSubscribableDataProvider.class);
 
     private static final AsyncValueHolder<Pair, TimeSeries> TIME_SERIES_HOLDER = new AsyncValueHolder<>();
 
@@ -46,8 +50,8 @@ public class BybitSubscribableDataProvider extends SubscribableDataProvider impl
         if (marketData.closeTime().equals(lastAddedTime)) {
             return;
         }
+        logger.debug("Receiving Market-Data: {}", marketData);
         lastAddedTime = marketData.closeTime();
-        System.out.println(this + "\t" + marketData);
         TimeSeriesEntry entry = map(marketData);
         TimeSeries timeSeries = TIME_SERIES_HOLDER.getOrRead(pair, this::createNewTimeSeries);
         timeSeries.addEntry(entry);
@@ -57,11 +61,6 @@ public class BybitSubscribableDataProvider extends SubscribableDataProvider impl
     @Override
     public Pair supportedPair() {
         return pair;
-    }
-
-    @Override
-    public TimeSeries getCurrentTimeSeries() {
-        return TIME_SERIES_HOLDER.getOrRead(pair, this::createNewTimeSeries);
     }
 
     private TimeSeries createNewTimeSeries() {

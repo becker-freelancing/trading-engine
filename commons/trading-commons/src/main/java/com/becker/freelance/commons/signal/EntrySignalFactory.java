@@ -92,12 +92,12 @@ public class EntrySignalFactory {
     public EntrySignal fromLevel(Decimal size, Direction direction, Decimal stopLevel, Decimal limitLevel, PositionType positionType, TimeSeriesEntry currentPrice) {
         return new LevelEntrySignal() {
             @Override
-            public Decimal getStopLevel() {
+            public Decimal stopLevel() {
                 return stopLevel;
             }
 
             @Override
-            public Decimal getLimitLevel() {
+            public Decimal limitLevel() {
                 return limitLevel;
             }
 

@@ -4,6 +4,7 @@ import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguratio
 import com.becker.freelance.backtest.wallet.BacktestWallet;
 import com.becker.freelance.commons.AppConfiguration;
 import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
@@ -27,7 +28,7 @@ public abstract class TradeExecutor implements OpenPositionRequestor {
         return new MultiplePairTradeExecutor(tradeExecutorsForPairs, backtestExecutionConfiguration);
     }
 
-    public static TradeExecutor find(AppConfiguration appConfiguration, Pair pair) {
+    public static TradeExecutor find(AppConfiguration appConfiguration, Pair pair, EurUsdRequestor eurUsdRequestor) {
         ServiceLoader<TradeExecutor> tradeExecutors = ServiceLoader.load(TradeExecutor.class);
         AppMode appMode = appConfiguration.appMode();
         List<TradeExecutor> executors = tradeExecutors.stream().map(ServiceLoader.Provider::get).filter(provider -> provider.supports(appMode)).toList();
@@ -39,7 +40,7 @@ public abstract class TradeExecutor implements OpenPositionRequestor {
             throw new IllegalArgumentException("AppMode " + appMode.getDescription() + " is not supported");
         }
 
-        return executors.get(0).construct(pair);
+        return executors.get(0).construct(pair, eurUsdRequestor);
     }
 
     private static TradeExecutor findForPair(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair) {
@@ -54,12 +55,12 @@ public abstract class TradeExecutor implements OpenPositionRequestor {
             throw new IllegalArgumentException("AppMode " + appMode.getDescription() + " is not supported");
         }
 
-        return executors.get(0).construct(backtestExecutionConfiguration, pair);
+        return executors.get(0).construct(backtestExecutionConfiguration, pair, backtestExecutionConfiguration.getEurUsdRequestor());
      }
 
-    protected abstract TradeExecutor construct(Pair pair);
+    protected abstract TradeExecutor construct(Pair pair, EurUsdRequestor eurUsdRequestor);
 
-    protected abstract TradeExecutor construct(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair);
+    protected abstract TradeExecutor construct(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair, EurUsdRequestor eurUsdRequestor);
 
     protected abstract boolean supports(AppMode appMode);
 

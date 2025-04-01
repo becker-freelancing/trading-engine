@@ -29,9 +29,10 @@ public class RemoteBacktestExecutor implements Runnable {
     @Override
     public void run() {
         try {
-            TradeExecutor tradeExecutor = TradeExecutor.find(appConfiguration, pair);
 
             DataProviderFactory dataProviderFactory = DataProviderFactory.find(appConfiguration.appMode());
+
+            TradeExecutor tradeExecutor = TradeExecutor.find(appConfiguration, pair, dataProviderFactory.createEurUsdRequestor());
 
             SubscribableDataProvider subscribableDataProvider = dataProviderFactory.createSubscribableDataProvider(pair);
 

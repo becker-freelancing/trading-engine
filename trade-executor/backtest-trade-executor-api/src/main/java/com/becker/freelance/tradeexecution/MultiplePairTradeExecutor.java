@@ -3,6 +3,7 @@ package com.becker.freelance.tradeexecution;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.backtest.wallet.BacktestWallet;
 import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
@@ -28,12 +29,12 @@ class MultiplePairTradeExecutor extends TradeExecutor {
     }
 
     @Override
-    protected TradeExecutor construct(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair) {
+    protected TradeExecutor construct(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair, EurUsdRequestor eurUsdRequestor) {
         throw new UnsupportedOperationException("MultiplePairTradeExecutor must be constructed explicitly");
     }
 
     @Override
-    protected TradeExecutor construct(Pair pair) {
+    protected TradeExecutor construct(Pair pair, EurUsdRequestor eurUsdRequestor) {
         throw new UnsupportedOperationException("MultiplePairTradeExecutor must be constructed explicitly");
     }
 

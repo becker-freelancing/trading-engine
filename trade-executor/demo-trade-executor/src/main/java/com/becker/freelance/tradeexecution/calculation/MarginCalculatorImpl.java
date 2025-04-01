@@ -1,17 +1,17 @@
 package com.becker.freelance.tradeexecution.calculation;
 
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.calculation.MarginCalculator;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
 
 public class MarginCalculatorImpl implements MarginCalculator {
 
-    private final TimeSeries eurUsd;
+    private final EurUsdRequestor eurUsd;
 
-    public MarginCalculatorImpl(TimeSeries eurUsd) {
+    public MarginCalculatorImpl(EurUsdRequestor eurUsd) {
         this.eurUsd = eurUsd;
     }
 
@@ -31,7 +31,7 @@ public class MarginCalculatorImpl implements MarginCalculator {
         }
 
         return marginCounterCurrency
-                .divide(eurUsd.getEntryForTime(time).getCloseMid())
+                .divide(eurUsd.getEurUsdForTime(time).getCloseMid())
                 .round(2);
     }
 }

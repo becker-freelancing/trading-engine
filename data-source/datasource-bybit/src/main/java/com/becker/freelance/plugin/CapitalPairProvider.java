@@ -14,7 +14,9 @@ public class CapitalPairProvider implements PairProvider {
         return List.of(
                 from("BTC", "USDT", 1, "BTC/USD M1", 1., 0.0001, 60., 0.05, 2., 2),
 
-                from("ETH", "USDT", 1, "ETH/USD M1", 1., 0.0001, 60., 0.05, 2., 2)
+                from("ETH", "USDT", 1, "ETH/USD M1", 1., 0.0001, 60., 0.05, 2., 2),
+
+                from("EUR", "USDT", 1, "ETH/USD M1", 1., 0.0001, 60., 0.05, 2., 2)
 
         );
     }
@@ -35,5 +37,7 @@ public class CapitalPairProvider implements PairProvider {
         public boolean isExecutableInAppMode(AppMode appMode) {
             return new BybitDemoAppMode().isEqual(appMode);
         }
+
+
     }
 }

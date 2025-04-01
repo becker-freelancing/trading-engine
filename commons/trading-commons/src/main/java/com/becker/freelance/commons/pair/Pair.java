@@ -11,8 +11,8 @@ public interface Pair {
     static Pair eurUsd1() {
         List<Pair> pairs = allPairs();
         return pairs.stream()
-                .filter(p -> "EUR".equals(p.baseCurrency()))
-                .filter(p -> "USD".equals(p.counterCurrency()))
+                .filter(Pair::isEuroBaseCurrency)
+                .filter(Pair::isUsdCounterCurrency)
                 .filter(p -> 1 == p.timeInMinutes())
                 .findAny()
                 .orElseThrow(() -> new IllegalStateException("No EUR/USD M1 found in " + pairs));
@@ -66,4 +66,11 @@ public interface Pair {
         return "EUR".equals(counterCurrency());
     }
 
+    default boolean isEuroBaseCurrency() {
+        return "EUR".equals(counterCurrency());
+    }
+
+    default boolean isUsdCounterCurrency() {
+        return "USD".equals(counterCurrency());
+    }
 }

@@ -25,17 +25,12 @@ public class EnvironmentProvider {
     }
 
 
-    String login() {
-        return System.getenv("CAPITAL_LOGIN");
+    public String secret() {
+        return System.getenv("BYBIT_SECRET");
     }
 
 
-    String password() {
-        return System.getenv("CAPITAL_PASSWORD");
-    }
-
-
-    String apiKey() {
-        return System.getenv("CAPITAL_API_KEY");
+    public String apiKey() {
+        return System.getenv("BYBIT_API_KEY");
     }
 }
