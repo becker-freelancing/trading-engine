@@ -18,6 +18,17 @@ public interface Pair {
                 .orElseThrow(() -> new IllegalStateException("No EUR/USD M1 found in " + pairs));
     }
 
+
+    static Pair usdEur1() {
+        List<Pair> pairs = allPairs();
+        return pairs.stream()
+                .filter(Pair::isUsdBaseCurrency)
+                .filter(Pair::isEuroCounterCurrency)
+                .filter(p -> 1 == p.timeInMinutes())
+                .findAny()
+                .orElseThrow(() -> new IllegalStateException("No EUR/USD M1 found in " + pairs));
+    }
+
     static Pair fromTechnicalName(String technicalName) {
         return allPairs().stream()
                 .filter(p -> technicalName.equals(p.technicalName()))
@@ -63,14 +74,26 @@ public interface Pair {
     boolean isExecutableInAppMode(AppMode appMode);
 
     default boolean isEuroCounterCurrency() {
-        return "EUR".equals(counterCurrency());
+        return getEurString().equals(counterCurrency());
+    }
+
+    default String getEurString() {
+        return "EUR";
     }
 
     default boolean isEuroBaseCurrency() {
-        return "EUR".equals(counterCurrency());
+        return getEurString().equals(baseCurrency());
     }
 
     default boolean isUsdCounterCurrency() {
-        return "USD".equals(counterCurrency());
+        return getUsdString().equals(counterCurrency());
+    }
+
+    default String getUsdString() {
+        return "USD";
+    }
+
+    default boolean isUsdBaseCurrency() {
+        return getUsdString().equals(baseCurrency());
     }
 }

@@ -98,6 +98,11 @@ class TradeApiClient {
                 .tpslMode("Full")
                 .build();
         Map<String, Object> order = (Map<String, Object>) tradeRestClient.createOrder(orderRequest);
+        if (!"OK".equals(order.get("retMsg"))) {
+            logger.warn("Could not open order for pair {}, because: {}", pair.technicalName(), order.get("retMsg"));
+            return Optional.empty();
+        }
+        logger.info("Order opened for {}, (Direction: {}, Stop: {}, Limit: {})", pair.technicalName(), direction, stopLevel, limitLevel);
         Map<String, String> result = (Map<String, String>) order.get("result");
         return Optional.ofNullable(result.get("id"));
     }

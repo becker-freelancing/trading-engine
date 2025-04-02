@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 import static com.bybit.api.client.constant.Util.generateTransferID;
 
 class WebSocketClientDelegate implements WebsocketClient {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketClientDelegate.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 

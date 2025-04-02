@@ -26,21 +26,32 @@ class MarketDataEndpoint {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Logger logger = LoggerFactory.getLogger(MarketDataEndpoint.class);
 
-    private final Set<Pair> pairs;
-    private final Map<Pair, Set<Consumer<MarketData>>> marketDataConsumer;
-    private final String endpoint;
-    private WebSocketClientDelegate websocketClient;
 
+    private final String urlPath;
 
-    public MarketDataEndpoint(Map<Pair, Set<Consumer<MarketData>>> marketDataConsumer) {
+    private MarketDataEndpoint(Map<Pair, Set<Consumer<MarketData>>> marketDataConsumer, String urlPath) {
         this.pairs = marketDataConsumer.keySet();
         this.marketDataConsumer = marketDataConsumer;
+        this.urlPath = urlPath;
         String endpoint = BybitApiConfig.STREAM_MAINNET_DOMAIN;
         if (new EnvironmentProvider().isDemo()) {
             endpoint = BybitApiConfig.STREAM_TESTNET_DOMAIN;
         }
         this.endpoint = endpoint;
         setWebsocketClient();
+    }
+
+    private final Set<Pair> pairs;
+    private final Map<Pair, Set<Consumer<MarketData>>> marketDataConsumer;
+
+    public static MarketDataEndpoint derivateEndpoint(Map<Pair, Set<Consumer<MarketData>>> derivateListeners) {
+        return new MarketDataEndpoint(derivateListeners, BybitApiConfig.V5_PUBLIC_LINEAR);
+    }
+    private final String endpoint;
+    private WebSocketClientDelegate websocketClient;
+
+    public static MarketDataEndpoint spotEndpoint(Map<Pair, Set<Consumer<MarketData>>> spotListeners) {
+        return new MarketDataEndpoint(spotListeners, BybitApiConfig.V5_PUBLIC_SPOT);
     }
 
     private void onError() {
@@ -54,7 +65,7 @@ class MarketDataEndpoint {
 
     public void startListen() {
         List<String> bybitPairs = pairs.stream().map(this::convertPairs).toList();
-        websocketClient.getPublicChannelStream(bybitPairs, BybitApiConfig.V5_PUBLIC_LINEAR);
+        websocketClient.getPublicChannelStream(bybitPairs, urlPath);
     }
 
     public void stopListen() {

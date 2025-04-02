@@ -12,17 +12,37 @@ import java.util.function.Consumer;
 
 public class MarketDataSocketRegistry {
 
-    private static final Map<Pair, Set<Consumer<MarketData>>> listeners = new HashMap<>();
-    private static MarketDataEndpoint marketDataEndpoint;
+    private static final Map<Pair, Set<Consumer<MarketData>>> derivateListeners = new HashMap<>();
+    private static final Map<Pair, Set<Consumer<MarketData>>> spotListeners = new HashMap<>();
+    private static MarketDataEndpoint marketDataEndpointDerivate;
+    private static MarketDataEndpoint marketDataEndpointSpot;
 
     public static synchronized void registerListener(Pair pair, MarketDataListener listener) {
-        if (marketDataEndpoint != null) {
-            marketDataEndpoint.stopListen();
+        if (pair.isUsdBaseCurrency() && pair.isEuroCounterCurrency()) {
+            listenForSpot(pair, listener);
+        } else {
+            listenForDerivate(pair, listener);
         }
-        listeners.computeIfAbsent(pair, p -> new HashSet<>());
-        listeners.get(pair).add(listener);
-        marketDataEndpoint = new MarketDataEndpoint(listeners);
-        marketDataEndpoint.startListen();
+    }
+
+    private static void listenForDerivate(Pair pair, MarketDataListener listener) {
+        if (marketDataEndpointDerivate != null) {
+            marketDataEndpointDerivate.stopListen();
+        }
+        derivateListeners.computeIfAbsent(pair, p -> new HashSet<>());
+        derivateListeners.get(pair).add(listener);
+        marketDataEndpointDerivate = MarketDataEndpoint.derivateEndpoint(derivateListeners);
+        marketDataEndpointDerivate.startListen();
+    }
+
+    private static void listenForSpot(Pair pair, MarketDataListener listener) {
+        if (marketDataEndpointSpot != null) {
+            marketDataEndpointSpot.stopListen();
+        }
+        spotListeners.computeIfAbsent(pair, p -> new HashSet<>());
+        spotListeners.get(pair).add(listener);
+        marketDataEndpointSpot = MarketDataEndpoint.spotEndpoint(spotListeners);
+        marketDataEndpointSpot.startListen();
     }
 
 }

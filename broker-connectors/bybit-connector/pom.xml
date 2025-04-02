@@ -21,6 +21,12 @@
             <groupId>io.github.wuhewuhe</groupId>
             <artifactId>bybit-java-api</artifactId>
             <version>1.2.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

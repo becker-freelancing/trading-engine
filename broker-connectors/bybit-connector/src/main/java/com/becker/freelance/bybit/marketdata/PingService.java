@@ -13,7 +13,7 @@ class PingService {
 
     private static final String PING_DATA = "{\"op\":\"ping\"}";
 
-    private static Logger logger = LoggerFactory.getLogger(PingService.class);
+    private static final Logger logger = LoggerFactory.getLogger(PingService.class);
 
     private static PingService instance;
 
@@ -58,7 +58,7 @@ class PingService {
     }
 
     private void ping() {
-        logger.info("Executing ping...");
+        logger.debug("Executing ping...");
         ws.send(PING_DATA);
     }
 
