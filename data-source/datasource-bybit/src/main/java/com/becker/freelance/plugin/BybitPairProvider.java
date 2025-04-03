@@ -13,8 +13,10 @@ public class BybitPairProvider implements PairProvider {
     public List<Pair> get() {
         return List.of(
                 from("BTC", "USDT", 1, "BTC/USDT M1", 1., 0.0001, 60., 0.05, 2., 2),
+                from("BTC", "USDT", 5, "BTC/USDT M5", 1., 0.0001, 60., 0.05, 2., 2),
 
                 from("ETH", "USDT", 1, "ETH/USDT M1", 1., 0.0001, 60., 0.05, 2., 2),
+                from("ETH", "USDT", 5, "ETH/USDT M5", 1., 0.0001, 60., 0.05, 2., 2),
 
                 from("USDT", "EUR", 1, "USDT/EUR M1", 1., 0.0001, 60., 0.05, 2., 2),
                 from("EUR", "USDT", 1, "EUR/USDT M1", 1., 0.0001, 60., 0.05, 2., 2)
