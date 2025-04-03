@@ -1,7 +1,6 @@
 package com.becker.freelance.bybit.marketdata;
 
 import com.becker.freelance.broker.marketdata.MarketData;
-import com.becker.freelance.bybit.env.EnvironmentProvider;
 import com.becker.freelance.bybit.util.PairConverter;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.math.Decimal;
@@ -34,9 +33,9 @@ class MarketDataEndpoint {
         this.marketDataConsumer = marketDataConsumer;
         this.urlPath = urlPath;
         String endpoint = BybitApiConfig.STREAM_MAINNET_DOMAIN;
-        if (new EnvironmentProvider().isDemo()) {
-            endpoint = BybitApiConfig.STREAM_TESTNET_DOMAIN;
-        }
+//        if (new EnvironmentProvider().isDemo()) {
+//            endpoint = BybitApiConfig.STREAM_TESTNET_DOMAIN;
+//        }
         this.endpoint = endpoint;
         setWebsocketClient();
     }
