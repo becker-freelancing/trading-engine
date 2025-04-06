@@ -3,6 +3,7 @@ package com.becker.freelance.data;
 import com.becker.freelance.broker.marketdata.MarketData;
 import com.becker.freelance.broker.marketdata.MarketDataListener;
 import com.becker.freelance.bybit.marketdata.MarketDataSocketRegistry;
+import com.becker.freelance.bybit.orderbook.OrderbookSocketRegistry;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.CompleteTimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeries;
@@ -31,6 +32,7 @@ public class BybitSubscribableDataProvider extends SubscribableDataProvider impl
         this.pair = pair;
         this.subscribers = new LinkedHashSet<>();
         MarketDataSocketRegistry.registerListener(pair, this);
+        OrderbookSocketRegistry.registerListener(pair, new OrderBookListener(pair));
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.bybit.api.client.domain.CategoryType;
 import com.bybit.api.client.domain.position.request.PositionDataRequest;
 import com.bybit.api.client.restApi.BybitApiPositionRestClient;
 import com.bybit.api.client.service.BybitApiClientFactory;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,7 +23,7 @@ import java.util.stream.Stream;
 public class RequestTradeHistory {
 
     public static void main(String[] args) throws IOException {
-        LocalDateTime exportStart = LocalDateTime.parse("2025-04-04T07:50:00");
+        LocalDateTime exportStart = LocalDateTime.parse("2025-04-01T07:50:00");
         LocalDateTime exportEnd = LocalDateTime.parse("2025-04-05T00:00:00");
 
 
@@ -36,24 +37,12 @@ public class RequestTradeHistory {
         Stream<Pnl> pnls = Stream.of();
         while (exportStart.isBefore(exportEnd)) {
             long startMillis = exportStart.toInstant(ZoneOffset.UTC).toEpochMilli();
-            LocalDateTime currEnd = exportStart.plusDays(6);
+            LocalDateTime currEnd = exportStart.plusHours(1);
             long endMillis = currEnd.toInstant(ZoneOffset.UTC).toEpochMilli();
+            System.out.println("Requesting " + exportStart + " - " + currEnd);
 
 
-            Map<String, Object> closePnlList = (Map<String, Object>) bybitApiPositionRestClient.getClosePnlList(PositionDataRequest.builder()
-                    .category(CategoryType.LINEAR)
-                    .startTime(startMillis)
-                    .endTime(endMillis).build());
-
-            if (0 != (int) closePnlList.get("retCode")) {
-                System.out.println(closePnlList.get("retMsg"));
-            }
-
-            Map<String, Object> result = (Map<String, Object>) closePnlList.get("result");
-            List<Map<String, String>> list = (List<Map<String, String>>) result.get("list");
-
-            pnls = Stream.concat(pnls, list.stream()
-                    .map(RequestTradeHistory::toPnl));
+            pnls = requestData(bybitApiPositionRestClient, startMillis, endMillis, pnls, null);
 
             exportStart = currEnd;
         }
@@ -74,6 +63,36 @@ public class RequestTradeHistory {
 
         Files.writeString(path, csv);
         System.out.println("Saved to " + path);
+    }
+
+    @NotNull
+    private static Stream<Pnl> requestData(BybitApiPositionRestClient bybitApiPositionRestClient, long startMillis, long endMillis, Stream<Pnl> pnls, String cursor) {
+        PositionDataRequest.PositionDataRequestBuilder positionDataRequestBuilder = PositionDataRequest.builder().category(CategoryType.LINEAR);
+
+        if (cursor == null) {
+            positionDataRequestBuilder = positionDataRequestBuilder
+                    .startTime(startMillis)
+                    .endTime(endMillis);
+        }
+
+        if (cursor != null) {
+            positionDataRequestBuilder = positionDataRequestBuilder.cursor(cursor);
+        }
+
+        Map<String, Object> closePnlList = (Map<String, Object>) bybitApiPositionRestClient.getClosePnlList(positionDataRequestBuilder
+                .build());
+
+        if (0 != (int) closePnlList.get("retCode")) {
+            System.err.println(closePnlList.get("retMsg"));
+        }
+
+        Map<String, Object> result = (Map<String, Object>) closePnlList.get("result");
+        List<Map<String, String>> list = (List<Map<String, String>>) result.get("list");
+
+
+        pnls = Stream.concat(pnls, list.stream()
+                .map(RequestTradeHistory::toPnl));
+        return pnls;
     }
 
     private static Pnl toPnl(Map<String, String> stringStringMap) {
