@@ -6,6 +6,7 @@ import com.bybit.api.client.domain.market.request.MarketDataRequest;
 import com.bybit.api.client.restApi.BybitApiMarketRestClient;
 import com.bybit.api.client.service.BybitApiClientFactory;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -42,14 +43,21 @@ public class RequestMarketData {
         while (true) {
             startTime = endTime.minusMinutes(998);
             System.out.println("Requesting from " + startTime + " to " + endTime);
-            Map<String, Object> marketLinesData = (Map<String, Object>) marketRestClient.getMarketLinesData(MarketDataRequest.builder()
-                    .category(CategoryType.LINEAR)
-                    .symbol(symbol)
-                    .marketInterval(MarketInterval.ONE_MINUTE)
-                    .start(map(startTime))
-                    .end(map(endTime))
-                    .limit(9999)
-                    .build());
+            Map<String, Object> marketLinesData;
+            try {
+
+                marketLinesData = (Map<String, Object>) marketRestClient.getMarketLinesData(MarketDataRequest.builder()
+                        .category(CategoryType.LINEAR)
+                        .symbol(symbol)
+                        .marketInterval(MarketInterval.ONE_MINUTE)
+                        .start(map(startTime))
+                        .end(map(endTime))
+                        .limit(9999)
+                        .build());
+            } catch (Exception e) {
+                e.printStackTrace();
+                continue;
+            }
 
             if (!"OK".equals(marketLinesData.get("retMsg"))) {
                 System.out.println(marketLinesData.get("retMsg"));
@@ -69,6 +77,8 @@ public class RequestMarketData {
 
             endTime = startTime;
         }
+
+        JOptionPane.showInputDialog("FINISHED");
     }
 
     private static Stream<String> mapMarketData(List<List<String>> list) {

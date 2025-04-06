@@ -12,7 +12,7 @@ public class BybitDemoAppMode implements AppMode {
 
     @Override
     public String getDataSourceName() {
-        return "BYBIT";
+        return "BYBIT_LOCAL";
     }
 
     @Override
@@ -20,10 +20,6 @@ public class BybitDemoAppMode implements AppMode {
         return getDataSourceName().equals(other.getDataSourceName()) && isDemo() == other.isDemo();
     }
 
-    @Override
-    public void onSelection() {
-        throw new IllegalStateException("System Env must be set");
-    }
 
     @Override
     public boolean equals(Object object) {

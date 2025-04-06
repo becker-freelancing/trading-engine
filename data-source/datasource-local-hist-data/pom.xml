@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>hist-data-local</artifactId>
+    <artifactId>datasource-local-hist-data</artifactId>
 
     <dependencies>
         <dependency>
@@ -34,7 +34,7 @@
         </dependency>
         <dependency>
             <groupId>com.becker-freelance.trading</groupId>
-            <artifactId>datasource-csv</artifactId>
+            <artifactId>datasource-local-csv</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

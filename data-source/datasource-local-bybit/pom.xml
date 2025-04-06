@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>binance-local</artifactId>
+    <artifactId>datasource-local-bybit</artifactId>
 
     <dependencies>
         <dependency>

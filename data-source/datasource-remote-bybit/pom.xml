@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>datasource-bybit</artifactId>
+    <artifactId>datasource-remote-bybit</artifactId>
 
     <dependencies>
         <dependency>

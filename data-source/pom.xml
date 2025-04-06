@@ -12,12 +12,13 @@
     <packaging>pom</packaging>
     <modules>
         <module>datasource-api</module>
-        <module>datasource-bybit</module>
-        <module>kraken-local</module>
-        <module>hist-data-local</module>
-        <module>binance-local</module>
-        <module>datasource-csv</module>
-        <module>datasource-capitalcom</module>
+        <module>datasource-remote-bybit</module>
+        <module>datasource-local-kraken</module>
+        <module>datasource-local-hist-data</module>
+        <module>datasource-local-binance</module>
+        <module>datasource-local-csv</module>
+        <module>datasource-local-bybit</module>
+        <module>datasource-remote-capitalcom</module>
     </modules>
 
     <artifactId>data-source</artifactId>
