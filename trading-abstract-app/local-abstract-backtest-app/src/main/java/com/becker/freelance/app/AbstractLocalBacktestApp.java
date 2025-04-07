@@ -1,5 +1,6 @@
 package com.becker.freelance.app;
 
+import com.becker.freelance.app.BacktestAppInitiatingUtil.LastExecutionProperties;
 import com.becker.freelance.backtest.BacktestEngine;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.commons.AppConfiguration;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 class AbstractLocalBacktestApp implements Runnable {
 
@@ -34,11 +36,25 @@ class AbstractLocalBacktestApp implements Runnable {
 
     @Override
     public void run() {
-        BaseStrategy strategy = appInitiatingUtil.askStrategy();
+        Optional<LastExecutionProperties> properties = appInitiatingUtil.findProperties();
+        BaseStrategy strategy;
+        AppMode appMode;
+        List<Pair> pairs;
+        Integer numThreads;
+        if (properties.isPresent()) {
+            LastExecutionProperties lastExecutionProperties = properties.get();
+            strategy = lastExecutionProperties.baseStrategy();
+            appMode = lastExecutionProperties.appMode();
+            pairs = lastExecutionProperties.pairs();
+            numThreads = lastExecutionProperties.numberOfThread();
+        } else {
+            strategy = appInitiatingUtil.askStrategy();
+            appMode = appInitiatingUtil.askAppMode();
+            pairs = appInitiatingUtil.askPair(appMode);
+            numThreads = appInitiatingUtil.askNumberOfThreads();
+        }
+        appInitiatingUtil.saveProperties(strategy, numThreads, pairs, appMode);
         logger.info("\t\tAnzahl Permutationen {}", strategy.getParameters().permutate().size());
-        AppMode appMode = appInitiatingUtil.askAppMode();
-        List<Pair> pairs = appInitiatingUtil.askPair(appMode);
-        Integer numThreads = appInitiatingUtil.askNumberOfThreads();
 
         TimeSeries eurusd = DataProviderFactory.find(appMode).createDataProvider(Pair.eurUsd1()).readTimeSeries(fromTime.minusDays(1), toTime);
 

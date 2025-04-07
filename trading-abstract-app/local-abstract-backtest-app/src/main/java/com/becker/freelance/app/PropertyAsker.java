@@ -77,4 +77,8 @@ class PropertyAsker {
         String message = "\t\tGeben Sie die Nummern der gewünschten {} ein (Komma separiert, falls mehrere): ";
         return askMultipleInput(selections, name, message);
     }
+
+    public void log(List<String> logs) {
+        logs.forEach(logger::info);
+    }
 }

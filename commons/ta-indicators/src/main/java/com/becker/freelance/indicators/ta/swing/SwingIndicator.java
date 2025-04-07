@@ -1,42 +1,28 @@
 package com.becker.freelance.indicators.ta.swing;
 
+import com.becker.freelance.indicators.ta.cache.CachableIndicator;
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.Indicator;
 import org.ta4j.core.num.Num;
 
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-abstract class SwingIndicator<T extends SwingPoint> implements Indicator<Optional<T>> {
+public abstract class SwingIndicator<T extends SwingPoint> extends CachableIndicator<Integer, T> implements Indicator<Optional<T>> {
 
     protected final int period;
     protected final Indicator<Num> estimationIndicator;
-    private final Map<Integer, T> cache;
     private final PeriodPredicate beforeCandlePredicate;
     private final PeriodPredicate afterCandlePredicate;
 
 
     SwingIndicator(int period, Indicator<Num> estimationIndicator, int cacheSize, PeriodPredicate beforeCandlePredicate, PeriodPredicate afterCandlePredicate) {
+        super(cacheSize);
         this.period = period;
         this.estimationIndicator = estimationIndicator;
-        this.cache = new FixedSizeMap<>(cacheSize);
         this.beforeCandlePredicate = beforeCandlePredicate;
         this.afterCandlePredicate = afterCandlePredicate;
-    }
-
-
-    protected Optional<T> findInCache(int index) {
-        if (cache.containsKey(index)) {
-            T swingPoint = cache.get(index);
-            if (!swingPoint.unstable()) {
-                return Optional.of(swingPoint);
-            }
-        }
-        return Optional.empty();
-    }
-
-    protected void putInCache(int index, T swingHighPoint) {
-        cache.put(index, swingHighPoint);
     }
 
     protected boolean isUnstable(int index) {
@@ -46,7 +32,7 @@ abstract class SwingIndicator<T extends SwingPoint> implements Indicator<Optiona
     protected Num[] getAfterCandle(boolean unstable, int index) {
         Num[] afterCandle = new Num[period];
         int idx = 0;
-        int maxIdx = unstable ? getBarSeries().getEndIndex() : index + period + 1;
+        int maxIdx = Math.min(unstable ? getBarSeries().getEndIndex() : index + period + 1, afterCandle.length - 1);
         for (int i = index + 1; i < maxIdx; i++) {
             afterCandle[idx] = estimationIndicator.getValue(i);
             idx++;
@@ -67,7 +53,7 @@ abstract class SwingIndicator<T extends SwingPoint> implements Indicator<Optiona
     @Override
     public Optional<T> getValue(int index) {
         Optional<T> cachePoint = findInCache(index);
-        if (cachePoint.isPresent()) return cachePoint;
+        if (cachePoint.isPresent() && !cachePoint.get().unstable()) return cachePoint;
 
         boolean unstable = isUnstable(index);
         Num candleValue = estimationIndicator.getValue(index);
@@ -99,6 +85,17 @@ abstract class SwingIndicator<T extends SwingPoint> implements Indicator<Optiona
         return Optional.empty();
     }
 
+    public Stream<T> recalculateAllStable(int fromIndex, int toIndex) {
+        return IntStream.range(fromIndex, toIndex + 1)
+                .mapToObj(this::getValue)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(SwingPoint::stable);
+    }
+
+    public Stream<T> recalculateAllStable(int toIndex) {
+        return recalculateAllStable(0, toIndex);
+    }
 
     @Override
     public int getUnstableBars() {

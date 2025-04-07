@@ -1,8 +1,8 @@
-package com.becker.freelance.indicators.ta.swing;
+package com.becker.freelance.indicators.ta.cache;
 
 import java.util.*;
 
-class FixedSizeMap<K, V> implements Map<K, V> {
+public class FixedSizeMap<K, V> implements Map<K, V> {
 
     private final int size;
     private final Map<K, V> content;

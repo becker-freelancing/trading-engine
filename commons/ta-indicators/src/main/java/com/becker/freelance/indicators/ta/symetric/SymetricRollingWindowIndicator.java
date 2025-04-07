@@ -1,4 +1,4 @@
-package com.becker.freelance.indicators.ta.supportresistence;
+package com.becker.freelance.indicators.ta.symetric;
 
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.Indicator;

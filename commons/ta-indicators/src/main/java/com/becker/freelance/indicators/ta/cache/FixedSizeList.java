@@ -1,8 +1,8 @@
-package com.becker.freelance.indicators.ta.swing;
+package com.becker.freelance.indicators.ta.cache;
 
 import java.util.*;
 
-class FixedSizeList<T> implements List<T> {
+public class FixedSizeList<T> implements List<T> {
 
     private final int size;
     private final List<T> content;
