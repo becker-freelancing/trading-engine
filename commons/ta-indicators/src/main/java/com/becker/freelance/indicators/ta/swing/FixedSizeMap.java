@@ -46,11 +46,16 @@ class FixedSizeMap<K, V> implements Map<K, V> {
             K oldestKey = keyList.remove(0);
             content.remove(oldestKey);
         }
+        if (content.containsKey(key)) {
+            keyList.remove(key);
+        }
+        keyList.add(key);
         return content.put(key, value);
     }
 
     @Override
     public V remove(Object key) {
+        keyList.remove((V) key);
         return content.remove(key);
     }
 

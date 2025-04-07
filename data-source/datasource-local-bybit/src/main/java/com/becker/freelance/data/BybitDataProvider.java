@@ -22,8 +22,7 @@ import java.util.stream.Collectors;
 public class BybitDataProvider extends DataProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(BybitDataProvider.class);
-    private static final RowMappingInfo WITH_SPREAD_MAPPING_INFO = new RowMappingInfo(true, 0, 1, 2, 4, 4, 5, 6, 7, 8, 9, 11);
-    private static final RowMappingInfo EUR_USD_MAPPING_INFO = new RowMappingInfo(true, 0, 1, 2, 4, 4, 5, 6, 7, 8);
+    private static final RowMappingInfo WITH_SPREAD_MAPPING_INFO = new RowMappingInfo(true, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
 
     private final Pair pair;
 
@@ -55,7 +54,7 @@ public class BybitDataProvider extends DataProvider {
     }
 
     private Map<LocalDateTime, TimeSeriesEntry> readCsvContent(InputStream fileInputStream, LocalDateTime from, LocalDateTime to, RowMappingInfo mappingInfo) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd kk:mm:ss");
         LocalDateTime beforeFrom = from.minusDays(3);
         return new CsvDataReader(mappingInfo, fileInputStream, formatter, pair).readCsvParallel()
                 .filter(entry -> entry.time().isAfter(beforeFrom))

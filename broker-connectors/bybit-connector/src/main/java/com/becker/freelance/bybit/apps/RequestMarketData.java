@@ -104,7 +104,7 @@ public class RequestMarketData {
     }
 
     private static void write(Path path, Stream<String> lines) throws IOException {
-        String append = lines.collect(Collectors.joining("\n"));
+        String append = "\n" + lines.collect(Collectors.joining("\n"));
         Files.writeString(path, append, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
     }
 

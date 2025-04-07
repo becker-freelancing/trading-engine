@@ -33,6 +33,21 @@ public class RowMappingInfo {
         this.tradesIdx = tradesIdx;
     }
 
+    public RowMappingInfo(boolean containsHeader, int closeTimeIdx, int openBidIdx, int openAskIdx, int highBidIdx, int highAskIdx, int lowBidIdx, int lowAskIdx, int closeBidIdx, int closeAskIdx, int volumeIdx) {
+        this(containsHeader,
+                closeTimeIdx,
+                openBidIdx,
+                openAskIdx,
+                highBidIdx,
+                highAskIdx,
+                lowBidIdx,
+                lowAskIdx,
+                closeBidIdx,
+                closeAskIdx,
+                volumeIdx,
+                -1);
+    }
+
     public RowMappingInfo(boolean containsHeader, int closeTimeIdx, int openBidIdx, int openAskIdx, int highBidIdx, int highAskIdx, int lowBidIdx, int lowAskIdx, int closeBidIdx, int closeAskIdx) {
         this(containsHeader,
                 closeTimeIdx,
