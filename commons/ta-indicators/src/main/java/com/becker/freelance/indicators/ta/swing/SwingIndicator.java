@@ -32,7 +32,10 @@ public abstract class SwingIndicator<T extends SwingPoint> extends CachableIndic
     protected Num[] getAfterCandle(boolean unstable, int index) {
         Num[] afterCandle = new Num[period];
         int idx = 0;
-        int maxIdx = Math.min(unstable ? getBarSeries().getEndIndex() : index + period + 1, afterCandle.length - 1);
+        int maxIdx = unstable ? getBarSeries().getEndIndex() : index + period + 1;
+        if (index < period) {
+            maxIdx = afterCandle.length;
+        }
         for (int i = index + 1; i < maxIdx; i++) {
             afterCandle[idx] = estimationIndicator.getValue(i);
             idx++;

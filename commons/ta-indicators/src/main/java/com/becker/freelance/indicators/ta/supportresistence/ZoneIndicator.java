@@ -2,6 +2,7 @@ package com.becker.freelance.indicators.ta.supportresistence;
 
 import com.becker.freelance.indicators.ta.swing.SwingIndicator;
 import com.becker.freelance.indicators.ta.swing.SwingPoint;
+import org.ta4j.core.Bar;
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.Indicator;
 import org.ta4j.core.num.DecimalNum;
@@ -10,19 +11,21 @@ import org.ta4j.core.num.Num;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
-public abstract class ZoneIndicator<S extends SwingPoint, T extends Zone> implements Indicator<List<T>> {
+public abstract class ZoneIndicator<S extends SwingPoint, T extends Zone<S>> implements Indicator<List<T>> {
 
     private final Num rangePrecision;
     private final SwingIndicator<S> swingIndicator;
     private final double weightFactor;
+    private final double quantile;
 
 
-    public ZoneIndicator(Num rangePrecision, SwingIndicator<S> swingIndicator) {
+    protected ZoneIndicator(Num rangePrecision, SwingIndicator<S> swingIndicator) {
         this.rangePrecision = rangePrecision;
         this.swingIndicator = swingIndicator;
         weightFactor = -0.005;
+        quantile = 0.8;
     }
 
 
@@ -34,88 +37,80 @@ public abstract class ZoneIndicator<S extends SwingPoint, T extends Zone> implem
                 .toList();
 
 
-        List<Tupel<Num, List<S>>> priceLevelCluster = findPriceLevelCluster(sortedSwingPoints, index);
-        Stream<Tupel<Num, List<S>>> scorePriceLevelCluster = calculateScores(priceLevelCluster);
-        return map(scorePriceLevelCluster);
-    }
-
-    private List<T> map(Stream<Tupel<Num, List<S>>> scorePriceLevelCluster) {
-        return scorePriceLevelCluster
+        List<Cluster<S>> cluster = getCluster(sortedSwingPoints, index);
+        Integer lowerCountThreshold = getThreshold(cluster);
+        return cluster.stream()
+                .filter(c -> c.count() >= lowerCountThreshold)
                 .map(this::map)
                 .toList();
     }
 
-    protected abstract T map(Tupel<Num, List<S>> scoreLevelCluster);
+    protected abstract T map(Cluster<S> sCluster);
 
+    private Integer getThreshold(List<Cluster<S>> cluster) {
+        List<Integer> sorted = cluster.stream()
+                .flatMap(c -> {
+                    List<Integer> nums = new ArrayList<>();
+                    for (int i = 0; i < c.count(); i++) {
+                        nums.add(c.count());
+                    }
+                    return nums.stream();
+                })
+                .sorted(Comparator.naturalOrder())
+                .toList();
+        int index = (int) (sorted.size() * quantile);
 
-    private Stream<Tupel<Num, List<S>>> calculateScores(List<Tupel<Num, List<S>>> priceLevelCluster) {
-        return priceLevelCluster.stream()
-                .map(this::calcScore);
+        return sorted.get(index);
     }
 
-    private Tupel<Num, List<S>> calcScore(Tupel<Num, List<S>> numListTupel) {
-        List<S> sorted = numListTupel.second().stream().sorted(Comparator.comparing(SwingPoint::candleValue)).toList();
-        Num zoneHeight = sorted.get(sorted.size() - 1).candleValue().minus(sorted.get(0).candleValue());
-        Num score = numListTupel.first().multipliedBy(DecimalNum.valueOf(1).dividedBy(zoneHeight));
-        return new Tupel<>(score, numListTupel.second());
-    }
+    private List<Cluster<S>> getCluster(List<S> sortedSwingPoints, int index) {
+        Num minPrice = getMinPrice(index);
+        Num maxPrice = getMaxPrice(index);
+        Num zoneWidth = minPrice.plus(maxPrice).dividedBy(DecimalNum.valueOf(2)).multipliedBy(rangePrecision);
 
-    private double getWeight(int currentIndex, SwingPoint swingLowPoint) {
-        int timeDelta = currentIndex - swingLowPoint.index();
-        return Math.exp(weightFactor * timeDelta);
-    }
+        List<Cluster<S>> result = new ArrayList<>();
+        while (minPrice.isLessThan(maxPrice)) {
 
+            Num finalMinPrice = minPrice;
+            Num currentMaxPrice = minPrice.plus(zoneWidth);
+            List<S> clusterContent = sortedSwingPoints.stream()
+                    .filter(point -> point.candleValue().isGreaterThanOrEqual(finalMinPrice))
+                    .filter(point -> point.candleValue().isLessThan(currentMaxPrice))
+                    .toList();
 
-    protected Num getMaxPriceForCurrentCluster(Num averagePriceInCluster) {
-        return averagePriceInCluster.plus(averagePriceInCluster.multipliedBy(rangePrecision));
-    }
+            result.add(new Cluster<>(finalMinPrice, currentMaxPrice, clusterContent));
 
-    protected Num getMinPriceForCurrentCluster(Num averagePriceInCluster) {
-        return averagePriceInCluster.minus(averagePriceInCluster.multipliedBy(rangePrecision));
-    }
-
-    protected Tupel<Num, Num> getAveragePriceInCluster(List<S> currentCluster, int index) {
-        Num weightedPriceSum = DecimalNum.ZERO;
-        Num weightSum = DecimalNum.ZERO;
-        for (SwingPoint swingLowPoint : currentCluster) {
-            DecimalNum weight = DecimalNum.valueOf(getWeight(index, swingLowPoint));
-            weightSum = weightSum.plus(weight);
-            weightedPriceSum = weightedPriceSum.plus(swingLowPoint.candleValue().multipliedBy(weight));
+            minPrice = currentMaxPrice;
         }
 
-        return new Tupel<>(weightedPriceSum.dividedBy(weightSum), weightSum);
+        return result;
     }
 
-    protected List<Tupel<Num, List<S>>> findPriceLevelCluster(List<S> sortedSwingPoints, int index) {
-        List<Tupel<Num, List<S>>> cluster = new ArrayList<>();
+    private Num getMaxPrice(int index) {
+        BarSeries barSeries = swingIndicator.getBarSeries();
+        return IntStream.range(0, index)
+                .mapToObj(barSeries::getBar)
+                .map(Bar::getClosePrice)
+                .max(Comparator.comparing(Num::doubleValue))
+                .orElse(DecimalNum.ZERO);
+    }
 
-        for (int i = 0; i < sortedSwingPoints.size(); i++) {
+    private Num getMinPrice(int index) {
+        BarSeries barSeries = swingIndicator.getBarSeries();
+        return IntStream.range(0, index)
+                .mapToObj(barSeries::getBar)
+                .map(Bar::getClosePrice)
+                .min(Comparator.comparing(Num::doubleValue))
+                .orElse(DecimalNum.ZERO);
+    }
 
-            List<S> currentCluster = new ArrayList<>();
-            Num totalWeight = DecimalNum.valueOf(0);
-            S startPoint = sortedSwingPoints.get(i);
-            currentCluster.add(startPoint);
+    protected record Cluster<S>(Num lowerLevel, Num upperLevel, List<S> items) {
 
-            for (int j = i + 1; j < sortedSwingPoints.size(); j++) {
-
-                Tupel<Num, Num> averagePriceInCluster = getAveragePriceInCluster(currentCluster, index);
-                Num maxPriceForSameCluster = getMaxPriceForCurrentCluster(averagePriceInCluster.first());
-                Num minPriceForSameCluster = getMinPriceForCurrentCluster(averagePriceInCluster.first());
-
-                S currentSwingPoint = sortedSwingPoints.get(j);
-                Num currentValue = currentSwingPoint.candleValue();
-                if (currentValue.isGreaterThan(maxPriceForSameCluster) || currentValue.isLessThan(minPriceForSameCluster)) {
-                    break;
-                }
-                currentCluster.add(currentSwingPoint);
-                totalWeight = averagePriceInCluster.second();
-                i = j;
-            }
-
-            cluster.add(new Tupel<>(totalWeight, currentCluster));
+        public int count() {
+            return items.size();
         }
-        return cluster;
     }
+
 
     @Override
     public int getUnstableBars() {
@@ -127,6 +122,4 @@ public abstract class ZoneIndicator<S extends SwingPoint, T extends Zone> implem
         return null;
     }
 
-    protected record Tupel<K, V>(K first, V second) {
-    }
 }

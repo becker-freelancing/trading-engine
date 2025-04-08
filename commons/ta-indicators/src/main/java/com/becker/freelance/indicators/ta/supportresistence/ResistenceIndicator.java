@@ -8,7 +8,6 @@ import org.ta4j.core.num.DecimalNum;
 import org.ta4j.core.num.Num;
 
 import java.util.Comparator;
-import java.util.List;
 
 public class ResistenceIndicator extends ZoneIndicator<SwingHighPoint, Resistence> {
 
@@ -18,18 +17,15 @@ public class ResistenceIndicator extends ZoneIndicator<SwingHighPoint, Resistenc
     }
 
     @Override
-    protected Resistence map(Tupel<Num, List<SwingHighPoint>> scoreLevelCluster) {
-        List<SwingHighPoint> cluster = scoreLevelCluster.second();
+    protected Resistence map(Cluster<SwingHighPoint> cluster) {
         return new Resistence(
-                cluster.stream().map(SwingPoint::index).min(Comparator.naturalOrder()).orElse(0),
-                cluster.stream().map(SwingPoint::index).max(Comparator.naturalOrder()).orElse(Integer.MAX_VALUE),
-                cluster.stream().map(SwingPoint::candleValue).min(Comparator.comparing(Num::doubleValue)).orElse(DecimalNum.ZERO),
-                cluster.stream().map(SwingPoint::candleValue).max(Comparator.comparing(Num::doubleValue)).orElse(DecimalNum.valueOf(Long.MAX_VALUE)),
-                scoreLevelCluster.first(),
-                cluster.size(),
-                cluster
+                cluster.items().stream().map(SwingPoint::index).min(Comparator.naturalOrder()).orElse(0),
+                cluster.items().stream().map(SwingPoint::index).max(Comparator.naturalOrder()).orElse(Integer.MAX_VALUE),
+                cluster.items().stream().map(SwingPoint::candleValue).min(Comparator.comparing(Num::doubleValue)).orElse(DecimalNum.ZERO),
+                cluster.items().stream().map(SwingPoint::candleValue).max(Comparator.comparing(Num::doubleValue)).orElse(DecimalNum.valueOf(Long.MAX_VALUE)),
+                DecimalNum.ZERO,
+                cluster.count(),
+                cluster.items()
         );
     }
-
-
 }
