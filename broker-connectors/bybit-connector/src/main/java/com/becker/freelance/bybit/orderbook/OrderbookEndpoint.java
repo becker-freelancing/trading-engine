@@ -111,7 +111,7 @@ class OrderbookEndpoint {
             List<Decimal> asksQuantities = asks.stream().map(l -> l.get(1)).map(Decimal::new).toList();
             Orderbook create = new Orderbook(convert.get(), map(orderBookResponse.getTs()), orderBookResponse.getType(),
                     bidValues, bidQuantities, asksValues, asksQuantities);
-            orderBookConsumers.get(convert.get()).forEach(consumer -> consumer.accept(create));
+            orderBookConsumers.getOrDefault(convert.get(), Set.of()).forEach(consumer -> consumer.accept(create));
         }
 
 //        private void consume(MarketData marketData) {
