@@ -1,19 +1,17 @@
 package com.becker.freelance.bybit.orderbook;
 
 import com.becker.freelance.broker.orderbook.OrderBookListener;
-import com.becker.freelance.broker.orderbook.Orderbook;
 import com.becker.freelance.commons.pair.Pair;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public class OrderbookSocketRegistry {
 
-    private static final Map<Pair, Set<Consumer<Orderbook>>> derivateListeners = new HashMap<>();
-    private static final Map<Pair, Set<Consumer<Orderbook>>> spotListeners = new HashMap<>();
+    private static final Map<Pair, Set<OrderBookListener>> derivateListeners = new HashMap<>();
+    private static final Map<Pair, Set<OrderBookListener>> spotListeners = new HashMap<>();
     private static OrderbookEndpoint marketDataEndpointDerivate;
     private static OrderbookEndpoint marketDataEndpointSpot;
 
@@ -23,6 +21,14 @@ public class OrderbookSocketRegistry {
         } else {
             listenForDerivate(pair, listener);
         }
+    }
+
+    public static synchronized void reconnectAll() {
+        derivateListeners.forEach((pair, consumers) -> {
+            consumers.forEach(consumer -> {
+                registerListener(pair, consumer);
+            });
+        });
     }
 
     private static void listenForDerivate(Pair pair, OrderBookListener listener) {

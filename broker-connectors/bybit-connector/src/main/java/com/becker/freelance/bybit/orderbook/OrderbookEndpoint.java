@@ -1,5 +1,6 @@
 package com.becker.freelance.bybit.orderbook;
 
+import com.becker.freelance.broker.orderbook.OrderBookListener;
 import com.becker.freelance.broker.orderbook.Orderbook;
 import com.becker.freelance.bybit.util.PairConverter;
 import com.becker.freelance.commons.pair.Pair;
@@ -14,8 +15,10 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 class OrderbookEndpoint {
 
@@ -24,43 +27,49 @@ class OrderbookEndpoint {
 
     private final String urlPath;
     private final Set<Pair> pairs;
-    private final Map<Pair, Set<Consumer<Orderbook>>> marketDataConsumer;
+    private final Map<Pair, Set<OrderBookListener>> marketDataConsumer;
     private final String endpoint;
     private WebSocketClientDelegate websocketClient;
+    private OrderBookEndpointWatcher endpointWatcher;
 
-    private OrderbookEndpoint(Map<Pair, Set<Consumer<Orderbook>>> marketDataConsumer, String urlPath) {
+
+    private OrderbookEndpoint(Map<Pair, Set<OrderBookListener>> marketDataConsumer, String urlPath) {
         this.pairs = marketDataConsumer.keySet();
         this.marketDataConsumer = marketDataConsumer;
         this.urlPath = urlPath;
-        String endpoint = BybitApiConfig.STREAM_MAINNET_DOMAIN;
-        this.endpoint = endpoint;
+        this.endpoint = BybitApiConfig.STREAM_MAINNET_DOMAIN;
         setWebsocketClient();
     }
 
-    public static OrderbookEndpoint derivateEndpoint(Map<Pair, Set<Consumer<Orderbook>>> derivateListeners) {
+    public static OrderbookEndpoint derivateEndpoint(Map<Pair, Set<OrderBookListener>> derivateListeners) {
         return new OrderbookEndpoint(derivateListeners, BybitApiConfig.V5_PUBLIC_LINEAR);
     }
 
-    public static OrderbookEndpoint spotEndpoint(Map<Pair, Set<Consumer<Orderbook>>> spotListeners) {
+    public static OrderbookEndpoint spotEndpoint(Map<Pair, Set<OrderBookListener>> spotListeners) {
         return new OrderbookEndpoint(spotListeners, BybitApiConfig.V5_PUBLIC_SPOT);
     }
 
     private void onError() {
+        endpointWatcher.stopWatching();
         setWebsocketClient();
         startListen();
     }
 
     private void setWebsocketClient() {
-        websocketClient = new WebSocketClientDelegate(endpoint, false, new SocketMessageHandler(marketDataConsumer), this::onError);
+        SocketMessageHandler messageHandler = new SocketMessageHandler(marketDataConsumer);
+        endpointWatcher = new OrderBookEndpointWatcher(messageHandler::getLastUpdateTime);
+        websocketClient = new WebSocketClientDelegate(endpoint, false, messageHandler, this::onError);
     }
 
     public void startListen() {
         List<String> bybitPairs = pairs.stream().map(this::convertPairs).distinct().toList();
         websocketClient.getPublicChannelStream(bybitPairs, urlPath);
+        endpointWatcher.watchUpdateTime();
     }
 
     public void stopListen() {
         websocketClient.disconnect();
+        endpointWatcher.stopWatching();
     }
 
     private String convertPairs(Pair pair) {
@@ -70,14 +79,14 @@ class OrderbookEndpoint {
 
     private static class SocketMessageHandler implements WebsocketMessageHandler {
 
-        private final Map<Pair, Set<Consumer<Orderbook>>> orderBookConsumers;
+        private final Map<Pair, Set<OrderBookListener>> orderBookConsumers;
         private final PairConverter pairConverter;
-        private Map<Pair, Orderbook> orderbook;
+        private LocalDateTime lastUpdateTime;
 
-        private SocketMessageHandler(Map<Pair, Set<Consumer<Orderbook>>> orderBookConsumers) {
+        private SocketMessageHandler(Map<Pair, Set<OrderBookListener>> orderBookConsumers) {
             this.orderBookConsumers = orderBookConsumers;
             this.pairConverter = new PairConverter();
-            orderbook = new HashMap<>();
+            this.lastUpdateTime = LocalDateTime.MIN;
         }
 
 
@@ -108,39 +117,20 @@ class OrderbookEndpoint {
             List<List<String>> asks = orderBookResponse.getData().getA();
             List<Decimal> asksValues = asks.stream().map(l -> l.get(0)).map(Decimal::new).toList();
             List<Decimal> asksQuantities = asks.stream().map(l -> l.get(1)).map(Decimal::new).toList();
-            Orderbook create = new Orderbook(convert.get(), map(orderBookResponse.getTs()), orderBookResponse.getType(),
+            LocalDateTime time = map(orderBookResponse.getTs());
+            setLastUpdateTime(time);
+            Orderbook create = new Orderbook(convert.get(), time, orderBookResponse.getType(),
                     bidValues, bidQuantities, asksValues, asksQuantities);
             orderBookConsumers.getOrDefault(convert.get(), Set.of()).forEach(consumer -> consumer.accept(create));
         }
 
-//        private void consume(MarketData marketData) {
-//            Set<Consumer<MarketData>> marketDataConsumer = marketDataConsumers.get(marketData.pair());
-//            if (marketDataConsumer == null) {
-//                return;
-//            }
-//
-//            marketDataConsumer.forEach(consumer -> consumer.accept(marketData));
-//        }
-//
-//        private Optional<MarketData> map(String epic, MarketDataResponseData marketDataResponseData) {
-//            Optional<Pair> convert = pairConverter.convert(epic, marketDataResponseData.getInterval());
-//            if (convert.isEmpty()) {
-//                return Optional.empty();
-//            }
-//
-//            Decimal open = new Decimal(marketDataResponseData.getOpen());
-//            Decimal high = new Decimal(marketDataResponseData.getHigh());
-//            Decimal low = new Decimal(marketDataResponseData.getLow());
-//            Decimal close = new Decimal(marketDataResponseData.getClose());
-//            Decimal volume = new Decimal(marketDataResponseData.getVolume());
-//
-//            return Optional.of(new MarketData(convert.get(), map(marketDataResponseData.getStart()),
-//                    open, open,
-//                    high, high,
-//                    low, low,
-//                    close, close,
-//                    volume));
-//        }
+        private synchronized LocalDateTime getLastUpdateTime() {
+            return lastUpdateTime;
+        }
+
+        private synchronized void setLastUpdateTime(LocalDateTime lastUpdateTime) {
+            this.lastUpdateTime = lastUpdateTime;
+        }
 
         private LocalDateTime map(long start) {
             return Instant.ofEpochMilli(start)
