@@ -41,14 +41,14 @@ public class TrendIndicator extends CachableIndicator<Integer, Trend> implements
         List<SwingHighPoint> lastNSwingHighs = swingHighIndicator.getLastNStableSwings(index, numberForValidation);
 
         if (lastNSwingLows.size() < numberForValidation || lastNSwingHighs.size() < numberForValidation) {
-            return new Trend(TrendDirection.SIDE);
+            return new Trend(TrendDirection.UNDEFINED);
         }
-        Trend result = new Trend(TrendDirection.SIDE);
+        Trend result = new Trend(TrendDirection.SIDE, lastNSwingHighs, lastNSwingLows);
 
         if (isUpTrend(lastNSwingHighs, lastNSwingLows)) {
-            result = new Trend(TrendDirection.UP);
+            result = new Trend(TrendDirection.UP, lastNSwingHighs, lastNSwingLows);
         } else if (isDownTrend(lastNSwingHighs, lastNSwingLows)) {
-            result = new Trend(TrendDirection.DOWN);
+            result = new Trend(TrendDirection.DOWN, lastNSwingHighs, lastNSwingLows);
         }
 
         putInCache(index, result);
