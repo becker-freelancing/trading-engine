@@ -27,4 +27,8 @@ public class CachableIndicator<K, V> {
     protected Stream<V> values() {
         return cache.values().stream();
     }
+
+    protected void removeFromCache(K index) {
+        cache.remove(index);
+    }
 }

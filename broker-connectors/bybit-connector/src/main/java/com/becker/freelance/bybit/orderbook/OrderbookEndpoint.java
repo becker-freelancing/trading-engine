@@ -22,7 +22,6 @@ class OrderbookEndpoint {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Logger logger = LoggerFactory.getLogger(OrderbookEndpoint.class);
 
-
     private final String urlPath;
     private final Set<Pair> pairs;
     private final Map<Pair, Set<Consumer<Orderbook>>> marketDataConsumer;

@@ -5,6 +5,9 @@ import org.ta4j.core.BarSeries;
 import org.ta4j.core.Indicator;
 import org.ta4j.core.num.Num;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -26,15 +29,23 @@ public abstract class SwingIndicator<T extends SwingPoint> extends CachableIndic
     }
 
     protected boolean isUnstable(int index) {
-        return index + period > getBarSeries().getEndIndex() || index - period < 0;
+        return isUnstableBeforeCandle(index) || isUnstableAfterCandle(index);
     }
 
-    protected Num[] getAfterCandle(boolean unstable, int index) {
+    protected boolean isUnstableBeforeCandle(int index) {
+        return index - period < 0;
+    }
+
+    protected boolean isUnstableAfterCandle(int index) {
+        return index + period > getBarSeries().getEndIndex();
+    }
+
+    protected Num[] getAfterCandle(int index) {
         Num[] afterCandle = new Num[period];
         int idx = 0;
-        int maxIdx = unstable ? getBarSeries().getEndIndex() : index + period + 1;
-        if (index < period) {
-            maxIdx = afterCandle.length;
+        int maxIdx = isUnstableAfterCandle(index) ? getBarSeries().getBarCount() : index + period + 1;
+        if (maxIdx < period) {
+            maxIdx = getBarSeries().getBarCount();
         }
         for (int i = index + 1; i < maxIdx; i++) {
             afterCandle[idx] = estimationIndicator.getValue(i);
@@ -58,7 +69,8 @@ public abstract class SwingIndicator<T extends SwingPoint> extends CachableIndic
         Optional<T> cachePoint = findInCache(index);
         if (cachePoint.isPresent() && !cachePoint.get().unstable()) return cachePoint;
 
-        boolean unstable = isUnstable(index);
+        removeFromCache(index);
+
         Num candleValue = estimationIndicator.getValue(index);
 
         Num[] beforeCandle = getBeforeCandle(index);
@@ -68,7 +80,7 @@ public abstract class SwingIndicator<T extends SwingPoint> extends CachableIndic
             }
         }
 
-        Num[] afterCandle = getAfterCandle(unstable, index);
+        Num[] afterCandle = getAfterCandle(index);
         boolean afterCandleLess = true;
         for (Num num : afterCandle) {
             if (afterCandlePredicate.test(num, candleValue)) {
@@ -78,7 +90,7 @@ public abstract class SwingIndicator<T extends SwingPoint> extends CachableIndic
         }
 
         if (afterCandleLess) {
-            T swingHighPoint = createResult(unstable, index, candleValue);
+            T swingHighPoint = createResult(isUnstable(index), index, candleValue);
             putInCache(index, swingHighPoint);
             return Optional.of(
                     swingHighPoint
@@ -98,6 +110,19 @@ public abstract class SwingIndicator<T extends SwingPoint> extends CachableIndic
 
     public Stream<T> recalculateAllStable(int toIndex) {
         return recalculateAllStable(0, toIndex);
+    }
+
+    public List<T> getLastNStableSwings(int toIndex, int n) {
+        List<T> result = new ArrayList<>();
+        for (int i = toIndex; i >= 0; i--) {
+            Optional<T> value = getValue(i);
+            value.filter(SwingPoint::stable).ifPresent(result::add);
+            if (result.size() == n) {
+                break;
+            }
+        }
+        Collections.reverse(result);
+        return result;
     }
 
     @Override
