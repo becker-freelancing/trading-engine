@@ -33,4 +33,13 @@ public class Trend {
     public List<SwingLowPoint> lastNSwingLows() {
         return lastNSwingLows;
     }
+
+    @Override
+    public String toString() {
+        return "Trend{" +
+                "trendDirection=" + trendDirection +
+                ", lastNSwingHighs=" + lastNSwingHighs +
+                ", lastNSwingLows=" + lastNSwingLows +
+                '}';
+    }
 }
