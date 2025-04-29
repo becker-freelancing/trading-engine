@@ -12,13 +12,12 @@
     <modules>
         <module>data-source</module>
         <module>strategies</module>
-        <module>money-management</module>
-        <module>risk-management</module>
         <module>trade-executor</module>
         <module>commons</module>
         <module>trading-abstract-app</module>
         <module>execution-engines</module>
         <module>broker-connectors</module>
+        <module>management</module>
     </modules>
 
 

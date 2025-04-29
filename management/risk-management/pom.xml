@@ -5,11 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.becker-freelance.trading</groupId>
-        <artifactId>trading-engine</artifactId>
+        <artifactId>management</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>money-management</artifactId>
-
+    <artifactId>risk-management</artifactId>
 
 </project>
