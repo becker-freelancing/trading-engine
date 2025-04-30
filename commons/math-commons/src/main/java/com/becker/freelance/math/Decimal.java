@@ -3,6 +3,7 @@ package com.becker.freelance.math;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.math.RoundingMode;
 
 public class Decimal extends BigDecimal {
 
@@ -11,6 +12,14 @@ public class Decimal extends BigDecimal {
     public static final Decimal TWO = new Decimal("2");
     public static final Decimal TEN = new Decimal(BigDecimal.TEN);
     public static final Decimal DOUBLE_MAX = new Decimal(Double.MAX_VALUE);
+
+    public static Decimal valueOf(double val) {
+        return new Decimal(val);
+    }
+
+    public static Decimal valueOf(long val) {
+        return new Decimal(val);
+    }
 
     public Decimal(String val) {
         super(val);
@@ -162,5 +171,15 @@ public class Decimal extends BigDecimal {
     @Override
     public Decimal min(BigDecimal val) {
         return new Decimal(super.min(val));
+    }
+
+    @Override
+    public Decimal round(MathContext mc) {
+        return new Decimal(super.round(mc));
+    }
+
+    @Override
+    public Decimal setScale(int newScale, RoundingMode roundingMode) {
+        return new Decimal(super.setScale(newScale, roundingMode));
     }
 }
