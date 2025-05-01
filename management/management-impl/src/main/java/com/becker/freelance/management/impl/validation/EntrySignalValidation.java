@@ -1,0 +1,50 @@
+package com.becker.freelance.management.impl.validation;
+
+import com.becker.freelance.commons.signal.EntrySignal;
+import com.becker.freelance.commons.signal.LevelEntrySignal;
+import com.becker.freelance.management.api.EntrySignalValidator;
+import com.becker.freelance.management.api.EnvironmentProvider;
+import com.becker.freelance.management.commons.validation.*;
+
+public class EntrySignalValidation implements EntrySignalValidator {
+
+    private final ChanceRiskRatioValidator chanceRiskRatioValidator;
+    private final MaxDrawdownValidator maxDrawdownValidator;
+    private final MaxRiskValidator maxRiskValidator;
+
+    public EntrySignalValidation() {
+        this.chanceRiskRatioValidator = new ChanceRiskRatioValidator();
+        this.maxDrawdownValidator = new MaxDrawdownValidator();
+        this.maxRiskValidator = new MaxRiskValidator();
+    }
+
+    @Override
+    public boolean isValidToExecute(EnvironmentProvider environmentProvider, EntrySignal entrySignal) {
+        LevelEntrySignal levelEntrySignal = entrySignal.toLevelEntrySignal(environmentProvider.getEurUsdRequestor());
+        if (!chanceRiskValid(environmentProvider, levelEntrySignal)) {
+            return false;
+        }
+        if (!maxDrawdownValid(environmentProvider, entrySignal)) {
+            return false;
+        }
+        if (!maxRiskValid(environmentProvider, levelEntrySignal)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean maxRiskValid(EnvironmentProvider environmentProvider, LevelEntrySignal levelEntrySignal) {
+        MaxRiskValidatorParams maxRiskValidatorParams = new MaxRiskValidatorParams(levelEntrySignal.getSize(), levelEntrySignal.stopInPoints(), levelEntrySignal.getPair());
+        return maxRiskValidator.isValid(environmentProvider, maxRiskValidatorParams);
+    }
+
+    private boolean maxDrawdownValid(EnvironmentProvider environmentProvider, EntrySignal entrySignal) {
+        return maxDrawdownValidator.isValid(environmentProvider, entrySignal.getPair());
+    }
+
+    private boolean chanceRiskValid(EnvironmentProvider environmentProvider, LevelEntrySignal levelEntrySignal) {
+        ChanceRiskRatioValidatorParams chanceRiskRatioValidatorParams = new ChanceRiskRatioValidatorParams(levelEntrySignal.limitInPoints(), levelEntrySignal.stopInPoints());
+        return chanceRiskRatioValidator.isValid(environmentProvider, chanceRiskRatioValidatorParams);
+    }
+}

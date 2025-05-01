@@ -4,5 +4,5 @@ import com.becker.freelance.commons.signal.EntrySignal;
 
 public interface EntrySignalAdaptor {
 
-    public EntrySignal adapt(EntrySignal entrySignal);
+    public EntrySignal adapt(EnvironmentProvider environmentProvider, EntrySignal entrySignal);
 }

@@ -1,10 +1,9 @@
-package com.becker.freelance.tradeexecution.util.signal;
+package com.becker.freelance.commons.signal;
 
 import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.PositionType;
-import com.becker.freelance.commons.signal.*;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 

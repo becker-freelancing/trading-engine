@@ -1,5 +1,8 @@
 package com.becker.freelance.commons.signal;
 
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
+import com.becker.freelance.commons.calculation.TradingCalculator;
+import com.becker.freelance.commons.calculation.TradingCalculatorImpl;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.PositionType;
@@ -32,4 +35,15 @@ public interface EntrySignal {
     }
 
     public void visit(EntrySignalVisitor visitor);
+
+    public default LevelEntrySignal toLevelEntrySignal(EurUsdRequestor eurUsdRequestor) {
+        TradingCalculator tradingCalculator = new TradingCalculatorImpl(eurUsdRequestor);
+        return toLevelEntrySignal(tradingCalculator);
+    }
+
+    public default LevelEntrySignal toLevelEntrySignal(TradingCalculator tradingCalculator) {
+        EntrySignalConverter entrySignalConverter = new EntrySignalConverter(tradingCalculator);
+        visit(entrySignalConverter);
+        return entrySignalConverter.getConvertion();
+    }
 }

@@ -8,6 +8,14 @@ public interface LevelEntrySignal extends EntrySignal {
 
     public Decimal limitLevel();
 
+    public default Decimal stopInPoints() {
+        return getOpenPriceForDirection().subtract(stopLevel()).abs();
+    }
+
+    public default Decimal limitInPoints() {
+        return getOpenPriceForDirection().subtract(limitLevel()).abs();
+    }
+
     @Override
     default void visit(EntrySignalVisitor visitor) {
         visitor.accept(this);

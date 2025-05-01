@@ -3,6 +3,7 @@ package com.becker.freelance.tradeexecution.calculation.calculation;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.calculation.MarginCalculator;
 import com.becker.freelance.commons.calculation.TradingCalculator;
+import com.becker.freelance.commons.calculation.TradingCalculatorImpl;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.position.PositionType;
@@ -20,7 +21,6 @@ import com.becker.freelance.tradeexecution.calculation.PositionCalculation;
 import com.becker.freelance.tradeexecution.calculation.PositionCalculation.PositionCalculationResult;
 import com.becker.freelance.tradeexecution.calculation.mock.PairMock;
 import com.becker.freelance.tradeexecution.position.DemoPositionFactory;
-import com.becker.freelance.tradeexecution.util.calculation.TradingCalculatorImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

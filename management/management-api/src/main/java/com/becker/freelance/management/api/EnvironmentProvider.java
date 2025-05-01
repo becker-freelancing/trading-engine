@@ -1,5 +1,6 @@
 package com.becker.freelance.management.api;
 
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.trade.Trade;
@@ -28,4 +29,6 @@ public interface EnvironmentProvider {
     public List<Position> getOpenPositions();
 
     public List<Trade> getTradesForDurationUntilNowForPair(Duration duration, Pair pair);
+
+    public EurUsdRequestor getEurUsdRequestor();
 }

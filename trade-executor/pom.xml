@@ -10,15 +10,14 @@
     </parent>
 
     <packaging>pom</packaging>
+    <artifactId>trade-executor</artifactId>
+
     <modules>
         <module>demo-trade-executor</module>
         <module>backtest-trade-executor-api</module>
         <module>open-positions-api</module>
         <module>capital-trade-executor</module>
         <module>bybit-trade-executor</module>
-        <module>trade-executor-util</module>
     </modules>
-    <artifactId>trade-executor</artifactId>
-
 
 </project>

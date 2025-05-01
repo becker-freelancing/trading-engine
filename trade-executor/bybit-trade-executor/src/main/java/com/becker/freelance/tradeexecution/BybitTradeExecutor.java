@@ -6,6 +6,7 @@ import com.becker.freelance.bybit.trades.TradeController;
 import com.becker.freelance.commons.AppMode;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.calculation.TradingCalculator;
+import com.becker.freelance.commons.calculation.TradingCalculatorImpl;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
@@ -13,8 +14,6 @@ import com.becker.freelance.commons.signal.LevelEntrySignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
-import com.becker.freelance.tradeexecution.util.calculation.TradingCalculatorImpl;
-import com.becker.freelance.tradeexecution.util.signal.EntrySignalConverter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -61,9 +60,7 @@ public class BybitTradeExecutor extends TradeExecutor {
     @Override
     public void entry(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, EntrySignal entrySignal) {
 
-        EntrySignalConverter entrySignalConverter = new EntrySignalConverter(tradingCalculator);
-        entrySignal.visit(entrySignalConverter);
-        LevelEntrySignal levelEntrySignal = entrySignalConverter.getConvertion();
+        LevelEntrySignal levelEntrySignal = entrySignal.toLevelEntrySignal(tradingCalculator);
 
         tradeController.createPositionStopLimitLevel(
                 levelEntrySignal.getDirection(),

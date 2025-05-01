@@ -2,7 +2,6 @@ package com.becker.freelance.tradeexecution.position;
 
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.calculation.MarginCalculator;
-import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.*;
 import com.becker.freelance.commons.signal.AmountEntrySignal;
@@ -10,8 +9,6 @@ import com.becker.freelance.commons.signal.DistanceEntrySignal;
 import com.becker.freelance.commons.signal.LevelEntrySignal;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.tradeexecution.calculation.MarginCalculatorImpl;
-import com.becker.freelance.tradeexecution.util.calculation.TradingCalculatorImpl;
-import com.becker.freelance.tradeexecution.util.signal.EntrySignalConverter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -19,12 +16,9 @@ import java.util.UUID;
 public class DemoPositionFactory implements PositionFactory {
 
     private final EurUsdRequestor eurUsd;
-    private final EntrySignalConverter signalConverter;
 
     public DemoPositionFactory(EurUsdRequestor eurUsd) {
-        TradingCalculator tradingCalculator = new TradingCalculatorImpl(eurUsd);
         this.eurUsd = eurUsd;
-        this.signalConverter = new EntrySignalConverter(tradingCalculator);
     }
 
 
@@ -40,25 +34,25 @@ public class DemoPositionFactory implements PositionFactory {
 
     @Override
     public StopLimitPosition createStopLimitPosition(DistanceEntrySignal entrySignal) {
-        LevelEntrySignal convert = signalConverter.convert(entrySignal);
+        LevelEntrySignal convert = entrySignal.toLevelEntrySignal(eurUsd);
         return createStopLimitPosition(convert);
     }
 
     @Override
     public TrailingPosition createTrailingPosition(DistanceEntrySignal entrySignal) {
-        LevelEntrySignal convert = signalConverter.convert(entrySignal);
+        LevelEntrySignal convert = entrySignal.toLevelEntrySignal(eurUsd);
         return createTrailingPosition(convert);
     }
 
     @Override
     public StopLimitPosition createStopLimitPosition(AmountEntrySignal entrySignal) {
-        LevelEntrySignal convert = signalConverter.convert(entrySignal);
+        LevelEntrySignal convert = entrySignal.toLevelEntrySignal(eurUsd);
         return createStopLimitPosition(convert);
     }
 
     @Override
     public TrailingPosition createTrailingPosition(AmountEntrySignal entrySignal) {
-        LevelEntrySignal convert = signalConverter.convert(entrySignal);
+        LevelEntrySignal convert = entrySignal.toLevelEntrySignal(eurUsd);
         return createTrailingPosition(convert);
     }
 

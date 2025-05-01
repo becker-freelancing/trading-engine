@@ -13,10 +13,9 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>money-management</module>
-        <module>risk-management</module>
         <module>management-commons</module>
         <module>management-api</module>
+        <module>management-impl</module>
     </modules>
 
 </project>

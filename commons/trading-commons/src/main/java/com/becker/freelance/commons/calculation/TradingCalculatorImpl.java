@@ -1,8 +1,5 @@
-package com.becker.freelance.tradeexecution.util.calculation;
+package com.becker.freelance.commons.calculation;
 
-import com.becker.freelance.commons.calculation.EurUsdRequestor;
-import com.becker.freelance.commons.calculation.ProfitLossCalculation;
-import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.math.Decimal;
