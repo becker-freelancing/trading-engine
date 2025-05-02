@@ -13,11 +13,11 @@
     <artifactId>broker-connector</artifactId>
 
     <modules>
-        <module>demo-trade-executor</module>
+        <module>demo-connector</module>
         <module>broker-connector-api</module>
-        <module>open-positions-api</module>
-        <module>capital-trade-executor</module>
-        <module>bybit-trade-executor</module>
+        <module>broker-requestor-api</module>
+        <module>capital-connector</module>
+        <module>bybit-connector</module>
     </modules>
 
 </project>

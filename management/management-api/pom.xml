@@ -24,7 +24,7 @@
         </dependency>
         <dependency>
             <groupId>com.becker-freelance.trading</groupId>
-            <artifactId>open-positions-api</artifactId>
+            <artifactId>broker-requestor-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 

@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>demo-trade-executor</artifactId>
+    <artifactId>demo-connector</artifactId>
 
 
     <dependencies>

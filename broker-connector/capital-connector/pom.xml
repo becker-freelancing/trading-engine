@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>capital-trade-executor</artifactId>
+    <artifactId>capital-connector</artifactId>
 
     <dependencies>
         <dependency>
