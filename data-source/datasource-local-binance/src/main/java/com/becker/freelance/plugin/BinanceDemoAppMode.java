@@ -1,6 +1,6 @@
 package com.becker.freelance.plugin;
 
-import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.app.AppMode;
 
 public class BinanceDemoAppMode implements AppMode {
 

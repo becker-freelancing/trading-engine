@@ -1,5 +1,7 @@
 package com.becker.freelance.commons;
 
+import com.becker.freelance.commons.app.AppConfiguration;
+import com.becker.freelance.commons.app.AppMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

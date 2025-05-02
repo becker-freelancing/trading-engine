@@ -3,11 +3,12 @@ package com.becker.freelance.tradeexecution;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.backtest.wallet.BacktestWallet;
 import com.becker.freelance.bybit.trades.TradeController;
-import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.calculation.TradingCalculatorImpl;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.signal.LevelEntrySignal;
@@ -15,7 +16,9 @@ import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -95,5 +98,15 @@ public class BybitTradeExecutor extends TradeExecutor {
     public boolean isPositionOpen(Pair pair) {
         return tradeController.allPositions().stream()
                 .anyMatch(position -> position.getPair().equals(pair));
+    }
+
+    @Override
+    public List<Position> getOpenPositions() {
+        return Collections.unmodifiableList(tradeController.allPositions());
+    }
+
+    @Override
+    public List<Trade> getTradesForDurationUntilNowForPair(Duration duration, Pair pair) {
+        return tradeController.getTradesForDurationUntilNowForPair(duration, pair);
     }
 }

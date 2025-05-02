@@ -1,6 +1,6 @@
 package com.becker.freelance.app;
 
-import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.strategies.BaseStrategy;
 

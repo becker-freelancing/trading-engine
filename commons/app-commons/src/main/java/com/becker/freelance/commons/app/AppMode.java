@@ -1,14 +1,14 @@
-package com.becker.freelance.commons;
+package com.becker.freelance.commons.app;
 
+
+import com.becker.freelance.commons.service.ExtServiceLoader;
 
 import java.util.List;
-import java.util.ServiceLoader;
 
 public interface AppMode {
 
     static List<AppMode> findAll() {
-        ServiceLoader<AppMode> appModes = ServiceLoader.load(AppMode.class);
-        return appModes.stream().map(ServiceLoader.Provider::get).toList();
+        return ExtServiceLoader.loadMultiple(AppMode.class).toList();
     }
 
     static AppMode fromDescription(String description) {

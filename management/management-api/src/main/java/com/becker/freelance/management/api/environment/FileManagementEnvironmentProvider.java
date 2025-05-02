@@ -5,6 +5,8 @@ import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
+import com.becker.freelance.opentrades.AccountBalanceRequestor;
+import com.becker.freelance.opentrades.BrokerSpecificsRequestor;
 import com.becker.freelance.opentrades.ClosedTradesRequestor;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
 import org.json.JSONArray;
@@ -83,7 +85,7 @@ public class FileManagementEnvironmentProvider implements ManagementEnvironmentP
 
     @Override
     public Decimal getCurrentAccountBalance() {
-        return accountBalanceRequestor.getCurrentAccountBalance();
+        return accountBalanceRequestor.getWallet().getAmount();
     }
 
     @Override

@@ -1,18 +1,16 @@
 package com.becker.freelance.data;
 
-import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.service.ExtServiceLoader;
 
 import java.util.List;
-import java.util.ServiceLoader;
 
 public abstract class DataProviderFactory {
 
     public static DataProviderFactory find(AppMode appMode) {
-        ServiceLoader<DataProviderFactory> serviceLoader = ServiceLoader.load(DataProviderFactory.class);
-        List<DataProviderFactory> factories = serviceLoader.stream()
-                .map(ServiceLoader.Provider::get)
+        List<DataProviderFactory> factories = ExtServiceLoader.loadMultiple(DataProviderFactory.class)
                 .filter(provider -> provider.supports(appMode)).toList();
 
         if (factories.size() > 1) {

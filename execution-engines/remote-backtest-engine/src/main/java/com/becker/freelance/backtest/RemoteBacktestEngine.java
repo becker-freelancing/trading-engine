@@ -1,6 +1,6 @@
 package com.becker.freelance.backtest;
 
-import com.becker.freelance.commons.AppConfiguration;
+import com.becker.freelance.commons.app.AppConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,6 @@ public class RemoteBacktestEngine implements Runnable {
         for (StrategyWithPair baseStrategy : baseStrategies) {
             RemoteBacktestExecutor remoteBacktestExecutor = new RemoteBacktestExecutor(baseStrategy, appConfiguration);
             Thread executionThread = new Thread(remoteBacktestExecutor);
-//            executionThread.setDaemon(true);
             executionThread.start();
         }
 

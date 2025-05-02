@@ -1,5 +1,6 @@
 package com.becker.freelance.commons;
 
+import com.becker.freelance.commons.app.AppMode;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

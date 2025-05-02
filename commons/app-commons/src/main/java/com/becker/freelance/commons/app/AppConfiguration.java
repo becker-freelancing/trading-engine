@@ -1,4 +1,4 @@
-package com.becker.freelance.commons;
+package com.becker.freelance.commons.app;
 
 import java.time.LocalDateTime;
 

@@ -2,7 +2,7 @@ package com.becker.freelance.backtest.commons;
 
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.backtest.util.PathUtil;
-import com.becker.freelance.commons.AppConfiguration;
+import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;

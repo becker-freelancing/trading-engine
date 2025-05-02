@@ -1,6 +1,7 @@
 package com.becker.freelance.strategies;
 
 
+import com.becker.freelance.commons.service.ExtServiceLoader;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.EntrySignalFactory;
 import com.becker.freelance.commons.signal.ExitSignal;
@@ -9,14 +10,16 @@ import com.becker.freelance.math.Decimal;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public abstract class BaseStrategy {
 
 
     public static List<BaseStrategy> loadAll(){
-        ServiceLoader<BaseStrategy> strategies = ServiceLoader.load(BaseStrategy.class);
-        return strategies.stream().map(ServiceLoader.Provider::get)
+        return ExtServiceLoader.loadMultiple(BaseStrategy.class)
                 .sorted(Comparator.comparing(BaseStrategy::getName))
                 .toList();
     }

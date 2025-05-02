@@ -1,6 +1,6 @@
 package com.becker.freelance.backtest;
 
-import com.becker.freelance.commons.AppConfiguration;
+import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.data.SubscribableDataProvider;

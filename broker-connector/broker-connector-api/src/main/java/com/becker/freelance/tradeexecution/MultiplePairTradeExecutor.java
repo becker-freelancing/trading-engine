@@ -2,15 +2,18 @@ package com.becker.freelance.tradeexecution;
 
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.backtest.wallet.BacktestWallet;
-import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
+import com.becker.freelance.commons.wallet.Wallet;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Supplier;
@@ -102,5 +105,23 @@ class MultiplePairTradeExecutor extends TradeExecutor {
     @Override
     public boolean isPositionOpen(Pair pair) {
         return tradeExecutors.get(pair).isPositionOpen(pair);
+    }
+
+    @Override
+    public List<Trade> getTradesForDurationUntilNowForPair(Duration duration, Pair pair) {
+        return tradeExecutors.get(pair).getTradesForDurationUntilNowForPair(duration, pair);
+    }
+
+    @Override
+    public List<Position> getOpenPositions() {
+        return tradeExecutors.values().stream()
+                .map(TradeExecutor::getOpenPositions)
+                .flatMap(List::stream)
+                .toList();
+    }
+
+    @Override
+    public Optional<Wallet> getWallet() {
+        return Optional.of(wallet);
     }
 }

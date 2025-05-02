@@ -2,8 +2,8 @@ package com.becker.freelance.app;
 
 import com.becker.freelance.backtest.RemoteBacktestEngine;
 import com.becker.freelance.backtest.StrategyWithPair;
-import com.becker.freelance.commons.AppConfiguration;
-import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.app.AppConfiguration;
+import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.strategies.BaseStrategy;
 import org.slf4j.Logger;

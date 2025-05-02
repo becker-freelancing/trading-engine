@@ -2,7 +2,7 @@ package com.becker.freelance.tradeexecution;
 
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.backtest.wallet.BacktestWallet;
-import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.calculation.MarginCalculator;
 import com.becker.freelance.commons.calculation.TradingCalculator;
@@ -23,8 +23,10 @@ import com.becker.freelance.tradeexecution.calculation.PositionCalculation;
 import com.becker.freelance.tradeexecution.calculation.PositionCalculation.PositionCalculationResult;
 import com.becker.freelance.tradeexecution.position.DemoPositionFactory;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -130,5 +132,18 @@ public class DemoTradeExecutor extends TradeExecutor {
     @Override
     protected Pair getPair() {
         return pair;
+    }
+
+    @Override
+    public List<Trade> getTradesForDurationUntilNowForPair(Duration duration, Pair pair) {
+        LocalDateTime startTime = LocalDateTime.now().minus(duration);
+        return closedTrades.stream()
+                .filter(trade -> trade.getCloseTime().isAfter(startTime))
+                .toList();
+    }
+
+    @Override
+    public List<Position> getOpenPositions() {
+        return Collections.unmodifiableList(openPositions);
     }
 }

@@ -1,4 +1,4 @@
-package com.becker.freelance.tradeexecution;
+package com.becker.freelance.opentrades;
 
 import com.becker.freelance.math.Decimal;
 

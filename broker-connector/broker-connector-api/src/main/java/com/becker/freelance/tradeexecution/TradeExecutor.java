@@ -2,24 +2,26 @@ package com.becker.freelance.tradeexecution;
 
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.backtest.wallet.BacktestWallet;
-import com.becker.freelance.commons.AppConfiguration;
-import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.app.AppConfiguration;
+import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.position.Position;
+import com.becker.freelance.commons.service.ExtServiceLoader;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
+import com.becker.freelance.commons.wallet.Wallet;
+import com.becker.freelance.opentrades.ClosedTradesRequestor;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.ServiceLoader;
+import java.util.Optional;
 import java.util.function.Supplier;
 
-public abstract class TradeExecutor implements OpenPositionRequestor {
+public abstract class TradeExecutor implements OpenPositionRequestor, ClosedTradesRequestor {
 
     public static TradeExecutor find(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration) {
         List<TradeExecutor> tradeExecutorsForPairs = backtestExecutionConfiguration.pairs().stream()
@@ -30,9 +32,9 @@ public abstract class TradeExecutor implements OpenPositionRequestor {
     }
 
     public static TradeExecutor find(AppConfiguration appConfiguration, Pair pair, EurUsdRequestor eurUsdRequestor) {
-        ServiceLoader<TradeExecutor> tradeExecutors = ServiceLoader.load(TradeExecutor.class);
         AppMode appMode = appConfiguration.appMode();
-        List<TradeExecutor> executors = tradeExecutors.stream().map(ServiceLoader.Provider::get).filter(provider -> provider.supports(appMode)).toList();
+        List<TradeExecutor> executors = ExtServiceLoader.loadMultiple(TradeExecutor.class)
+                .filter(provider -> provider.supports(appMode)).toList();
 
         if (executors.size() > 1) {
             throw new IllegalStateException("Found multiple TradeExecutor for AppMode " + appMode.getDescription() + ": " + executors);
@@ -45,9 +47,9 @@ public abstract class TradeExecutor implements OpenPositionRequestor {
     }
 
     private static TradeExecutor findForPair(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair) {
-        ServiceLoader<TradeExecutor> tradeExecutors = ServiceLoader.load(TradeExecutor.class);
         AppMode appMode = appConfiguration.appMode();
-        List<TradeExecutor> executors = tradeExecutors.stream().map(ServiceLoader.Provider::get).filter(provider -> provider.supports(appMode)).toList();
+        List<TradeExecutor> executors = ExtServiceLoader.loadMultiple(TradeExecutor.class)
+                .filter(provider -> provider.supports(appMode)).toList();
 
         if (executors.size() > 1) {
             throw new IllegalStateException("Found multiple TradeExecutor for AppMode " + appMode.getDescription() + ": " + executors);
@@ -79,8 +81,7 @@ public abstract class TradeExecutor implements OpenPositionRequestor {
 
     protected abstract void setWallet(Supplier<BacktestWallet> wallet);
 
-    @Override
-    public List<Position> getOpenPositions() {
-        throw new UnsupportedOperationException();
+    public Optional<Wallet> getWallet() {
+        return Optional.empty();
     }
 }

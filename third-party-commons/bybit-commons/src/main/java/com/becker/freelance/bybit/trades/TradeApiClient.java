@@ -4,6 +4,8 @@ import com.becker.freelance.bybit.env.BybitEnvironmentProvider;
 import com.becker.freelance.bybit.util.PairConverter;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
+import com.becker.freelance.commons.position.PositionType;
+import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
 import com.bybit.api.client.domain.CategoryType;
 import com.bybit.api.client.domain.TradeOrderType;
@@ -21,6 +23,7 @@ import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -124,4 +127,59 @@ class TradeApiClient {
         tradeRestClient.createOrder(orderRequest);
     }
 
+    public Stream<Trade> getTradesInTime(LocalDateTime from, LocalDateTime to, Pair pair) {
+        Stream<Trade> result = Stream.of();
+        while (from.isBefore(to)) {
+            long startMillis = from.toInstant(ZoneOffset.UTC).toEpochMilli();
+            LocalDateTime currEnd = from.plusHours(1);
+            long endMillis = currEnd.toInstant(ZoneOffset.UTC).toEpochMilli();
+
+            result = requestTradesInTime(startMillis, endMillis, result, null);
+            from = currEnd;
+        }
+
+        return result.filter(trade -> trade.getPair().equalsIgnoreResolution(pair));
+    }
+
+    private Stream<Trade> requestTradesInTime(long startMillis, long endMillis, Stream<Trade> result, String cursor) {
+        PositionDataRequest.PositionDataRequestBuilder positionDataRequestBuilder = PositionDataRequest.builder().category(CategoryType.LINEAR);
+
+        if (cursor == null) {
+            positionDataRequestBuilder = positionDataRequestBuilder
+                    .startTime(startMillis)
+                    .endTime(endMillis);
+        } else {
+            positionDataRequestBuilder = positionDataRequestBuilder.cursor(cursor);
+        }
+
+        Map<String, Object> closePnlList = (Map<String, Object>) positionRestClient.getClosePnlList(positionDataRequestBuilder
+                .build());
+
+        if (0 != (int) closePnlList.get("retCode")) {
+            logger.error("Could not request trade history. Error-Code: {}, Error-Message: {}", closePnlList.get("retCode"), closePnlList.get("retMsg"));
+        }
+
+        Map<String, Object> responseResult = (Map<String, Object>) closePnlList.get("result");
+        List<Map<String, String>> list = (List<Map<String, String>>) responseResult.get("list");
+
+
+        result = Stream.concat(result, list.stream()
+                .map(this::toTrade));
+        return result;
+    }
+
+    private Trade toTrade(Map<String, String> stringStringMap) {
+        return new Trade(
+                Instant.ofEpochMilli(Long.valueOf(stringStringMap.get("createdTime"))).atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                Instant.ofEpochMilli(Long.valueOf(stringStringMap.get("createdTime"))).atZone(ZoneId.systemDefault()).toLocalDateTime(), //TODO
+                pairConverter.convert(stringStringMap.get("symbol"), "1").orElseThrow(() -> new IllegalArgumentException("Could not convert pair: " + stringStringMap.get("symbol"))),
+                new Decimal(stringStringMap.get("closedPnl")),
+                new Decimal(stringStringMap.get("avgEntryPrice")),
+                new Decimal(stringStringMap.get("avgExitPrice")),
+                new Decimal(stringStringMap.get("qty")),
+                stringStringMap.get("side").equalsIgnoreCase("BUY") ? Direction.BUY : Direction.SELL,
+                Decimal.ZERO, //TODO
+                PositionType.HARD_LIMIT //TODO
+        );
+    }
 }

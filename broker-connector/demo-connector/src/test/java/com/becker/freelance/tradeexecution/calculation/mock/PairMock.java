@@ -1,6 +1,6 @@
 package com.becker.freelance.tradeexecution.calculation.mock;
 
-import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.math.Decimal;
 

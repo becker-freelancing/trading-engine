@@ -1,6 +1,6 @@
 package com.becker.freelance.commons.pair;
 
-import com.becker.freelance.commons.AppMode;
+import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.math.Decimal;
 
 import java.time.Duration;
@@ -95,5 +95,10 @@ public interface Pair {
 
     default boolean isUsdBaseCurrency() {
         return getUsdString().equals(baseCurrency());
+    }
+
+    default boolean equalsIgnoreResolution(Pair pair) {
+        return this.baseCurrency().equals(pair.baseCurrency()) &&
+                this.counterCurrency().equals(pair.counterCurrency());
     }
 }

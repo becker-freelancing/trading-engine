@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,4 +84,10 @@ public class TradeController {
                 .findFirst();
     }
 
+    public List<Trade> getTradesForDurationUntilNowForPair(Duration duration, Pair pair) {
+        LocalDateTime to = LocalDateTime.now();
+        LocalDateTime from = to.minus(duration);
+        return apiClient.getTradesInTime(from, to, pair)
+                .toList();
+    }
 }
