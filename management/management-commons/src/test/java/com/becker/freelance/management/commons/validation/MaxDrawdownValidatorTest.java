@@ -2,8 +2,8 @@ package com.becker.freelance.management.commons.validation;
 
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.trade.Trade;
-import com.becker.freelance.management.api.EnvironmentProvider;
-import com.becker.freelance.management.api.MaxDrawdown;
+import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
+import com.becker.freelance.management.api.environment.MaxDrawdown;
 import com.becker.freelance.math.Decimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,11 +26,11 @@ class MaxDrawdownValidatorTest {
 
     @Test
     void validIfLessThanMaxDrawdown() {
-        EnvironmentProvider environmentProvider = mock(EnvironmentProvider.class);
+        ManagementEnvironmentProvider environmentProvider = mock(ManagementEnvironmentProvider.class);
         doReturn(List.of(
                 new MaxDrawdown(Decimal.valueOf(25), Duration.ZERO),
                 new MaxDrawdown(Decimal.valueOf(23.48), Duration.ZERO)
-        )).when(environmentProvider).getMaxDrawDowns();
+        )).when(environmentProvider).getMaxDrawdowns();
         doReturn(buildTrades()).when(environmentProvider).getTradesForDurationUntilNowForPair(any(), any());
         doReturn(Decimal.valueOf(940)).when(environmentProvider).getCurrentAccountBalance();
 
@@ -41,11 +41,11 @@ class MaxDrawdownValidatorTest {
 
     @Test
     void notValidIfLessThanMaxDrawdown() {
-        EnvironmentProvider environmentProvider = mock(EnvironmentProvider.class);
+        ManagementEnvironmentProvider environmentProvider = mock(ManagementEnvironmentProvider.class);
         doReturn(List.of(
                 new MaxDrawdown(Decimal.valueOf(25), Duration.ZERO),
                 new MaxDrawdown(Decimal.valueOf(23.47), Duration.ZERO)
-        )).when(environmentProvider).getMaxDrawDowns();
+        )).when(environmentProvider).getMaxDrawdowns();
         doReturn(buildTrades()).when(environmentProvider).getTradesForDurationUntilNowForPair(any(), any());
         doReturn(Decimal.valueOf(940)).when(environmentProvider).getCurrentAccountBalance();
 

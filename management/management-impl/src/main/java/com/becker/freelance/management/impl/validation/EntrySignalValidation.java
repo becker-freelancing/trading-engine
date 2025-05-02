@@ -2,8 +2,8 @@ package com.becker.freelance.management.impl.validation;
 
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.LevelEntrySignal;
-import com.becker.freelance.management.api.EntrySignalValidator;
-import com.becker.freelance.management.api.EnvironmentProvider;
+import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
+import com.becker.freelance.management.api.validation.EntrySignalValidator;
 import com.becker.freelance.management.commons.validation.*;
 
 public class EntrySignalValidation implements EntrySignalValidator {
@@ -19,7 +19,7 @@ public class EntrySignalValidation implements EntrySignalValidator {
     }
 
     @Override
-    public boolean isValidToExecute(EnvironmentProvider environmentProvider, EntrySignal entrySignal) {
+    public boolean isValidToExecute(ManagementEnvironmentProvider environmentProvider, EntrySignal entrySignal) {
         LevelEntrySignal levelEntrySignal = entrySignal.toLevelEntrySignal(environmentProvider.getEurUsdRequestor());
         if (!chanceRiskValid(environmentProvider, levelEntrySignal)) {
             return false;
@@ -34,16 +34,16 @@ public class EntrySignalValidation implements EntrySignalValidator {
         return true;
     }
 
-    private boolean maxRiskValid(EnvironmentProvider environmentProvider, LevelEntrySignal levelEntrySignal) {
+    private boolean maxRiskValid(ManagementEnvironmentProvider environmentProvider, LevelEntrySignal levelEntrySignal) {
         MaxRiskValidatorParams maxRiskValidatorParams = new MaxRiskValidatorParams(levelEntrySignal.getSize(), levelEntrySignal.stopInPoints(), levelEntrySignal.getPair());
         return maxRiskValidator.isValid(environmentProvider, maxRiskValidatorParams);
     }
 
-    private boolean maxDrawdownValid(EnvironmentProvider environmentProvider, EntrySignal entrySignal) {
+    private boolean maxDrawdownValid(ManagementEnvironmentProvider environmentProvider, EntrySignal entrySignal) {
         return maxDrawdownValidator.isValid(environmentProvider, entrySignal.getPair());
     }
 
-    private boolean chanceRiskValid(EnvironmentProvider environmentProvider, LevelEntrySignal levelEntrySignal) {
+    private boolean chanceRiskValid(ManagementEnvironmentProvider environmentProvider, LevelEntrySignal levelEntrySignal) {
         ChanceRiskRatioValidatorParams chanceRiskRatioValidatorParams = new ChanceRiskRatioValidatorParams(levelEntrySignal.limitInPoints(), levelEntrySignal.stopInPoints());
         return chanceRiskRatioValidator.isValid(environmentProvider, chanceRiskRatioValidatorParams);
     }

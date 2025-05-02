@@ -1,8 +1,8 @@
 package com.becker.freelance.management.commons.validation;
 
-import com.becker.freelance.management.api.EnvironmentProvider;
+import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
 
 public interface Validator<S> {
 
-    public boolean isValid(EnvironmentProvider environmentProvider, S s);
+    public boolean isValid(ManagementEnvironmentProvider environmentProvider, S s);
 }

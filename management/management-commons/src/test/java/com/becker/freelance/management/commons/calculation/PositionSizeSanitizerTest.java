@@ -1,6 +1,6 @@
 package com.becker.freelance.management.commons.calculation;
 
-import com.becker.freelance.management.api.EnvironmentProvider;
+import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
 import com.becker.freelance.math.Decimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ class PositionSizeSanitizerTest {
 
     @Test
     void sanitizePositionSizeForFractionsInRange() {
-        EnvironmentProvider environmentProvider = buildEnvironment(5);
+        ManagementEnvironmentProvider environmentProvider = buildEnvironment(5);
 
         Decimal sanitize = positionSizeSanitizer.calculate(environmentProvider, new Decimal("3.40005"));
 
@@ -30,15 +30,15 @@ class PositionSizeSanitizerTest {
 
     @Test
     void sanitizePositionSizeForFractionsNotInRange() {
-        EnvironmentProvider environmentProvider = buildEnvironment(5);
+        ManagementEnvironmentProvider environmentProvider = buildEnvironment(5);
 
         Decimal sanitize = positionSizeSanitizer.calculate(environmentProvider, new Decimal("3.400005"));
 
         assertEquals(new Decimal("3.40000"), sanitize);
     }
 
-    private EnvironmentProvider buildEnvironment(int brokerFractions) {
-        EnvironmentProvider environmentProvider = mock(EnvironmentProvider.class);
+    private ManagementEnvironmentProvider buildEnvironment(int brokerFractions) {
+        ManagementEnvironmentProvider environmentProvider = mock(ManagementEnvironmentProvider.class);
         doReturn(brokerFractions).when(environmentProvider).getMaxBrokerOrderFractionPlaces();
         return environmentProvider;
     }

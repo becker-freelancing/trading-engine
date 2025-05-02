@@ -5,6 +5,11 @@ import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.NoTimeSeriesEntryFoundException;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
+import com.becker.freelance.management.api.ManagementLoader;
+import com.becker.freelance.management.api.adaption.EntrySignalAdaptor;
+import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
+import com.becker.freelance.management.api.validation.CompositeStrategy;
+import com.becker.freelance.management.api.validation.EntrySignalValidator;
 import com.becker.freelance.strategies.BaseStrategy;
 import com.becker.freelance.tradeexecution.TradeExecutor;
 import org.slf4j.Logger;
@@ -20,6 +25,9 @@ public class StrategyEngine {
 
     private final BaseStrategy strategy;
     private final TradeExecutor tradeExecutor;
+    private final EntrySignalAdaptor entrySignalAdaptor;
+    private final EntrySignalValidator entrySignalValidator;
+    private ManagementEnvironmentProvider environmentProvider;
 
     public StrategyEngine(Supplier<BaseStrategy> strategySupplier, TradeExecutor tradeExecutor) {
         if (!strategySupplier.get().isInitiatedForParameter()) {
@@ -27,6 +35,10 @@ public class StrategyEngine {
         }
         this.tradeExecutor = tradeExecutor;
         this.strategy = strategySupplier.get().withOpenPositionRequestor(tradeExecutor);
+        ManagementLoader managementLoader = new ManagementLoader();
+        this.entrySignalAdaptor = managementLoader.findEntrySignalAdaptor();
+        this.entrySignalValidator = managementLoader.findEntrySignalValidator(CompositeStrategy.ALL_MATCH);
+//        this.environmentProvider = managementLoader.findEnvironmentProvider();
     }
 
     public void executeForTime(TimeSeries timeSeries, LocalDateTime time, BaseStrategy strategy) {
@@ -49,7 +61,10 @@ public class StrategyEngine {
 
     private void shouldEnter(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, BaseStrategy strategy) {
         Optional<EntrySignal> entrySignal = strategy.shouldEnter(timeSeries, time);
-        entrySignal.ifPresent(signal -> tradeExecutor.entry(currentPrice, timeSeries, time, signal));
+        entrySignal
+                .map(signal -> entrySignalAdaptor.adapt(environmentProvider, signal))
+                .filter(signal -> entrySignalValidator.isValidToExecute(environmentProvider, signal))
+                .ifPresent(signal -> tradeExecutor.entry(currentPrice, timeSeries, time, signal));
     }
 
     private void shouldExit(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, BaseStrategy strategy) {

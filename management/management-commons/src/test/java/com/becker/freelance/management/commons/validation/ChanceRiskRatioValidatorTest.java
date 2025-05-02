@@ -1,6 +1,6 @@
 package com.becker.freelance.management.commons.validation;
 
-import com.becker.freelance.management.api.EnvironmentProvider;
+import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
 import com.becker.freelance.math.Decimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ class ChanceRiskRatioValidatorTest {
 
     @Test
     void validIfChanceRiskRatioIsGreater() {
-        EnvironmentProvider environmentProvider = mock(EnvironmentProvider.class);
+        ManagementEnvironmentProvider environmentProvider = mock(ManagementEnvironmentProvider.class);
         doReturn(Optional.of(Decimal.valueOf(2))).when(environmentProvider).getMinChanceRiskRatio();
 
         ChanceRiskRatioValidatorParams chanceRiskRatioValidatorParams = new ChanceRiskRatioValidatorParams(Decimal.valueOf(4), Decimal.valueOf(2));
@@ -34,7 +34,7 @@ class ChanceRiskRatioValidatorTest {
 
     @Test
     void notValidIfChanceRiskRatioIsLess() {
-        EnvironmentProvider environmentProvider = mock(EnvironmentProvider.class);
+        ManagementEnvironmentProvider environmentProvider = mock(ManagementEnvironmentProvider.class);
         doReturn(Optional.of(Decimal.valueOf(2))).when(environmentProvider).getMinChanceRiskRatio();
 
         ChanceRiskRatioValidatorParams chanceRiskRatioValidatorParams = new ChanceRiskRatioValidatorParams(Decimal.valueOf(4), Decimal.valueOf(2.000001));
@@ -46,7 +46,7 @@ class ChanceRiskRatioValidatorTest {
 
     @Test
     void validIfNoMinChanceRiskRatioIsProvided() {
-        EnvironmentProvider environmentProvider = mock(EnvironmentProvider.class);
+        ManagementEnvironmentProvider environmentProvider = mock(ManagementEnvironmentProvider.class);
         doReturn(Optional.empty()).when(environmentProvider).getMinChanceRiskRatio();
 
         boolean valid = chanceRiskRatioValidator.isValid(environmentProvider, null);

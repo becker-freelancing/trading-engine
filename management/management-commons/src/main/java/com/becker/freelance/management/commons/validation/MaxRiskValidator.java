@@ -2,14 +2,14 @@ package com.becker.freelance.management.commons.validation;
 
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Position;
-import com.becker.freelance.management.api.EnvironmentProvider;
+import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
 import com.becker.freelance.math.Decimal;
 
 import java.util.Optional;
 
 public class MaxRiskValidator implements Validator<MaxRiskValidatorParams> {
     @Override
-    public boolean isValid(EnvironmentProvider environmentProvider, MaxRiskValidatorParams maxRiskValidatorParams) {
+    public boolean isValid(ManagementEnvironmentProvider environmentProvider, MaxRiskValidatorParams maxRiskValidatorParams) {
         Optional<Decimal> optionalMaxTotalRisk = environmentProvider.getMaxTotalRisk();
         if (optionalMaxTotalRisk.isEmpty()) {
             return true;
@@ -31,7 +31,7 @@ public class MaxRiskValidator implements Validator<MaxRiskValidatorParams> {
         return totalRiskAfterPositionOpen.isLessThanOrEqualTo(optionalMaxTotalRisk.get());
     }
 
-    private Decimal calculateRiskInPercent(Position position, EnvironmentProvider environmentProvider) {
+    private Decimal calculateRiskInPercent(Position position, ManagementEnvironmentProvider environmentProvider) {
         Pair pair = position.getPair();
         Decimal size = position.getSize();
         Decimal stopLevel = position.getStopLevel();

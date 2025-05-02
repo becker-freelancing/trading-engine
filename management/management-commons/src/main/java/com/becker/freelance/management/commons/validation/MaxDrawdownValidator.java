@@ -2,8 +2,8 @@ package com.becker.freelance.management.commons.validation;
 
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.trade.Trade;
-import com.becker.freelance.management.api.EnvironmentProvider;
-import com.becker.freelance.management.api.MaxDrawdown;
+import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
+import com.becker.freelance.management.api.environment.MaxDrawdown;
 import com.becker.freelance.math.Decimal;
 
 import java.util.Arrays;
@@ -13,13 +13,13 @@ import java.util.List;
 public class MaxDrawdownValidator implements Validator<Pair> {
 
     @Override
-    public boolean isValid(EnvironmentProvider environmentProvider, Pair pair) {
+    public boolean isValid(ManagementEnvironmentProvider environmentProvider, Pair pair) {
 
-        List<MaxDrawdown> maxDrawDowns = environmentProvider.getMaxDrawDowns();
+        List<MaxDrawdown> maxDrawDowns = environmentProvider.getMaxDrawdowns();
         return maxDrawDowns.stream().allMatch(maxDrawdown -> isLessThanDrawDown(maxDrawdown, environmentProvider, pair));
     }
 
-    private boolean isLessThanDrawDown(MaxDrawdown maxDrawdown, EnvironmentProvider environmentProvider, Pair pair) {
+    private boolean isLessThanDrawDown(MaxDrawdown maxDrawdown, ManagementEnvironmentProvider environmentProvider, Pair pair) {
         List<Trade> tradesForDurationUntilNow = environmentProvider.getTradesForDurationUntilNowForPair(maxDrawdown.drawdownCalculationDuration(), pair);
         Decimal accountBalance = environmentProvider.getCurrentAccountBalance();
         Decimal[] accountBalancesAfterTrades = new Decimal[tradesForDurationUntilNow.size() + 1];

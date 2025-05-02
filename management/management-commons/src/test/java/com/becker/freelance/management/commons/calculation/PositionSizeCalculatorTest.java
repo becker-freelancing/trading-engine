@@ -1,7 +1,7 @@
 package com.becker.freelance.management.commons.calculation;
 
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.management.api.EnvironmentProvider;
+import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
 import com.becker.freelance.math.Decimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class PositionSizeCalculatorTest {
 
     @Test
     void withMaxRiskPerTradeAndSizeGreaterOne() {
-        EnvironmentProvider environmentProvider = buildEnvironment(Decimal.valueOf(500),
+        ManagementEnvironmentProvider environmentProvider = buildEnvironment(Decimal.valueOf(500),
                 null,
                 Decimal.valueOf(0.01));
 
@@ -38,7 +38,7 @@ class PositionSizeCalculatorTest {
 
     @Test
     void withPreferredRiskPerTradeAndSizeGreaterOne() {
-        EnvironmentProvider environmentProvider = buildEnvironment(
+        ManagementEnvironmentProvider environmentProvider = buildEnvironment(
                 Decimal.valueOf(10000),
                 Decimal.valueOf(0.005),
                 Decimal.valueOf(0.01));
@@ -66,12 +66,12 @@ class PositionSizeCalculatorTest {
         );
     }
 
-    EnvironmentProvider buildEnvironment(
+    ManagementEnvironmentProvider buildEnvironment(
             Decimal accountBalance,
             Decimal preferredRiskPerTrade,
             Decimal maxRiskPerTrade
     ) {
-        EnvironmentProvider environmentProvider = mock(EnvironmentProvider.class);
+        ManagementEnvironmentProvider environmentProvider = mock(ManagementEnvironmentProvider.class);
         doReturn(Optional.ofNullable(preferredRiskPerTrade)).when(environmentProvider).getPreferredRiskPerTrade();
         doReturn(accountBalance).when(environmentProvider).getCurrentAccountBalance();
         doReturn(maxRiskPerTrade).when(environmentProvider).getMaxRiskPerTrade();

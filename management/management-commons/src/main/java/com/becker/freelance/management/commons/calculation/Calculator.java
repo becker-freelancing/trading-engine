@@ -1,7 +1,7 @@
 package com.becker.freelance.management.commons.calculation;
 
-import com.becker.freelance.management.api.EnvironmentProvider;
+import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
 
 public interface Calculator<T, S> {
-    public T calculate(EnvironmentProvider environmentProvider, S s);
+    public T calculate(ManagementEnvironmentProvider environmentProvider, S s);
 }
