@@ -1,8 +1,8 @@
-package com.becker.freelance.strategies;
+package com.becker.freelance.strategies.init;
 
 import com.becker.freelance.math.Decimal;
 
-public class StrategyParameter {
+public class StrategyInitParameter {
 
     private final String name;
     private final Decimal defaultValue;
@@ -10,7 +10,7 @@ public class StrategyParameter {
     private final Decimal maxValue;
     private final Decimal stepSize;
 
-    public StrategyParameter(String name, Decimal defaultValue, Decimal minValue, Decimal maxValue, Decimal stepSize) {
+    public StrategyInitParameter(String name, Decimal defaultValue, Decimal minValue, Decimal maxValue, Decimal stepSize) {
         this.name = name;
         this.defaultValue = defaultValue;
         this.minValue = minValue;
@@ -19,20 +19,20 @@ public class StrategyParameter {
     }
 
 
-    public StrategyParameter(String name, Double defaultValue, Double minValue, Double maxValue, Double stepSize) {
+    public StrategyInitParameter(String name, Double defaultValue, Double minValue, Double maxValue, Double stepSize) {
         this(name, new Decimal(defaultValue), new Decimal(minValue), new Decimal(maxValue), new Decimal(stepSize));
     }
 
-    public StrategyParameter(String name, Integer defaultValue, Double minValue, Double maxValue, Double stepSize) {
+    public StrategyInitParameter(String name, Integer defaultValue, Double minValue, Double maxValue, Double stepSize) {
         this(name, defaultValue.doubleValue(), minValue, maxValue, stepSize);
     }
 
 
-    public StrategyParameter(String name, Integer defaultValue, Integer minValue, Integer maxValue, Integer stepSize) {
+    public StrategyInitParameter(String name, Integer defaultValue, Integer minValue, Integer maxValue, Integer stepSize) {
         this(name, new Decimal(defaultValue), new Decimal(minValue), new Decimal(maxValue), new Decimal(stepSize));
     }
 
-    public StrategyParameter(String name, Integer value) {
+    public StrategyInitParameter(String name, Integer value) {
         this(name, value, value, value, value);
     }
 

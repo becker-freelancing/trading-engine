@@ -7,6 +7,9 @@ import com.becker.freelance.commons.signal.EntrySignalFactory;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
+import com.becker.freelance.strategies.init.PermutableStrategyInitParameter;
+import com.becker.freelance.strategies.parameter.EntryParameter;
+import com.becker.freelance.strategies.parameter.ExitParameter;
 
 import java.util.Comparator;
 import java.util.List;
@@ -23,12 +26,12 @@ public abstract class BaseStrategy {
     }
 
     protected String name;
-    protected PermutableStrategyParameter parameters;
+    protected PermutableStrategyInitParameter parameters;
     private boolean initiatedForParameter = false;
     private OpenPositionRequestor openPositionRequestor;
     protected EntrySignalFactory entrySignalFactory;
 
-    public BaseStrategy(String name, PermutableStrategyParameter parameters) {
+    public BaseStrategy(String name, PermutableStrategyInitParameter parameters) {
         this.name = name;
         this.parameters = parameters;
     }
@@ -48,7 +51,7 @@ public abstract class BaseStrategy {
         return name;
     }
 
-    public PermutableStrategyParameter getParameters() {
+    public PermutableStrategyInitParameter getParameters() {
         return parameters;
     }
 

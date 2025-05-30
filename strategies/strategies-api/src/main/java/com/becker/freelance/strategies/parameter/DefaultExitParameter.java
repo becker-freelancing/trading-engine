@@ -1,4 +1,4 @@
-package com.becker.freelance.strategies;
+package com.becker.freelance.strategies.parameter;
 
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;

@@ -1,12 +1,13 @@
-package com.becker.freelance.strategies;
+package com.becker.freelance.strategies.parameter;
 
+import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import org.ta4j.core.Bar;
 
 import java.time.LocalDateTime;
 
-public interface ExitParameter {
+public interface StrategyParameter {
 
     TimeSeries timeSeries();
 
@@ -16,5 +17,9 @@ public interface ExitParameter {
 
     default Bar currentPriceAsBar() {
         return timeSeries().getEntryForTimeAsBar(time());
+    }
+
+    default Pair pair() {
+        return timeSeries().getPair();
     }
 }
