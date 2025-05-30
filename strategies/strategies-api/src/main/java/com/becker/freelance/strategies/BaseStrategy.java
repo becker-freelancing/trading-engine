@@ -5,11 +5,9 @@ import com.becker.freelance.commons.service.ExtServiceLoader;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.EntrySignalFactory;
 import com.becker.freelance.commons.signal.ExitSignal;
-import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
 
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +38,9 @@ public abstract class BaseStrategy {
         entrySignalFactory = new EntrySignalFactory();
     }
 
-    public abstract Optional<EntrySignal> shouldEnter(TimeSeries timeSeries, LocalDateTime time);
+    public abstract Optional<EntrySignal> shouldEnter(EntryParameter entryParameter);
 
-    public abstract Optional<ExitSignal> shouldExit(TimeSeries timeSeries, LocalDateTime time);
+    public abstract Optional<ExitSignal> shouldExit(ExitParameter exitParameter);
 
     public abstract BaseStrategy forParameters(Map<String, Decimal> parameters);
 

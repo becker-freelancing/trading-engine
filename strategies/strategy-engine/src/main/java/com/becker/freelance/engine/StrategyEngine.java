@@ -10,7 +10,7 @@ import com.becker.freelance.management.api.adaption.EntrySignalAdaptor;
 import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
 import com.becker.freelance.management.api.validation.CompositeStrategy;
 import com.becker.freelance.management.api.validation.EntrySignalValidator;
-import com.becker.freelance.strategies.BaseStrategy;
+import com.becker.freelance.strategies.*;
 import com.becker.freelance.tradeexecution.TradeExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +48,8 @@ public class StrategyEngine {
             adaptPositions(currentPrice);
             closePositionsIfSlOrTpReached(currentPrice);
 
-            shouldExit(currentPrice, timeSeries, time, strategy);
-            shouldEnter(currentPrice, timeSeries, time, strategy);
+            shouldExit(new DefaultExitParameter(timeSeries, time, currentPrice), strategy);
+            shouldEnter(new DefaultEntryParameter(timeSeries, time, currentPrice), strategy);
         } catch (NoTimeSeriesEntryFoundException e) {
             logger.error("Error while executing Strategy {}", strategy.getClass().getName(), e);
         }
@@ -59,17 +59,17 @@ public class StrategyEngine {
         tradeExecutor.adaptPositions(currentPrice);
     }
 
-    private void shouldEnter(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, BaseStrategy strategy) {
-        Optional<EntrySignal> entrySignal = strategy.shouldEnter(timeSeries, time);
+    private void shouldEnter(EntryParameter entryParameter, BaseStrategy strategy) {
+        Optional<EntrySignal> entrySignal = strategy.shouldEnter(entryParameter);
         entrySignal
                 .map(signal -> entrySignalAdaptor.adapt(environmentProvider, signal))
                 .filter(signal -> entrySignalValidator.isValidToExecute(environmentProvider, signal))
-                .ifPresent(signal -> tradeExecutor.entry(currentPrice, timeSeries, time, signal));
+                .ifPresent(signal -> tradeExecutor.entry(entryParameter.currentPrice(), entryParameter.timeSeries(), entryParameter.time(), signal));
     }
 
-    private void shouldExit(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, BaseStrategy strategy) {
-        Optional<ExitSignal> exitSignal = strategy.shouldExit(timeSeries, time);
-        exitSignal.ifPresent(signal -> tradeExecutor.exit(currentPrice, timeSeries, time, signal));
+    private void shouldExit(ExitParameter exitParameter, BaseStrategy strategy) {
+        Optional<ExitSignal> exitSignal = strategy.shouldExit(exitParameter);
+        exitSignal.ifPresent(signal -> tradeExecutor.exit(exitParameter.currentPrice(), exitParameter.timeSeries(), exitParameter.time(), signal));
     }
 
     private void closePositionsIfSlOrTpReached(TimeSeriesEntry currentPrice) {
