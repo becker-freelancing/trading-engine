@@ -54,7 +54,7 @@ public class BacktestExecutor implements Runnable {
 
             for (Pair pair : backtestExecutionConfiguration.pairs()) {
                 SubscribableDataProvider dataProviderForPair = dataProviderFactory.createSubscribableDataProvider(pair, backtestSynchronizer);
-                StrategyEngine strategyEngine = new StrategyEngine(strategySupplier, tradeExecutor);
+                StrategyEngine strategyEngine = new StrategyEngine(strategySupplier, tradeExecutor, backtestExecutionConfiguration.getEurUsdRequestor());
                 StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine);
                 dataProviderForPair.addSubscriber(strategyDataSubscriber);
             }

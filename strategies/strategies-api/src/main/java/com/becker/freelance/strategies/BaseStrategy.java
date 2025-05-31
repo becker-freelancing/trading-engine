@@ -19,7 +19,7 @@ public abstract class BaseStrategy implements TradingStrategy {
 
     protected BaseStrategy(StrategyCreator strategyCreator) {
         this.strategyCreator = strategyCreator;
-        entrySignalFactory = new EntrySignalFactory();
+        this.entrySignalFactory = new EntrySignalFactory();
     }
 
     public Optional<EntrySignal> shouldEnter(EntryParameter entryParameter) {

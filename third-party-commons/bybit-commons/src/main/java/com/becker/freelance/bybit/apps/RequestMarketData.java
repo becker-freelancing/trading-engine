@@ -8,6 +8,8 @@ import com.bybit.api.client.service.BybitApiClientFactory;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,7 +31,12 @@ public class RequestMarketData {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd kk:mm:ss");
 
     public static void main(String[] args) throws Exception {
-        String symbol = "ETHUSDT";
+        String symbol = "USDTEUR";
+        Function<String, String> transformator = (in) -> {
+            double price = Double.parseDouble(in);
+            price = new BigDecimal(1 / price).setScale(5, RoundingMode.HALF_UP).doubleValue();
+            return String.valueOf(price);
+        };
 
         Path path = Path.of(getBasePath().toString(), "data-bybit", symbol + "_1.csv");
         createPath(path);
@@ -47,7 +55,7 @@ public class RequestMarketData {
             try {
 
                 marketLinesData = (Map<String, Object>) marketRestClient.getMarketLinesData(MarketDataRequest.builder()
-                        .category(CategoryType.LINEAR)
+                        .category(CategoryType.SPOT)
                         .symbol(symbol)
                         .marketInterval(MarketInterval.ONE_MINUTE)
                         .start(map(startTime))
@@ -67,7 +75,7 @@ public class RequestMarketData {
             Map<String, Object> result = (Map<String, Object>) marketLinesData.get("result");
             List<List<String>> list = (List<List<String>>) result.get("list");
 
-            lines = Stream.concat(lines, mapMarketData(list));
+            lines = Stream.concat(lines, mapMarketData(list, transformator));
 
             i++;
             if (i % 10 == 0) {
@@ -81,19 +89,19 @@ public class RequestMarketData {
         JOptionPane.showInputDialog("FINISHED");
     }
 
-    private static Stream<String> mapMarketData(List<List<String>> list) {
+    private static Stream<String> mapMarketData(List<List<String>> list, Function<String, String> priceTransformator) {
         return list.stream()
-                .map(RequestMarketData::map);
+                .map(data -> map(data, priceTransformator));
     }
 
-    private static String map(List<String> data) {
+    private static String map(List<String> data, Function<String, String> priceTransformator) {
         LocalDateTime start = map(data.get(0));
         return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
                 start.format(formatter),
-                data.get(1), data.get(1),
-                data.get(2), data.get(2),
-                data.get(3), data.get(3),
-                data.get(4), data.get(4),
+                priceTransformator.apply(data.get(1)), priceTransformator.apply(data.get(1)),
+                priceTransformator.apply(data.get(2)), priceTransformator.apply(data.get(2)),
+                priceTransformator.apply(data.get(3)), priceTransformator.apply(data.get(3)),
+                priceTransformator.apply(data.get(4)), priceTransformator.apply(data.get(4)),
                 data.get(5));
     }
 

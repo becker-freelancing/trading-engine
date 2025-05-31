@@ -17,6 +17,11 @@
             <artifactId>ta4j-core</artifactId>
             <version>${ta4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20241224</version>
+        </dependency>
     </dependencies>
 
 </project>

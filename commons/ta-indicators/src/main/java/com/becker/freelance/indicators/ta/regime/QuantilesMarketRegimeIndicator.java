@@ -10,6 +10,10 @@ import java.util.Optional;
 
 public class QuantilesMarketRegimeIndicator extends CachableIndicator<Integer, QuantileMarketRegime> implements Indicator<QuantileMarketRegime> {
 
+    public static QuantilesMarketRegimeIndicator fromConfig(Indicator<DurationMarketRegime> regimeIndicator) {
+
+    }
+
     private final Indicator<DurationMarketRegime> regimeIndicator;
     private final Map<MarketRegime, List<Double>> quantiles;
 

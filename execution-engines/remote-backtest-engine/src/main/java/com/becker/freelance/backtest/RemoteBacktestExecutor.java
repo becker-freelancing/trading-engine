@@ -36,7 +36,7 @@ public class RemoteBacktestExecutor implements Runnable {
 
             SubscribableDataProvider subscribableDataProvider = dataProviderFactory.createSubscribableDataProvider(pair);
 
-            StrategyEngine strategyEngine = new StrategyEngine(strategySupplier, tradeExecutor);
+            StrategyEngine strategyEngine = new StrategyEngine(strategySupplier, tradeExecutor, dataProviderFactory.createEurUsdRequestor());
             StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine);
             subscribableDataProvider.addSubscriber(strategyDataSubscriber);
         } catch (Exception e) {

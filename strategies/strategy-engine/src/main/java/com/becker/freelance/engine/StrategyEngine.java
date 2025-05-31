@@ -1,5 +1,7 @@
 package com.becker.freelance.engine;
 
+import com.becker.freelance.broker.BrokerRequestor;
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.NoTimeSeriesEntryFoundException;
@@ -31,16 +33,21 @@ public class StrategyEngine {
     private final TradeExecutor tradeExecutor;
     private final EntrySignalAdaptor entrySignalAdaptor;
     private final EntrySignalValidator entrySignalValidator;
-    private ManagementEnvironmentProvider environmentProvider;
+    private final ManagementEnvironmentProvider environmentProvider;
 
-    public StrategyEngine(Supplier<TradingStrategy> strategySupplier, TradeExecutor tradeExecutor) {
+    public StrategyEngine(Supplier<TradingStrategy> strategySupplier, TradeExecutor tradeExecutor, EurUsdRequestor eurUsdRequestor) {
         this.tradeExecutor = tradeExecutor;
         this.strategy = strategySupplier.get();
         this.strategy.setOpenPositionRequestor(tradeExecutor);
         ManagementLoader managementLoader = new ManagementLoader();
         this.entrySignalAdaptor = managementLoader.findEntrySignalAdaptor();
         this.entrySignalValidator = managementLoader.findEntrySignalValidator(CompositeStrategy.ALL_MATCH);
-//        this.environmentProvider = managementLoader.findEnvironmentProvider();
+        BrokerRequestor brokerRequestor = BrokerRequestor.find(tradeExecutor);
+        this.environmentProvider = managementLoader.findEnvironmentProvider(
+                brokerRequestor, brokerRequestor,
+                tradeExecutor, tradeExecutor,
+                eurUsdRequestor
+        );
     }
 
     public void executeForTime(TimeSeries timeSeries, LocalDateTime time, TradingStrategy strategy) {
