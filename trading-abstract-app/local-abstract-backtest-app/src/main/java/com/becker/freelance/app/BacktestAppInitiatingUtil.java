@@ -3,7 +3,7 @@ package com.becker.freelance.app;
 import com.becker.freelance.backtest.util.PathUtil;
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.strategies.BaseStrategy;
+import com.becker.freelance.strategies.creation.StrategyCreator;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,11 +21,11 @@ class BacktestAppInitiatingUtil {
         propertyAsker = new PropertyAsker();
     }
 
-    public void saveProperties(BaseStrategy baseStrategy, Integer numberOfThreads, List<Pair> pairs, AppMode appMode) {
+    public void saveProperties(StrategyCreator baseStrategy, Integer numberOfThreads, List<Pair> pairs, AppMode appMode) {
         Path propertiesPath = getPropertiesPath();
 
         List<String> content = List.of(
-                baseStrategy.getName(),
+                baseStrategy.strategyName(),
                 String.valueOf(numberOfThreads),
                 pairs.stream().map(Pair::shortName).collect(Collectors.joining(";")),
                 appMode.getDescription()
@@ -52,7 +52,7 @@ class BacktestAppInitiatingUtil {
             return Optional.empty();
         }
 
-        BaseStrategy baseStrategy = BaseStrategy.loadAll().stream().filter(strategy -> strategy.getName().equals(lines.get(0))).findAny().orElseThrow(IllegalStateException::new);
+        StrategyCreator baseStrategy = StrategyCreator.findAll().stream().filter(strategy -> strategy.strategyName().equals(lines.get(0))).findAny().orElseThrow(IllegalStateException::new);
         Integer numberOfThreads = Integer.parseInt(lines.get(1));
         Set<String> savedPairs = Set.of(lines.get(2).split(";"));
         List<Pair> pairs = Pair.allPairs().stream().filter(pair -> savedPairs.contains(pair.shortName())).toList();
@@ -60,7 +60,7 @@ class BacktestAppInitiatingUtil {
 
         propertyAsker.log(List.of(
                 "\t\tStrategie:",
-                "\t\t\t" + baseStrategy.getName(),
+                "\t\t\t" + baseStrategy.strategyName(),
                 "\t\tAnzahl an Threads:",
                 "\t\t\t" + numberOfThreads,
                 "\t\tPairs:",
@@ -100,8 +100,8 @@ class BacktestAppInitiatingUtil {
     }
 
 
-    public BaseStrategy askStrategy() {
-        BaseStrategy strategy = propertyAsker.askProperty(BaseStrategy.loadAll(), BaseStrategy::getName, "Strategie");
+    public StrategyCreator askStrategy() {
+        StrategyCreator strategy = propertyAsker.askProperty(StrategyCreator.findAll(), StrategyCreator::strategyName, "Strategie");
         return strategy;
     }
 
@@ -127,7 +127,7 @@ class BacktestAppInitiatingUtil {
         YES, NO
     }
 
-    public record LastExecutionProperties(BaseStrategy baseStrategy, Integer numberOfThread, List<Pair> pairs,
+    public record LastExecutionProperties(StrategyCreator baseStrategy, Integer numberOfThread, List<Pair> pairs,
                                           AppMode appMode) {
     }
 

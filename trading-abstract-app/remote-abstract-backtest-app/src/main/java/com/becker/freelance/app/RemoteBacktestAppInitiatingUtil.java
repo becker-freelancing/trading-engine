@@ -2,7 +2,7 @@ package com.becker.freelance.app;
 
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.strategies.BaseStrategy;
+import com.becker.freelance.strategies.creation.StrategyCreator;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 class RemoteBacktestAppInitiatingUtil {
 
 
-    public List<BaseStrategy> askStrategy() {
+    public List<StrategyCreator> askStrategy() {
         String strategies = System.getenv("STRATEGIES");
         Set<String> strategieNames = Arrays.stream(strategies.split(";")).map(String::trim).collect(Collectors.toSet());
-        return BaseStrategy.loadAll().stream().filter(strategy -> strategieNames.contains(strategy.getName())).toList();
+        return StrategyCreator.findAll().stream().filter(strategy -> strategieNames.contains(strategy.strategyName())).toList();
     }
 
     public List<Pair> askPair(AppMode appMode) {

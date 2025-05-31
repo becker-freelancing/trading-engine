@@ -1,70 +1,50 @@
 package com.becker.freelance.strategies;
 
 
-import com.becker.freelance.commons.service.ExtServiceLoader;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.EntrySignalFactory;
 import com.becker.freelance.commons.signal.ExitSignal;
-import com.becker.freelance.math.Decimal;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
-import com.becker.freelance.strategies.init.PermutableStrategyInitParameter;
-import com.becker.freelance.strategies.parameter.EntryParameter;
-import com.becker.freelance.strategies.parameter.ExitParameter;
+import com.becker.freelance.strategies.creation.StrategyCreator;
+import com.becker.freelance.strategies.executionparameter.EntryParameter;
+import com.becker.freelance.strategies.executionparameter.ExitParameter;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-public abstract class BaseStrategy {
+public abstract class BaseStrategy implements TradingStrategy {
 
-
-    public static List<BaseStrategy> loadAll(){
-        return ExtServiceLoader.loadMultiple(BaseStrategy.class)
-                .sorted(Comparator.comparing(BaseStrategy::getName))
-                .toList();
-    }
-
-    protected String name;
-    protected PermutableStrategyInitParameter parameters;
-    private boolean initiatedForParameter = false;
+    protected final EntrySignalFactory entrySignalFactory;
+    private final StrategyCreator strategyCreator;
     private OpenPositionRequestor openPositionRequestor;
-    protected EntrySignalFactory entrySignalFactory;
 
-    public BaseStrategy(String name, PermutableStrategyInitParameter parameters) {
-        this.name = name;
-        this.parameters = parameters;
-    }
-
-    public BaseStrategy(Map<String, Decimal> parameters) {
-        initiatedForParameter = true;
+    protected BaseStrategy(StrategyCreator strategyCreator) {
+        this.strategyCreator = strategyCreator;
         entrySignalFactory = new EntrySignalFactory();
     }
 
-    public abstract Optional<EntrySignal> shouldEnter(EntryParameter entryParameter);
-
-    public abstract Optional<ExitSignal> shouldExit(ExitParameter exitParameter);
-
-    public abstract BaseStrategy forParameters(Map<String, Decimal> parameters);
-
-    public String getName() {
-        return name;
+    public Optional<EntrySignal> shouldEnter(EntryParameter entryParameter) {
+        return internalShouldEnter(entryParameter);
     }
 
-    public PermutableStrategyInitParameter getParameters() {
-        return parameters;
+    public Optional<ExitSignal> shouldExit(ExitParameter exitParameter) {
+        return internalShouldExit(exitParameter);
     }
 
-    public boolean isInitiatedForParameter() {
-        return initiatedForParameter;
-    }
+    protected abstract Optional<EntrySignal> internalShouldEnter(EntryParameter entryParameter);
+
+    protected abstract Optional<ExitSignal> internalShouldExit(ExitParameter exitParameter);
 
     public OpenPositionRequestor getOpenPositionRequestor() {
         return openPositionRequestor;
     }
 
-    public BaseStrategy withOpenPositionRequestor(OpenPositionRequestor openPositionRequestor) {
+    @Override
+    public void setOpenPositionRequestor(OpenPositionRequestor openPositionRequestor) {
         this.openPositionRequestor = openPositionRequestor;
-        return this;
+    }
+
+    @Override
+    public StrategyCreator strategyCreator() {
+        return strategyCreator;
     }
 }

@@ -1,22 +1,21 @@
 package com.becker.freelance.backtest;
 
-import com.becker.freelance.math.Decimal;
+import com.becker.freelance.strategies.creation.StrategyParameter;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
 public class ExcludeExistingParametersFilter implements ParameterFilter{
 
-    private final Set<Map<String, Decimal>> existingParameters;
+    private final Set<StrategyParameter> existingParameters;
 
-    public ExcludeExistingParametersFilter(Set<Map<String, Decimal>> existingParameters) {
+    public ExcludeExistingParametersFilter(Set<StrategyParameter> existingParameters) {
         this.existingParameters = new HashSet<>(existingParameters);
     }
 
     @Override
-    public Predicate<Map<String, Decimal>> getPredicate() {
+    public Predicate<StrategyParameter> getPredicate() {
         return param -> !existingParameters.contains(param);
     }
 

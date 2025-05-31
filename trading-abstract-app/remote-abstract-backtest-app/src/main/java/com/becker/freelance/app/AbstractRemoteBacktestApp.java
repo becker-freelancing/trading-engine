@@ -5,7 +5,8 @@ import com.becker.freelance.backtest.StrategyWithPair;
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.strategies.BaseStrategy;
+import com.becker.freelance.strategies.TradingStrategy;
+import com.becker.freelance.strategies.creation.StrategyCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +26,8 @@ public class AbstractRemoteBacktestApp implements Runnable {
 
     @Override
     public void run() {
-        List<BaseStrategy> strategies = appInitiatingUtil.askStrategy();
-        logger.info("Strategies in Backtest: {}", strategies.stream().map(BaseStrategy::getName).toList());
+        List<StrategyCreator> strategies = appInitiatingUtil.askStrategy();
+        logger.info("Strategies in Backtest: {}", strategies.stream().map(StrategyCreator::strategyName).toList());
 
         AppMode appMode = appInitiatingUtil.askAppMode();
         logger.info("AppMode: {}", appMode.getDescription());
@@ -45,7 +46,7 @@ public class AbstractRemoteBacktestApp implements Runnable {
         remoteBacktestEngine.run();
     }
 
-    private Supplier<BaseStrategy> toSupplier(BaseStrategy strategy) {
-        return () -> strategy.forParameters(strategy.getParameters().defaultValues());
+    private Supplier<TradingStrategy> toSupplier(StrategyCreator strategy) {
+        return () -> strategy.build(strategy.strategyParameters().defaultValues());
     }
 }

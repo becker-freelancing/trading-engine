@@ -7,13 +7,12 @@ import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.data.SubscribableDataProvider;
 import com.becker.freelance.engine.StrategyEngine;
-import com.becker.freelance.math.Decimal;
-import com.becker.freelance.strategies.BaseStrategy;
+import com.becker.freelance.strategies.TradingStrategy;
+import com.becker.freelance.strategies.creation.StrategyParameter;
 import com.becker.freelance.tradeexecution.TradeExecutor;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -22,17 +21,18 @@ public class BacktestExecutor implements Runnable {
 
     private final AppConfiguration appConfiguration;
     private final BacktestExecutionConfiguration backtestExecutionConfiguration;
-    private final BiConsumer<List<Trade>, Map<String, Decimal>> onBacktestFinished;
+    private final BiConsumer<List<Trade>, StrategyParameter> onBacktestFinished;
     private final Consumer<Exception> onError;
-    private final Map<String, Decimal> parameters;
-    private final Supplier<BaseStrategy> strategySupplier;
+    private final StrategyParameter parameters;
+    private final Supplier<TradingStrategy> strategySupplier;
 
 
     public BacktestExecutor(AppConfiguration appConfiguration,
                             BacktestExecutionConfiguration backtestExecutionConfiguration,
-                            BiConsumer<List<Trade>, Map<String, Decimal>> onBacktestFinished,
+                            BiConsumer<List<Trade>, StrategyParameter> onBacktestFinished,
                             Consumer<Exception> onError,
-                            Map<String, Decimal> parameters, Supplier<BaseStrategy> strategySupplier) {
+                            StrategyParameter parameters,
+                            Supplier<TradingStrategy> strategySupplier) {
         this.appConfiguration = appConfiguration;
         this.backtestExecutionConfiguration = backtestExecutionConfiguration;
         this.onBacktestFinished = onBacktestFinished;
@@ -70,7 +70,7 @@ public class BacktestExecutor implements Runnable {
         }
     }
 
-    public Map<String, Decimal> getParameter() {
+    public StrategyParameter getParameter() {
         return parameters;
     }
 }

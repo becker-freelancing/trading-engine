@@ -1,10 +1,11 @@
 package com.becker.freelance.backtest;
 
 import com.becker.freelance.math.Decimal;
+import com.becker.freelance.strategies.creation.DefaultParameterNames;
+import com.becker.freelance.strategies.creation.StrategyParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -14,32 +15,32 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ExcludeExistingParametersFilterTest {
 
     ExcludeExistingParametersFilter filter;
-    Predicate<Map<String, Decimal>> predicate;
+    Predicate<StrategyParameter> predicate;
 
     @BeforeEach
     void setUp() {
         filter = new ExcludeExistingParametersFilter(Set.of(
-                Map.of("tp", Decimal.ONE),
-                Map.of("tp", Decimal.TWO)
+                new StrategyParameter(DefaultParameterNames.TAKE_PROFIT, Decimal.ONE),
+                new StrategyParameter(DefaultParameterNames.TAKE_PROFIT, Decimal.TWO)
         ));
         predicate = filter.getPredicate();
     }
 
     @Test
     void nonExistingParameter() {
-        assertTrue(predicate.test(Map.of("tp", Decimal.TEN)));
+        assertTrue(predicate.test(new StrategyParameter(DefaultParameterNames.TAKE_PROFIT, Decimal.TEN)));
     }
 
 
     @Test
     void existingParameter() {
-        assertFalse(predicate.test(Map.of("tp", Decimal.ONE)));
+        assertFalse(predicate.test(new StrategyParameter(DefaultParameterNames.TAKE_PROFIT, Decimal.ONE)));
     }
 
     @Test
     void close() {
         filter.close();
-        assertTrue(predicate.test(Map.of("tp", Decimal.ONE)));
+        assertTrue(predicate.test(new StrategyParameter(DefaultParameterNames.TAKE_PROFIT, Decimal.ONE)));
     }
 
 }

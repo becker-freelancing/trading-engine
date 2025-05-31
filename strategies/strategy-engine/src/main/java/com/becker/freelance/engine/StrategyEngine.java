@@ -10,11 +10,11 @@ import com.becker.freelance.management.api.adaption.EntrySignalAdaptor;
 import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
 import com.becker.freelance.management.api.validation.CompositeStrategy;
 import com.becker.freelance.management.api.validation.EntrySignalValidator;
-import com.becker.freelance.strategies.BaseStrategy;
-import com.becker.freelance.strategies.parameter.DefaultEntryParameter;
-import com.becker.freelance.strategies.parameter.DefaultExitParameter;
-import com.becker.freelance.strategies.parameter.EntryParameter;
-import com.becker.freelance.strategies.parameter.ExitParameter;
+import com.becker.freelance.strategies.TradingStrategy;
+import com.becker.freelance.strategies.executionparameter.DefaultEntryParameter;
+import com.becker.freelance.strategies.executionparameter.DefaultExitParameter;
+import com.becker.freelance.strategies.executionparameter.EntryParameter;
+import com.becker.freelance.strategies.executionparameter.ExitParameter;
 import com.becker.freelance.tradeexecution.TradeExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,25 +27,23 @@ public class StrategyEngine {
 
     private final Logger logger = LoggerFactory.getLogger(StrategyEngine.class);
 
-    private final BaseStrategy strategy;
+    private final TradingStrategy strategy;
     private final TradeExecutor tradeExecutor;
     private final EntrySignalAdaptor entrySignalAdaptor;
     private final EntrySignalValidator entrySignalValidator;
     private ManagementEnvironmentProvider environmentProvider;
 
-    public StrategyEngine(Supplier<BaseStrategy> strategySupplier, TradeExecutor tradeExecutor) {
-        if (!strategySupplier.get().isInitiatedForParameter()) {
-            throw new IllegalArgumentException("Strategy must be initiated for parameters but wasn't");
-        }
+    public StrategyEngine(Supplier<TradingStrategy> strategySupplier, TradeExecutor tradeExecutor) {
         this.tradeExecutor = tradeExecutor;
-        this.strategy = strategySupplier.get().withOpenPositionRequestor(tradeExecutor);
+        this.strategy = strategySupplier.get();
+        this.strategy.setOpenPositionRequestor(tradeExecutor);
         ManagementLoader managementLoader = new ManagementLoader();
         this.entrySignalAdaptor = managementLoader.findEntrySignalAdaptor();
         this.entrySignalValidator = managementLoader.findEntrySignalValidator(CompositeStrategy.ALL_MATCH);
 //        this.environmentProvider = managementLoader.findEnvironmentProvider();
     }
 
-    public void executeForTime(TimeSeries timeSeries, LocalDateTime time, BaseStrategy strategy) {
+    public void executeForTime(TimeSeries timeSeries, LocalDateTime time, TradingStrategy strategy) {
         try {
             TimeSeriesEntry currentPrice = timeSeries.getEntryForTime(time);
 
@@ -63,7 +61,7 @@ public class StrategyEngine {
         tradeExecutor.adaptPositions(currentPrice);
     }
 
-    private void shouldEnter(EntryParameter entryParameter, BaseStrategy strategy) {
+    private void shouldEnter(EntryParameter entryParameter, TradingStrategy strategy) {
         Optional<EntrySignal> entrySignal = strategy.shouldEnter(entryParameter);
         entrySignal
                 .map(signal -> entrySignalAdaptor.adapt(environmentProvider, signal))
@@ -71,7 +69,7 @@ public class StrategyEngine {
                 .ifPresent(signal -> tradeExecutor.entry(entryParameter.currentPrice(), entryParameter.timeSeries(), entryParameter.time(), signal));
     }
 
-    private void shouldExit(ExitParameter exitParameter, BaseStrategy strategy) {
+    private void shouldExit(ExitParameter exitParameter, TradingStrategy strategy) {
         Optional<ExitSignal> exitSignal = strategy.shouldExit(exitParameter);
         exitSignal.ifPresent(signal -> tradeExecutor.exit(exitParameter.currentPrice(), exitParameter.timeSeries(), exitParameter.time(), signal));
     }

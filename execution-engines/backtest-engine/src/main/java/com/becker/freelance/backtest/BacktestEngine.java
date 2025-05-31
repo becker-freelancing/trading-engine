@@ -4,15 +4,15 @@ import com.becker.freelance.backtest.commons.BacktestResultWriter;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.trade.Trade;
-import com.becker.freelance.math.Decimal;
-import com.becker.freelance.strategies.BaseStrategy;
+import com.becker.freelance.strategies.TradingStrategy;
+import com.becker.freelance.strategies.creation.StrategyCreator;
+import com.becker.freelance.strategies.creation.StrategyParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
@@ -26,36 +26,36 @@ public class BacktestEngine {
 
     private final AppConfiguration appConfiguration;
     private final BacktestExecutionConfiguration backtestExecutionConfiguration;
-    private final BaseStrategy baseStrategy;
+    private final StrategyCreator strategyCreator;
     private final ExecutorService executor;
     private final BacktestResultWriter resultWriter;
     private final ParameterFilter parameterFilter;
-    private final BiConsumer<List<Trade>, Map<String, Decimal>> onBacktestFinishedCallback;
+    private final BiConsumer<List<Trade>, StrategyParameter> onBacktestFinishedCallback;
     private final Consumer<Exception> onExceptionCallback;
 
     private int currentIteration = 0;
     private int requiredIterations;
 
 
-    public BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, BaseStrategy baseStrategy, ParameterFilter parameterFilter, Path writePath) {
+    public BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, StrategyCreator strategyCreator, ParameterFilter parameterFilter, Path writePath) {
         this(appConfiguration,
                 backtestExecutionConfiguration,
-                baseStrategy,
+                strategyCreator,
                 Executors.newFixedThreadPool(backtestExecutionConfiguration.numberOfThreads()),
-                getBacktestResultWriter(appConfiguration, backtestExecutionConfiguration, baseStrategy, writePath),
+                getBacktestResultWriter(appConfiguration, backtestExecutionConfiguration, strategyCreator, writePath),
                 parameterFilter
         );
 
     }
 
-    public BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, BaseStrategy baseStrategy) {
-        this(appConfiguration, backtestExecutionConfiguration, baseStrategy, ParameterFilter.allOkFilter(), null);
+    public BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, StrategyCreator strategyCreator) {
+        this(appConfiguration, backtestExecutionConfiguration, strategyCreator, ParameterFilter.allOkFilter(), null);
     }
 
-    protected BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, BaseStrategy baseStrategy, ExecutorService executor, BacktestResultWriter resultWriter, ParameterFilter parameterFilter) {
+    protected BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, StrategyCreator strategyCreator, ExecutorService executor, BacktestResultWriter resultWriter, ParameterFilter parameterFilter) {
         this.appConfiguration = appConfiguration;
         this.backtestExecutionConfiguration = backtestExecutionConfiguration;
-        this.baseStrategy = baseStrategy;
+        this.strategyCreator = strategyCreator;
         this.executor = executor;
         this.resultWriter = resultWriter;
         this.parameterFilter = parameterFilter;
@@ -63,10 +63,10 @@ public class BacktestEngine {
         this.onExceptionCallback = this::shutdownNowOnException;
     }
 
-    private static BacktestResultWriter getBacktestResultWriter(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, BaseStrategy baseStrategy, Path writePath) {
+    private static BacktestResultWriter getBacktestResultWriter(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, StrategyCreator baseStrategy, Path writePath) {
         final BacktestResultWriter resultWriter;
         if (writePath == null) {
-            resultWriter = new BacktestResultWriter(appConfiguration, backtestExecutionConfiguration, baseStrategy.getName());
+            resultWriter = new BacktestResultWriter(appConfiguration, backtestExecutionConfiguration, baseStrategy.strategyName());
         } else {
             resultWriter = new BacktestResultWriter(appConfiguration, backtestExecutionConfiguration, writePath);
         }
@@ -75,14 +75,14 @@ public class BacktestEngine {
 
     public void run() {
         addShutdownHook();
-        List<Map<String, Decimal>> parameters;
+        List<StrategyParameter> parameters;
         try (parameterFilter) {
-            parameters = baseStrategy.getParameters().permutate()
+            parameters = strategyCreator.strategyParameters().permutate()
                     .stream().filter(parameterFilter.getPredicate()).toList();
         }
         requiredIterations = parameters.size();
-        for (Map<String, Decimal> parameter : parameters) {
-            Supplier<BaseStrategy> strategySupplier = () -> baseStrategy.forParameters(parameter);
+        for (StrategyParameter parameter : parameters) {
+            Supplier<TradingStrategy> strategySupplier = () -> strategyCreator.build(parameter);
 
             BacktestExecutor backtestExecutor = new BacktestExecutor(appConfiguration,
                     backtestExecutionConfiguration,
@@ -111,9 +111,9 @@ public class BacktestEngine {
         backtestExecutor.run();
     }
 
-    private void writeBacktestResult(List<Trade> allClosedTrades, Map<String, Decimal> parameter) {
+    private void writeBacktestResult(List<Trade> allClosedTrades, StrategyParameter parameter) {
         try {
-            resultWriter.writeResult(allClosedTrades, parameter);
+            resultWriter.writeResult(allClosedTrades, parameter.asMap());
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

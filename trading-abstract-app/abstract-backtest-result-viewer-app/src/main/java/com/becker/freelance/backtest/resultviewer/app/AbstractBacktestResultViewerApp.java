@@ -4,7 +4,7 @@ import com.becker.freelance.backtest.commons.BacktestResultContent;
 import com.becker.freelance.backtest.commons.BacktestResultReader;
 import com.becker.freelance.backtest.util.PathUtil;
 import com.becker.freelance.math.Decimal;
-import com.becker.freelance.strategies.BaseStrategy;
+import com.becker.freelance.strategies.creation.StrategyCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,14 +92,8 @@ public class AbstractBacktestResultViewerApp implements Runnable {
 
 
 
-    private Path askForResultPath() {
-        BaseStrategy strategy = askForStrategy();
-
-        return askForResultFileName(strategy);
-    }
-
-    private static Path askForResultFileName(BaseStrategy strategy) {
-        String strategyResultDir = PathUtil.fromRelativePath(RESULTS_DIR_NAME + strategy.getName());
+    private static Path askForResultFileName(StrategyCreator strategy) {
+        String strategyResultDir = PathUtil.fromRelativePath(RESULTS_DIR_NAME + strategy.strategyName());
         List<Path> results;
         try (Stream<Path> walk = Files.walk(Path.of(strategyResultDir))) {
             results = walk.filter(Files::isRegularFile)
@@ -113,11 +107,17 @@ public class AbstractBacktestResultViewerApp implements Runnable {
         return result;
     }
 
-    private static BaseStrategy askForStrategy() {
-        List<BaseStrategy> baseStrategies = BaseStrategy.loadAll().stream()
-                .filter(baseStrategy -> Files.exists(Path.of(PathUtil.fromRelativePath(RESULTS_DIR_NAME + baseStrategy.getName()))))
+    private static StrategyCreator askForStrategy() {
+        List<StrategyCreator> baseStrategies = StrategyCreator.findAll().stream()
+                .filter(baseStrategy -> Files.exists(Path.of(PathUtil.fromRelativePath(RESULTS_DIR_NAME + baseStrategy.strategyName()))))
                 .toList();
-        BaseStrategy strategy = new PropertyAsker().askProperty(baseStrategies, BaseStrategy::getName, "Strategie");
+        StrategyCreator strategy = new PropertyAsker().askProperty(baseStrategies, StrategyCreator::strategyName, "Strategie");
         return strategy;
+    }
+
+    private Path askForResultPath() {
+        StrategyCreator strategy = askForStrategy();
+
+        return askForResultFileName(strategy);
     }
 }

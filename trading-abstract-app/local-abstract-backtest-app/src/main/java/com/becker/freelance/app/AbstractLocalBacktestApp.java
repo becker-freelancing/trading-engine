@@ -9,7 +9,7 @@ import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.math.Decimal;
-import com.becker.freelance.strategies.BaseStrategy;
+import com.becker.freelance.strategies.creation.StrategyCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ class AbstractLocalBacktestApp implements Runnable {
     @Override
     public void run() {
         Optional<LastExecutionProperties> properties = appInitiatingUtil.findProperties();
-        BaseStrategy strategy;
+        StrategyCreator strategy;
         AppMode appMode;
         List<Pair> pairs;
         Integer numThreads;
@@ -54,7 +54,7 @@ class AbstractLocalBacktestApp implements Runnable {
             numThreads = appInitiatingUtil.askNumberOfThreads();
         }
         appInitiatingUtil.saveProperties(strategy, numThreads, pairs, appMode);
-        logger.info("\t\tAnzahl Permutationen {}", strategy.getParameters().permutate().size());
+        logger.info("\t\tAnzahl Permutationen {}", strategy.strategyParameters().permutate().size());
 
         TimeSeries eurusd = DataProviderFactory.find(appMode).createDataProvider(Pair.eurUsd1()).readTimeSeries(fromTime.minusDays(1), toTime);
 

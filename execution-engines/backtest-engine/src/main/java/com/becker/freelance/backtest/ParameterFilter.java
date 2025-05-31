@@ -1,8 +1,7 @@
 package com.becker.freelance.backtest;
 
-import com.becker.freelance.math.Decimal;
+import com.becker.freelance.strategies.creation.StrategyParameter;
 
-import java.util.Map;
 import java.util.function.Predicate;
 
 public interface ParameterFilter extends AutoCloseable{
@@ -10,7 +9,7 @@ public interface ParameterFilter extends AutoCloseable{
     static ParameterFilter allOkFilter() {
         return new ParameterFilter() {
             @Override
-            public Predicate<Map<String, Decimal>> getPredicate() {
+            public Predicate<StrategyParameter> getPredicate() {
                 return map -> true;
             }
 
@@ -21,7 +20,7 @@ public interface ParameterFilter extends AutoCloseable{
         };
     }
 
-    Predicate<Map<String, Decimal>> getPredicate();
+    Predicate<StrategyParameter> getPredicate();
 
     @Override
     void close();

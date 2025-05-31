@@ -13,7 +13,9 @@ import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.math.Decimal;
-import com.becker.freelance.strategies.BaseStrategy;
+import com.becker.freelance.strategies.creation.StrategyCreator;
+import com.becker.freelance.strategies.creation.StrategyParameter;
+import com.becker.freelance.strategies.creation.StringParameterName;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,20 +44,23 @@ class AbstractLocalBacktestContinueApp implements Runnable {
     @Override
     public void run() {
         PropertyAsker propertyAsker = new PropertyAsker();
-        BaseStrategy strategy = appInitiatingUtil.askStrategy();
+        StrategyCreator strategy = appInitiatingUtil.askStrategy();
         List<Path> strategyResults;
-        try (Stream<Path> walk = Files.walk(Path.of(PathUtil.resultDirForStrategy(strategy.getName())))){
+        try (Stream<Path> walk = Files.walk(Path.of(PathUtil.resultDirForStrategy(strategy.strategyName())))) {
             strategyResults = walk.filter(Files::isRegularFile)
                     .filter(path -> path.toString().endsWith(".zst")).sorted(Comparator.comparing(path -> path.getFileName().toString())).toList();
         } catch (IOException e) {
-            throw new IllegalStateException("Could not read results for strategy " + strategy.getName(), e);
+            throw new IllegalStateException("Could not read results for strategy " + strategy.strategyName(), e);
         }
         Path resultPath = propertyAsker.askProperty(strategyResults, path -> path.getFileName().toString(), "Ergebnis");
         Integer numThreads = appInitiatingUtil.askNumberOfThreads();
         Set<BacktestResultContent> backtestResultContents = new BacktestResultReader(resultPath).readCsvContent();
         parseAppParameter(backtestResultContents);
         Path resultWriteFile = unzipResultFile(resultPath);
-        Set<Map<String, Decimal>> parameters = backtestResultContents.stream().map(BacktestResultContent::parameters).collect(Collectors.toSet());
+        Set<StrategyParameter> parameters = backtestResultContents.stream()
+                .map(BacktestResultContent::parameters)
+                .map(this::map)
+                .collect(Collectors.toSet());
 
         TimeSeries eurusd = readEurUsdTimeSeries(appMode);
 
@@ -65,6 +70,14 @@ class AbstractLocalBacktestContinueApp implements Runnable {
 
         BacktestEngine backtestEngine = new BacktestEngine(appConfiguration, backtestExecutionConfiguration, strategy, new ExcludeExistingParametersFilter(parameters), resultWriteFile);
         backtestEngine.run();
+    }
+
+    private StrategyParameter map(Map<String, Decimal> stringDecimalMap) {
+        return new StrategyParameter(stringDecimalMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        entry -> new StringParameterName(entry.getKey()),
+                        Map.Entry::getValue
+                )));
     }
 
     private Path unzipResultFile(Path resultPath) {

@@ -22,9 +22,9 @@ public class MarketRegimeIndicator extends CachableIndicator<Integer, MarketRegi
     private final Indicator<Num> ema50;
     private final Indicator<Num> ema100;
 
-    public MarketRegimeIndicator(Indicator<Num> closePrice, double volaSplitThreshold1, double trendReversalSlopeThreshold, int trendSlopeShift) {
+    public MarketRegimeIndicator(Indicator<Num> closePrice, double volaSplitThreshold, double trendReversalSlopeThreshold, int trendSlopeShift) {
         super(100);
-        this.volaSplitThreshold = volaSplitThreshold1;
+        this.volaSplitThreshold = volaSplitThreshold;
         this.trendReversalSlopeThreshold = DecimalNum.valueOf(trendReversalSlopeThreshold);
         this.trendSlopeShift = trendSlopeShift;
         this.closePrice = closePrice;
