@@ -43,6 +43,17 @@ public class StrategyParameter {
         throw new IllegalStateException("Could not convert value " + parameter + " to boolean for parameter with name " + parameterName.getName());
     }
 
+    public int getParameterAsInt(ParameterName parameterName) {
+        Decimal parameter = getParameter(parameterName);
+        return parameter.intValue();
+    }
+
+
+    public double getParameterAsDouble(ParameterName parameterName) {
+        Decimal parameter = getParameter(parameterName);
+        return parameter.doubleValue();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
