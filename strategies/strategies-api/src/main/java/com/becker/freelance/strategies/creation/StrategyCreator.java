@@ -1,5 +1,6 @@
 package com.becker.freelance.strategies.creation;
 
+import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.service.ExtServiceLoader;
 import com.becker.freelance.strategies.TradingStrategy;
 import com.becker.freelance.strategies.validinitparameter.ValidStrategyInitParameters;
@@ -19,6 +20,6 @@ public interface StrategyCreator {
 
     public ValidStrategyInitParameters strategyParameters();
 
-    public TradingStrategy build(StrategyParameter parameter);
+    public TradingStrategy build(Pair pair, StrategyParameter parameter);
 
 }

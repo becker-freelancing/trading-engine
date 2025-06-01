@@ -4,7 +4,7 @@ import com.becker.freelance.backtest.commons.BacktestResultWriter;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.trade.Trade;
-import com.becker.freelance.strategies.TradingStrategy;
+import com.becker.freelance.engine.StrategySupplier;
 import com.becker.freelance.strategies.creation.StrategyCreator;
 import com.becker.freelance.strategies.creation.StrategyParameter;
 import org.slf4j.Logger;
@@ -17,7 +17,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class BacktestEngine {
 
@@ -82,7 +81,7 @@ public class BacktestEngine {
         }
         requiredIterations = parameters.size();
         for (StrategyParameter parameter : parameters) {
-            Supplier<TradingStrategy> strategySupplier = () -> strategyCreator.build(parameter);
+            StrategySupplier strategySupplier = (pair) -> strategyCreator.build(pair, parameter);
 
             BacktestExecutor backtestExecutor = new BacktestExecutor(appConfiguration,
                     backtestExecutionConfiguration,

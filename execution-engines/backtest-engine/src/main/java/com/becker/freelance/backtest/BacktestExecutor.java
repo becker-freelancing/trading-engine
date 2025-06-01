@@ -7,7 +7,7 @@ import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.data.SubscribableDataProvider;
 import com.becker.freelance.engine.StrategyEngine;
-import com.becker.freelance.strategies.TradingStrategy;
+import com.becker.freelance.engine.StrategySupplier;
 import com.becker.freelance.strategies.creation.StrategyParameter;
 import com.becker.freelance.tradeexecution.TradeExecutor;
 
@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class BacktestExecutor implements Runnable {
 
@@ -24,7 +23,7 @@ public class BacktestExecutor implements Runnable {
     private final BiConsumer<List<Trade>, StrategyParameter> onBacktestFinished;
     private final Consumer<Exception> onError;
     private final StrategyParameter parameters;
-    private final Supplier<TradingStrategy> strategySupplier;
+    private final StrategySupplier strategySupplier;
 
 
     public BacktestExecutor(AppConfiguration appConfiguration,
@@ -32,7 +31,7 @@ public class BacktestExecutor implements Runnable {
                             BiConsumer<List<Trade>, StrategyParameter> onBacktestFinished,
                             Consumer<Exception> onError,
                             StrategyParameter parameters,
-                            Supplier<TradingStrategy> strategySupplier) {
+                            StrategySupplier strategySupplier) {
         this.appConfiguration = appConfiguration;
         this.backtestExecutionConfiguration = backtestExecutionConfiguration;
         this.onBacktestFinished = onBacktestFinished;
@@ -54,7 +53,7 @@ public class BacktestExecutor implements Runnable {
 
             for (Pair pair : backtestExecutionConfiguration.pairs()) {
                 SubscribableDataProvider dataProviderForPair = dataProviderFactory.createSubscribableDataProvider(pair, backtestSynchronizer);
-                StrategyEngine strategyEngine = new StrategyEngine(strategySupplier, tradeExecutor, backtestExecutionConfiguration.getEurUsdRequestor());
+                StrategyEngine strategyEngine = new StrategyEngine(pair, strategySupplier, tradeExecutor, backtestExecutionConfiguration.getEurUsdRequestor());
                 StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine);
                 dataProviderForPair.addSubscriber(strategyDataSubscriber);
             }

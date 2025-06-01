@@ -31,7 +31,7 @@ public class RegimeIndicatorFactory {
     }
 
     public Indicator<QuantileMarketRegime> quantileMarketRegimeIndicator(String pairName, Indicator<DurationMarketRegime> durationMarketRegimeIndicator) {
-        JSONObject configForPair = loadConfigForPair(pairName);
+        JSONObject configForPair = loadConfigForPair(pairName).getJSONObject("quantileRegimeDetector");
         Map<MarketRegime, List<Double>> quantiles = Arrays.stream(MarketRegime.values())
                 .map(regime -> new AbstractMap.SimpleEntry<>(regime, configForPair.getJSONArray(regime.toString())))
                 .collect(Collectors.toMap(

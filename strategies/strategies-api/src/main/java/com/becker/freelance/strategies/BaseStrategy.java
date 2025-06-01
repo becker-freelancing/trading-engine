@@ -1,9 +1,14 @@
 package com.becker.freelance.strategies;
 
 
+import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.EntrySignalFactory;
 import com.becker.freelance.commons.signal.ExitSignal;
+import com.becker.freelance.indicators.ta.regime.DurationMarketRegime;
+import com.becker.freelance.indicators.ta.regime.MarketRegime;
+import com.becker.freelance.indicators.ta.regime.QuantileMarketRegime;
+import com.becker.freelance.indicators.ta.regime.RegimeIndicatorFactory;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
 import com.becker.freelance.strategies.creation.StrategyCreator;
 import com.becker.freelance.strategies.executionparameter.EntryParameter;
@@ -24,14 +29,20 @@ public abstract class BaseStrategy implements TradingStrategy {
     private final StrategyCreator strategyCreator;
     protected final BarSeries barSeries;
     protected final Indicator<Num> closePrice;
+    private final Indicator<QuantileMarketRegime> regimeIndicator;
     private OpenPositionRequestor openPositionRequestor;
     private ZonedDateTime lastAddedBarTime;
 
-    protected BaseStrategy(StrategyCreator strategyCreator) {
+    protected BaseStrategy(StrategyCreator strategyCreator, Pair pair) {
         this.strategyCreator = strategyCreator;
         this.entrySignalFactory = new EntrySignalFactory();
         this.barSeries = new BaseBarSeries();
         this.closePrice = new ClosePriceIndicator(barSeries);
+
+        RegimeIndicatorFactory regimeIndicatorFactory = new RegimeIndicatorFactory();
+        Indicator<MarketRegime> marketRegimeIndicator = regimeIndicatorFactory.marketRegimeIndicatorFromConfigFile(pair.technicalName(), closePrice);
+        Indicator<DurationMarketRegime> durationMarketRegimeIndicator = regimeIndicatorFactory.durationMarketRegimeIndicator(marketRegimeIndicator);
+        this.regimeIndicator = regimeIndicatorFactory.quantileMarketRegimeIndicator(pair.technicalName(), durationMarketRegimeIndicator);
     }
 
     public Optional<EntrySignal> shouldEnter(EntryParameter entryParameter) {
@@ -68,5 +79,10 @@ public abstract class BaseStrategy implements TradingStrategy {
     @Override
     public StrategyCreator strategyCreator() {
         return strategyCreator;
+    }
+
+    @Override
+    public QuantileMarketRegime currentMarketRegime() {
+        return regimeIndicator.getValue(barSeries.getEndIndex());
     }
 }

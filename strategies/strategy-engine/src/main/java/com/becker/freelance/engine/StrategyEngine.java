@@ -2,6 +2,7 @@ package com.becker.freelance.engine;
 
 import com.becker.freelance.broker.BrokerRequestor;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
+import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.NoTimeSeriesEntryFoundException;
@@ -23,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 public class StrategyEngine {
 
@@ -35,9 +35,9 @@ public class StrategyEngine {
     private final EntrySignalValidator entrySignalValidator;
     private final ManagementEnvironmentProvider environmentProvider;
 
-    public StrategyEngine(Supplier<TradingStrategy> strategySupplier, TradeExecutor tradeExecutor, EurUsdRequestor eurUsdRequestor) {
+    public StrategyEngine(Pair pair, StrategySupplier strategySupplier, TradeExecutor tradeExecutor, EurUsdRequestor eurUsdRequestor) {
         this.tradeExecutor = tradeExecutor;
-        this.strategy = strategySupplier.get();
+        this.strategy = strategySupplier.get(pair);
         this.strategy.setOpenPositionRequestor(tradeExecutor);
         ManagementLoader managementLoader = new ManagementLoader();
         this.entrySignalAdaptor = managementLoader.findEntrySignalAdaptor();
