@@ -15,6 +15,7 @@ import org.ta4j.core.Indicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 import org.ta4j.core.num.Num;
 
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 public abstract class BaseStrategy implements TradingStrategy {
@@ -24,6 +25,7 @@ public abstract class BaseStrategy implements TradingStrategy {
     protected final BarSeries barSeries;
     protected final Indicator<Num> closePrice;
     private OpenPositionRequestor openPositionRequestor;
+    private ZonedDateTime lastAddedBarTime;
 
     protected BaseStrategy(StrategyCreator strategyCreator) {
         this.strategyCreator = strategyCreator;
@@ -33,16 +35,21 @@ public abstract class BaseStrategy implements TradingStrategy {
     }
 
     public Optional<EntrySignal> shouldEnter(EntryParameter entryParameter) {
-        if (true) {
-            throw new IllegalStateException("TODO");
-        }
-        Bar currentPrice = entryParameter.currentPriceAsBar();
-        barSeries.addBar(currentPrice); //TODO: Nur Hinzufügen, falls in should Exit noch nicht hinzugefügt
+        addBarIfNeeded(entryParameter.currentPriceAsBar());
         return internalShouldEnter(entryParameter);
     }
 
     public Optional<ExitSignal> shouldExit(ExitParameter exitParameter) {
+        addBarIfNeeded(exitParameter.currentPriceAsBar());
         return internalShouldExit(exitParameter);
+    }
+
+    private void addBarIfNeeded(Bar currentPrice) {
+        if (currentPrice.getEndTime().equals(lastAddedBarTime)) {
+            return;
+        }
+        barSeries.addBar(currentPrice);
+        lastAddedBarTime = currentPrice.getEndTime();
     }
 
     protected abstract Optional<EntrySignal> internalShouldEnter(EntryParameter entryParameter);
