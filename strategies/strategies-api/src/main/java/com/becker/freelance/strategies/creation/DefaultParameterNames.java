@@ -16,7 +16,8 @@ public enum DefaultParameterNames implements ParameterName {
     LONG_MA_PERIOD("longMaPeriod"),
     SWING_HIGH_LOW_ORDER("swingHighLowOrder"),
     SWING_HIGH_LOW_MAX_AGE("swingHighLowMaxAge"),
-    SIGNAL_LINE_PERIOD("signalLinePeriod");
+    SIGNAL_LINE_PERIOD("signalLinePeriod"),
+    TRAILING_STOP_ORDER("trailingStopOrder");
 
     private final String name;
 

@@ -56,6 +56,7 @@ public class EntrySignalFactory {
                                  PositionType positionType,
                                  TimeSeriesEntry currentPrice,
                                  TradeableQuantilMarketRegime openMarketRegime) {
+        checkLevels(direction, stopLevel, limitLevel);
         return new DefaultLevelEntrySignal(
                 size,
                 direction,
@@ -67,5 +68,14 @@ public class EntrySignalFactory {
                 limitLevel
         );
 
+    }
+
+    private void checkLevels(Direction direction, Decimal stopLevel, Decimal limitLevel) {
+        if (direction == Direction.BUY && stopLevel.isGreaterThan(limitLevel)) {
+            throw new IllegalStateException("Stop Level must be less than Limit Level for BUY-Positions");
+        }
+        if (direction == Direction.SELL && stopLevel.isLessThan(limitLevel)) {
+            throw new IllegalStateException("Stop Level must be greater than Limit Level for SELL-Positions");
+        }
     }
 }

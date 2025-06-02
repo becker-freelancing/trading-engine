@@ -21,6 +21,10 @@ public class Decimal extends BigDecimal {
         return new Decimal(val);
     }
 
+    public static Decimal exp(Decimal exponent) {
+        return Decimal.valueOf(Math.exp(exponent.doubleValue()));
+    }
+
     public Decimal(String val) {
         super(val);
     }
