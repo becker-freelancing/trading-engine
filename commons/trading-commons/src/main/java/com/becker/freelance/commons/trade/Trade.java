@@ -20,13 +20,13 @@ public class Trade {
     private Direction direction;
     private Decimal conversionRate;
     private PositionType positionType;
-    private TradeableQuantilMarketRegime quantilMarketRegime;
+    private TradeableQuantilMarketRegime openMarketRegime;
 
     protected Trade(){}
 
     public Trade(LocalDateTime openTime, LocalDateTime closeTime, Pair pair, Decimal profitInEuro,
                  Decimal openLevel, Decimal closeLevel, Decimal size, Direction direction,
-                 Decimal conversionRate, PositionType positionType, TradeableQuantilMarketRegime quantilMarketRegime) {
+                 Decimal conversionRate, PositionType positionType, TradeableQuantilMarketRegime openMarketRegime) {
         this.openTime = openTime;
         this.closeTime = closeTime;
         this.pair = pair;
@@ -37,7 +37,7 @@ public class Trade {
         this.direction = direction;
         this.conversionRate = conversionRate;
         this.positionType = positionType;
-        this.quantilMarketRegime = quantilMarketRegime;
+        this.openMarketRegime = openMarketRegime;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class Trade {
                 ", direction=" + direction +
                 ", conversionRate=" + conversionRate +
                 ", positionType=" + positionType +
-                ", quantilMarketRegime=" + quantilMarketRegime +
+                ", quantilMarketRegime=" + openMarketRegime +
                 '}';
     }
 
@@ -97,4 +97,7 @@ public class Trade {
         return positionType;
     }
 
+    public TradeableQuantilMarketRegime getOpenMarketRegime() {
+        return openMarketRegime;
+    }
 }

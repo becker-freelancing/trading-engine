@@ -4,6 +4,7 @@ import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguratio
 import com.becker.freelance.backtest.util.PathUtil;
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -46,6 +47,7 @@ public class BacktestResultWriter {
         objectMapper.registerModule(new JavaTimeModule());
         SimpleModule module = new SimpleModule();
         module.addSerializer(Pair.class, new PairSerializer());
+        module.addSerializer(TradeableQuantilMarketRegime.class, new TradeableMarketRegimeSerializer());
         objectMapper.registerModule(module);
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         this.writePath = writePath;
