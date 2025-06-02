@@ -47,12 +47,22 @@ public abstract class BaseStrategy implements TradingStrategy {
 
     public Optional<EntrySignal> shouldEnter(EntryParameter entryParameter) {
         addBarIfNeeded(entryParameter.currentPriceAsBar());
+        if (canNotExecute()) {
+            return Optional.empty();
+        }
         return internalShouldEnter(entryParameter);
     }
 
     public Optional<ExitSignal> shouldExit(ExitParameter exitParameter) {
         addBarIfNeeded(exitParameter.currentPriceAsBar());
+        if (canNotExecute()) {
+            return Optional.empty();
+        }
         return internalShouldExit(exitParameter);
+    }
+
+    private boolean canNotExecute() {
+        return barSeries.getBarCount() < regimeIndicator.getUnstableBars();
     }
 
     private void addBarIfNeeded(Bar currentPrice) {

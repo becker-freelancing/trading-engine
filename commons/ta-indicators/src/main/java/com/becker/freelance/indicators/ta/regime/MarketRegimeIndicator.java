@@ -1,6 +1,7 @@
 package com.becker.freelance.indicators.ta.regime;
 
 import com.becker.freelance.indicators.ta.cache.CachableIndicator;
+import com.becker.freelance.indicators.ta.util.VolatilityIndicator;
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.Indicator;
 import org.ta4j.core.indicators.EMAIndicator;
@@ -8,8 +9,6 @@ import org.ta4j.core.num.DecimalNum;
 import org.ta4j.core.num.Num;
 
 import java.util.Optional;
-import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 
 public class MarketRegimeIndicator extends CachableIndicator<Integer, MarketRegime> implements Indicator<MarketRegime> {
 
@@ -21,6 +20,7 @@ public class MarketRegimeIndicator extends CachableIndicator<Integer, MarketRegi
     private final Indicator<Num> closePrice;
     private final Indicator<Num> ema50;
     private final Indicator<Num> ema100;
+    private final Indicator<Optional<Num>> volaIndicator;
 
     public MarketRegimeIndicator(Indicator<Num> closePrice, double volaSplitThreshold, double trendReversalSlopeThreshold, int trendSlopeShift) {
         super(100);
@@ -30,6 +30,7 @@ public class MarketRegimeIndicator extends CachableIndicator<Integer, MarketRegi
         this.closePrice = closePrice;
         this.ema50 = new EMAIndicator(closePrice, 50);
         this.ema100 = new EMAIndicator(closePrice, 100);
+        this.volaIndicator = new VolatilityIndicator(closePrice, 30);
     }
 
     @Override
@@ -67,20 +68,8 @@ public class MarketRegimeIndicator extends CachableIndicator<Integer, MarketRegi
     }
 
     private Vola getVola(int index) {
-        double[] logReturns = IntStream.rangeClosed(index - 30, index)
-                .mapToObj(idx -> closePrice.getValue(idx).dividedBy(closePrice.getValue(idx - 1)))
-                .mapToDouble(Num::doubleValue)
-                .map(Math::log)
-                .toArray();
+        Double vola = volaIndicator.getValue(index).map(Num::doubleValue).orElse(0.);
 
-        double mean = DoubleStream.of(logReturns).average().orElse(0.0);
-
-        double variance = DoubleStream.of(logReturns)
-                .map(x -> Math.pow(x - mean, 2))
-                .average()
-                .orElse(0.);
-
-        double vola = Math.sqrt(variance);
         if (vola <= volaSplitThreshold) {
             return Vola.LOW;
         }

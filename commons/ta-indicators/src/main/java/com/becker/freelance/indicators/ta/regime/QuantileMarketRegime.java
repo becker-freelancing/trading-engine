@@ -30,7 +30,7 @@ public enum QuantileMarketRegime implements TradeableQuantilMarketRegime {
 
     public static QuantileMarketRegime fromId(int id) {
         for (QuantileMarketRegime regime : QuantileMarketRegime.values()) {
-            if (regime.getId() == id) {
+            if (regime.id() == id) {
                 return regime;
             }
         }
@@ -48,7 +48,7 @@ public enum QuantileMarketRegime implements TradeableQuantilMarketRegime {
         };
     }
 
-    public int getId() {
+    public int id() {
         return id;
     }
 }
