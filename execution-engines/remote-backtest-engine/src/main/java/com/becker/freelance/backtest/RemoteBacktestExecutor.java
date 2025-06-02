@@ -5,18 +5,16 @@ import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.data.SubscribableDataProvider;
 import com.becker.freelance.engine.StrategyEngine;
-import com.becker.freelance.strategies.TradingStrategy;
+import com.becker.freelance.engine.StrategySupplier;
 import com.becker.freelance.tradeexecution.TradeExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.function.Supplier;
 
 public class RemoteBacktestExecutor implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteBacktestExecutor.class);
 
-    private final Supplier<TradingStrategy> strategySupplier;
+    private final StrategySupplier strategySupplier;
     private final Pair pair;
     private final AppConfiguration appConfiguration;
 
@@ -36,11 +34,11 @@ public class RemoteBacktestExecutor implements Runnable {
 
             SubscribableDataProvider subscribableDataProvider = dataProviderFactory.createSubscribableDataProvider(pair);
 
-            StrategyEngine strategyEngine = new StrategyEngine(strategySupplier, tradeExecutor, dataProviderFactory.createEurUsdRequestor());
+            StrategyEngine strategyEngine = new StrategyEngine(pair, strategySupplier, tradeExecutor, dataProviderFactory.createEurUsdRequestor());
             StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine);
             subscribableDataProvider.addSubscriber(strategyDataSubscriber);
         } catch (Exception e) {
-            logger.error("Error for Strategy {}", strategySupplier.get().strategyCreator().strategyName(), e);
+            logger.error("Error for Strategy {}", strategySupplier.get(pair).strategyCreator().strategyName(), e);
         }
     }
 }

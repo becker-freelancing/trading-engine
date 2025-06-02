@@ -3,6 +3,7 @@ package com.becker.freelance.commons.trade;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.PositionType;
+import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
@@ -19,12 +20,13 @@ public class Trade {
     private Direction direction;
     private Decimal conversionRate;
     private PositionType positionType;
+    private TradeableQuantilMarketRegime quantilMarketRegime;
 
     protected Trade(){}
 
     public Trade(LocalDateTime openTime, LocalDateTime closeTime, Pair pair, Decimal profitInEuro,
                  Decimal openLevel, Decimal closeLevel, Decimal size, Direction direction,
-                 Decimal conversionRate, PositionType positionType) {
+                 Decimal conversionRate, PositionType positionType, TradeableQuantilMarketRegime quantilMarketRegime) {
         this.openTime = openTime;
         this.closeTime = closeTime;
         this.pair = pair;
@@ -35,14 +37,24 @@ public class Trade {
         this.direction = direction;
         this.conversionRate = conversionRate;
         this.positionType = positionType;
+        this.quantilMarketRegime = quantilMarketRegime;
     }
 
     @Override
     public String toString() {
-        return String.format("Trade(openTime=%s, closeTime=%s, pair=%s, profitInEuro=%.2f, openLevel=%.4f, " +
-                        "closeLevel=%.4f, size=%.2f, direction=%s, conversionRate=%.4f, positionType=%s)",
-                openTime, closeTime, pair, profitInEuro, openLevel, closeLevel, size,
-                direction, conversionRate, positionType);
+        return "Trade{" +
+                "openTime=" + openTime +
+                ", closeTime=" + closeTime +
+                ", pair=" + pair +
+                ", profitInEuro=" + profitInEuro +
+                ", openLevel=" + openLevel +
+                ", closeLevel=" + closeLevel +
+                ", size=" + size +
+                ", direction=" + direction +
+                ", conversionRate=" + conversionRate +
+                ", positionType=" + positionType +
+                ", quantilMarketRegime=" + quantilMarketRegime +
+                '}';
     }
 
     public LocalDateTime getOpenTime() {

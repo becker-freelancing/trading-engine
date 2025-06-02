@@ -59,27 +59,27 @@ public class CapitalTradeExecutor extends TradeExecutor {
 
         if (entrySignal instanceof LevelEntrySignal levelEntrySignal) {
             tradeController.createPositionStopLimitLevel(
-                    entrySignal.getDirection(),
+                    entrySignal.direction(),
                     currentPrice.pair(),
-                    entrySignal.getSize(),
+                    entrySignal.size(),
                     levelEntrySignal.stopLevel(),
                     levelEntrySignal.limitLevel()
             );
         } else if (entrySignal instanceof DistanceEntrySignal distanceEntrySignal) {
             tradeController.createPositionStopLimitDistance(
-                    entrySignal.getDirection(),
+                    entrySignal.direction(),
                     currentPrice.pair(),
-                    entrySignal.getSize(),
-                    distanceEntrySignal.getStopDistance(),
-                    distanceEntrySignal.getLimitDistance()
+                    entrySignal.size(),
+                    distanceEntrySignal.stopDistance(),
+                    distanceEntrySignal.limitDistance()
             );
         } else if (entrySignal instanceof AmountEntrySignal amountEntrySignal) {
             tradeController.createPositionStopLimitAmount(
-                    entrySignal.getDirection(),
+                    entrySignal.direction(),
                     currentPrice.pair(),
-                    entrySignal.getSize(),
-                    amountEntrySignal.getStopAmount(),
-                    amountEntrySignal.getLimitAmount()
+                    entrySignal.size(),
+                    amountEntrySignal.stopAmount(),
+                    amountEntrySignal.limitAmount()
             );
         } else {
             throw new UnsupportedOperationException("Could not open position by EntrySignal " + entrySignal.getClass());

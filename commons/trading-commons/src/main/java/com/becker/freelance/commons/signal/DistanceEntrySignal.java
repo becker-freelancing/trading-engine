@@ -4,9 +4,9 @@ import com.becker.freelance.math.Decimal;
 
 public interface DistanceEntrySignal extends EntrySignal {
 
-    public Decimal getStopDistance();
+    public Decimal stopDistance();
 
-    public Decimal getLimitDistance();
+    public Decimal limitDistance();
 
     @Override
     default void visit(EntrySignalVisitor visitor) {

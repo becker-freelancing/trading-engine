@@ -6,6 +6,7 @@ import com.becker.freelance.commons.calculation.TradingCalculatorImpl;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.PositionType;
+import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
@@ -13,25 +14,27 @@ import java.time.LocalDateTime;
 
 public interface EntrySignal {
 
-    public Decimal getSize();
+    public Decimal size();
 
-    public Direction getDirection();
+    public Direction direction();
 
-    public Pair getPair();
+    public Pair pair();
 
-    public TimeSeriesEntry getOpenPrice();
+    public TimeSeriesEntry openPrice();
 
     public PositionType positionType();
 
+    public TradeableQuantilMarketRegime openMarketRegime();
+
     public default Decimal getOpenPriceForDirection() {
-        return switch (getDirection()) {
-            case SELL -> getOpenPrice().closeBid();
-            case BUY -> getOpenPrice().closeAsk();
+        return switch (direction()) {
+            case SELL -> openPrice().closeBid();
+            case BUY -> openPrice().closeAsk();
         };
     }
 
     public default LocalDateTime getOpenTime() {
-        return getOpenPrice().time();
+        return openPrice().time();
     }
 
     public void visit(EntrySignalVisitor visitor);

@@ -5,6 +5,7 @@ import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.position.PositionType;
 import com.becker.freelance.commons.position.StopLimitPosition;
+import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
@@ -78,5 +79,10 @@ class CapitalPosition implements StopLimitPosition {
     @Override
     public String getId() {
         return position.getDealId();
+    }
+
+    @Override
+    public TradeableQuantilMarketRegime getOpenMarketRegime() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

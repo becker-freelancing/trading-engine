@@ -25,7 +25,7 @@ public class PositionSizeAdaptor implements EntrySignalAdaptor {
         LevelEntrySignal levelEntrySignal = entrySignal.toLevelEntrySignal(environmentProvider.getEurUsdRequestor());
 
         Decimal stopDistanceInPoints = levelEntrySignal.stopInPoints();
-        PositionSizeCalculationParams positionSizeCalculationParams = new PositionSizeCalculationParams(stopDistanceInPoints, entrySignal.getPair());
+        PositionSizeCalculationParams positionSizeCalculationParams = new PositionSizeCalculationParams(stopDistanceInPoints, entrySignal.pair());
 
         Decimal positionSize = positionSizeCalculator.calculate(environmentProvider, positionSizeCalculationParams);
         positionSize = positionSizeSanitizer.calculate(environmentProvider, positionSize);

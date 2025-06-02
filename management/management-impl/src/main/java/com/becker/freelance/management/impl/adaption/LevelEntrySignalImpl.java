@@ -3,6 +3,7 @@ package com.becker.freelance.management.impl.adaption;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.PositionType;
+import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.signal.LevelEntrySignal;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
@@ -28,27 +29,32 @@ public class LevelEntrySignalImpl implements LevelEntrySignal {
     }
 
     @Override
-    public Decimal getSize() {
+    public Decimal size() {
         return size;
     }
 
     @Override
-    public Direction getDirection() {
-        return levelEntrySignal.getDirection();
+    public Direction direction() {
+        return levelEntrySignal.direction();
     }
 
     @Override
-    public Pair getPair() {
-        return levelEntrySignal.getPair();
+    public Pair pair() {
+        return levelEntrySignal.pair();
     }
 
     @Override
-    public TimeSeriesEntry getOpenPrice() {
-        return levelEntrySignal.getOpenPrice();
+    public TimeSeriesEntry openPrice() {
+        return levelEntrySignal.openPrice();
     }
 
     @Override
     public PositionType positionType() {
         return levelEntrySignal.positionType();
+    }
+
+    @Override
+    public TradeableQuantilMarketRegime openMarketRegime() {
+        return levelEntrySignal.openMarketRegime();
     }
 }

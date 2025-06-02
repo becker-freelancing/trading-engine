@@ -1,6 +1,7 @@
 package com.becker.freelance.commons.position;
 
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,8 @@ public interface Position extends Cloneable {
     public Position clone();
 
     public String getId();
+
+    public TradeableQuantilMarketRegime getOpenMarketRegime();
 
     public default Position cloneWithSize(Decimal size) {
         Position clone = clone();

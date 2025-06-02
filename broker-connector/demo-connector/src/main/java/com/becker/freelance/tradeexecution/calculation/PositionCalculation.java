@@ -142,7 +142,7 @@ public class PositionCalculation {
     private Trade toTrade(Decimal conversionRate, Decimal profit, Decimal closePrice, Pair pair, Position position, TimeSeriesEntry currentPrice) {
         return new Trade(position.getOpenTime(), currentPrice.time(), pair, profit,
                 position.getOpenPrice(), closePrice, position.getSize(), position.getDirection(),
-                conversionRate, position.getPositionType());
+                conversionRate, position.getPositionType(), position.getOpenMarketRegime());
     }
 
 

@@ -35,12 +35,12 @@ public class EntrySignalValidation implements EntrySignalValidator {
     }
 
     private boolean maxRiskValid(ManagementEnvironmentProvider environmentProvider, LevelEntrySignal levelEntrySignal) {
-        MaxRiskValidatorParams maxRiskValidatorParams = new MaxRiskValidatorParams(levelEntrySignal.getSize(), levelEntrySignal.stopInPoints(), levelEntrySignal.getPair());
+        MaxRiskValidatorParams maxRiskValidatorParams = new MaxRiskValidatorParams(levelEntrySignal.size(), levelEntrySignal.stopInPoints(), levelEntrySignal.pair());
         return maxRiskValidator.isValid(environmentProvider, maxRiskValidatorParams);
     }
 
     private boolean maxDrawdownValid(ManagementEnvironmentProvider environmentProvider, EntrySignal entrySignal) {
-        return maxDrawdownValidator.isValid(environmentProvider, entrySignal.getPair());
+        return maxDrawdownValidator.isValid(environmentProvider, entrySignal.pair());
     }
 
     private boolean chanceRiskValid(ManagementEnvironmentProvider environmentProvider, LevelEntrySignal levelEntrySignal) {

@@ -4,9 +4,9 @@ import com.becker.freelance.math.Decimal;
 
 public interface AmountEntrySignal extends EntrySignal {
 
-    public Decimal getStopAmount();
+    public Decimal stopAmount();
 
-    public Decimal getLimitAmount();
+    public Decimal limitAmount();
 
     @Override
     default void visit(EntrySignalVisitor visitor) {

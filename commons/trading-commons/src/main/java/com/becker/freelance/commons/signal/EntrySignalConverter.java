@@ -4,6 +4,7 @@ import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.PositionType;
+import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
@@ -38,12 +39,12 @@ public class EntrySignalConverter implements EntrySignalVisitor {
     }
 
     public LevelEntrySignal convert(DistanceEntrySignal entrySignal) {
-        return convert(entrySignal, entrySignal.getLimitDistance(), entrySignal.getStopDistance());
+        return convert(entrySignal, entrySignal.limitDistance(), entrySignal.stopDistance());
     }
 
     public LevelEntrySignal convert(AmountEntrySignal entrySignal) {
-        Decimal limitDistance = tradingCalculator.getDistanceByAmount(entrySignal.getPair(), entrySignal.getSize(), entrySignal.getLimitAmount());
-        Decimal stopDistance = tradingCalculator.getDistanceByAmount(entrySignal.getPair(), entrySignal.getSize(), entrySignal.getStopAmount());
+        Decimal limitDistance = tradingCalculator.getDistanceByAmount(entrySignal.pair(), entrySignal.size(), entrySignal.limitAmount());
+        Decimal stopDistance = tradingCalculator.getDistanceByAmount(entrySignal.pair(), entrySignal.size(), entrySignal.stopAmount());
         return convert(entrySignal, limitDistance, stopDistance);
     }
 
@@ -52,9 +53,9 @@ public class EntrySignalConverter implements EntrySignalVisitor {
     }
 
     private LevelEntrySignal convert(EntrySignal entrySignal, Decimal limitDistance, Decimal stopDistance) {
-        Decimal closeSpread = entrySignal.getOpenPrice().getCloseSpread();
-        Decimal stopLevel = getStopLevel(closeSpread, stopDistance, entrySignal.getOpenPriceForDirection(), entrySignal.getDirection());
-        Decimal limitLevel = getLimitLevel(closeSpread, limitDistance, entrySignal.getOpenPriceForDirection(), entrySignal.getDirection());
+        Decimal closeSpread = entrySignal.openPrice().getCloseSpread();
+        Decimal stopLevel = getStopLevel(closeSpread, stopDistance, entrySignal.getOpenPriceForDirection(), entrySignal.direction());
+        Decimal limitLevel = getLimitLevel(closeSpread, limitDistance, entrySignal.getOpenPriceForDirection(), entrySignal.direction());
 
         return new LevelEntrySignalImpl(entrySignal, stopLevel, limitLevel, entrySignal.positionType());
     }
@@ -77,23 +78,28 @@ public class EntrySignalConverter implements EntrySignalVisitor {
                                         PositionType positionType) implements LevelEntrySignal {
 
         @Override
-        public Decimal getSize() {
-            return entrySignal.getSize();
+        public Decimal size() {
+            return entrySignal.size();
         }
 
         @Override
-        public Direction getDirection() {
-            return entrySignal.getDirection();
+        public Direction direction() {
+            return entrySignal.direction();
         }
 
         @Override
-        public Pair getPair() {
-            return entrySignal.getPair();
+        public Pair pair() {
+            return entrySignal.pair();
         }
 
         @Override
-        public TimeSeriesEntry getOpenPrice() {
-            return entrySignal.getOpenPrice();
+        public TimeSeriesEntry openPrice() {
+            return entrySignal.openPrice();
+        }
+
+        @Override
+        public TradeableQuantilMarketRegime openMarketRegime() {
+            return entrySignal.openMarketRegime();
         }
     }
 }

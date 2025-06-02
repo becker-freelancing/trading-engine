@@ -66,9 +66,9 @@ public class BybitTradeExecutor extends TradeExecutor {
         LevelEntrySignal levelEntrySignal = entrySignal.toLevelEntrySignal(tradingCalculator);
 
         tradeController.createPositionStopLimitLevel(
-                levelEntrySignal.getDirection(),
+                levelEntrySignal.direction(),
                 currentPrice.pair(),
-                levelEntrySignal.getSize(),
+                levelEntrySignal.size(),
                 levelEntrySignal.stopLevel(),
                 levelEntrySignal.limitLevel()
         );

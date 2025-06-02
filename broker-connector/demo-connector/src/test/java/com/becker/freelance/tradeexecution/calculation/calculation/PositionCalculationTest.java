@@ -7,6 +7,7 @@ import com.becker.freelance.commons.calculation.TradingCalculatorImpl;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.position.PositionType;
+import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.signal.AmountEntrySignal;
 import com.becker.freelance.commons.signal.DistanceEntrySignal;
 import com.becker.freelance.commons.signal.EntrySignalFactory;
@@ -93,12 +94,12 @@ class PositionCalculationTest {
 
         entrySignalFactory = new EntrySignalFactory();
         demoPositionFactory = new DemoPositionFactory(eurUsdRequestor);
-        buyPosition = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("1"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionType.HARD_LIMIT, entryForMarginCalculation));
-        sellPosition = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("1"), Direction.SELL, new Decimal("15"), new Decimal("3"), PositionType.HARD_LIMIT, entryForMarginCalculation));
-        buyPosition2 = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("2"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionType.HARD_LIMIT, entryForMarginCalculation));
-        sellPosition2 = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("2"), Direction.SELL, new Decimal("15"), new Decimal("3"), PositionType.HARD_LIMIT, entryForMarginCalculation));
-        buyPosition3 = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("3"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionType.HARD_LIMIT, entryForMarginCalculation));
-        sellPosition3 = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("3"), Direction.SELL, new Decimal("15"), new Decimal("3"), PositionType.HARD_LIMIT, entryForMarginCalculation));
+        buyPosition = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("1"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
+        sellPosition = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("1"), Direction.SELL, new Decimal("15"), new Decimal("3"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
+        buyPosition2 = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("2"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
+        sellPosition2 = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("2"), Direction.SELL, new Decimal("15"), new Decimal("3"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
+        buyPosition3 = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("3"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
+        sellPosition3 = demoPositionFactory.createStopLimitPosition((LevelEntrySignal) entrySignalFactory.fromLevel(new Decimal("3"), Direction.SELL, new Decimal("15"), new Decimal("3"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
 
     }
 
@@ -448,9 +449,9 @@ class PositionCalculationTest {
     @Test
     void closePositionIfSlOrTpReached() {
         doReturn(Decimal.ZERO).when(entryForMarginCalculation).getCloseSpread();
-        Position position1 = demoPositionFactory.createStopLimitPosition((AmountEntrySignal) entrySignalFactory.fromAmount(new Decimal("1."), Direction.BUY, new Decimal("1"), new Decimal("1"), PositionType.HARD_LIMIT, entryForMarginCalculation));
-        Position position2 = demoPositionFactory.createStopLimitPosition((AmountEntrySignal) entrySignalFactory.fromAmount(new Decimal("1."), Direction.SELL, new Decimal("50000000"), new Decimal("500000000"), PositionType.HARD_LIMIT, entryForMarginCalculation));
-        Position position3 = demoPositionFactory.createStopLimitPosition((AmountEntrySignal) entrySignalFactory.fromAmount(new Decimal("1."), Direction.BUY, new Decimal("20"), new Decimal("20"), PositionType.HARD_LIMIT, entryForMarginCalculation));
+        Position position1 = demoPositionFactory.createStopLimitPosition((AmountEntrySignal) entrySignalFactory.fromAmount(new Decimal("1."), Direction.BUY, new Decimal("1"), new Decimal("1"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
+        Position position2 = demoPositionFactory.createStopLimitPosition((AmountEntrySignal) entrySignalFactory.fromAmount(new Decimal("1."), Direction.SELL, new Decimal("50000000"), new Decimal("500000000"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
+        Position position3 = demoPositionFactory.createStopLimitPosition((AmountEntrySignal) entrySignalFactory.fromAmount(new Decimal("1."), Direction.BUY, new Decimal("20"), new Decimal("20"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
         wallet.addMargin(MARGIN_PER_POSITION.multiply(3));
         when(currentPrice.lowBid()).thenReturn(new Decimal("1.6"));
         when(currentPrice.lowAsk()).thenReturn(new Decimal("1.6"));
@@ -470,9 +471,9 @@ class PositionCalculationTest {
     @Test
     void closeAllBuyPositions() {
         doReturn(Decimal.ZERO).when(entryForMarginCalculation).getCloseSpread();
-        Position position1 = demoPositionFactory.createStopLimitPosition((DistanceEntrySignal) entrySignalFactory.fromDistance(new Decimal("1.0"), Direction.BUY, new Decimal("1"), new Decimal("1"), PositionType.HARD_LIMIT, entryForMarginCalculation));
-        Position position2 = demoPositionFactory.createStopLimitPosition((DistanceEntrySignal) entrySignalFactory.fromDistance(new Decimal("2.0"), Direction.SELL, new Decimal("1"), new Decimal("1"), PositionType.HARD_LIMIT, entryForMarginCalculation));
-        Position position3 = demoPositionFactory.createStopLimitPosition((DistanceEntrySignal) entrySignalFactory.fromDistance(new Decimal("3.0"), Direction.BUY, new Decimal("20"), new Decimal("20"), PositionType.HARD_LIMIT, entryForMarginCalculation));
+        Position position1 = demoPositionFactory.createStopLimitPosition((DistanceEntrySignal) entrySignalFactory.fromDistance(new Decimal("1.0"), Direction.BUY, new Decimal("1"), new Decimal("1"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
+        Position position2 = demoPositionFactory.createStopLimitPosition((DistanceEntrySignal) entrySignalFactory.fromDistance(new Decimal("2.0"), Direction.SELL, new Decimal("1"), new Decimal("1"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
+        Position position3 = demoPositionFactory.createStopLimitPosition((DistanceEntrySignal) entrySignalFactory.fromDistance(new Decimal("3.0"), Direction.BUY, new Decimal("20"), new Decimal("20"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
         wallet.addMargin(new Decimal(MARGIN_PER_POSITION.multiply(6)));
 
         PositionCalculationResult calculationResult = positionCalculation.closeAllBuyPositions(currentPrice, List.of(position1, position2, position3), wallet);
@@ -486,9 +487,9 @@ class PositionCalculationTest {
     @Test
     void closeAllSellPositions() {
         doReturn(Decimal.ZERO).when(entryForMarginCalculation).getCloseSpread();
-        Position position1 = demoPositionFactory.createStopLimitPosition((DistanceEntrySignal) entrySignalFactory.fromDistance(new Decimal("1.0"), Direction.BUY, new Decimal("1"), new Decimal("1"), PositionType.HARD_LIMIT, entryForMarginCalculation));
-        Position position2 = demoPositionFactory.createStopLimitPosition((DistanceEntrySignal) entrySignalFactory.fromDistance(new Decimal("2.0"), Direction.SELL, new Decimal("1"), new Decimal("1"), PositionType.HARD_LIMIT, entryForMarginCalculation));
-        Position position3 = demoPositionFactory.createStopLimitPosition((DistanceEntrySignal) entrySignalFactory.fromDistance(new Decimal("3.0"), Direction.BUY, new Decimal("20"), new Decimal("20"), PositionType.HARD_LIMIT, entryForMarginCalculation));
+        Position position1 = demoPositionFactory.createStopLimitPosition((DistanceEntrySignal) entrySignalFactory.fromDistance(new Decimal("1.0"), Direction.BUY, new Decimal("1"), new Decimal("1"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
+        Position position2 = demoPositionFactory.createStopLimitPosition((DistanceEntrySignal) entrySignalFactory.fromDistance(new Decimal("2.0"), Direction.SELL, new Decimal("1"), new Decimal("1"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
+        Position position3 = demoPositionFactory.createStopLimitPosition((DistanceEntrySignal) entrySignalFactory.fromDistance(new Decimal("3.0"), Direction.BUY, new Decimal("20"), new Decimal("20"), PositionType.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
         wallet.addMargin(MARGIN_PER_POSITION.multiply(6));
 
         PositionCalculationResult calculationResult = positionCalculation.closeAllSellPositions(currentPrice, List.of(position1, position2, position3), wallet);

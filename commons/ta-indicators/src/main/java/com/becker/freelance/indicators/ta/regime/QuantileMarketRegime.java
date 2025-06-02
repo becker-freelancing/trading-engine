@@ -1,6 +1,8 @@
 package com.becker.freelance.indicators.ta.regime;
 
-public enum QuantileMarketRegime {
+import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+
+public enum QuantileMarketRegime implements TradeableQuantilMarketRegime {
     UP_LOW_VOLA_033(1),
     UP_LOW_VOLA_066(2),
     UP_LOW_VOLA_1(3),

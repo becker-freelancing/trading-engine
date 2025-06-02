@@ -179,7 +179,8 @@ class TradeApiClient {
                 new Decimal(stringStringMap.get("qty")),
                 stringStringMap.get("side").equalsIgnoreCase("BUY") ? Direction.BUY : Direction.SELL,
                 Decimal.ZERO, //TODO
-                PositionType.HARD_LIMIT //TODO
+                PositionType.HARD_LIMIT, //TODO
+                null //TODO
         );
     }
 }
