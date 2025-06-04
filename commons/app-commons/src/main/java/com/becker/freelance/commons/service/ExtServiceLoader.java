@@ -1,9 +1,6 @@
 package com.becker.freelance.commons.service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class ExtServiceLoader {
@@ -30,6 +27,16 @@ public class ExtServiceLoader {
         }
 
         return providers.get(0).get();
+    }
+
+    public static <T> Optional<T> tryLoadSingle(Class<T> clazz) {
+        List<ServiceLoader.Provider<T>> providers = ServiceLoader.load(clazz).stream().toList();
+
+        if (providers.size() != 1) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(providers.get(0).get());
     }
 
     public static <T> T loadSingleton(Class<T> clazz) {

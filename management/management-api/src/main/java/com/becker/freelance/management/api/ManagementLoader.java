@@ -1,6 +1,7 @@
 package com.becker.freelance.management.api;
 
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
+import com.becker.freelance.commons.calculation.TradingFeeCalculator;
 import com.becker.freelance.management.api.adaption.EntrySignalAdaptor;
 import com.becker.freelance.management.api.adaption.EntrySignalAdaptorComposite;
 import com.becker.freelance.management.api.environment.FileManagementEnvironmentProvider;
@@ -32,10 +33,17 @@ public class ManagementLoader {
                                                                  BrokerSpecificsRequestor brokerSpecificsRequestor,
                                                                  OpenPositionRequestor openPositionRequestor,
                                                                  ClosedTradesRequestor closedTradesRequestor,
-                                                                 EurUsdRequestor eurUsdRequestor) {
+                                                                 EurUsdRequestor eurUsdRequestor,
+                                                                 TradingFeeCalculator tradingFeeCalculator) {
 
-        return new FileManagementEnvironmentProvider(accountBalanceRequestor, brokerSpecificsRequestor, openPositionRequestor, closedTradesRequestor, eurUsdRequestor);
+        return new FileManagementEnvironmentProvider(accountBalanceRequestor,
+                brokerSpecificsRequestor,
+                openPositionRequestor,
+                closedTradesRequestor,
+                eurUsdRequestor,
+                tradingFeeCalculator);
     }
+
 
     private <T> List<T> loadAll(Class<T> clazz) {
         return ServiceLoader.load(clazz).stream()

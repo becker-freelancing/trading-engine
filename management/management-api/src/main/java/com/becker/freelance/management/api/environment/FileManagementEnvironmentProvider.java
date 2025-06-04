@@ -1,6 +1,7 @@
 package com.becker.freelance.management.api.environment;
 
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
+import com.becker.freelance.commons.calculation.TradingFeeCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.trade.Trade;
@@ -30,13 +31,15 @@ public class FileManagementEnvironmentProvider implements ManagementEnvironmentP
     private final OpenPositionRequestor openPositionRequestor;
     private final ClosedTradesRequestor closedTradesRequestor;
     private final EurUsdRequestor eurUsdRequestor;
+    private final TradingFeeCalculator tradingFeeCalculator;
 
-    public FileManagementEnvironmentProvider(AccountBalanceRequestor accountBalanceRequestor, BrokerSpecificsRequestor brokerSpecificsRequestor, OpenPositionRequestor openPositionRequestor, ClosedTradesRequestor closedTradesRequestor, EurUsdRequestor eurUsdRequestor) {
+    public FileManagementEnvironmentProvider(AccountBalanceRequestor accountBalanceRequestor, BrokerSpecificsRequestor brokerSpecificsRequestor, OpenPositionRequestor openPositionRequestor, ClosedTradesRequestor closedTradesRequestor, EurUsdRequestor eurUsdRequestor, TradingFeeCalculator tradingFeeCalculator) {
         this.accountBalanceRequestor = accountBalanceRequestor;
         this.brokerSpecificsRequestor = brokerSpecificsRequestor;
         this.openPositionRequestor = openPositionRequestor;
         this.closedTradesRequestor = closedTradesRequestor;
         this.eurUsdRequestor = eurUsdRequestor;
+        this.tradingFeeCalculator = tradingFeeCalculator;
         JSONObject managementConfig;
         try {
             managementConfig = new JSONObject(new String(FileManagementEnvironmentProvider.class.getClassLoader().getResourceAsStream("management-config.json").readAllBytes()));
@@ -106,5 +109,15 @@ public class FileManagementEnvironmentProvider implements ManagementEnvironmentP
     @Override
     public EurUsdRequestor getEurUsdRequestor() {
         return eurUsdRequestor;
+    }
+
+    @Override
+    public Decimal calculateTakerTradingFeeInCounterCurrency(Decimal currentPrice, Decimal positionSize) {
+        return tradingFeeCalculator.calculateTakerTradingFeeInCounterCurrency(currentPrice, positionSize);
+    }
+
+    @Override
+    public Decimal calculateMakerTradingFeeInCounterCurrency(Decimal currentPrice, Decimal positionSize) {
+        return tradingFeeCalculator.calculateMakerTradingFeeInCounterCurrency(currentPrice, positionSize);
     }
 }

@@ -7,6 +7,7 @@ import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.engine.StrategySupplier;
 import com.becker.freelance.strategies.creation.StrategyCreator;
+import com.becker.freelance.strategies.strategy.DefaultStrategyParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +47,9 @@ public class AbstractRemoteBacktestApp implements Runnable {
     }
 
     private StrategySupplier toSupplier(StrategyCreator strategy) {
-        return (pair) -> strategy.build(pair, strategy.strategyParameters().defaultValues());
+        return (pair, tradingCalculator) -> {
+            DefaultStrategyParameter defaultStrategyParameter = new DefaultStrategyParameter(strategy.strategyParameters().defaultValues(), tradingCalculator, pair, strategy);
+            return strategy.build(defaultStrategyParameter);
+        };
     }
 }

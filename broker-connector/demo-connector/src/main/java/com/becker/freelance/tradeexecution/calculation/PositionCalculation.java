@@ -1,8 +1,8 @@
 package com.becker.freelance.tradeexecution.calculation;
 
-import com.becker.freelance.commons.calculation.MarginCalculator;
 import com.becker.freelance.commons.calculation.ProfitLossCalculation;
 import com.becker.freelance.commons.calculation.TradingCalculator;
+import com.becker.freelance.commons.calculation.TradingFeeCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
@@ -22,11 +22,11 @@ public class PositionCalculation {
     }
 
     private final TradingCalculator tradingCalculator;
-    private final MarginCalculator marginCalculator;
+    private final TradingFeeCalculator tradingFeeCalculator;
 
-    public PositionCalculation(TradingCalculator tradingCalculator, MarginCalculator marginCalculator) {
+    public PositionCalculation(TradingCalculator tradingCalculator, TradingFeeCalculator tradingFeeCalculator) {
         this.tradingCalculator = tradingCalculator;
-        this.marginCalculator = marginCalculator;
+        this.tradingFeeCalculator = tradingFeeCalculator;
     }
 
 
@@ -131,8 +131,9 @@ public class PositionCalculation {
         List<Trade> closedTrades = new ArrayList<>();
         for (Position position : positions) {
             ProfitLossCalculation profitConversionRate = tradingCalculator.getProfitInEuro(position, currentPrice, currentPrice.time());
-            closedTrades.add(toTrade(profitConversionRate.conversionRate(), profitConversionRate.profit(), profitConversionRate.closePrice(), currentPrice.pair(), position, currentPrice));
-            wallet.adjustAmount(profitConversionRate.profit());
+            Trade trade = toTrade(profitConversionRate.conversionRate(), profitConversionRate.profit(), profitConversionRate.closePrice(), currentPrice.pair(), position, currentPrice);
+            closedTrades.add(trade);
+            wallet.adjustAmount(trade.getProfitInEuroWithFees());
             wallet.removeMargin(position.getMargin());
         }
 
@@ -140,9 +141,18 @@ public class PositionCalculation {
     }
 
     private Trade toTrade(Decimal conversionRate, Decimal profit, Decimal closePrice, Pair pair, Position position, TimeSeriesEntry currentPrice) {
-        return new Trade(position.getOpenTime(), currentPrice.time(), pair, profit,
-                position.getOpenPrice(), closePrice, position.getSize(), position.getDirection(),
+        Decimal exitTradingFee = exitTradingFee(position, closePrice);
+        return new Trade(position.getOpenTime(), currentPrice.time(), pair, profit.subtract(position.getOpenFee()).subtract(exitTradingFee),
+                position.getOpenPrice(), closePrice, position.getOpenFee(), exitTradingFee, position.getSize(), position.getDirection(),
                 conversionRate, position.getPositionType(), position.getOpenMarketRegime());
+    }
+
+    private Decimal exitTradingFee(Position position, Decimal closePrice) {
+        if (position.isCloseTaker()) {
+            return tradingFeeCalculator.calculateTakerTradingFeeInCounterCurrency(closePrice, position.getSize());
+        }
+
+        return tradingFeeCalculator.calculateMakerTradingFeeInCounterCurrency(closePrice, position.getSize());
     }
 
 
@@ -185,7 +195,7 @@ public class PositionCalculation {
         trades.addAll(stopCloseTrades);
         limitClose.forEach(position -> wallet.removeMargin(position.getMargin()));
         stopClose.forEach(position -> wallet.removeMargin(position.getMargin()));
-        trades.forEach(trade -> wallet.adjustAmount(trade.getProfitInEuro()));
+        trades.forEach(trade -> wallet.adjustAmount(trade.getProfitInEuroWithFees()));
         return new PositionCalculationResult(new ArrayList<>(remainingPositions), trades);
     }
 

@@ -67,7 +67,7 @@ class MaxDrawdownValidatorTest {
 
     Trade buildTrade(int profit) {
         Trade trade = mock(Trade.class);
-        doReturn(Decimal.valueOf(profit)).when(trade).getProfitInEuro();
+        doReturn(Decimal.valueOf(profit)).when(trade).getProfitInEuroWithFees();
         return trade;
     }
 

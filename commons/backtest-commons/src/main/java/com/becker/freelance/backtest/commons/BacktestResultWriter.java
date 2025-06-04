@@ -101,7 +101,7 @@ public class BacktestResultWriter {
     }
 
     private String buildLine(List<Trade> trades, Map<String, Decimal> parameter) {
-        List<Decimal> profits = trades.stream().map(Trade::getProfitInEuro).toList();
+        List<Decimal> profits = trades.stream().map(Trade::getProfitInEuroWithFees).toList();
         Decimal sum = Decimal.ZERO;
         Decimal min = new Decimal(Double.MAX_VALUE);
         Decimal max = min.multiply(new BigDecimal("-1"));

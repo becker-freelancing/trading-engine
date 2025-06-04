@@ -5,6 +5,6 @@ import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 
 import java.time.LocalDateTime;
 
-public record DefaultEntryParameter(TimeSeries timeSeries, LocalDateTime time,
-                                    TimeSeriesEntry currentPrice) implements EntryParameter {
+public record DefaultEntryExecutionParameter(TimeSeries timeSeries, LocalDateTime time,
+                                             TimeSeriesEntry currentPrice) implements EntryExecutionParameter {
 }

@@ -38,7 +38,7 @@ public class RemoteBacktestExecutor implements Runnable {
             StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine);
             subscribableDataProvider.addSubscriber(strategyDataSubscriber);
         } catch (Exception e) {
-            logger.error("Error for Strategy {}", strategySupplier.get(pair).strategyCreator().strategyName(), e);
+            logger.error("Error while executing Strategy", e);
         }
     }
 }

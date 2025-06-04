@@ -5,8 +5,9 @@ import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguratio
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.engine.StrategySupplier;
+import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 import com.becker.freelance.strategies.creation.StrategyCreator;
-import com.becker.freelance.strategies.creation.StrategyParameter;
+import com.becker.freelance.strategies.strategy.DefaultStrategyParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ public class BacktestEngine {
     private final ExecutorService executor;
     private final BacktestResultWriter resultWriter;
     private final ParameterFilter parameterFilter;
-    private final BiConsumer<List<Trade>, StrategyParameter> onBacktestFinishedCallback;
+    private final BiConsumer<List<Trade>, StrategyCreationParameter> onBacktestFinishedCallback;
     private final Consumer<Exception> onExceptionCallback;
 
     private int currentIteration = 0;
@@ -74,14 +75,17 @@ public class BacktestEngine {
 
     public void run() {
         addShutdownHook();
-        List<StrategyParameter> parameters;
+        List<StrategyCreationParameter> parameters;
         try (parameterFilter) {
             parameters = strategyCreator.strategyParameters().permutate()
                     .stream().filter(parameterFilter.getPredicate()).toList();
         }
         requiredIterations = parameters.size();
-        for (StrategyParameter parameter : parameters) {
-            StrategySupplier strategySupplier = (pair) -> strategyCreator.build(pair, parameter);
+        for (StrategyCreationParameter parameter : parameters) {
+            StrategySupplier strategySupplier = (pair, tradingCalculator) -> {
+                DefaultStrategyParameter defaultStrategyParameter = new DefaultStrategyParameter(parameter, tradingCalculator, pair, strategyCreator);
+                return strategyCreator.build(defaultStrategyParameter);
+            };
 
             BacktestExecutor backtestExecutor = new BacktestExecutor(appConfiguration,
                     backtestExecutionConfiguration,
@@ -110,7 +114,7 @@ public class BacktestEngine {
         backtestExecutor.run();
     }
 
-    private void writeBacktestResult(List<Trade> allClosedTrades, StrategyParameter parameter) {
+    private void writeBacktestResult(List<Trade> allClosedTrades, StrategyCreationParameter parameter) {
         try {
             resultWriter.writeResult(allClosedTrades, parameter.asMap());
         } catch (IOException e) {

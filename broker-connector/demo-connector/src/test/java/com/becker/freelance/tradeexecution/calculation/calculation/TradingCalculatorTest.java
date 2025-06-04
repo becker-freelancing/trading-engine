@@ -72,7 +72,7 @@ public class TradingCalculatorTest {
         Decimal profitLoss = profitLossResult.profit();
         Decimal umrechnungsFactor = profitLossResult.conversionRate();
 
-        assertEquals(new Decimal("96.0"), profitLoss);
+        assertEquals(new Decimal("96.00"), profitLoss);
         assertEquals(Decimal.ONE, umrechnungsFactor);
     }
 

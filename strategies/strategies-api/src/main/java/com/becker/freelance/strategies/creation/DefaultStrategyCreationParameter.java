@@ -8,30 +8,33 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class StrategyParameter {
+public class DefaultStrategyCreationParameter implements StrategyCreationParameter {
 
     private final Map<ParameterName, Decimal> parameters;
 
-    public StrategyParameter(Map<ParameterName, Decimal> parameters) {
+    public DefaultStrategyCreationParameter(Map<ParameterName, Decimal> parameters) {
         this.parameters = new HashMap<>(parameters);
     }
 
-    public StrategyParameter(ParameterName name, Decimal value) {
+    public DefaultStrategyCreationParameter(ParameterName name, Decimal value) {
         this(Map.of(name, value));
     }
 
-    public StrategyParameter(StrategyParameter parameter) {
+    private DefaultStrategyCreationParameter(DefaultStrategyCreationParameter parameter) {
         this(parameter.parameters);
     }
 
+    @Override
     public void addParameter(ParameterName name, Decimal value) {
         parameters.put(name, value);
     }
 
+    @Override
     public Decimal getParameter(ParameterName parameterName) {
         return parameters.get(parameterName);
     }
 
+    @Override
     public boolean getParameterAsBool(ParameterName parameterName) {
         Decimal parameter = getParameter(parameterName);
         if (parameter.equals(Decimal.ZERO)) {
@@ -43,12 +46,14 @@ public class StrategyParameter {
         throw new IllegalStateException("Could not convert value " + parameter + " to boolean for parameter with name " + parameterName.getName());
     }
 
+    @Override
     public int getParameterAsInt(ParameterName parameterName) {
         Decimal parameter = getParameter(parameterName);
         return parameter.intValue();
     }
 
 
+    @Override
     public double getParameterAsDouble(ParameterName parameterName) {
         Decimal parameter = getParameter(parameterName);
         return parameter.doubleValue();
@@ -57,7 +62,7 @@ public class StrategyParameter {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        StrategyParameter that = (StrategyParameter) o;
+        DefaultStrategyCreationParameter that = (DefaultStrategyCreationParameter) o;
         return Objects.equals(parameters, that.parameters);
     }
 
@@ -66,9 +71,15 @@ public class StrategyParameter {
         return Objects.hashCode(parameters);
     }
 
+    @Override
     public Map<String, Decimal> asMap() {
         return parameters.entrySet().stream()
                 .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey().getName(), entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @Override
+    public StrategyCreationParameter clone() {
+        return new DefaultStrategyCreationParameter(this);
     }
 }

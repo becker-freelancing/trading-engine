@@ -7,11 +7,11 @@ import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.calculation.TradingCalculatorImpl;
+import com.becker.freelance.commons.calculation.TradingFeeCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
-import com.becker.freelance.commons.signal.LevelEntrySignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
@@ -26,6 +26,7 @@ public class BybitTradeExecutor extends TradeExecutor {
 
     private TradeController tradeController;
     private TradingCalculator tradingCalculator;
+    private TradingFeeCalculator tradingFeeCalculator;
 
     public BybitTradeExecutor() {
     }
@@ -33,6 +34,7 @@ public class BybitTradeExecutor extends TradeExecutor {
     public BybitTradeExecutor(Pair pair, EurUsdRequestor eurUsdRequestor) {
         tradeController = new TradeController();
         tradingCalculator = new TradingCalculatorImpl(eurUsdRequestor);
+        tradingFeeCalculator = TradingFeeCalculator.getInstance();
     }
 
     @Override
@@ -57,20 +59,19 @@ public class BybitTradeExecutor extends TradeExecutor {
 
     @Override
     public void exit(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, ExitSignal exitSignal) {
-        tradeController.closePositions(currentPrice.pair(), exitSignal);
+        tradeController.closePositions(currentPrice.pair(), exitSignal, tradingFeeCalculator);
     }
 
     @Override
     public void entry(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, EntrySignal entrySignal) {
 
-        LevelEntrySignal levelEntrySignal = entrySignal.toLevelEntrySignal(tradingCalculator);
-
         tradeController.createPositionStopLimitLevel(
-                levelEntrySignal.direction(),
+                entrySignal.direction(),
                 currentPrice.pair(),
-                levelEntrySignal.size(),
-                levelEntrySignal.stopLevel(),
-                levelEntrySignal.limitLevel()
+                entrySignal.size(),
+                entrySignal.stopLevel(),
+                entrySignal.limitLevel(),
+                tradingFeeCalculator
         );
     }
 

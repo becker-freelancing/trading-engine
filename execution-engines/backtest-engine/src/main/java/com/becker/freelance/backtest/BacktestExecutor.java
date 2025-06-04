@@ -8,7 +8,7 @@ import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.data.SubscribableDataProvider;
 import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.engine.StrategySupplier;
-import com.becker.freelance.strategies.creation.StrategyParameter;
+import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 import com.becker.freelance.tradeexecution.TradeExecutor;
 
 import java.time.LocalDateTime;
@@ -20,17 +20,17 @@ public class BacktestExecutor implements Runnable {
 
     private final AppConfiguration appConfiguration;
     private final BacktestExecutionConfiguration backtestExecutionConfiguration;
-    private final BiConsumer<List<Trade>, StrategyParameter> onBacktestFinished;
+    private final BiConsumer<List<Trade>, StrategyCreationParameter> onBacktestFinished;
     private final Consumer<Exception> onError;
-    private final StrategyParameter parameters;
+    private final StrategyCreationParameter parameters;
     private final StrategySupplier strategySupplier;
 
 
     public BacktestExecutor(AppConfiguration appConfiguration,
                             BacktestExecutionConfiguration backtestExecutionConfiguration,
-                            BiConsumer<List<Trade>, StrategyParameter> onBacktestFinished,
+                            BiConsumer<List<Trade>, StrategyCreationParameter> onBacktestFinished,
                             Consumer<Exception> onError,
-                            StrategyParameter parameters,
+                            StrategyCreationParameter parameters,
                             StrategySupplier strategySupplier) {
         this.appConfiguration = appConfiguration;
         this.backtestExecutionConfiguration = backtestExecutionConfiguration;
@@ -69,7 +69,7 @@ public class BacktestExecutor implements Runnable {
         }
     }
 
-    public StrategyParameter getParameter() {
+    public StrategyCreationParameter getParameter() {
         return parameters;
     }
 }

@@ -1,11 +1,11 @@
 package com.becker.freelance.tradeexecution.calculation.calculation;
 
+import com.becker.freelance.commons.calculation.TradingFeeCalculator;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
-import com.becker.freelance.commons.position.PositionType;
+import com.becker.freelance.commons.position.PositionBehaviour;
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.signal.EntrySignalFactory;
-import com.becker.freelance.commons.signal.LevelEntrySignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
@@ -45,10 +45,10 @@ class TrailingStopPositionTest {
         TimeSeriesEntry openPrice = buildEntry(new Decimal("1.05"));
         TimeSeriesEntry openPriceSell = buildEntry(new Decimal("6100"));
 
-        EntrySignalFactory entrySignalFactory = new EntrySignalFactory();
-        DemoPositionFactory positionFactory = new DemoPositionFactory(time -> closeEntry);
-        buyPosition = positionFactory.createTrailingPosition((LevelEntrySignal) entrySignalFactory.fromLevel(Decimal.ONE, Direction.BUY, new Decimal("1.02"), new Decimal("1.08"), PositionType.TRAILING, openPrice, mock(TradeableQuantilMarketRegime.class)));
-        sellPosition = positionFactory.createTrailingPosition((LevelEntrySignal) entrySignalFactory.fromLevel(Decimal.ONE, Direction.SELL, new Decimal("6200"), new Decimal("6000"), PositionType.TRAILING, openPriceSell, mock(TradeableQuantilMarketRegime.class)));
+        EntrySignalFactory entrySignalFactory = new EntrySignalFactory(null);
+        DemoPositionFactory positionFactory = new DemoPositionFactory(time -> closeEntry, mock(TradingFeeCalculator.class));
+        buyPosition = positionFactory.createTrailingPosition(entrySignalFactory.fromLevel(Decimal.ONE, Direction.BUY, new Decimal("1.02"), new Decimal("1.08"), PositionBehaviour.TRAILING, openPrice, mock(TradeableQuantilMarketRegime.class)));
+        sellPosition = positionFactory.createTrailingPosition(entrySignalFactory.fromLevel(Decimal.ONE, Direction.SELL, new Decimal("6200"), new Decimal("6000"), PositionBehaviour.TRAILING, openPriceSell, mock(TradeableQuantilMarketRegime.class)));
     }
 
     private static TimeSeriesEntry buildEntry(Decimal value) {

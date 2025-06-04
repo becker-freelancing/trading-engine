@@ -26,7 +26,13 @@ public interface Position extends Cloneable {
 
     public Decimal getLimitLevel();
 
-    public PositionType getPositionType();
+    public Decimal getOpenFee();
+
+    public PositionBehaviour getPositionType();
+
+    public boolean isOpenTaker();
+
+    public boolean isCloseTaker();
 
     public Position clone();
 

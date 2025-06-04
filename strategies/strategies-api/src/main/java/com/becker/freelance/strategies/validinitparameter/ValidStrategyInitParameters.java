@@ -1,8 +1,9 @@
 package com.becker.freelance.strategies.validinitparameter;
 
 import com.becker.freelance.math.Decimal;
+import com.becker.freelance.strategies.creation.DefaultStrategyCreationParameter;
 import com.becker.freelance.strategies.creation.ParameterName;
-import com.becker.freelance.strategies.creation.StrategyParameter;
+import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,10 +14,10 @@ import java.util.function.Predicate;
 public class ValidStrategyInitParameters {
 
     private final List<StrategyInitParameter> strategyInitParameter;
-    private final Predicate<StrategyParameter> parameterValidation;
+    private final Predicate<StrategyCreationParameter> parameterValidation;
 
 
-    public ValidStrategyInitParameters(Predicate<StrategyParameter> parameterValidation, List<StrategyInitParameter> strategyInitParameter) {
+    public ValidStrategyInitParameters(Predicate<StrategyCreationParameter> parameterValidation, List<StrategyInitParameter> strategyInitParameter) {
         this.strategyInitParameter = strategyInitParameter;
         this.parameterValidation = parameterValidation;
     }
@@ -25,7 +26,7 @@ public class ValidStrategyInitParameters {
         this(p -> true, strategyInitParameter);
     }
 
-    public ValidStrategyInitParameters(Predicate<StrategyParameter> parameterValidation, StrategyInitParameter... strategyInitParameter) {
+    public ValidStrategyInitParameters(Predicate<StrategyCreationParameter> parameterValidation, StrategyInitParameter... strategyInitParameter) {
         this(parameterValidation, List.of(strategyInitParameter));
     }
 
@@ -33,17 +34,17 @@ public class ValidStrategyInitParameters {
         this(List.of(strategyInitParameter));
     }
 
-    private static List<StrategyParameter> internalPermute(List<StrategyParameter> lastResult, List<StrategyInitParameter> strategyInitParameter) {
+    private static List<StrategyCreationParameter> internalPermute(List<StrategyCreationParameter> lastResult, List<StrategyInitParameter> strategyInitParameter) {
         if (strategyInitParameter.isEmpty()) {
             return lastResult;
         }
 
         StrategyInitParameter currParam = strategyInitParameter.remove(0);
-        List<StrategyParameter> result = new ArrayList<>();
+        List<StrategyCreationParameter> result = new ArrayList<>();
 
         for (Decimal param = currParam.getMinValue(); param.isLessThanOrEqualTo(currParam.getMaxValue()); param = param.add(currParam.getStepSize())) {
-            for (StrategyParameter strategyParameter : lastResult) {
-                StrategyParameter copy = new StrategyParameter(strategyParameter);
+            for (StrategyCreationParameter strategyCreationParameter : lastResult) {
+                StrategyCreationParameter copy = strategyCreationParameter.clone();
                 copy.addParameter(currParam.getName(), param);
                 result.add(copy);
             }
@@ -52,32 +53,32 @@ public class ValidStrategyInitParameters {
         return internalPermute(result, strategyInitParameter);
     }
 
-    private List<StrategyParameter> validatePermutations(List<StrategyParameter> permutated) {
+    private List<StrategyCreationParameter> validatePermutations(List<StrategyCreationParameter> permutated) {
         return permutated.stream().filter(parameterValidation).toList();
     }
 
-    public List<StrategyParameter> permutate() {
+    public List<StrategyCreationParameter> permutate() {
         if (strategyInitParameter.isEmpty()) {
             return new ArrayList<>();
         }
 
         List<StrategyInitParameter> workList = new ArrayList<>(strategyInitParameter);
         StrategyInitParameter currParam = workList.remove(0);
-        List<StrategyParameter> start = new ArrayList<>();
+        List<StrategyCreationParameter> start = new ArrayList<>();
 
         for (Decimal param = currParam.getMinValue(); param.isLessThanOrEqualTo(currParam.getMaxValue()); param = param.add(currParam.getStepSize())) {
             Map<ParameterName, Decimal> initial = new HashMap<>();
             initial.put(currParam.getName(), param);
-            start.add(new StrategyParameter(initial));
+            start.add(new DefaultStrategyCreationParameter(initial));
         }
 
-        List<StrategyParameter> permutated = internalPermute(start, workList);
+        List<StrategyCreationParameter> permutated = internalPermute(start, workList);
         return validatePermutations(permutated);
     }
 
 
-    public StrategyParameter defaultValues() {
-        StrategyParameter parameter = new StrategyParameter(Map.of());
+    public DefaultStrategyCreationParameter defaultValues() {
+        DefaultStrategyCreationParameter parameter = new DefaultStrategyCreationParameter(Map.of());
         for (StrategyInitParameter param : strategyInitParameter) {
             parameter.addParameter(param.getName(), param.getDefaultValue());
         }

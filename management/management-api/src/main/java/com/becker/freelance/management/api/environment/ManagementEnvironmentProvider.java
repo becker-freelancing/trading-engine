@@ -31,4 +31,8 @@ public interface ManagementEnvironmentProvider {
     public List<Trade> getTradesForDurationUntilNowForPair(Duration duration, Pair pair);
 
     public EurUsdRequestor getEurUsdRequestor();
+
+    public Decimal calculateMakerTradingFeeInCounterCurrency(Decimal currentPrice, Decimal positionSize);
+
+    public Decimal calculateTakerTradingFeeInCounterCurrency(Decimal currentPrice, Decimal positionSize);
 }

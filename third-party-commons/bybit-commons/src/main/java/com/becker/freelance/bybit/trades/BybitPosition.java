@@ -3,7 +3,7 @@ package com.becker.freelance.bybit.trades;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
-import com.becker.freelance.commons.position.PositionType;
+import com.becker.freelance.commons.position.PositionBehaviour;
 import com.becker.freelance.commons.position.StopLimitPosition;
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.math.Decimal;
@@ -65,7 +65,22 @@ class BybitPosition implements StopLimitPosition {
     }
 
     @Override
-    public PositionType getPositionType() {
+    public Decimal getOpenFee() {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public PositionBehaviour getPositionType() {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public boolean isOpenTaker() {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public boolean isCloseTaker() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 

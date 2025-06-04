@@ -1,5 +1,6 @@
 package com.becker.freelance.bybit.trades;
 
+import com.becker.freelance.commons.calculation.TradingFeeCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
@@ -43,7 +44,7 @@ public class TradeController {
     }
 
 
-    public Optional<Position> createPositionStopLimitLevel(Direction direction, Pair pair, Decimal size, Decimal stopLevel, Decimal limitLevel) {
+    public Optional<Position> createPositionStopLimitLevel(Direction direction, Pair pair, Decimal size, Decimal stopLevel, Decimal limitLevel, TradingFeeCalculator tradingFeeCalculator) {
         Optional<String> dealReference;
         try {
             dealReference = apiClient.createPositionStopLimitLevel(
@@ -61,7 +62,7 @@ public class TradeController {
         return dealReference.flatMap(this::getPosition);
     }
 
-    public List<Trade> closePositions(Pair pair, ExitSignal exitSignal) {
+    public List<Trade> closePositions(Pair pair, ExitSignal exitSignal, TradingFeeCalculator tradingFeeCalculator) {
         Optional<Decimal> sizeToClose = allPositions().stream()
                 .filter(position -> position.getDirection().equals(exitSignal.directionToClose()))
                 .map(Position::getSize)

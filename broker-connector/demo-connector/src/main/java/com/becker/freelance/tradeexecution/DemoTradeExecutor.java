@@ -2,22 +2,20 @@ package com.becker.freelance.tradeexecution;
 
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.backtest.wallet.BacktestWallet;
+import com.becker.freelance.broker.DemoBrokerRequestor;
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
-import com.becker.freelance.commons.calculation.MarginCalculator;
 import com.becker.freelance.commons.calculation.TradingCalculator;
-import com.becker.freelance.commons.calculation.TradingCalculatorImpl;
+import com.becker.freelance.commons.calculation.TradingFeeCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.position.PositionFactory;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
-import com.becker.freelance.commons.signal.LevelEntrySignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
-import com.becker.freelance.tradeexecution.calculation.MarginCalculatorImpl;
 import com.becker.freelance.tradeexecution.calculation.PositionAdaptor;
 import com.becker.freelance.tradeexecution.calculation.PositionCalculation;
 import com.becker.freelance.tradeexecution.calculation.PositionCalculation.PositionCalculationResult;
@@ -51,10 +49,10 @@ public class DemoTradeExecutor extends TradeExecutor {
         openPositions = new ArrayList<>();
         closedTrades = new ArrayList<>();
         this.pair = pair;
-        tradingCalculator = new TradingCalculatorImpl(eurUsdRequestor);
-        MarginCalculator marginCalculator = new MarginCalculatorImpl(eurUsdRequestor);
-        positionCalculation = new PositionCalculation(tradingCalculator, marginCalculator);
-        positionFactory = new DemoPositionFactory(eurUsdRequestor);
+        tradingCalculator = new DemoBrokerRequestor().getTradingCalculator(eurUsdRequestor);
+        TradingFeeCalculator tradingFeeCalculator = TradingFeeCalculator.getInstance();
+        positionCalculation = new PositionCalculation(tradingCalculator, tradingFeeCalculator);
+        positionFactory = new DemoPositionFactory(eurUsdRequestor, tradingFeeCalculator);
         positionAdaptor = new PositionAdaptor();
     }
 
@@ -95,15 +93,14 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public void entry(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, EntrySignal entrySignal) {
-        LevelEntrySignal levelEntrySignal = entrySignal.toLevelEntrySignal(tradingCalculator);
-        Position position = toPosition(levelEntrySignal);
+        Position position = toPosition(entrySignal);
         PositionCalculationResult openPositionsResult = positionCalculation.openPosition(currentPrice, openPositions, position, wallet.get());
         openPositions = openPositionsResult.positions();
         closedTrades.addAll(openPositionsResult.trades());
     }
 
-    private Position toPosition(LevelEntrySignal entrySignal) {
-        return switch (entrySignal.positionType()) {
+    private Position toPosition(EntrySignal entrySignal) {
+        return switch (entrySignal.positionBehaviour()) {
             case HARD_LIMIT -> positionFactory.createStopLimitPosition(entrySignal);
             case TRAILING -> positionFactory.createTrailingPosition(entrySignal);
         };

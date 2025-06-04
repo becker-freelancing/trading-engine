@@ -4,7 +4,6 @@ import com.becker.freelance.bybit.env.BybitEnvironmentProvider;
 import com.becker.freelance.bybit.util.PairConverter;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
-import com.becker.freelance.commons.position.PositionType;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
 import com.bybit.api.client.domain.CategoryType;
@@ -169,18 +168,19 @@ class TradeApiClient {
     }
 
     private Trade toTrade(Map<String, String> stringStringMap) {
-        return new Trade(
-                Instant.ofEpochMilli(Long.valueOf(stringStringMap.get("createdTime"))).atZone(ZoneId.systemDefault()).toLocalDateTime(),
-                Instant.ofEpochMilli(Long.valueOf(stringStringMap.get("createdTime"))).atZone(ZoneId.systemDefault()).toLocalDateTime(), //TODO
-                pairConverter.convert(stringStringMap.get("symbol"), "1").orElseThrow(() -> new IllegalArgumentException("Could not convert pair: " + stringStringMap.get("symbol"))),
-                new Decimal(stringStringMap.get("closedPnl")),
-                new Decimal(stringStringMap.get("avgEntryPrice")),
-                new Decimal(stringStringMap.get("avgExitPrice")),
-                new Decimal(stringStringMap.get("qty")),
-                stringStringMap.get("side").equalsIgnoreCase("BUY") ? Direction.BUY : Direction.SELL,
-                Decimal.ZERO, //TODO
-                PositionType.HARD_LIMIT, //TODO
-                null //TODO
-        );
+        throw new UnsupportedOperationException("Trading Fees are not implemented yet");
+//        return new Trade(
+//                Instant.ofEpochMilli(Long.valueOf(stringStringMap.get("createdTime"))).atZone(ZoneId.systemDefault()).toLocalDateTime(),
+//                Instant.ofEpochMilli(Long.valueOf(stringStringMap.get("createdTime"))).atZone(ZoneId.systemDefault()).toLocalDateTime(), //TODO
+//                pairConverter.convert(stringStringMap.get("symbol"), "1").orElseThrow(() -> new IllegalArgumentException("Could not convert pair: " + stringStringMap.get("symbol"))),
+//                new Decimal(stringStringMap.get("closedPnl")),
+//                new Decimal(stringStringMap.get("avgEntryPrice")),
+//                new Decimal(stringStringMap.get("avgExitPrice")),
+//                new Decimal(stringStringMap.get("qty")),
+//                stringStringMap.get("side").equalsIgnoreCase("BUY") ? Direction.BUY : Direction.SELL,
+//                Decimal.ZERO, //TODO
+//                PositionBehaviour.HARD_LIMIT, //TODO
+//                null //TODO
+//        );
     }
 }

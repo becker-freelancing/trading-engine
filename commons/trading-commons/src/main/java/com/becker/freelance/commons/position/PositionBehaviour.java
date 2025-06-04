@@ -1,6 +1,6 @@
 package com.becker.freelance.commons.position;
 
-public enum PositionType {
+public enum PositionBehaviour {
     TRAILING,
     HARD_LIMIT
 }

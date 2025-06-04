@@ -1,5 +1,8 @@
 package com.becker.freelance.broker;
 
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
+import com.becker.freelance.commons.calculation.TradingCalculator;
+import com.becker.freelance.commons.calculation.TradingCalculatorImpl;
 import com.becker.freelance.commons.wallet.Wallet;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.opentrades.ReadOnlyWallet;
@@ -31,5 +34,10 @@ public class DemoBrokerRequestor extends BrokerRequestor {
     @Override
     public Integer getMaxBrokerFractionPlaces() {
         return 2;
+    }
+
+    @Override
+    public TradingCalculator getTradingCalculator(EurUsdRequestor eurUsdRequestor) {
+        return new TradingCalculatorImpl(eurUsdRequestor);
     }
 }

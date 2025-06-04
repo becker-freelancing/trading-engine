@@ -13,8 +13,9 @@ import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.math.Decimal;
+import com.becker.freelance.strategies.creation.DefaultStrategyCreationParameter;
+import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 import com.becker.freelance.strategies.creation.StrategyCreator;
-import com.becker.freelance.strategies.creation.StrategyParameter;
 import com.becker.freelance.strategies.creation.StringParameterName;
 
 import java.io.IOException;
@@ -57,7 +58,7 @@ class AbstractLocalBacktestContinueApp implements Runnable {
         Set<BacktestResultContent> backtestResultContents = new BacktestResultReader(resultPath).readCsvContent();
         parseAppParameter(backtestResultContents);
         Path resultWriteFile = unzipResultFile(resultPath);
-        Set<StrategyParameter> parameters = backtestResultContents.stream()
+        Set<StrategyCreationParameter> parameters = backtestResultContents.stream()
                 .map(BacktestResultContent::parameters)
                 .map(this::map)
                 .collect(Collectors.toSet());
@@ -72,8 +73,8 @@ class AbstractLocalBacktestContinueApp implements Runnable {
         backtestEngine.run();
     }
 
-    private StrategyParameter map(Map<String, Decimal> stringDecimalMap) {
-        return new StrategyParameter(stringDecimalMap.entrySet().stream()
+    private StrategyCreationParameter map(Map<String, Decimal> stringDecimalMap) {
+        return new DefaultStrategyCreationParameter(stringDecimalMap.entrySet().stream()
                 .collect(Collectors.toMap(
                         entry -> new StringParameterName(entry.getKey()),
                         Map.Entry::getValue

@@ -2,19 +2,19 @@ package com.becker.freelance.management.impl.adaption;
 
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
-import com.becker.freelance.commons.position.PositionType;
+import com.becker.freelance.commons.position.PositionBehaviour;
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
-import com.becker.freelance.commons.signal.LevelEntrySignal;
+import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
-public class LevelEntrySignalImpl implements LevelEntrySignal {
+public class EntrySignalImpl implements EntrySignal {
 
-    private final LevelEntrySignal levelEntrySignal;
+    private final EntrySignal levelEntrySignal;
     private final Decimal size;
 
-    public LevelEntrySignalImpl(LevelEntrySignal levelEntrySignal, Decimal size) {
-        this.levelEntrySignal = levelEntrySignal;
+    public EntrySignalImpl(EntrySignal entrySignal, Decimal size) {
+        this.levelEntrySignal = entrySignal;
         this.size = size;
     }
 
@@ -49,8 +49,8 @@ public class LevelEntrySignalImpl implements LevelEntrySignal {
     }
 
     @Override
-    public PositionType positionType() {
-        return levelEntrySignal.positionType();
+    public PositionBehaviour positionBehaviour() {
+        return levelEntrySignal.positionBehaviour();
     }
 
     @Override

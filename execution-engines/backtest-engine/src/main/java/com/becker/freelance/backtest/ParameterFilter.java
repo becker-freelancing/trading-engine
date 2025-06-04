@@ -1,6 +1,6 @@
 package com.becker.freelance.backtest;
 
-import com.becker.freelance.strategies.creation.StrategyParameter;
+import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 
 import java.util.function.Predicate;
 
@@ -9,7 +9,7 @@ public interface ParameterFilter extends AutoCloseable{
     static ParameterFilter allOkFilter() {
         return new ParameterFilter() {
             @Override
-            public Predicate<StrategyParameter> getPredicate() {
+            public Predicate<StrategyCreationParameter> getPredicate() {
                 return map -> true;
             }
 
@@ -20,7 +20,7 @@ public interface ParameterFilter extends AutoCloseable{
         };
     }
 
-    Predicate<StrategyParameter> getPredicate();
+    Predicate<StrategyCreationParameter> getPredicate();
 
     @Override
     void close();

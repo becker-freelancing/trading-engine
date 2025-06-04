@@ -25,7 +25,7 @@ public class MaxDrawdownValidator implements Validator<Pair> {
         Decimal[] accountBalancesAfterTrades = new Decimal[tradesForDurationUntilNow.size() + 1];
         accountBalancesAfterTrades[accountBalancesAfterTrades.length - 1] = accountBalance;
         for (int i = tradesForDurationUntilNow.size() - 1; i >= 0; i--) {
-            accountBalance = accountBalance.subtract(tradesForDurationUntilNow.get(i).getProfitInEuro());
+            accountBalance = accountBalance.subtract(tradesForDurationUntilNow.get(i).getProfitInEuroWithFees());
             accountBalancesAfterTrades[i] = accountBalance;
         }
         Decimal maxAccountBalance = Arrays.stream(accountBalancesAfterTrades).max(Comparator.naturalOrder()).orElse(accountBalance);

@@ -1,11 +1,8 @@
 package com.becker.freelance.commons.signal;
 
-import com.becker.freelance.commons.calculation.EurUsdRequestor;
-import com.becker.freelance.commons.calculation.TradingCalculator;
-import com.becker.freelance.commons.calculation.TradingCalculatorImpl;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
-import com.becker.freelance.commons.position.PositionType;
+import com.becker.freelance.commons.position.PositionBehaviour;
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
@@ -13,6 +10,13 @@ import com.becker.freelance.math.Decimal;
 import java.time.LocalDateTime;
 
 public interface EntrySignal {
+
+    public static Decimal getOpenPriceForDirection(Direction direction, TimeSeriesEntry openPrice) {
+        return switch (direction) {
+            case SELL -> openPrice.closeBid();
+            case BUY -> openPrice.closeAsk();
+        };
+    }
 
     public Decimal size();
 
@@ -22,31 +26,40 @@ public interface EntrySignal {
 
     public TimeSeriesEntry openPrice();
 
-    public PositionType positionType();
+    public PositionBehaviour positionBehaviour();
 
     public TradeableQuantilMarketRegime openMarketRegime();
 
     public default Decimal getOpenPriceForDirection() {
-        return switch (direction()) {
-            case SELL -> openPrice().closeBid();
-            case BUY -> openPrice().closeAsk();
-        };
+        return getOpenPriceForDirection(direction(), openPrice());
     }
 
     public default LocalDateTime getOpenTime() {
         return openPrice().time();
     }
 
-    public void visit(EntrySignalVisitor visitor);
 
-    public default LevelEntrySignal toLevelEntrySignal(EurUsdRequestor eurUsdRequestor) {
-        TradingCalculator tradingCalculator = new TradingCalculatorImpl(eurUsdRequestor);
-        return toLevelEntrySignal(tradingCalculator);
+    public default boolean isOpenTaker() {
+        return true;
     }
 
-    public default LevelEntrySignal toLevelEntrySignal(TradingCalculator tradingCalculator) {
-        EntrySignalConverter entrySignalConverter = new EntrySignalConverter(tradingCalculator);
-        visit(entrySignalConverter);
-        return entrySignalConverter.getConvertion();
+    public default boolean isCloseTaker() {
+        return true;
+    }
+
+    public Decimal stopLevel();
+
+    public Decimal limitLevel();
+
+    public default Decimal stopInPoints() {
+        return getOpenPriceForDirection().subtract(stopLevel()).abs();
+    }
+
+    public default Decimal limitInPoints() {
+        return getOpenPriceForDirection().subtract(limitLevel()).abs();
+    }
+
+    default Decimal targetProfit() {
+        return getOpenPriceForDirection().subtract(limitLevel()).abs().multiply(size()).multiply(pair().profitPerPointForOneContract());
     }
 }

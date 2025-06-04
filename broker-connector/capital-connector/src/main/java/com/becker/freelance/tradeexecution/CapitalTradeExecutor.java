@@ -7,7 +7,8 @@ import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Position;
-import com.becker.freelance.commons.signal.*;
+import com.becker.freelance.commons.signal.EntrySignal;
+import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
@@ -57,33 +58,13 @@ public class CapitalTradeExecutor extends TradeExecutor {
     @Override
     public void entry(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, EntrySignal entrySignal) {
 
-        if (entrySignal instanceof LevelEntrySignal levelEntrySignal) {
-            tradeController.createPositionStopLimitLevel(
-                    entrySignal.direction(),
-                    currentPrice.pair(),
-                    entrySignal.size(),
-                    levelEntrySignal.stopLevel(),
-                    levelEntrySignal.limitLevel()
-            );
-        } else if (entrySignal instanceof DistanceEntrySignal distanceEntrySignal) {
-            tradeController.createPositionStopLimitDistance(
-                    entrySignal.direction(),
-                    currentPrice.pair(),
-                    entrySignal.size(),
-                    distanceEntrySignal.stopDistance(),
-                    distanceEntrySignal.limitDistance()
-            );
-        } else if (entrySignal instanceof AmountEntrySignal amountEntrySignal) {
-            tradeController.createPositionStopLimitAmount(
-                    entrySignal.direction(),
-                    currentPrice.pair(),
-                    entrySignal.size(),
-                    amountEntrySignal.stopAmount(),
-                    amountEntrySignal.limitAmount()
-            );
-        } else {
-            throw new UnsupportedOperationException("Could not open position by EntrySignal " + entrySignal.getClass());
-        }
+        tradeController.createPositionStopLimitLevel(
+                entrySignal.direction(),
+                currentPrice.pair(),
+                entrySignal.size(),
+                entrySignal.stopLevel(),
+                entrySignal.limitLevel()
+        );
     }
 
     @Override

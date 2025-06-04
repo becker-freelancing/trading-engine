@@ -1,7 +1,6 @@
 package com.becker.freelance.management.impl.adaption;
 
 import com.becker.freelance.commons.signal.EntrySignal;
-import com.becker.freelance.commons.signal.LevelEntrySignal;
 import com.becker.freelance.management.api.adaption.EntrySignalAdaptor;
 import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
 import com.becker.freelance.management.commons.calculation.Calculator;
@@ -22,9 +21,7 @@ public class PositionSizeAdaptor implements EntrySignalAdaptor {
 
     @Override
     public EntrySignal adapt(ManagementEnvironmentProvider environmentProvider, EntrySignal entrySignal) {
-        LevelEntrySignal levelEntrySignal = entrySignal.toLevelEntrySignal(environmentProvider.getEurUsdRequestor());
-
-        Decimal stopDistanceInPoints = levelEntrySignal.stopInPoints();
+        Decimal stopDistanceInPoints = entrySignal.stopInPoints();
         PositionSizeCalculationParams positionSizeCalculationParams = new PositionSizeCalculationParams(stopDistanceInPoints, entrySignal.pair());
 
         Decimal positionSize = positionSizeCalculator.calculate(environmentProvider, positionSizeCalculationParams);
@@ -33,6 +30,6 @@ public class PositionSizeAdaptor implements EntrySignalAdaptor {
         }
         positionSize = positionSizeSanitizer.calculate(environmentProvider, positionSize);
 
-        return new LevelEntrySignalImpl(levelEntrySignal, positionSize);
+        return new EntrySignalImpl(entrySignal, positionSize);
     }
 }
