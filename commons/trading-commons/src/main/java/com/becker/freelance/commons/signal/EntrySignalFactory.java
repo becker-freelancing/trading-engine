@@ -56,7 +56,7 @@ public class EntrySignalFactory {
                                  PositionType positionType,
                                  TimeSeriesEntry currentPrice,
                                  TradeableQuantilMarketRegime openMarketRegime) {
-        checkLevels(direction, stopLevel, limitLevel);
+        checkLevels(direction, stopLevel, limitLevel, currentPrice);
         return new DefaultLevelEntrySignal(
                 size,
                 direction,
@@ -70,12 +70,28 @@ public class EntrySignalFactory {
 
     }
 
-    private void checkLevels(Direction direction, Decimal stopLevel, Decimal limitLevel) {
-        if (direction == Direction.BUY && stopLevel.isGreaterThan(limitLevel)) {
-            throw new IllegalStateException("Stop Level must be less than Limit Level for BUY-Positions");
+    private void checkLevels(Direction direction, Decimal stopLevel, Decimal limitLevel, TimeSeriesEntry currentPrice) {
+        if (direction == Direction.BUY) {
+            if (stopLevel.isGreaterThan(limitLevel)) {
+                throw new IllegalStateException("Stop Level must be less than Limit Level for BUY-Positions");
+            }
+            if (stopLevel.isGreaterThan(currentPrice.getCloseMid())) {
+                throw new IllegalStateException("Stop Level must be less than the current price for BUY-Positions");
+            }
+            if (limitLevel.isLessThan(currentPrice.getCloseMid())) {
+                throw new IllegalStateException("Limit Level must be greater than the current price for BUY-Positions");
+            }
         }
-        if (direction == Direction.SELL && stopLevel.isLessThan(limitLevel)) {
-            throw new IllegalStateException("Stop Level must be greater than Limit Level for SELL-Positions");
+        if (direction == Direction.SELL) {
+            if (stopLevel.isLessThan(limitLevel)) {
+                throw new IllegalStateException("Stop Level must be greater than Limit Level for SELL-Positions");
+            }
+            if (stopLevel.isLessThan(currentPrice.getCloseMid())) {
+                throw new IllegalStateException("Stop Level must be greater than the current price for SELL-Positions");
+            }
+            if (limitLevel.isGreaterThan(currentPrice.getCloseMid())) {
+                throw new IllegalStateException("Limit Level must be less than the current price for SELL-Positions");
+            }
         }
     }
 }

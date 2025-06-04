@@ -5,7 +5,6 @@ import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
-import com.becker.freelance.commons.timeseries.NoTimeSeriesEntryFoundException;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.management.api.ManagementLoader;
@@ -59,7 +58,7 @@ public class StrategyEngine {
 
             shouldExit(new DefaultExitParameter(timeSeries, time, currentPrice), strategy);
             shouldEnter(new DefaultEntryParameter(timeSeries, time, currentPrice), strategy);
-        } catch (NoTimeSeriesEntryFoundException e) {
+        } catch (Exception e) {
             logger.error("Error while executing Strategy {}", strategy.getClass().getName(), e);
         }
     }
