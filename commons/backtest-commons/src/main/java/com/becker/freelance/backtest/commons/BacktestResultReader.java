@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,70 +39,132 @@ public class BacktestResultReader {
     }
 
     public Set<BacktestResultContent> readCsvContent() {
+        if (true) {
+            throw new UnsupportedOperationException("Method streamCsvContent does not return all Contents");
+        }
         return streamCsvContent().collect(Collectors.toSet());
     }
 
     public Stream<BacktestResultContent> streamCsvContent() {
         logger.info("Reading Backtest Results from {}", resultPath);
-        Stream<String> lines = readLines(resultPath);
-        return lines.parallel().filter(line -> !line.startsWith("pairs")).map(this::toBacktestResultContent);
+        BacktestResultContent[] result = new BacktestResultContent[]{null};
+        Consumer<String> lineConsumer = line -> {
+            if (result[0] != null) {
+                return;
+            }
+            if (line.startsWith("pairs")) {
+                return;
+            }
+            result[0] = toBacktestResultContent(line);
+        };
+        readLines(resultPath, lineConsumer);
+        return Stream.of(result[0]);
     }
 
     public Stream<BacktestResultContent> streamCsvContentWithMinValue(Decimal minValue) {
         logger.info("Reading Backtest Results from {}", resultPath);
-        Stream<String> lines = readLines(resultPath);
-        return lines.parallel().filter(line -> !line.startsWith("pairs")).filter(line -> {
+        List<BacktestResultContent> resultContents = new ArrayList<>();
+        Consumer<String> consumer = line -> {
+            if (line.startsWith("pairs")) {
+                return;
+            }
             String[] split = line.split(";");
             Decimal currMin = new Decimal(split[4]);
-            return minValue.isEqualTo(currMin);
-        }).map(this::toBacktestResultContent);
+            if (!minValue.isEqualTo(currMin)) {
+                return;
+            }
+            resultContents.add(toBacktestResultContent(line));
+        };
+        readLines(resultPath, consumer);
+        return resultContents.stream();
     }
 
     public Stream<Decimal> streamMinValues(){
         logger.info("Reading Min Result Values from {}", resultPath);
-        Stream<String> lines = readLines(resultPath);
-        return lines.filter(line -> !line.startsWith("pairs"))
-                .map(line -> line.split(";"))
-                .filter(split -> !split[9].equals("[]"))
-                .map(split -> new Decimal(split[4]));
+
+        List<Decimal> mins = new ArrayList<>();
+        Consumer<String> lineConsumer = line -> {
+            if (line.startsWith("pairs")) {
+                return;
+            }
+            String[] split = line.split(";");
+            if (split[9].equals("[]")) {
+                return;
+            }
+            mins.add(new Decimal(split[4]));
+        };
+        readLines(resultPath, lineConsumer);
+        return mins.stream();
     }
 
     public Stream<BacktestResultContent> streamCsvContentWithMaxValue(Decimal maxValue) {
         logger.info("Reading Backtest Results from {}", resultPath);
-        Stream<String> lines = readLines(resultPath);
-        return lines.parallel().filter(line -> !line.startsWith("pairs")).filter(line -> {
+        List<BacktestResultContent> resultContents = new ArrayList<>();
+        Consumer<String> consumer = line -> {
+            if (line.startsWith("pairs")) {
+                return;
+            }
             String[] split = line.split(";");
-            Decimal currMin = new Decimal(split[5]);
-            return maxValue.isEqualTo(currMin);
-        }).map(this::toBacktestResultContent);
+            Decimal currMax = new Decimal(split[5]);
+            if (!maxValue.isEqualTo(currMax)) {
+                return;
+            }
+            resultContents.add(toBacktestResultContent(line));
+        };
+        readLines(resultPath, consumer);
+        return resultContents.stream();
     }
 
     public Stream<Decimal> streamMaxValues(){
         logger.info("Reading Max Result Values from {}", resultPath);
-        Stream<String> lines = readLines(resultPath);
-        return lines.filter(line -> !line.startsWith("pairs"))
-                .map(line -> line.split(";"))
-                .filter(split -> !split[9].equals("[]"))
-                .map(split -> new Decimal(split[5]));
+        List<Decimal> maxs = new ArrayList<>();
+        Consumer<String> lineConsumer = line -> {
+            if (line.startsWith("pairs")) {
+                return;
+            }
+            String[] split = line.split(";");
+            if (split[9].equals("[]")) {
+                return;
+            }
+            maxs.add(new Decimal(split[5]));
+        };
+        readLines(resultPath, lineConsumer);
+        return maxs.stream();
     }
 
     public Stream<BacktestResultContent> streamCsvContentWithCumulativeValue(Decimal cumulativeValue) {
         logger.info("Reading Backtest Results from {}", resultPath);
-        Stream<String> lines = readLines(resultPath);
-        return lines.parallel().filter(line -> !line.startsWith("pairs")).filter(line -> {
+        List<BacktestResultContent> resultContents = new ArrayList<>();
+        Consumer<String> consumer = line -> {
+            if (line.startsWith("pairs")) {
+                return;
+            }
             String[] split = line.split(";");
             Decimal currMin = new Decimal(split[6]);
-            return cumulativeValue.isEqualTo(currMin);
-        }).map(this::toBacktestResultContent);
+            if (!cumulativeValue.isEqualTo(currMin)) {
+                return;
+            }
+            resultContents.add(toBacktestResultContent(line));
+        };
+        readLines(resultPath, consumer);
+        return resultContents.stream();
     }
 
     public Stream<Decimal> streamCumulativeValues(){
         logger.info("Reading Cumulative Result Values from {}", resultPath);
-        Stream<String> lines = readLines(resultPath);
-        return lines.filter(line -> !line.startsWith("pairs"))
-                .map(line -> line.split(";"))
-                .filter(split -> !split[9].equals("[]"))
-                .map(split -> new Decimal(split[6]));
+        List<Decimal> cumulatives = new ArrayList<>();
+        Consumer<String> lineConsumer = line -> {
+            if (line.startsWith("pairs")) {
+                return;
+            }
+            String[] split = line.split(";");
+            if (split[9].equals("[]")) {
+                return;
+            }
+            cumulatives.add(new Decimal(split[6]));
+        };
+        readLines(resultPath, lineConsumer);
+        return cumulatives.stream();
     }
 
     private BacktestResultContent toBacktestResultContent(String line) {
@@ -147,19 +210,17 @@ public class BacktestResultReader {
         return tradesJson;
     }
 
-    private Stream<String> readLines(Path resultPath) {
+    private void readLines(Path resultPath, Consumer<String> lineConsumer) {
         try (
                 FileInputStream fis = new FileInputStream(resultPath.toFile());
                 ZstdCompressorInputStream zis = new ZstdCompressorInputStream(fis);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(zis))
         ){
 
-            Stream.Builder<String> builder = Stream.builder();
             String line;
             while ((line = reader.readLine()) != null){
-                builder.add(line);
+                lineConsumer.accept(line);
             }
-            return builder.build();
         } catch (IOException e) {
             throw new IllegalStateException("Could not read file " + resultPath, e);
         }
