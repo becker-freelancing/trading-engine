@@ -130,7 +130,7 @@ public class Decimal extends BigDecimal {
         if (isEqualToZero()){
             return this;
         }
-        return new Decimal(super.round(getMathContext(precision)));
+        return new Decimal(setScale(precision, RoundingMode.HALF_UP));
     }
 
     private MathContext getMathContext(int fractionalPlaces) {
