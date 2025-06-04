@@ -7,10 +7,11 @@ import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface ManagementEnvironmentProvider {
+public interface ManagementEnvironmentProvider extends TimeChangeListener {
 
     public Decimal getMaxRiskPerTrade();
 
@@ -35,4 +36,6 @@ public interface ManagementEnvironmentProvider {
     public Decimal calculateMakerTradingFeeInCounterCurrency(Decimal currentPrice, Decimal positionSize);
 
     public Decimal calculateTakerTradingFeeInCounterCurrency(Decimal currentPrice, Decimal positionSize);
+
+    public LocalDateTime currentTime();
 }

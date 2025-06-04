@@ -72,6 +72,13 @@ public class DefaultStrategyCreationParameter implements StrategyCreationParamet
     }
 
     @Override
+    public String toString() {
+        return "DefaultStrategyCreationParameter{" +
+                "parameters=" + parameters +
+                '}';
+    }
+
+    @Override
     public Map<String, Decimal> asMap() {
         return parameters.entrySet().stream()
                 .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey().getName(), entry.getValue()))
@@ -82,4 +89,6 @@ public class DefaultStrategyCreationParameter implements StrategyCreationParamet
     public StrategyCreationParameter clone() {
         return new DefaultStrategyCreationParameter(this);
     }
+
+
 }

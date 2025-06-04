@@ -85,8 +85,7 @@ public class TradeController {
                 .findFirst();
     }
 
-    public List<Trade> getTradesForDurationUntilNowForPair(Duration duration, Pair pair) {
-        LocalDateTime to = LocalDateTime.now();
+    public List<Trade> getTradesForDurationUntilNowForPair(LocalDateTime to, Duration duration, Pair pair) {
         LocalDateTime from = to.minus(duration);
         return apiClient.getTradesInTime(from, to, pair)
                 .toList();

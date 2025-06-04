@@ -107,7 +107,7 @@ public class BybitTradeExecutor extends TradeExecutor {
     }
 
     @Override
-    public List<Trade> getTradesForDurationUntilNowForPair(Duration duration, Pair pair) {
-        return tradeController.getTradesForDurationUntilNowForPair(duration, pair);
+    public List<Trade> getTradesForDurationUntilTimeForPair(LocalDateTime toTime, Duration duration, Pair pair) {
+        return tradeController.getTradesForDurationUntilNowForPair(toTime, duration, pair);
     }
 }

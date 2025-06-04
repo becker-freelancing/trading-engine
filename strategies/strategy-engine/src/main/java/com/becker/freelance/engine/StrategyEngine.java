@@ -11,6 +11,7 @@ import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.management.api.ManagementLoader;
 import com.becker.freelance.management.api.adaption.EntrySignalAdaptor;
 import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
+import com.becker.freelance.management.api.environment.TimeChangeListener;
 import com.becker.freelance.management.api.validation.CompositeStrategy;
 import com.becker.freelance.management.api.validation.EntrySignalValidator;
 import com.becker.freelance.strategies.executionparameter.DefaultEntryExecutionParameter;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class StrategyEngine {
 
@@ -35,7 +37,7 @@ public class StrategyEngine {
     private final EntrySignalValidator entrySignalValidator;
     private final ManagementEnvironmentProvider environmentProvider;
 
-    public StrategyEngine(Pair pair, StrategySupplier strategySupplier, TradeExecutor tradeExecutor, EurUsdRequestor eurUsdRequestor) {
+    public StrategyEngine(Pair pair, StrategySupplier strategySupplier, TradeExecutor tradeExecutor, EurUsdRequestor eurUsdRequestor, Consumer<TimeChangeListener> timeChangeListenerConsumer) {
         this.tradeExecutor = tradeExecutor;
         ManagementLoader managementLoader = new ManagementLoader();
         this.entrySignalAdaptor = managementLoader.findEntrySignalAdaptor();
@@ -46,7 +48,7 @@ public class StrategyEngine {
                 tradeExecutor, tradeExecutor,
                 eurUsdRequestor, TradingFeeCalculator.fromConfigFile()
         );
-
+        timeChangeListenerConsumer.accept(this.environmentProvider);
         this.strategy = strategySupplier.get(pair, brokerRequestor.getTradingCalculator(eurUsdRequestor));
         this.strategy.setOpenPositionRequestor(tradeExecutor);
     }

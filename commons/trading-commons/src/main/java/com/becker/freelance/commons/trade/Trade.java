@@ -8,7 +8,7 @@ import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
 
-public class Trade {
+public class Trade implements Comparable<Trade> {
 
     private LocalDateTime openTime;
     private LocalDateTime closeTime;
@@ -94,6 +94,11 @@ public class Trade {
 
     public Decimal getCloseFee() {
         return closeFee;
+    }
+
+    @Override
+    public int compareTo(Trade o) {
+        return this.closeTime.compareTo(o.closeTime);
     }
 
     @Override

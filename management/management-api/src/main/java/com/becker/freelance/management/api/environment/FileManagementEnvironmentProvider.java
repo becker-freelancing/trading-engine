@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -32,6 +33,7 @@ public class FileManagementEnvironmentProvider implements ManagementEnvironmentP
     private final ClosedTradesRequestor closedTradesRequestor;
     private final EurUsdRequestor eurUsdRequestor;
     private final TradingFeeCalculator tradingFeeCalculator;
+    private LocalDateTime currentTime = LocalDateTime.MIN;
 
     public FileManagementEnvironmentProvider(AccountBalanceRequestor accountBalanceRequestor, BrokerSpecificsRequestor brokerSpecificsRequestor, OpenPositionRequestor openPositionRequestor, ClosedTradesRequestor closedTradesRequestor, EurUsdRequestor eurUsdRequestor, TradingFeeCalculator tradingFeeCalculator) {
         this.accountBalanceRequestor = accountBalanceRequestor;
@@ -103,7 +105,7 @@ public class FileManagementEnvironmentProvider implements ManagementEnvironmentP
 
     @Override
     public List<Trade> getTradesForDurationUntilNowForPair(Duration duration, Pair pair) {
-        return closedTradesRequestor.getTradesForDurationUntilNowForPair(duration, pair);
+        return closedTradesRequestor.getTradesForDurationUntilTimeForPair(currentTime(), duration, pair);
     }
 
     @Override
@@ -117,7 +119,17 @@ public class FileManagementEnvironmentProvider implements ManagementEnvironmentP
     }
 
     @Override
+    public LocalDateTime currentTime() {
+        return currentTime;
+    }
+
+    @Override
     public Decimal calculateMakerTradingFeeInCounterCurrency(Decimal currentPrice, Decimal positionSize) {
         return tradingFeeCalculator.calculateMakerTradingFeeInCounterCurrency(currentPrice, positionSize);
+    }
+
+    @Override
+    public void onTimeChange(LocalDateTime newTime) {
+        this.currentTime = newTime;
     }
 }

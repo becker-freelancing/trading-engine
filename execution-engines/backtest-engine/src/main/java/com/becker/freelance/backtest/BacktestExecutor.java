@@ -8,6 +8,7 @@ import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.data.SubscribableDataProvider;
 import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.engine.StrategySupplier;
+import com.becker.freelance.management.api.environment.TimeChangeListener;
 import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 import com.becker.freelance.tradeexecution.TradeExecutor;
 
@@ -53,7 +54,8 @@ public class BacktestExecutor implements Runnable {
 
             for (Pair pair : backtestExecutionConfiguration.pairs()) {
                 SubscribableDataProvider dataProviderForPair = dataProviderFactory.createSubscribableDataProvider(pair, backtestSynchronizer);
-                StrategyEngine strategyEngine = new StrategyEngine(pair, strategySupplier, tradeExecutor, backtestExecutionConfiguration.getEurUsdRequestor());
+                Consumer<TimeChangeListener> timeChangeListenerConsumer = listener -> backtestSynchronizer.addSubscibor(new TimeChangeListenerSynchronizeable(listener));
+                StrategyEngine strategyEngine = new StrategyEngine(pair, strategySupplier, tradeExecutor, backtestExecutionConfiguration.getEurUsdRequestor(), timeChangeListenerConsumer);
                 StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine);
                 dataProviderForPair.addSubscriber(strategyDataSubscriber);
             }

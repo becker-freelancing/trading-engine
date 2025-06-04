@@ -94,7 +94,7 @@ public class CapitalTradeExecutor extends TradeExecutor {
     }
 
     @Override
-    public List<Trade> getTradesForDurationUntilNowForPair(Duration duration, Pair pair) {
+    public List<Trade> getTradesForDurationUntilTimeForPair(LocalDateTime toTime, Duration duration, Pair pair) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 

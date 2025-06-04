@@ -32,7 +32,7 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     private Supplier<BacktestWallet> wallet;
     private List<Position> openPositions;
-    private List<Trade> closedTrades;
+    private ClosedTradesHolder closedTrades;
     private PositionCalculation positionCalculation;
     private Pair pair;
     private PositionFactory positionFactory;
@@ -47,7 +47,7 @@ public class DemoTradeExecutor extends TradeExecutor {
         BacktestWallet wallet = new BacktestWallet(backtestExecutionConfiguration.initialWalletAmount());
         this.wallet = () -> wallet;
         openPositions = new ArrayList<>();
-        closedTrades = new ArrayList<>();
+        closedTrades = new ClosedTradesHolder();
         this.pair = pair;
         tradingCalculator = new DemoBrokerRequestor().getTradingCalculator(eurUsdRequestor);
         TradingFeeCalculator tradingFeeCalculator = TradingFeeCalculator.getInstance();
@@ -108,7 +108,7 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public List<Trade> getAllClosedTrades() {
-        return closedTrades;
+        return closedTrades.toList();
     }
 
     @Override
@@ -132,11 +132,9 @@ public class DemoTradeExecutor extends TradeExecutor {
     }
 
     @Override
-    public List<Trade> getTradesForDurationUntilNowForPair(Duration duration, Pair pair) {
-        LocalDateTime startTime = LocalDateTime.now().minus(duration);
-        return closedTrades.stream()
-                .filter(trade -> trade.getCloseTime().isAfter(startTime))
-                .toList();
+    public List<Trade> getTradesForDurationUntilTimeForPair(LocalDateTime toTime, Duration duration, Pair pair) {
+        LocalDateTime startTime = toTime.minus(duration);
+        return new ArrayList<>(closedTrades.getTradesInRange(startTime, toTime));
     }
 
     @Override

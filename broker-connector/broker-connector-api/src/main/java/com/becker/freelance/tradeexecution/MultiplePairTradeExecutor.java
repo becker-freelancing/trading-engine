@@ -108,8 +108,8 @@ class MultiplePairTradeExecutor extends TradeExecutor {
     }
 
     @Override
-    public List<Trade> getTradesForDurationUntilNowForPair(Duration duration, Pair pair) {
-        return tradeExecutors.get(pair).getTradesForDurationUntilNowForPair(duration, pair);
+    public List<Trade> getTradesForDurationUntilTimeForPair(LocalDateTime toTime, Duration duration, Pair pair) {
+        return tradeExecutors.get(pair).getTradesForDurationUntilTimeForPair(toTime, duration, pair);
     }
 
     @Override
