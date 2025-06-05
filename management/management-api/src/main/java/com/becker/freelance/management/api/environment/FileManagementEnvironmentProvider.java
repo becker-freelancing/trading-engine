@@ -26,6 +26,7 @@ public class FileManagementEnvironmentProvider implements ManagementEnvironmentP
     private final Decimal preferredRiskPerTrade;
     private final Decimal maxTotalRisk;
     private final Decimal minChanceRiskRatio;
+    private final Decimal maxPositionSize;
     private final List<MaxDrawdown> maxDrawdowns;
     private final AccountBalanceRequestor accountBalanceRequestor;
     private final BrokerSpecificsRequestor brokerSpecificsRequestor;
@@ -54,6 +55,7 @@ public class FileManagementEnvironmentProvider implements ManagementEnvironmentP
         this.maxTotalRisk = managementConfig.has("maxTotalRisk") ? new Decimal(managementConfig.getDouble("maxTotalRisk")) : null;
         this.minChanceRiskRatio = managementConfig.has("minChanceRiskRatio") ? new Decimal(managementConfig.getDouble("minChanceRiskRatio")) : null;
         this.maxDrawdowns = managementConfig.has("maxDrawdowns") ? map(managementConfig.getJSONArray("maxDrawdowns")) : List.of();
+        this.maxPositionSize = managementConfig.has("maxPositionSize") ? new Decimal(managementConfig.getDouble("maxPositionSize")) : Decimal.DOUBLE_MAX;
     }
 
     private List<MaxDrawdown> map(JSONArray maxDrawdowns) {
@@ -131,5 +133,10 @@ public class FileManagementEnvironmentProvider implements ManagementEnvironmentP
     @Override
     public void onTimeChange(LocalDateTime newTime) {
         this.currentTime = newTime;
+    }
+
+    @Override
+    public Decimal getMaxPositionSize() {
+        return maxPositionSize;
     }
 }

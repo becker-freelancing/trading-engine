@@ -25,7 +25,7 @@ public class TradingCalculatorImpl implements TradingCalculator {
     }
 
     @Override
-    public ProfitLossCalculation getProfitInEuro(Position position, Decimal currentPrice, LocalDateTime time) {
+    public ProfitLossCalculation getProfitInEuroWithoutFees(Position position, Decimal currentPrice, LocalDateTime time) {
         Decimal diff = currentPrice.subtract(position.getOpenPrice());
         Decimal profitPerPoint = getProfitPerPoint(position.getPair(), position.getSize());
         Decimal profitCounterCurrency = diff.multiply(profitPerPoint).multiply(new Decimal(position.getDirection().getFactor()));

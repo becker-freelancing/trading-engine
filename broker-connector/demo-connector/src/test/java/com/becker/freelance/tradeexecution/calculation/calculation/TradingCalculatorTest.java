@@ -40,7 +40,7 @@ public class TradingCalculatorTest {
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
         Position position = getPosition(new Decimal("1.04876"), PairMock.eurUsd(), Decimal.TEN, Direction.BUY);
-        ProfitLossCalculation profitLossResult = calculator.getProfitInEuro(position, new Decimal("1.29864"), time);
+        ProfitLossCalculation profitLossResult = calculator.getProfitInEuroWithoutFees(position, new Decimal("1.29864"), time);
         Decimal profitLoss = profitLossResult.profit();
         Decimal umrechnungsFactor = profitLossResult.conversionRate();
 
@@ -54,7 +54,7 @@ public class TradingCalculatorTest {
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
         Position position = getPosition(new Decimal("1.04876"), PairMock.eurUsd(), Decimal.ONE, Direction.SELL);
-        ProfitLossCalculation profitLossResult = calculator.getProfitInEuro(position, new Decimal("1.29864"), time);
+        ProfitLossCalculation profitLossResult = calculator.getProfitInEuroWithoutFees(position, new Decimal("1.29864"), time);
         Decimal profitLoss = profitLossResult.profit();
         Decimal umrechnungsFactor = profitLossResult.conversionRate();
 
@@ -68,7 +68,7 @@ public class TradingCalculatorTest {
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
         Position position = getPosition(new Decimal("3361.1"), PairMock.ethEur(), Decimal.ONE, Direction.SELL);
-        ProfitLossCalculation profitLossResult = calculator.getProfitInEuro(position, new Decimal("3351.5"), time);
+        ProfitLossCalculation profitLossResult = calculator.getProfitInEuroWithoutFees(position, new Decimal("3351.5"), time);
         Decimal profitLoss = profitLossResult.profit();
         Decimal umrechnungsFactor = profitLossResult.conversionRate();
 
@@ -82,7 +82,7 @@ public class TradingCalculatorTest {
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
         Position position = getPosition(new Decimal("3361.1"), PairMock.ethEur(), new Decimal("0.1"), Direction.BUY);
-        ProfitLossCalculation profitLossResult = calculator.getProfitInEuro(position, new Decimal("3351.5"), time);
+        ProfitLossCalculation profitLossResult = calculator.getProfitInEuroWithoutFees(position, new Decimal("3351.5"), time);
         Decimal profitLoss = profitLossResult.profit();
         Decimal umrechnungsFactor = profitLossResult.conversionRate();
 
@@ -97,7 +97,7 @@ public class TradingCalculatorTest {
         when(closeEntry.getCloseMid()).thenReturn(new Decimal("0.9875"));
 
         Position position = getPosition(new Decimal("2601.05"), PairMock.gldUsd(), Decimal.TEN, Direction.BUY);
-        ProfitLossCalculation profitLossResult = calculator.getProfitInEuro(position, new Decimal("2655.2"), time);
+        ProfitLossCalculation profitLossResult = calculator.getProfitInEuroWithoutFees(position, new Decimal("2655.2"), time);
         Decimal profitLoss = profitLossResult.profit();
         Decimal umrechnungsFactor = profitLossResult.conversionRate();
 
@@ -111,7 +111,7 @@ public class TradingCalculatorTest {
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
 
         Position position = getPosition(new Decimal("68752.35"), PairMock.xbtEur(), Decimal.ONE, Direction.SELL);
-        ProfitLossCalculation profitLossResult = calculator.getProfitInEuro(position, new Decimal("72015.6"), time);
+        ProfitLossCalculation profitLossResult = calculator.getProfitInEuroWithoutFees(position, new Decimal("72015.6"), time);
         Decimal profitLoss = profitLossResult.profit();
         Decimal umrechnungsFactor = profitLossResult.conversionRate();
 

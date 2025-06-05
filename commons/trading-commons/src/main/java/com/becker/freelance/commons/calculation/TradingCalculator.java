@@ -13,12 +13,12 @@ public interface TradingCalculator {
 
     public Decimal getDistanceByAmount(Pair pair, Decimal size, Decimal amount);
 
-    public ProfitLossCalculation getProfitInEuro(Position position, Decimal currentPrice, LocalDateTime time);
+    public ProfitLossCalculation getProfitInEuroWithoutFees(Position position, Decimal currentPrice, LocalDateTime time);
 
-    public default ProfitLossCalculation getProfitInEuro(Position position, TimeSeriesEntry currentPrice, LocalDateTime time) {
+    public default ProfitLossCalculation getProfitInEuroWithoutFees(Position position, TimeSeriesEntry currentPrice, LocalDateTime time) {
         return switch (position.getDirection()) {
-            case SELL -> getProfitInEuro(position, currentPrice.closeAsk(), time);
-            case BUY -> getProfitInEuro(position, currentPrice.closeBid(), time);
+            case SELL -> getProfitInEuroWithoutFees(position, currentPrice.closeAsk(), time);
+            case BUY -> getProfitInEuroWithoutFees(position, currentPrice.closeBid(), time);
         };
     }
 }

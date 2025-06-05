@@ -31,7 +31,7 @@ public class DemoPositionFactory implements PositionFactory {
 
     @Override
     public TrailingPosition createTrailingPosition(EntrySignal entrySignal) {
-        return new TrailingPositionImpl(entrySignal, PositionBehaviour.TRAILING, eurUsd);
+        return new TrailingPositionImpl(entrySignal, PositionBehaviour.TRAILING, eurUsd, tradingFeeCalculator);
     }
 
 
@@ -46,12 +46,13 @@ public class DemoPositionFactory implements PositionFactory {
         private Decimal stopLevel;
         private final Decimal initialStopLevel;
         private final TradeableQuantilMarketRegime openMarketRegime;
+        private final TradingFeeCalculator tradingFeeCalculator;
 
-        public TrailingPositionImpl(EntrySignal entrySignal, PositionBehaviour positionBehaviour, EurUsdRequestor eurUsd) {
-            this(entrySignal, positionBehaviour, entrySignal.size(), eurUsd, entrySignal.stopLevel(), entrySignal.stopLevel(), entrySignal.openMarketRegime());
+        public TrailingPositionImpl(EntrySignal entrySignal, PositionBehaviour positionBehaviour, EurUsdRequestor eurUsd, TradingFeeCalculator tradingFeeCalculator) {
+            this(entrySignal, positionBehaviour, entrySignal.size(), eurUsd, entrySignal.stopLevel(), entrySignal.stopLevel(), entrySignal.openMarketRegime(), tradingFeeCalculator);
         }
 
-        public TrailingPositionImpl(EntrySignal entrySignal, PositionBehaviour positionBehaviour, Decimal size, EurUsdRequestor eurUsd, Decimal stopLevel, Decimal initialStopLevel, TradeableQuantilMarketRegime openMarketRegime) {
+        public TrailingPositionImpl(EntrySignal entrySignal, PositionBehaviour positionBehaviour, Decimal size, EurUsdRequestor eurUsd, Decimal stopLevel, Decimal initialStopLevel, TradeableQuantilMarketRegime openMarketRegime, TradingFeeCalculator tradingFeeCalculator) {
             this.entrySignal = entrySignal;
             this.positionBehaviour = positionBehaviour;
             this.size = size;
@@ -59,13 +60,14 @@ public class DemoPositionFactory implements PositionFactory {
             this.eurUsd = eurUsd;
             this.stopLevel = stopLevel;
             this.initialStopLevel = initialStopLevel;
+            this.tradingFeeCalculator = tradingFeeCalculator;
             this.id = UUID.randomUUID().toString();
             this.openMarketRegime = openMarketRegime;
         }
 
         @Override
         public Decimal getOpenFee() {
-            return null;
+            return tradingFeeCalculator.calculateTradingFeeInCounterCurrency(entrySignal, size);
         }
 
         @Override
@@ -100,7 +102,7 @@ public class DemoPositionFactory implements PositionFactory {
 
         @Override
         public Decimal getMargin() {
-            return marginCalculator.getMarginEur(getPair(), getSize(), getOpenPrice(), getOpenTime());
+            return marginCalculator.getMarginEur(getPair(), getSize(), getOpenPrice(), getOpenTime()).divide(getLeverage());
         }
 
         @Override
@@ -147,7 +149,8 @@ public class DemoPositionFactory implements PositionFactory {
                     eurUsd,
                     stopLevel,
                     initialStopLevel,
-                    openMarketRegime
+                    openMarketRegime,
+                    tradingFeeCalculator
             );
         }
 
@@ -220,7 +223,7 @@ public class DemoPositionFactory implements PositionFactory {
 
         @Override
         public Decimal getMargin() {
-            return marginCalculator.getMarginEur(getPair(), getSize(), getOpenPrice(), getOpenTime());
+            return marginCalculator.getMarginEur(getPair(), getSize(), getOpenPrice(), getOpenTime()).divide(getLeverage());
         }
 
         @Override

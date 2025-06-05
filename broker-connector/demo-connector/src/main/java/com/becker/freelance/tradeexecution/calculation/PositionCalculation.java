@@ -130,7 +130,7 @@ public class PositionCalculation {
     private PositionCalculationResult closePositions(TimeSeriesEntry currentPrice, List<Position> positions, Wallet wallet) {
         List<Trade> closedTrades = new ArrayList<>();
         for (Position position : positions) {
-            ProfitLossCalculation profitConversionRate = tradingCalculator.getProfitInEuro(position, currentPrice, currentPrice.time());
+            ProfitLossCalculation profitConversionRate = tradingCalculator.getProfitInEuroWithoutFees(position, currentPrice, currentPrice.time());
             Trade trade = toTrade(profitConversionRate.conversionRate(), profitConversionRate.profit(), profitConversionRate.closePrice(), currentPrice.pair(), position, currentPrice);
             closedTrades.add(trade);
             wallet.adjustAmount(trade.getProfitInEuroWithFees());
@@ -183,11 +183,11 @@ public class PositionCalculation {
         List<Position> stopClose = openPositions.stream().filter(position -> isStopReached(position, currentPrice)).toList();
         List<Position> remainingPositions = openPositions.stream().filter(position -> !isStopReached(position, currentPrice) && !isLimitReached(position, currentPrice)).toList();
         List<Trade> limitCloseTrades = limitClose.stream().map(position -> {
-            ProfitLossCalculation profitInEuro = tradingCalculator.getProfitInEuro(position, position.getLimitLevel(), currentPrice.time());
+            ProfitLossCalculation profitInEuro = tradingCalculator.getProfitInEuroWithoutFees(position, position.getLimitLevel(), currentPrice.time());
             return toTrade(profitInEuro.conversionRate(), profitInEuro.profit(), profitInEuro.closePrice(), position.getPair(), position, currentPrice);
         }).toList();
         List<Trade> stopCloseTrades = stopClose.stream().map(position -> {
-            ProfitLossCalculation profitInEuro = tradingCalculator.getProfitInEuro(position, position.getStopLevel(), currentPrice.time());
+            ProfitLossCalculation profitInEuro = tradingCalculator.getProfitInEuroWithoutFees(position, position.getStopLevel(), currentPrice.time());
             return toTrade(profitInEuro.conversionRate(), profitInEuro.profit(), profitInEuro.closePrice(), position.getPair(), position, currentPrice);
         }).toList();
 

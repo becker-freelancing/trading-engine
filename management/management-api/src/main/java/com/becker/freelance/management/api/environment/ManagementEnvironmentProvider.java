@@ -27,6 +27,8 @@ public interface ManagementEnvironmentProvider extends TimeChangeListener {
 
     public Integer getMaxBrokerOrderFractionPlaces();
 
+    public Decimal getMaxPositionSize();
+
     public List<Position> getOpenPositions();
 
     public List<Trade> getTradesForDurationUntilNowForPair(Duration duration, Pair pair);
