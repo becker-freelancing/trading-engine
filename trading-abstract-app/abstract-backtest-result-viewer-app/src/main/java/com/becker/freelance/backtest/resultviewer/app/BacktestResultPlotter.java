@@ -9,15 +9,14 @@ import org.knowm.xchart.style.Styler;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 class BacktestResultPlotter implements Runnable {
 
-    private final Set<BacktestResultContent> bestCumulative;
-    private final Set<BacktestResultContent> bestMax;
-    private final Set<BacktestResultContent> bestMin;
+    private final List<BacktestResultContent> bestCumulative;
+    private final List<BacktestResultContent> bestMax;
+    private final List<BacktestResultContent> bestMin;
 
-    public BacktestResultPlotter(Set<BacktestResultContent> bestCumulative, Set<BacktestResultContent> bestMax, Set<BacktestResultContent> bestMin) {
+    public BacktestResultPlotter(List<BacktestResultContent> bestCumulative, List<BacktestResultContent> bestMax, List<BacktestResultContent> bestMin) {
         this.bestCumulative = bestCumulative;
         this.bestMax = bestMax;
         this.bestMin = bestMin;
@@ -32,7 +31,7 @@ class BacktestResultPlotter implements Runnable {
         new SwingWrapper<>(List.of(cumulativeChart, maxChart, minChart)).displayChartMatrix();
     }
 
-    private XYChart plotResults(Set<BacktestResultContent> backtestResultContents, String title) {
+    private XYChart plotResults(List<BacktestResultContent> backtestResultContents, String title) {
         List<String> legends = new ArrayList<>();
         List<List<Decimal>> data = new ArrayList<>();
 

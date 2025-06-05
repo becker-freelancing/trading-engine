@@ -2,6 +2,7 @@ package com.becker.freelance.backtest.resultviewer.app;
 
 import com.becker.freelance.backtest.commons.BacktestResultContent;
 import com.becker.freelance.backtest.commons.BacktestResultReader;
+import com.becker.freelance.backtest.resultviewer.app.metric.*;
 import com.becker.freelance.backtest.util.PathUtil;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.creation.StrategyCreator;
@@ -13,10 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AbstractBacktestResultViewerApp implements Runnable {
@@ -26,71 +23,46 @@ public class AbstractBacktestResultViewerApp implements Runnable {
     private static final String RESULTS_DIR_NAME = "results\\";
     private static final String FILE_ENDING = ".zst";
 
+    private static final List<MetricCalculator> ALL_METRICS = List.of(
+            new AverageTradeHoldingDuration(),
+            new NumberOfTrades(),
+            new ProfitHitRatio(),
+            new ProfitHitRatioWithoutFees(),
+            new MaxDrawdownMetric(),
+            new AverageProfitPerTrade(),
+            new ReturnsStd(),
+            new AverageOpenFeeRate(),
+            new AverageCloseFeeRate(),
+            new TotalFeeRate()
+    );
+
 
     public AbstractBacktestResultViewerApp() {
 
     }
 
-    @Override
-    public void run() {
-        Path resultPath = askForResultPath();
-
-        logger.info("Reading Results from {}...", resultPath);
-        logger.info("Reading Results finished");
-        logger.info("Processing Results...");
-
-        Set<BacktestResultContent> bestMin = getBestMin(resultPath);
-        Set<BacktestResultContent> bestCumulative = getBestCumulative(resultPath);
-        Set<BacktestResultContent> bestMax = getBestMax(resultPath);
-        BacktestResultContent baseData = getBaseData(resultPath);
-
-
-
-        new BacktestResultConsoleWriter(bestCumulative, bestMax, bestMin, baseData).run();
-        new BacktestResultPlotter(bestCumulative, bestMax, bestMin).run();
-    }
-
     private static BacktestResultContent getBaseData(Path resultPath) {
         BacktestResultReader resultReader = new BacktestResultReader(resultPath);
-        BacktestResultContent baseData = resultReader.streamCsvContent().findAny().orElseThrow(() -> new IllegalStateException("No Results found"));
-        return baseData;
+        return resultReader.streamCsvContent().findAny().orElseThrow(() -> new IllegalStateException("No Results found"));
     }
 
-    private static Set<BacktestResultContent> getBestMin(Path resultPath) {
+    private static List<BacktestResultContent> getBestMin(Path resultPath) {
         BacktestResultReader resultReader = new BacktestResultReader(resultPath);
         Decimal bestMinValue = resultReader.streamMinValues().max(Comparator.naturalOrder()).orElse(Decimal.ZERO);
-        Set<BacktestResultContent> bestMin = resultReader.streamCsvContentWithMinValue(bestMinValue).collect(Collectors.toSet());
-        return bestMin;
+        return resultReader.streamCsvContentWithMinValue(bestMinValue).toList();
     }
 
-    private static Set<BacktestResultContent> getBestCumulative(Path resultPath) {
+    private static List<BacktestResultContent> getBestCumulative(Path resultPath) {
         BacktestResultReader resultReader = new BacktestResultReader(resultPath);
         Decimal bestCumulativeValue = resultReader.streamCumulativeValues().max(Comparator.naturalOrder()).orElse(Decimal.ZERO);
-        Set<BacktestResultContent> bestCumulative = resultReader.streamCsvContentWithCumulativeValue(bestCumulativeValue).collect(Collectors.toSet());
-        return bestCumulative;
+        return resultReader.streamCsvContentWithCumulativeValue(bestCumulativeValue).toList();
     }
 
-    private static Set<BacktestResultContent> getBestMax(Path resultPath) {
+    private static List<BacktestResultContent> getBestMax(Path resultPath) {
         BacktestResultReader resultReader = new BacktestResultReader(resultPath);
         Decimal bestMaxValue = resultReader.streamMaxValues().max(Comparator.naturalOrder()).orElse(Decimal.ZERO);
-        Set<BacktestResultContent> bestMax = resultReader.streamCsvContentWithMaxValue(bestMaxValue).collect(Collectors.toSet());
-        return bestMax;
+        return resultReader.streamCsvContentWithMaxValue(bestMaxValue).toList();
     }
-
-
-    private Set<BacktestResultContent> filterForBest(Stream<BacktestResultContent> backtestResultContents, Function<BacktestResultContent, Decimal> extractor) {
-        Stream.Builder<BacktestResultContent> findMaxStream = Stream.builder();
-        Stream.Builder<BacktestResultContent> findMaxElementsStream = Stream.builder();
-        backtestResultContents.forEach(result -> {
-            findMaxStream.add(result);
-            findMaxElementsStream.add(result);
-        });
-        Decimal best = findMaxStream.build().map(extractor).max(Comparator.naturalOrder()).orElse(Decimal.ZERO);
-        return findMaxElementsStream.build().filter(result -> Objects.equals(extractor.apply(result), best)).collect(Collectors.toSet());
-    }
-
-
-
 
     private static Path askForResultFileName(StrategyCreator strategy) {
         String strategyResultDir = PathUtil.fromRelativePath(RESULTS_DIR_NAME + strategy.strategyName());
@@ -103,16 +75,32 @@ public class AbstractBacktestResultViewerApp implements Runnable {
             throw new IllegalStateException("Could not read results from " + strategyResultDir);
         }
 
-        Path result = new PropertyAsker().askProperty(results, path -> path.getFileName().toString(), "Ergebnis");
-        return result;
+        return new PropertyAsker().askProperty(results, path -> path.getFileName().toString(), "Ergebnis");
     }
 
     private static StrategyCreator askForStrategy() {
         List<StrategyCreator> baseStrategies = StrategyCreator.findAll().stream()
                 .filter(baseStrategy -> Files.exists(Path.of(PathUtil.fromRelativePath(RESULTS_DIR_NAME + baseStrategy.strategyName()))))
                 .toList();
-        StrategyCreator strategy = new PropertyAsker().askProperty(baseStrategies, StrategyCreator::strategyName, "Strategie");
-        return strategy;
+        return new PropertyAsker().askProperty(baseStrategies, StrategyCreator::strategyName, "Strategie");
+    }
+
+    @Override
+    public void run() {
+        Path resultPath = askForResultPath();
+
+        logger.info("Reading Results from {}...", resultPath);
+        logger.info("Reading Results finished");
+        logger.info("Processing Results...");
+
+        List<BacktestResultContent> bestMin = getBestMin(resultPath);
+        List<BacktestResultContent> bestCumulative = getBestCumulative(resultPath);
+        List<BacktestResultContent> bestMax = getBestMax(resultPath);
+        BacktestResultContent baseData = getBaseData(resultPath);
+
+
+        new BacktestResultConsoleWriter(bestCumulative, bestMax, bestMin, ALL_METRICS, baseData).run();
+        new BacktestResultPlotter(bestCumulative, bestMax, bestMin).run();
     }
 
     private Path askForResultPath() {

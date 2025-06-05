@@ -107,7 +107,7 @@ class BacktestAppInitiatingUtil {
 
 
     public Integer askNumberOfThreads() {
-        Integer numThreads = propertyAsker.askProperty(List.of(1, 20, 40, 80), i -> Integer.toString(i), "Anzahl an Threads");
+        Integer numThreads = propertyAsker.askProperty(List.of(1, 10, 20, 40, 80), i -> Integer.toString(i), "Anzahl an Threads");
         return numThreads;
     }
 

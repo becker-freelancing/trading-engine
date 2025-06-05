@@ -3,8 +3,10 @@ package com.becker.freelance.backtest.commons;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.math.Decimal;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,8 @@ public class BacktestResultReader {
     public BacktestResultReader(Path resultPath) {
         this.resultPath = resultPath;
         this.objectMapper = new ObjectMapper();
+        this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.registerModule(new JavaTimeModule());
         SimpleModule module = new SimpleModule(Pair.class.getName());
         module.addDeserializer(Pair.class, new PairDeserializer());
         module.addDeserializer(TradeableQuantilMarketRegime.class, new TradeableMarketRegimeDeserializer());

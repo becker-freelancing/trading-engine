@@ -1,6 +1,7 @@
 package com.becker.freelance.backtest.commons;
 
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -18,6 +19,15 @@ import java.util.stream.IntStream;
 public record BacktestResultContent(ObjectMapper objectMapper, String pairs, String appMode, LocalDateTime fromTime,
                                     LocalDateTime toTime, Decimal min, Decimal max, Decimal cumulative,
                                     Decimal initialWalletAmount, String parametersJson, String tradesJson) {
+
+    public List<Trade> tradeObjects() {
+        try {
+            return objectMapper.readValue(tradesJson(), new TypeReference<List<Trade>>() {
+            });
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Could not parse Trades", e);
+        }
+    }
 
     public List<Decimal> tradeProfits() {
         JSONArray trades = new JSONArray(tradesJson());
