@@ -57,9 +57,9 @@ public class ValidStrategyInitParameters {
         return permutated.stream().filter(parameterValidation).toList();
     }
 
-    public List<StrategyCreationParameter> permutate() {
+    public PermutatedStrategyCreationParameter permutate() {
         if (strategyInitParameter.isEmpty()) {
-            return new ArrayList<>();
+            return new PermutatedStrategyCreationParameter();
         }
 
         List<StrategyInitParameter> workList = new ArrayList<>(strategyInitParameter);
@@ -73,7 +73,7 @@ public class ValidStrategyInitParameters {
         }
 
         List<StrategyCreationParameter> permutated = internalPermute(start, workList);
-        return validatePermutations(permutated);
+        return new PermutatedStrategyCreationParameter(validatePermutations(permutated));
     }
 
 

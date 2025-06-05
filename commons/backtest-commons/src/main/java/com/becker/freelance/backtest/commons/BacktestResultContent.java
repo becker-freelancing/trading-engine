@@ -22,7 +22,7 @@ public record BacktestResultContent(ObjectMapper objectMapper, String pairs, Str
     public List<Decimal> tradeProfits() {
         JSONArray trades = new JSONArray(tradesJson());
         return IntStream.range(0, trades.length()).mapToObj(trades::getJSONObject)
-                .map(trade -> trade.getBigDecimal("profitInEuro"))
+                .map(trade -> trade.has("profitInEuros") ? trade.getBigDecimal("profitInEuros") : trade.getBigDecimal("profitInEuroWithFees"))
                 .map(Decimal::new)
                 .toList();
     }

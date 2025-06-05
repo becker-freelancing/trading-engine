@@ -78,7 +78,8 @@ public class BacktestEngine {
         List<StrategyCreationParameter> parameters;
         try (parameterFilter) {
             parameters = strategyCreator.strategyParameters().permutate()
-                    .stream().filter(parameterFilter.getPredicate()).toList();
+                    .filter(parameterFilter.getPredicate())
+                    .asSearchList();
         }
         requiredIterations = parameters.size();
         for (StrategyCreationParameter parameter : parameters) {
