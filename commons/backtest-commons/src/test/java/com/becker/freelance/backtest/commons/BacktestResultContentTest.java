@@ -30,8 +30,8 @@ class BacktestResultContentTest {
                         {"size": 0.2, "tp": 20}
                         """,
                 """
-                        [{"openTime":"2023-01-01T05:20:00","closeTime":"2023-01-01T05:25:00","pair":{"technicalName":"GLD/USD M5"},"profitInEuro":10.0,"openLevel":1811.83,"closeLevel":1811.73,"size":0.2,"direction":"SELL","conversionRate":1.0716,"positionType":"HARD_LIMIT"},
-                        {"openTime":"2023-01-01T05:20:00","closeTime":"2023-01-01T05:25:00","pair":{"technicalName":"GLD/USD M5"},"profitInEuro":20.0,"openLevel":1811.83,"closeLevel":1811.73,"size":0.2,"direction":"SELL","conversionRate":1.0716,"positionType":"HARD_LIMIT"}]
+                        [{"openTime":"2023-01-01T05:20:00","closeTime":"2023-01-01T05:25:00","pair":{"technicalName":"GLD/USD M5"},"profitInEuroWithFees":10.0,"openLevel":1811.83,"closeLevel":1811.73,"size":0.2,"direction":"SELL","conversionRate":1.0716,"positionType":"HARD_LIMIT"},
+                        {"openTime":"2023-01-01T05:20:00","closeTime":"2023-01-01T05:25:00","pair":{"technicalName":"GLD/USD M5"},"profitInEuroWithFees":20.0,"openLevel":1811.83,"closeLevel":1811.73,"size":0.2,"direction":"SELL","conversionRate":1.0716,"positionType":"HARD_LIMIT"}]
                         """
         );
     }

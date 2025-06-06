@@ -33,7 +33,8 @@ public class AbstractBacktestResultViewerApp implements Runnable {
             new ReturnsStd(),
             new AverageOpenFeeRate(),
             new AverageCloseFeeRate(),
-            new TotalFeeRate()
+            new TotalFeeRate(),
+            new MarketRegimeProfit()
     );
 
 

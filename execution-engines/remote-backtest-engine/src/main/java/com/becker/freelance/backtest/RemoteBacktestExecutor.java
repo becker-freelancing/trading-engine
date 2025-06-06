@@ -34,7 +34,11 @@ public class RemoteBacktestExecutor implements Runnable {
 
             SubscribableDataProvider subscribableDataProvider = dataProviderFactory.createSubscribableDataProvider(pair);
 
-            StrategyEngine strategyEngine = new StrategyEngine(pair, strategySupplier, tradeExecutor, dataProviderFactory.createEurUsdRequestor());
+            if (true) {
+                throw new UnsupportedOperationException("Management Provider muss Uhrzeitabhängig gemacht werden, evtl.");
+            }
+            StrategyEngine strategyEngine = new StrategyEngine(pair, strategySupplier, tradeExecutor, dataProviderFactory.createEurUsdRequestor(), listener -> {
+            });
             StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine);
             subscribableDataProvider.addSubscriber(strategyDataSubscriber);
         } catch (Exception e) {

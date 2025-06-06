@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
 
 class PositionCalculationTest {
 
-    static final Decimal MARGIN_PER_POSITION = new Decimal("3330.00");
+    static final Decimal MARGIN_PER_POSITION = new Decimal("333.00");
 
     static LocalDateTime currentTime = LocalDateTime.of(2020, 1, 1, 0, 0, 0);
 
@@ -37,7 +37,6 @@ class PositionCalculationTest {
     }
 
     private TradingCalculator tradingCalculator;
-    private MarginCalculator marginCalculator;
     private PositionCalculation positionCalculation;
     private TimeSeriesEntry currentPrice;
     private TimeSeriesEntry otherPrice;
@@ -83,7 +82,7 @@ class PositionCalculationTest {
         doCallRealMethod().when(entryForMarginCalculation).getCloseMid();
         EurUsdRequestor eurUsdRequestor = time -> entryForMarginCalculation;
         tradingCalculator = new TradingCalculatorImpl(eurUsdRequestor);
-        marginCalculator = new MarginCalculatorImpl(eurUsdRequestor);
+        MarginCalculator marginCalculator = new MarginCalculatorImpl(eurUsdRequestor);
         TradingFeeCalculator tradingFeeCalculator = mock(TradingFeeCalculator.class);
         doReturn(new Decimal(2)).when(tradingFeeCalculator).calculateTakerTradingFeeInCounterCurrency(any(), any());
         doReturn(new Decimal(2)).when(tradingFeeCalculator).calculateMakerTradingFeeInCounterCurrency(any(), any());
@@ -480,7 +479,7 @@ class PositionCalculationTest {
         assertEquals(2, calculationResult.trades().size());
         assertEquals(1, calculationResult.positions().size());
         assertEquals(new Decimal("11714277.72"), wallet.getAmount());
-        assertEquals(new Decimal("6660.00"), wallet.getMargin());
+        assertEquals(MARGIN_PER_POSITION.multiply(2), wallet.getMargin());
     }
 
     @Test

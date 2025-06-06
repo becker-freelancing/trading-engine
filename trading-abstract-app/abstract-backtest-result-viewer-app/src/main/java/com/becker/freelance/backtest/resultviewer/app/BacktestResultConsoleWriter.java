@@ -1,8 +1,8 @@
 package com.becker.freelance.backtest.resultviewer.app;
 
 import com.becker.freelance.backtest.commons.BacktestResultContent;
-import com.becker.freelance.backtest.resultviewer.app.metric.Metric;
 import com.becker.freelance.backtest.resultviewer.app.metric.MetricCalculator;
+import com.becker.freelance.backtest.resultviewer.app.metric.Writable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +50,8 @@ class BacktestResultConsoleWriter implements Runnable{
             logger.info("\t\tCum: {}", result.cumulative());
 
             metricCalculators.forEach(metricCalculator -> {
-                Metric metric = metricCalculator.calculate(result);
-                logger.info("\t\t{}: {} {}", metric.name(), metric.value(), metric.unit());
+                Writable metric = metricCalculator.calculate(result);
+                metric.getLines().forEach(line -> logger.info("\t\t{}", line));
             });
         }
     }
