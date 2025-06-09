@@ -142,9 +142,10 @@ public class PositionCalculation {
 
     private Trade toTrade(Decimal conversionRate, Decimal profit, Decimal closePrice, Pair pair, Position position, TimeSeriesEntry currentPrice) {
         Decimal exitTradingFee = exitTradingFee(position, closePrice);
-        Decimal profitWithFees = profit.subtract(position.getOpenFee()).subtract(exitTradingFee);
+        Decimal openFee = position.getOpenFee();
+        Decimal profitWithFees = profit.subtract(openFee).subtract(exitTradingFee);
         return new Trade(position.getOpenTime(), currentPrice.time(), pair, profitWithFees,
-                position.getOpenPrice(), closePrice, position.getOpenFee(), exitTradingFee, position.getSize(), position.getDirection(),
+                position.getOpenPrice(), closePrice, openFee, exitTradingFee, position.getSize(), position.getDirection(),
                 conversionRate, position.getPositionType(), position.getOpenMarketRegime());
     }
 

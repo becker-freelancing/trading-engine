@@ -40,11 +40,11 @@ public interface EntrySignal {
 
 
     public default boolean isOpenTaker() {
-        return false;
+        return true;
     }
 
     public default boolean isCloseTaker() {
-        return false;
+        return true;
     }
 
     public Decimal stopLevel();

@@ -12,7 +12,7 @@ public class AverageProfitPerTrade implements MetricCalculator {
         double sum = profits.stream()
                 .reduce(Decimal::add)
                 .map(Decimal::doubleValue).orElse(0.);
-        double ratio = sum / (double) profits.size() * 100;
+        double ratio = sum / (double) profits.size();
         return new Metric("Average Profit", ratio, "€");
     }
 }

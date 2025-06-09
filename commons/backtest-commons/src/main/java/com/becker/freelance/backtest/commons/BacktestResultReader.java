@@ -65,17 +65,22 @@ public class BacktestResultReader {
         return Stream.of(result[0]);
     }
 
-    public Stream<BacktestResultContent> streamCsvContentWithMinValue(Decimal minValue) {
+    public Stream<BacktestResultContent> streamCsvContentWithMinValue() {
         logger.info("Reading Backtest Results from {}", resultPath);
         List<BacktestResultContent> resultContents = new ArrayList<>();
+        Decimal[] currentBestMin = new Decimal[]{Decimal.DOUBLE_MAX.multiply(-1)};
         Consumer<String> consumer = line -> {
             if (line.startsWith("pairs")) {
                 return;
             }
             String[] split = line.split(";");
             Decimal currMin = new Decimal(split[4]);
-            if (!minValue.isEqualTo(currMin)) {
+            if (currMin.isLessThan(currentBestMin[0])) {
                 return;
+            }
+            if (currMin.isGreaterThan(currentBestMin[0])) {
+                currentBestMin[0] = currMin;
+                resultContents.clear();
             }
             resultContents.add(toBacktestResultContent(line));
         };
@@ -83,35 +88,22 @@ public class BacktestResultReader {
         return resultContents.stream();
     }
 
-    public Stream<Decimal> streamMinValues(){
-        logger.info("Reading Min Result Values from {}", resultPath);
-
-        List<Decimal> mins = new ArrayList<>();
-        Consumer<String> lineConsumer = line -> {
-            if (line.startsWith("pairs")) {
-                return;
-            }
-            String[] split = line.split(";");
-            if (split[9].equals("[]")) {
-                return;
-            }
-            mins.add(new Decimal(split[4]));
-        };
-        readLines(resultPath, lineConsumer);
-        return mins.stream();
-    }
-
-    public Stream<BacktestResultContent> streamCsvContentWithMaxValue(Decimal maxValue) {
+    public Stream<BacktestResultContent> streamCsvContentWithMaxValue() {
         logger.info("Reading Backtest Results from {}", resultPath);
         List<BacktestResultContent> resultContents = new ArrayList<>();
+        Decimal[] bestMaxValue = new Decimal[]{Decimal.DOUBLE_MAX.multiply(-1)};
         Consumer<String> consumer = line -> {
             if (line.startsWith("pairs")) {
                 return;
             }
             String[] split = line.split(";");
             Decimal currMax = new Decimal(split[5]);
-            if (!maxValue.isEqualTo(currMax)) {
+            if (currMax.isLessThan(bestMaxValue[0])) {
                 return;
+            }
+            if (currMax.isGreaterThan(bestMaxValue[0])) {
+                bestMaxValue[0] = currMax;
+                resultContents.clear();
             }
             resultContents.add(toBacktestResultContent(line));
         };
@@ -119,34 +111,23 @@ public class BacktestResultReader {
         return resultContents.stream();
     }
 
-    public Stream<Decimal> streamMaxValues(){
-        logger.info("Reading Max Result Values from {}", resultPath);
-        List<Decimal> maxs = new ArrayList<>();
-        Consumer<String> lineConsumer = line -> {
-            if (line.startsWith("pairs")) {
-                return;
-            }
-            String[] split = line.split(";");
-            if (split[9].equals("[]")) {
-                return;
-            }
-            maxs.add(new Decimal(split[5]));
-        };
-        readLines(resultPath, lineConsumer);
-        return maxs.stream();
-    }
 
-    public Stream<BacktestResultContent> streamCsvContentWithCumulativeValue(Decimal cumulativeValue) {
+    public Stream<BacktestResultContent> streamCsvContentWithCumulativeValue() {
         logger.info("Reading Backtest Results from {}", resultPath);
         List<BacktestResultContent> resultContents = new ArrayList<>();
+        Decimal[] bestCum = new Decimal[]{Decimal.DOUBLE_MAX.multiply(-1)};
         Consumer<String> consumer = line -> {
             if (line.startsWith("pairs")) {
                 return;
             }
             String[] split = line.split(";");
             Decimal currMin = new Decimal(split[6]);
-            if (!cumulativeValue.isEqualTo(currMin)) {
+            if (currMin.isLessThan(bestCum[0])) {
                 return;
+            }
+            if (currMin.isGreaterThan(bestCum[0])) {
+                bestCum[0] = currMin;
+                resultContents.clear();
             }
             resultContents.add(toBacktestResultContent(line));
         };
@@ -154,22 +135,6 @@ public class BacktestResultReader {
         return resultContents.stream();
     }
 
-    public Stream<Decimal> streamCumulativeValues(){
-        logger.info("Reading Cumulative Result Values from {}", resultPath);
-        List<Decimal> cumulatives = new ArrayList<>();
-        Consumer<String> lineConsumer = line -> {
-            if (line.startsWith("pairs")) {
-                return;
-            }
-            String[] split = line.split(";");
-            if (split[9].equals("[]")) {
-                return;
-            }
-            cumulatives.add(new Decimal(split[6]));
-        };
-        readLines(resultPath, lineConsumer);
-        return cumulatives.stream();
-    }
 
     private BacktestResultContent toBacktestResultContent(String line) {
         String[] split = line.split(";");

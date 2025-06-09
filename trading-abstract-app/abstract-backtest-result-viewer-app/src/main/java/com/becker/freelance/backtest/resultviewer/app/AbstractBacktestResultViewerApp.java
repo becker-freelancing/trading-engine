@@ -4,7 +4,6 @@ import com.becker.freelance.backtest.commons.BacktestResultContent;
 import com.becker.freelance.backtest.commons.BacktestResultReader;
 import com.becker.freelance.backtest.resultviewer.app.metric.*;
 import com.becker.freelance.backtest.util.PathUtil;
-import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.creation.StrategyCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +13,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 public class AbstractBacktestResultViewerApp implements Runnable {
@@ -34,7 +37,11 @@ public class AbstractBacktestResultViewerApp implements Runnable {
             new AverageOpenFeeRate(),
             new AverageCloseFeeRate(),
             new TotalFeeRate(),
-            new MarketRegimeProfit()
+            new MarketRegimeProfit(),
+            new BuyProfitHitRate(),
+            new SellProfitHitRate(),
+            new DayOfWeekHitRate(),
+            new HourOfDayHitRate()
     );
 
 
@@ -49,20 +56,17 @@ public class AbstractBacktestResultViewerApp implements Runnable {
 
     private static List<BacktestResultContent> getBestMin(Path resultPath) {
         BacktestResultReader resultReader = new BacktestResultReader(resultPath);
-        Decimal bestMinValue = resultReader.streamMinValues().max(Comparator.naturalOrder()).orElse(Decimal.ZERO);
-        return resultReader.streamCsvContentWithMinValue(bestMinValue).toList();
+        return resultReader.streamCsvContentWithMinValue().toList();
     }
 
     private static List<BacktestResultContent> getBestCumulative(Path resultPath) {
         BacktestResultReader resultReader = new BacktestResultReader(resultPath);
-        Decimal bestCumulativeValue = resultReader.streamCumulativeValues().max(Comparator.naturalOrder()).orElse(Decimal.ZERO);
-        return resultReader.streamCsvContentWithCumulativeValue(bestCumulativeValue).toList();
+        return resultReader.streamCsvContentWithCumulativeValue().toList();
     }
 
     private static List<BacktestResultContent> getBestMax(Path resultPath) {
         BacktestResultReader resultReader = new BacktestResultReader(resultPath);
-        Decimal bestMaxValue = resultReader.streamMaxValues().max(Comparator.naturalOrder()).orElse(Decimal.ZERO);
-        return resultReader.streamCsvContentWithMaxValue(bestMaxValue).toList();
+        return resultReader.streamCsvContentWithMaxValue().toList();
     }
 
     private static Path askForResultFileName(StrategyCreator strategy) {
@@ -94,10 +98,25 @@ public class AbstractBacktestResultViewerApp implements Runnable {
         logger.info("Reading Results finished");
         logger.info("Processing Results...");
 
-        List<BacktestResultContent> bestMin = getBestMin(resultPath);
-        List<BacktestResultContent> bestCumulative = getBestCumulative(resultPath);
-        List<BacktestResultContent> bestMax = getBestMax(resultPath);
-        BacktestResultContent baseData = getBaseData(resultPath);
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+        Future<List<BacktestResultContent>> bestMinFuture = executorService.submit(() -> getBestMin(resultPath));
+        Future<List<BacktestResultContent>> bestCumulativeFuture = executorService.submit(() -> getBestCumulative(resultPath));
+        Future<List<BacktestResultContent>> bestMaxFuture = executorService.submit(() -> getBestMax(resultPath));
+        Future<BacktestResultContent> baseDataFuture = executorService.submit(() -> getBaseData(resultPath));
+
+        List<BacktestResultContent> bestMin;
+        List<BacktestResultContent> bestCumulative;
+        List<BacktestResultContent> bestMax;
+        BacktestResultContent baseData;
+        try {
+            bestMin = bestMinFuture.get();
+            bestCumulative = bestCumulativeFuture.get();
+            bestMax = bestMaxFuture.get();
+            baseData = baseDataFuture.get();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new IllegalStateException("Could not read results", e);
+        }
+        executorService.shutdown();
 
 
         new BacktestResultConsoleWriter(bestCumulative, bestMax, bestMin, ALL_METRICS, baseData).run();
