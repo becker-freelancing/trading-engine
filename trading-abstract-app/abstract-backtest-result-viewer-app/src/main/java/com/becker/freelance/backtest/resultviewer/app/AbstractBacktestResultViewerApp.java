@@ -23,7 +23,7 @@ public class AbstractBacktestResultViewerApp implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractBacktestResultViewerApp.class);
 
-    private static final String RESULTS_DIR_NAME = "results\\";
+    private static final String RESULTS_DIR_NAME = "results/";
     private static final String FILE_ENDING = ".zst";
 
     private static final List<MetricCalculator> ALL_METRICS = List.of(

@@ -22,14 +22,14 @@ public class PathUtil {
     }
 
     public static String rootResultDir(){
-        return fromRelativePath("results\\");
+        return fromRelativePath("results/");
     }
 
     public static String resultDirForStrategy(String strategyName){
-        return rootResultDir() + strategyName + "\\";
+        return rootResultDir() + strategyName + "/";
     }
 
     public static String fromModelsDir(String name) {
-        return fromRelativePath("models\\" + name);
+        return fromRelativePath("models/" + name);
     }
 }

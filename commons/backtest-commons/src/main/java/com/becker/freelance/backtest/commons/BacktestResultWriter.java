@@ -76,7 +76,7 @@ public class BacktestResultWriter {
         } else {
             pairName = "MULTIPLE_PAIR";
         }
-        return PathUtil.fromRelativePath("results\\" + strategyName + "\\" + pairName + "__" + strategyName + "__" + BacktestResultWriter.FILE_NAME_FORMATTER.format(startTime) + ".csv");
+        return PathUtil.fromRelativePath("results/" + strategyName + "/" + pairName + "__" + strategyName + "__" + BacktestResultWriter.FILE_NAME_FORMATTER.format(startTime) + ".csv");
     }
 
     private void prepareCsvFile() {

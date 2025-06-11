@@ -81,7 +81,7 @@ class BacktestAppInitiatingUtil {
     }
 
     private Path getPropertiesPath() {
-        Path path = Path.of(PathUtil.fromRelativePath("backtest-app\\config\\last-execution.csv"));
+        Path path = Path.of(PathUtil.fromRelativePath("backtest-app/config/last-execution.csv"));
 
         try {
 

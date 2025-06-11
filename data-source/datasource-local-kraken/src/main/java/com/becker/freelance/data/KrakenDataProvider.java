@@ -39,7 +39,7 @@ public class KrakenDataProvider extends DataProvider{
     @Override
     public TimeSeries readTimeSeries(LocalDateTime from, LocalDateTime to) {
         logger.info("Start reading TimeSeries {}...", pair.technicalName());
-        String filePath = PathUtil.fromRelativePath("data\\" + getFilename() + ".zip");
+        String filePath = PathUtil.fromRelativePath("data/" + getFilename() + ".zip");
 
         Map<LocalDateTime, TimeSeriesEntry> entries;
 
