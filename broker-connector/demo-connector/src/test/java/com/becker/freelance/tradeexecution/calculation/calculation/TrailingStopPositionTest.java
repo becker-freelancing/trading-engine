@@ -3,7 +3,6 @@ package com.becker.freelance.tradeexecution.calculation.calculation;
 import com.becker.freelance.commons.calculation.MarginCalculator;
 import com.becker.freelance.commons.calculation.TradingFeeCalculator;
 import com.becker.freelance.commons.order.OrderBuilder;
-import com.becker.freelance.commons.order.TriggerDirection;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.position.PositionBehaviour;
@@ -35,6 +34,16 @@ class TrailingStopPositionTest {
     TrailingPositionAdaptor trailingPositionAdaptor;
 
 
+    private static TimeSeriesEntry buildEntry(Decimal value) {
+        TimeSeriesEntry price = mock(TimeSeriesEntry.class);
+        when(price.closeAsk()).thenReturn(value);
+        when(price.closeBid()).thenReturn(value);
+        doCallRealMethod().when(price).getCloseMid();
+        doCallRealMethod().when(price).getClosePriceForDirection(any());
+        doReturn(LocalDateTime.of(2020, 1, 1, 0, 0)).when(price).time();
+        return price;
+    }
+
     @BeforeEach
     void setUp() {
         timeSeries = mock(TimeSeries.class);
@@ -51,7 +60,7 @@ class TrailingStopPositionTest {
         DemoPositionFactory positionFactory = new DemoPositionFactory(time -> closeEntry, mock(TradingFeeCalculator.class), mock(MarginCalculator.class));
         buyPosition = positionFactory.createTrailingPosition(EntrySignalBuilder.getInstance()
                 .withOpenOrder(OrderBuilder.getInstance().withSize(Decimal.ONE).withDirection(Direction.BUY).withPair(PairMock.eurUsd()).asMarketOrder())
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.02"))).withThresholdPrice(new Decimal("1.02")).withTriggerDirection(TriggerDirection.DOWN_CROSS))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.02"))).withThresholdPrice(new Decimal("1.02")))
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.08")))
                 .withPositionBehaviour(PositionBehaviour.TRAILING)
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
@@ -60,21 +69,12 @@ class TrailingStopPositionTest {
 
         sellPosition = positionFactory.createTrailingPosition(EntrySignalBuilder.getInstance()
                 .withOpenOrder(OrderBuilder.getInstance().withSize(Decimal.ONE).withDirection(Direction.SELL).withPair(PairMock.eurUsd()).asMarketOrder())
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("6200"))).withThresholdPrice(new Decimal("6200")).withTriggerDirection(TriggerDirection.UP_CROSS))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("6200"))).withThresholdPrice(new Decimal("6200")))
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("6000")))
                 .withPositionBehaviour(PositionBehaviour.TRAILING)
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
                 .buildValidated(openPriceSell), openPriceSell);
         sellPosition.getOpenOrder().executeIfPossible(openPriceSell);
-    }
-
-    private static TimeSeriesEntry buildEntry(Decimal value) {
-        TimeSeriesEntry price = mock(TimeSeriesEntry.class);
-        when(price.closeAsk()).thenReturn(value);
-        when(price.closeBid()).thenReturn(value);
-        doCallRealMethod().when(price).getCloseMid();
-        doReturn(LocalDateTime.of(2020, 1, 1, 0, 0)).when(price).time();
-        return price;
     }
 
     @Test

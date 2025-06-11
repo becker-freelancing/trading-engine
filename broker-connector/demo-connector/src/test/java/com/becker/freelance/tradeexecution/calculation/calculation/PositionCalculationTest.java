@@ -2,7 +2,6 @@ package com.becker.freelance.tradeexecution.calculation.calculation;
 
 import com.becker.freelance.commons.calculation.*;
 import com.becker.freelance.commons.order.OrderBuilder;
-import com.becker.freelance.commons.order.TriggerDirection;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
@@ -57,6 +56,7 @@ class PositionCalculationTest {
     void setUp() {
         currentPrice = mock(TimeSeriesEntry.class);
         doReturn(PairMock.eurUsd()).when(currentPrice).pair();
+        doReturn(new Decimal("10.")).when(currentPrice).getOpenMid();
         doReturn(new Decimal("10.")).when(currentPrice).getCloseMid();
         doReturn(new Decimal("10.")).when(currentPrice).closeAsk();
         doReturn(new Decimal("10.")).when(currentPrice).closeBid();
@@ -64,6 +64,7 @@ class PositionCalculationTest {
         doReturn(currentPrice.closeBid()).when(currentPrice).lowBid();
         doReturn(currentPrice.closeAsk()).when(currentPrice).highAsk();
         doReturn(currentPrice.closeBid()).when(currentPrice).highBid();
+        doCallRealMethod().when(currentPrice).getClosePriceForDirection(any());
         doReturn(nextTime()).when(currentPrice).time();
         otherPrice = mock(TimeSeriesEntry.class);
         doReturn(PairMock.eurUsd()).when(otherPrice).pair();
@@ -82,6 +83,7 @@ class PositionCalculationTest {
         doReturn(new Decimal("7")).when(entryForMarginCalculation).closeAsk();
         doReturn(new Decimal("7")).when(entryForMarginCalculation).closeBid();
         doCallRealMethod().when(entryForMarginCalculation).getCloseMid();
+        doCallRealMethod().when(entryForMarginCalculation).getClosePriceForDirection(any());
         EurUsdRequestor eurUsdRequestor = time -> entryForMarginCalculation;
         tradingCalculator = new TradingCalculatorImpl(eurUsdRequestor);
         MarginCalculator marginCalculator = new MarginCalculatorImpl(eurUsdRequestor);
@@ -95,7 +97,7 @@ class PositionCalculationTest {
         demoPositionFactory = new DemoPositionFactory(eurUsdRequestor, tradingFeeCalculator, marginCalculator);
         buyPosition = demoPositionFactory.createStopLimitPosition(new EntrySignalBuilder()
                 .withOpenOrder(OrderBuilder.getInstance().withPair(PairMock.eurUsd()).withDirection(Direction.BUY).withSize(Decimal.ONE).asMarketOrder())
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("3"))).withThresholdPrice(new Decimal("3")).withTriggerDirection(TriggerDirection.DOWN_CROSS))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("3"))).withThresholdPrice(new Decimal("3")))
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("17")))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
@@ -104,7 +106,7 @@ class PositionCalculationTest {
         buyPosition2 = demoPositionFactory.createStopLimitPosition(new EntrySignalBuilder()
                 .withOpenOrder(OrderBuilder.getInstance().withPair(PairMock.eurUsd()).withDirection(Direction.BUY).withSize(Decimal.TWO).asMarketOrder())
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("15")))
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("5"))).withThresholdPrice(new Decimal("5")).withTriggerDirection(TriggerDirection.DOWN_CROSS))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("5"))).withThresholdPrice(new Decimal("5")))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
                 .build());
@@ -112,7 +114,7 @@ class PositionCalculationTest {
 
         buyPosition3 = demoPositionFactory.createStopLimitPosition(new EntrySignalBuilder()
                 .withOpenOrder(OrderBuilder.getInstance().withPair(PairMock.eurUsd()).withDirection(Direction.BUY).withSize(new Decimal("3")).asMarketOrder())
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("17"))).withThresholdPrice(new Decimal("17")).withTriggerDirection(TriggerDirection.DOWN_CROSS))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("17"))).withThresholdPrice(new Decimal("17")))
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("5")))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
@@ -121,7 +123,7 @@ class PositionCalculationTest {
 
         sellPosition = demoPositionFactory.createStopLimitPosition(new EntrySignalBuilder()
                 .withOpenOrder(OrderBuilder.getInstance().withPair(PairMock.eurUsd()).withDirection(Direction.SELL).withSize(Decimal.ONE).asMarketOrder())
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("15"))).withThresholdPrice(new Decimal("15")).withTriggerDirection(TriggerDirection.UP_CROSS))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("15"))).withThresholdPrice(new Decimal("15")))
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("3")))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
@@ -130,7 +132,7 @@ class PositionCalculationTest {
 
         sellPosition2 = demoPositionFactory.createStopLimitPosition(new EntrySignalBuilder()
                 .withOpenOrder(OrderBuilder.getInstance().withPair(PairMock.eurUsd()).withDirection(Direction.SELL).withSize(Decimal.TWO).asMarketOrder())
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("3"))).withThresholdPrice(new Decimal("3")).withTriggerDirection(TriggerDirection.UP_CROSS))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("3"))).withThresholdPrice(new Decimal("3")))
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("15")))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
@@ -139,7 +141,7 @@ class PositionCalculationTest {
 
         sellPosition3 = demoPositionFactory.createStopLimitPosition(new EntrySignalBuilder()
                 .withOpenOrder(OrderBuilder.getInstance().withPair(PairMock.eurUsd()).withDirection(Direction.SELL).withSize(new Decimal("3")).asMarketOrder())
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("15"))).withThresholdPrice(new Decimal("15")).withTriggerDirection(TriggerDirection.UP_CROSS))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("15"))).withThresholdPrice(new Decimal("15")))
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("3")))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
@@ -530,7 +532,7 @@ class PositionCalculationTest {
         Position position1 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
                 .withOpenOrder(OrderBuilder.getInstance().withSize(Decimal.ONE).withDirection(Direction.BUY).withPair(pair).asMarketOrder())
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.4")))
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1"))).withTriggerDirection(TriggerDirection.DOWN_CROSS).withThresholdPrice(new Decimal("1")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1"))).withThresholdPrice(new Decimal("1")))
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .build());
@@ -538,7 +540,7 @@ class PositionCalculationTest {
         Position position2 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
                 .withOpenOrder(OrderBuilder.getInstance().withSize(Decimal.ONE).withDirection(Direction.SELL).withPair(pair).asMarketOrder())
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("0.1")))
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("100"))).withTriggerDirection(TriggerDirection.UP_CROSS).withThresholdPrice(new Decimal("100")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("100"))).withThresholdPrice(new Decimal("100")))
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .build());
@@ -546,7 +548,7 @@ class PositionCalculationTest {
         Position position3 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
                 .withOpenOrder(OrderBuilder.getInstance().withSize(Decimal.ONE).withDirection(Direction.BUY).withPair(pair).asMarketOrder())
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.5")))
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.2"))).withTriggerDirection(TriggerDirection.DOWN_CROSS).withThresholdPrice(new Decimal("1.2")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.2"))).withThresholdPrice(new Decimal("1.2")))
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .build());
@@ -558,10 +560,14 @@ class PositionCalculationTest {
         Decimal marginPerPosition = new Decimal("333.00");
 
         wallet.addMargin(marginPerPosition.multiply(3));
+        when(currentPrice.openBid()).thenReturn(new Decimal("1.6"));
+        when(currentPrice.openAsk()).thenReturn(new Decimal("1.6"));
         when(currentPrice.lowBid()).thenReturn(new Decimal("1.6"));
         when(currentPrice.lowAsk()).thenReturn(new Decimal("1.6"));
+        doCallRealMethod().when(currentPrice).getLowMid();
         when(currentPrice.highAsk()).thenReturn(new Decimal("1.6"));
         when(currentPrice.highBid()).thenReturn(new Decimal("1.6"));
+        doCallRealMethod().when(currentPrice).getHighMid();
         when(currentPrice.closeBid()).thenReturn(new Decimal("1.6"));
         when(currentPrice.closeAsk()).thenReturn(new Decimal("1.6"));
 
@@ -581,7 +587,7 @@ class PositionCalculationTest {
         Position position1 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
                 .withOpenOrder(OrderBuilder.getInstance().withSize(Decimal.ONE).withDirection(Direction.BUY).withPair(pair).asMarketOrder().asMarketOrder())
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.4")))
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1"))).withTriggerDirection(TriggerDirection.DOWN_CROSS).withThresholdPrice(new Decimal("1")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1"))).withThresholdPrice(new Decimal("1")))
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .build());
@@ -589,7 +595,7 @@ class PositionCalculationTest {
         Position position2 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
                 .withOpenOrder(OrderBuilder.getInstance().withSize(new Decimal("2")).withDirection(Direction.SELL).withPair(pair).asMarketOrder())
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("0.1")))
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("100"))).withTriggerDirection(TriggerDirection.UP_CROSS).withThresholdPrice(new Decimal("100")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("100"))).withThresholdPrice(new Decimal("100")))
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .build());
@@ -597,7 +603,7 @@ class PositionCalculationTest {
         Position position3 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
                 .withOpenOrder(OrderBuilder.getInstance().withSize(new Decimal("3")).withDirection(Direction.BUY).withPair(pair).asMarketOrder())
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.5")))
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.2"))).withTriggerDirection(TriggerDirection.DOWN_CROSS).withThresholdPrice(new Decimal("1.2")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.2"))).withThresholdPrice(new Decimal("1.2")))
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .build());
@@ -626,7 +632,7 @@ class PositionCalculationTest {
         Position position1 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
                 .withOpenOrder(OrderBuilder.getInstance().withSize(Decimal.ONE).withDirection(Direction.BUY).withPair(pair).asMarketOrder())
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.4")))
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1"))).withTriggerDirection(TriggerDirection.DOWN_CROSS).withThresholdPrice(new Decimal("1")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1"))).withThresholdPrice(new Decimal("1")))
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .build());
@@ -634,7 +640,7 @@ class PositionCalculationTest {
         Position position2 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
                 .withOpenOrder(OrderBuilder.getInstance().withSize(new Decimal("2")).withDirection(Direction.SELL).withPair(pair).asMarketOrder())
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("0.1")))
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("100"))).withTriggerDirection(TriggerDirection.UP_CROSS).withThresholdPrice(new Decimal("100")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("100"))).withThresholdPrice(new Decimal("100")))
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .build());
@@ -642,7 +648,7 @@ class PositionCalculationTest {
         Position position3 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
                 .withOpenOrder(OrderBuilder.getInstance().withSize(new Decimal("3")).withDirection(Direction.BUY).withPair(pair).asMarketOrder())
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.5")))
-                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.2"))).withTriggerDirection(TriggerDirection.DOWN_CROSS).withThresholdPrice(new Decimal("1.2")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.2"))).withThresholdPrice(new Decimal("1.2")))
                 .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
                 .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
                 .build());

@@ -86,6 +86,6 @@ public class MarketOrderBuilder implements OrderBuilder {
 
     @Override
     public Decimal getEstimatedExecutionLevel(TimeSeriesEntry currentPrice) {
-        return currentPrice.getCloseMid();
+        return currentPrice.getClosePriceForDirection(getDirection());
     }
 }

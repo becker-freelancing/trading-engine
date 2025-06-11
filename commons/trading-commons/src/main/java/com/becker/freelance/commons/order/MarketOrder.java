@@ -7,6 +7,6 @@ public interface MarketOrder extends Order {
 
     @Override
     default Decimal getEstimatedExecutionLevel(TimeSeriesEntry currentPrice) {
-        return currentPrice.getCloseMid();
+        return currentPrice.getClosePriceForDirection(getDirection());
     }
 }

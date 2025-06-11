@@ -17,7 +17,7 @@ final class DefaultConditionalOrder implements ConditionalOrder {
     private boolean activated = false;
 
 
-    DefaultConditionalOrder(Order delegate, TriggerDirection triggerDirection, Decimal thresholdPrice) {
+    DefaultConditionalOrder(Order delegate, Decimal thresholdPrice) {
         if (thresholdPrice.isLessThanZero()) {
             throw new IllegalStateException("Threshold Price of Conditional Order cannot be 0 or less");
         }
@@ -38,7 +38,6 @@ final class DefaultConditionalOrder implements ConditionalOrder {
     public LazyOrder clone() {
         return new DefaultConditionalOrder(
                 delegate.clone(),
-                triggerDirection,
                 thresholdPrice
         );
     }
@@ -73,7 +72,7 @@ final class DefaultConditionalOrder implements ConditionalOrder {
 
     @Override
     public TriggerDirection getTriggerDirection() {
-        return triggerDirection();
+        return triggerDirection;
     }
 
     @Override
@@ -147,10 +146,6 @@ final class DefaultConditionalOrder implements ConditionalOrder {
 
     public Order delegate() {
         return delegate;
-    }
-
-    public TriggerDirection triggerDirection() {
-        return triggerDirection;
     }
 
     public Decimal thresholdPrice() {

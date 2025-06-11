@@ -12,17 +12,11 @@ public class ConditionalOrderBuilder implements LazyOrderBuilder {
     private Pair pair;
     private boolean reduceOnly;
     private OrderBuilder delegate;
-    private TriggerDirection triggerDirection;
     private Decimal thresholdPrice;
 
 
     public ConditionalOrderBuilder withDelegate(OrderBuilder delegate) {
         this.delegate = delegate;
-        return this;
-    }
-
-    public ConditionalOrderBuilder withTriggerDirection(TriggerDirection triggerDirection) {
-        this.triggerDirection = triggerDirection;
         return this;
     }
 
@@ -32,7 +26,7 @@ public class ConditionalOrderBuilder implements LazyOrderBuilder {
     }
 
     public ConditionalOrder build() {
-        return new DefaultConditionalOrder(delegate.build(), triggerDirection, thresholdPrice);
+        return new DefaultConditionalOrder(delegate.build(), thresholdPrice);
     }
 
     @Override

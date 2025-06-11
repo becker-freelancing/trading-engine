@@ -1,6 +1,7 @@
 package com.becker.freelance.commons.timeseries;
 
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
@@ -29,13 +30,16 @@ public record TimeSeriesEntry(LocalDateTime time, Decimal openBid, Decimal openA
         return closeBid().subtract(closeAsk());
     }
 
+    public Decimal getClosePriceForDirection(Direction direction) {
+        return switch (direction) {
+            case BUY -> closeAsk();
+            case SELL -> closeBid();
+        };
+    }
+
     @Override
     public String toString() {
         return String.format("TimeSeriesEntry(Time: %s, Pair: %s, Open: %f, High: %f, Low: %f, Close: %f, Volume: %f, Trades: %f)",
                 time, pair.technicalName(), openAsk, highAsk, lowAsk, closeAsk, volume, trades);
-    }
-
-    public boolean isGreenCandle() {
-        return getCloseMid().isGreaterThan(getOpenMid());
     }
 }

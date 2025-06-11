@@ -127,6 +127,10 @@ public class DemoTradeExecutor extends TradeExecutor {
         // Try Execution Pending Positions wich are not opened, e.g.  due to Limit Open Orders
         List<Position> remainingPositionsToExecute = new ArrayList<>();
         for (Position positionToExecute : positionsToExecuteBuffer) {
+            if (true) {
+                //TODO: Wann sollen Orders aus dem Buffer rausgenomen werden?
+                throw new UnsupportedOperationException("Muss noch gecheckt werden");
+            }
             if (positionToExecute.getOpenOrder().canBeExecuted(currentPrice)) {
                 internalEntry(currentPrice, positionToExecute);
             } else {

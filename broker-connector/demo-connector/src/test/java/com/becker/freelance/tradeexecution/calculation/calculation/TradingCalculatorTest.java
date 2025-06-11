@@ -31,6 +31,7 @@ public class TradingCalculatorTest {
 
         when(eurUsdRequestor.getEurUsdForTime(any(LocalDateTime.class))).thenReturn(closeEntry);
         when(closeEntry.getCloseMid()).thenReturn(new Decimal("1.0545"));
+        when(closeEntry.getClosePriceForDirection(any())).thenReturn(new Decimal("1.0545"));
     }
 
 
@@ -94,7 +95,7 @@ public class TradingCalculatorTest {
     public void testWithPaxgUsdSize1() {
         TradingCalculator calculator = new TradingCalculatorImpl(eurUsdRequestor);
         LocalDateTime time = LocalDateTime.of(2020, 1, 1, 0, 0);
-        when(closeEntry.getCloseMid()).thenReturn(new Decimal("0.9875"));
+        when(closeEntry.getClosePriceForDirection(any())).thenReturn(new Decimal("0.9875"));
 
         Position position = getPosition(new Decimal("2601.05"), PairMock.gldUsd(), Decimal.TEN, Direction.BUY);
         ProfitLossCalculation profitLossResult = calculator.getProfitInEuroWithoutFees(position, new Decimal("2655.2"), time);

@@ -29,7 +29,7 @@ public class TradingCalculatorImpl implements TradingCalculator {
         Decimal diff = currentPrice.subtract(position.getOpenPrice());
         Decimal profitPerPoint = getProfitPerPoint(position.getPair(), position.getSize());
         Decimal profitCounterCurrency = diff.multiply(profitPerPoint).multiply(new Decimal(position.getDirection().getFactor()));
-        Decimal conversionRate = position.getPair().isEuroCounterCurrency() ? Decimal.ONE : eurUsd.getEurUsdForTime(time).getCloseMid();
+        Decimal conversionRate = position.getPair().isEuroCounterCurrency() ? Decimal.ONE : eurUsd.getEurUsdForTime(time).getClosePriceForDirection(position.getDirection());
         Decimal profitEuro = profitCounterCurrency.divide(conversionRate).round(2);
         return new ProfitLossCalculation(conversionRate, profitEuro, currentPrice);
     }

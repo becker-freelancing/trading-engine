@@ -128,8 +128,8 @@ final class DefaultLimitOrder implements LimitOrder {
 
     private boolean isLimitPriceReached(TimeSeriesEntry currentPrice) {
         return switch (getDirection()) {
-            case BUY -> currentPrice.getCloseMid().isLessThanOrEqualTo(getOrderPrice());
-            case SELL -> currentPrice.getCloseMid().isGreaterThanOrEqualTo(getOrderPrice());
+            case BUY -> currentPrice.getClosePriceForDirection(direction()).isLessThanOrEqualTo(getOrderPrice());
+            case SELL -> currentPrice.getClosePriceForDirection(direction()).isGreaterThanOrEqualTo(getOrderPrice());
         };
     }
 

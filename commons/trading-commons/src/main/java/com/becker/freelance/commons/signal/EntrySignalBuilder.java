@@ -132,10 +132,10 @@ public class EntrySignalBuilder {
             if (stopLevel.isGreaterThan(limitLevel)) {
                 throw new IllegalStateException("Stop Level must be less than Limit Level for BUY-Positions");
             }
-            if (stopLevel.isGreaterThan(currentPrice.getCloseMid())) {
+            if (stopLevel.isGreaterThan(currentPrice.getClosePriceForDirection(Direction.BUY))) {
                 throw new IllegalStateException("Stop Level must be less than the current price for BUY-Positions");
             }
-            if (limitLevel.isLessThan(currentPrice.getCloseMid())) {
+            if (limitLevel.isLessThan(currentPrice.getClosePriceForDirection(Direction.BUY))) {
                 throw new IllegalStateException("Limit Level must be greater than the current price for BUY-Positions");
             }
         }
@@ -143,10 +143,10 @@ public class EntrySignalBuilder {
             if (stopLevel.isLessThan(limitLevel)) {
                 throw new IllegalStateException("Stop Level must be greater than Limit Level for SELL-Positions");
             }
-            if (stopLevel.isLessThan(currentPrice.getCloseMid())) {
+            if (stopLevel.isLessThan(currentPrice.getClosePriceForDirection(Direction.SELL))) {
                 throw new IllegalStateException("Stop Level must be greater than the current price for SELL-Positions");
             }
-            if (limitLevel.isGreaterThan(currentPrice.getCloseMid())) {
+            if (limitLevel.isGreaterThan(currentPrice.getClosePriceForDirection(Direction.SELL))) {
                 throw new IllegalStateException("Limit Level must be less than the current price for SELL-Positions");
             }
         }
