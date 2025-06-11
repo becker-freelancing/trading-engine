@@ -106,6 +106,7 @@ public class DemoTradeExecutor extends TradeExecutor {
     private void internalEntry(TimeSeriesEntry currentPrice, Position position) {
         position.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult openPositionsResult = positionCalculation.openPosition(currentPrice, openPositions, position, wallet.get());
+
         openPositions = openPositionsResult.positions();
         closedTrades.addAll(openPositionsResult.trades());
     }

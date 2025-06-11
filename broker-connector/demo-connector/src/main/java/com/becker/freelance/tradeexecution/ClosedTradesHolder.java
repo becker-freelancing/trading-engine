@@ -4,24 +4,28 @@ import com.becker.freelance.commons.trade.Trade;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ClosedTradesHolder {
 
-    private final NavigableSet<Trade> trades;
+    private final NavigableMap<LocalDateTime, List<Trade>> trades;
 
     public ClosedTradesHolder() {
-        trades = new TreeSet<>();
+        trades = new TreeMap<>();
     }
 
     public void addTrade(Trade trade) {
-        trades.add(trade);
+        trades.computeIfAbsent(trade.getCloseTime(), k -> new ArrayList<>())
+                .add(trade);
     }
 
     public Set<Trade> getTradesInRange(LocalDateTime start, LocalDateTime end) {
-        SearchTrade startSearchTrade = new SearchTrade(start);
-        SearchTrade endSearchTrade = new SearchTrade(end);
 
-        return trades.subSet(startSearchTrade, false, endSearchTrade, true);
+        return trades.subMap(start, true, end, true)
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 
     public void addAll(List<Trade> trades) {
@@ -29,15 +33,10 @@ public class ClosedTradesHolder {
     }
 
     public List<Trade> toList() {
-        return trades.stream()
-                .sorted(Comparator.comparing(Trade::getCloseTime))
+        return trades
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
                 .toList();
-    }
-
-    private static class SearchTrade extends Trade {
-
-        SearchTrade(LocalDateTime start) {
-            super(null, null, start, null, null, null, null, null, null, null, null, null, null, null);
-        }
     }
 }
