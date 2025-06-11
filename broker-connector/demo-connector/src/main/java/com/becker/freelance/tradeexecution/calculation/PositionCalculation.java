@@ -246,8 +246,8 @@ public class PositionCalculation {
 
     private Decimal currentLimitPrice(Position position, TimeSeriesEntry currentPrice) {
         return switch (position.getDirection()) {
-            case BUY -> currentPrice.closeBid().max(currentPrice.highBid());
-            case SELL -> currentPrice.closeAsk().min(currentPrice.lowAsk());
+            case BUY -> currentPrice.highBid();
+            case SELL -> currentPrice.lowAsk();
         };
     }
 
