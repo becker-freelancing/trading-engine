@@ -1,5 +1,7 @@
 package com.becker.freelance.capital.trades;
 
+import com.becker.freelance.commons.order.LazyOrder;
+import com.becker.freelance.commons.order.Order;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
@@ -20,6 +22,11 @@ class CapitalPosition implements StopLimitPosition {
         this.position = positionResponse;
     }
 
+
+    @Override
+    public Order getOpenOrder() {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 
     @Override
     public Decimal getSize() {
@@ -57,13 +64,13 @@ class CapitalPosition implements StopLimitPosition {
     }
 
     @Override
-    public Decimal getStopLevel() {
-        throw new UnsupportedOperationException("Stop Level is not requestable on Capital Remote position yet.");
+    public LazyOrder getStopOrder() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public Decimal getLimitLevel() {
-        throw new UnsupportedOperationException("Limit Level is not requestable on Capital Remote position yet.");
+    public LazyOrder getLimitOrder() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -82,7 +89,7 @@ class CapitalPosition implements StopLimitPosition {
     }
 
     @Override
-    public boolean isCloseTaker() {
+    public boolean isAnyCloseTaker() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 

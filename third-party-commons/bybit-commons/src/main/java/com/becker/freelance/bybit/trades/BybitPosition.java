@@ -1,5 +1,7 @@
 package com.becker.freelance.bybit.trades;
 
+import com.becker.freelance.commons.order.LazyOrder;
+import com.becker.freelance.commons.order.Order;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
@@ -18,6 +20,11 @@ class BybitPosition implements StopLimitPosition {
         this.position = positionResponse;
     }
 
+
+    @Override
+    public Order getOpenOrder() {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 
     @Override
     public Decimal getSize() {
@@ -55,19 +62,20 @@ class BybitPosition implements StopLimitPosition {
     }
 
     @Override
-    public Decimal getStopLevel() {
-        return position.stopLevel();
+    public LazyOrder getStopOrder() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public Decimal getLimitLevel() {
-        return position.limitLevel();
+    public LazyOrder getLimitOrder() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public Decimal getOpenFee() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
+
 
     @Override
     public PositionBehaviour getPositionType() {
@@ -80,7 +88,7 @@ class BybitPosition implements StopLimitPosition {
     }
 
     @Override
-    public boolean isCloseTaker() {
+    public boolean isAnyCloseTaker() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 

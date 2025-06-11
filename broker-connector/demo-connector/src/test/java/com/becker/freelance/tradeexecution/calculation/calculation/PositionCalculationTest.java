@@ -1,11 +1,14 @@
 package com.becker.freelance.tradeexecution.calculation.calculation;
 
 import com.becker.freelance.commons.calculation.*;
+import com.becker.freelance.commons.order.OrderBuilder;
+import com.becker.freelance.commons.order.TriggerDirection;
+import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.position.PositionBehaviour;
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
-import com.becker.freelance.commons.signal.EntrySignalFactory;
+import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
@@ -27,7 +30,7 @@ import static org.mockito.Mockito.*;
 
 class PositionCalculationTest {
 
-    static final Decimal MARGIN_PER_POSITION = new Decimal("333.00");
+    static final Decimal MARGIN_PER_POSITION = new Decimal("475.71");
 
     static LocalDateTime currentTime = LocalDateTime.of(2020, 1, 1, 0, 0, 0);
 
@@ -47,7 +50,6 @@ class PositionCalculationTest {
     private Position sellPosition;
     private Position sellPosition2;
     private Position sellPosition3;
-    private EntrySignalFactory entrySignalFactory;
     private DemoPositionFactory demoPositionFactory;
     private TimeSeriesEntry entryForMarginCalculation;
 
@@ -90,19 +92,64 @@ class PositionCalculationTest {
         doCallRealMethod().when(tradingFeeCalculator).calculateTradingFeeInCounterCurrency(any(), any());
         positionCalculation = new PositionCalculation(tradingCalculator, tradingFeeCalculator);
 
-        entrySignalFactory = new EntrySignalFactory(tradingCalculator);
-        demoPositionFactory = new DemoPositionFactory(eurUsdRequestor, tradingFeeCalculator);
-        buyPosition = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromLevel(new Decimal("1"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
-        sellPosition = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromLevel(new Decimal("1"), Direction.SELL, new Decimal("15"), new Decimal("3"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
-        buyPosition2 = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromLevel(new Decimal("2"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
-        sellPosition2 = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromLevel(new Decimal("2"), Direction.SELL, new Decimal("15"), new Decimal("3"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
-        buyPosition3 = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromLevel(new Decimal("3"), Direction.BUY, new Decimal("5"), new Decimal("17"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
-        sellPosition3 = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromLevel(new Decimal("3"), Direction.SELL, new Decimal("15"), new Decimal("3"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
+        demoPositionFactory = new DemoPositionFactory(eurUsdRequestor, tradingFeeCalculator, marginCalculator);
+        buyPosition = demoPositionFactory.createStopLimitPosition(new EntrySignalBuilder()
+                .withOpenOrder(OrderBuilder.getInstance().withPair(PairMock.eurUsd()).withDirection(Direction.BUY).withSize(Decimal.ONE).asMarketOrder())
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("3"))).withThresholdPrice(new Decimal("3")).withTriggerDirection(TriggerDirection.DOWN_CROSS))
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("17")))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .build());
+
+        buyPosition2 = demoPositionFactory.createStopLimitPosition(new EntrySignalBuilder()
+                .withOpenOrder(OrderBuilder.getInstance().withPair(PairMock.eurUsd()).withDirection(Direction.BUY).withSize(Decimal.TWO).asMarketOrder())
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("15")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("5"))).withThresholdPrice(new Decimal("5")).withTriggerDirection(TriggerDirection.DOWN_CROSS))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .build());
+
+
+        buyPosition3 = demoPositionFactory.createStopLimitPosition(new EntrySignalBuilder()
+                .withOpenOrder(OrderBuilder.getInstance().withPair(PairMock.eurUsd()).withDirection(Direction.BUY).withSize(new Decimal("3")).asMarketOrder())
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("17"))).withThresholdPrice(new Decimal("17")).withTriggerDirection(TriggerDirection.DOWN_CROSS))
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("5")))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .build());
+
+
+        sellPosition = demoPositionFactory.createStopLimitPosition(new EntrySignalBuilder()
+                .withOpenOrder(OrderBuilder.getInstance().withPair(PairMock.eurUsd()).withDirection(Direction.SELL).withSize(Decimal.ONE).asMarketOrder())
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("15"))).withThresholdPrice(new Decimal("15")).withTriggerDirection(TriggerDirection.UP_CROSS))
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("3")))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .build());
+
+
+        sellPosition2 = demoPositionFactory.createStopLimitPosition(new EntrySignalBuilder()
+                .withOpenOrder(OrderBuilder.getInstance().withPair(PairMock.eurUsd()).withDirection(Direction.SELL).withSize(Decimal.TWO).asMarketOrder())
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("3"))).withThresholdPrice(new Decimal("3")).withTriggerDirection(TriggerDirection.UP_CROSS))
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("15")))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .build());
+
+
+        sellPosition3 = demoPositionFactory.createStopLimitPosition(new EntrySignalBuilder()
+                .withOpenOrder(OrderBuilder.getInstance().withPair(PairMock.eurUsd()).withDirection(Direction.SELL).withSize(new Decimal("3")).asMarketOrder())
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("15"))).withThresholdPrice(new Decimal("15")).withTriggerDirection(TriggerDirection.UP_CROSS))
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("3")))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .build());
 
     }
 
     @Test
     void openSingleBuy() {
+        buyPosition.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, List.of(), buyPosition, wallet);
 
         List<Position> positions = positionCalculationResult.positions();
@@ -115,11 +162,12 @@ class PositionCalculationTest {
         assertEquals(Direction.BUY, position.getDirection());
         assertEquals(new Decimal("1"), position.getSize());
 
-        assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
+        assertMargin(MARGIN_PER_POSITION, wallet.getMargin());
     }
 
     @Test
     void openSingleSell() {
+        sellPosition.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, List.of(), sellPosition, wallet);
 
         List<Position> positions = positionCalculationResult.positions();
@@ -132,11 +180,13 @@ class PositionCalculationTest {
         assertEquals(Direction.SELL, position.getDirection());
         assertEquals(new Decimal("1"), position.getSize());
 
-        assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
+        assertMargin(MARGIN_PER_POSITION, wallet.getMargin());
     }
 
     @Test
     void openSecondBuy() {
+        buyPosition.getOpenOrder().executeIfPossible(currentPrice);
+        buyPosition2.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult preResult = positionCalculation.openPosition(currentPrice, List.of(), buyPosition, wallet);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, preResult.positions(), buyPosition2, wallet);
 
@@ -153,11 +203,13 @@ class PositionCalculationTest {
         assertEquals(Direction.BUY, position2.getDirection());
         assertEquals(new Decimal("2"), position2.getSize());
 
-        assertEquals(MARGIN_PER_POSITION.multiply(new Decimal("3")), wallet.getMargin());
+        assertMargin(MARGIN_PER_POSITION.multiply(new Decimal("3")), wallet.getMargin());
     }
 
     @Test
     void openSecondSell() {
+        sellPosition.getOpenOrder().executeIfPossible(currentPrice);
+        sellPosition2.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult preResult = positionCalculation.openPosition(currentPrice, List.of(), sellPosition, wallet);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, preResult.positions(), sellPosition2, wallet);
 
@@ -174,11 +226,13 @@ class PositionCalculationTest {
         assertEquals(Direction.SELL, position2.getDirection());
         assertEquals(new Decimal("2"), position2.getSize());
 
-        assertEquals(MARGIN_PER_POSITION.multiply(new Decimal("3")), wallet.getMargin());
+        assertMargin(MARGIN_PER_POSITION.multiply(new Decimal("3")), wallet.getMargin());
     }
 
     @Test
     void openSellWithBiggerExistingBuy() {
+        buyPosition2.getOpenOrder().executeIfPossible(currentPrice);
+        sellPosition.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult preResult = positionCalculation.openPosition(currentPrice, List.of(), buyPosition2, wallet);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, preResult.positions(), sellPosition, wallet);
 
@@ -194,11 +248,13 @@ class PositionCalculationTest {
         assertEquals(Direction.BUY, position.getDirection());
         assertEquals(new Decimal("1"), position.getSize());
 
-        assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
+        assertMargin(MARGIN_PER_POSITION, wallet.getMargin());
     }
 
     @Test
     void openBuyWithBiggerExistingSell() {
+        sellPosition2.getOpenOrder().executeIfPossible(currentPrice);
+        buyPosition.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult preResult = positionCalculation.openPosition(currentPrice, List.of(), sellPosition2, wallet);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, preResult.positions(), buyPosition, wallet);
 
@@ -214,11 +270,13 @@ class PositionCalculationTest {
         assertEquals(Direction.SELL, position.getDirection());
         assertEquals(new Decimal("1"), position.getSize());
 
-        assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
+        assertMargin(MARGIN_PER_POSITION, wallet.getMargin());
     }
 
     @Test
     void openSellWithSmallerExistingBuy() {
+        buyPosition.getOpenOrder().executeIfPossible(currentPrice);
+        sellPosition2.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult preResult = positionCalculation.openPosition(currentPrice, List.of(), buyPosition, wallet);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, preResult.positions(), sellPosition2, wallet);
 
@@ -234,11 +292,13 @@ class PositionCalculationTest {
         assertEquals(Direction.SELL, position.getDirection());
         assertEquals(new Decimal("1"), position.getSize());
 
-        assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
+        assertMargin(MARGIN_PER_POSITION, wallet.getMargin());
     }
 
     @Test
     void openBuyWithSmallerExistingSell() {
+        sellPosition.getOpenOrder().executeIfPossible(currentPrice);
+        buyPosition2.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult preResult = positionCalculation.openPosition(currentPrice, List.of(), sellPosition, wallet);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, preResult.positions(), buyPosition2, wallet);
 
@@ -254,12 +314,14 @@ class PositionCalculationTest {
         assertEquals(Direction.BUY, position.getDirection());
         assertEquals(new Decimal("1"), position.getSize());
 
-        assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
+        assertMargin(MARGIN_PER_POSITION, wallet.getMargin());
     }
 
 
     @Test
     void openSellWithSameExistingBuy() {
+        buyPosition.getOpenOrder().executeIfPossible(currentPrice);
+        sellPosition.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult preResult = positionCalculation.openPosition(currentPrice, List.of(), buyPosition, wallet);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, preResult.positions(), sellPosition, wallet);
 
@@ -278,6 +340,8 @@ class PositionCalculationTest {
 
     @Test
     void openBuyWithSameExistingSell() {
+        sellPosition.getOpenOrder().executeIfPossible(currentPrice);
+        buyPosition.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult preResult = positionCalculation.openPosition(currentPrice, List.of(), sellPosition, wallet);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, preResult.positions(), buyPosition, wallet);
 
@@ -296,6 +360,9 @@ class PositionCalculationTest {
 
     @Test
     void openSellWithMultipleBiggerBuy() {
+        buyPosition.getOpenOrder().executeIfPossible(currentPrice);
+        buyPosition2.getOpenOrder().executeIfPossible(currentPrice);
+        sellPosition2.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult preResult = positionCalculation.openPosition(currentPrice, List.of(), buyPosition, wallet);
         PositionCalculationResult preResult2 = positionCalculation.openPosition(currentPrice, preResult.positions(), buyPosition2, wallet);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, preResult2.positions(), sellPosition2, wallet);
@@ -316,12 +383,15 @@ class PositionCalculationTest {
         assertEquals(Direction.BUY, position.getDirection());
         assertEquals(new Decimal("1"), position.getSize());
 
-        assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
+        assertMargin(MARGIN_PER_POSITION, wallet.getMargin());
     }
 
 
     @Test
     void openBuyWithMultipleBiggerSell() {
+        sellPosition.getOpenOrder().executeIfPossible(currentPrice);
+        sellPosition2.getOpenOrder().executeIfPossible(currentPrice);
+        buyPosition2.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult preResult = positionCalculation.openPosition(currentPrice, List.of(), sellPosition, wallet);
         PositionCalculationResult preResult2 = positionCalculation.openPosition(currentPrice, preResult.positions(), sellPosition2, wallet);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, preResult2.positions(), buyPosition2, wallet);
@@ -342,12 +412,14 @@ class PositionCalculationTest {
         assertEquals(Direction.SELL, position.getDirection());
         assertEquals(new Decimal("1"), position.getSize());
 
-        assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
+        assertMargin(MARGIN_PER_POSITION, wallet.getMargin());
     }
 
 
     @Test
     void openSellWithMultipleSmallerBuy() {
+        buyPosition.getOpenOrder().executeIfPossible(currentPrice);
+        sellPosition3.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult preResult = positionCalculation.openPosition(currentPrice, List.of(), buyPosition, wallet);
         PositionCalculationResult preResult2 = positionCalculation.openPosition(currentPrice, preResult.positions(), buyPosition, wallet);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, preResult2.positions(), sellPosition3, wallet);
@@ -368,12 +440,14 @@ class PositionCalculationTest {
         assertEquals(Direction.SELL, position.getDirection());
         assertEquals(new Decimal("1"), position.getSize());
 
-        assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
+        assertMargin(MARGIN_PER_POSITION, wallet.getMargin());
     }
 
 
     @Test
     void openBuyWithMultipleSmallerSell() {
+        sellPosition.getOpenOrder().executeIfPossible(currentPrice);
+        buyPosition3.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult preResult = positionCalculation.openPosition(currentPrice, List.of(), sellPosition, wallet);
         PositionCalculationResult preResult2 = positionCalculation.openPosition(currentPrice, preResult.positions(), sellPosition, wallet);
         wallet.adjustAmount(Decimal.DOUBLE_MAX);
@@ -395,12 +469,14 @@ class PositionCalculationTest {
         assertEquals(Direction.BUY, position.getDirection());
         assertEquals(new Decimal("1"), position.getSize());
 
-        assertEquals(MARGIN_PER_POSITION, wallet.getMargin());
+        assertMargin(MARGIN_PER_POSITION, wallet.getMargin());
     }
 
 
     @Test
     void openSellWithMultipleSameBuy() {
+        buyPosition.getOpenOrder().executeIfPossible(currentPrice);
+        sellPosition2.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult preResult = positionCalculation.openPosition(currentPrice, List.of(), buyPosition, wallet);
         PositionCalculationResult preResult2 = positionCalculation.openPosition(currentPrice, preResult.positions(), buyPosition, wallet);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, preResult2.positions(), sellPosition2, wallet);
@@ -424,6 +500,8 @@ class PositionCalculationTest {
 
     @Test
     void openBuyWithMultipleSameSell() {
+        sellPosition.getOpenOrder().executeIfPossible(currentPrice);
+        buyPosition2.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult preResult = positionCalculation.openPosition(currentPrice, List.of(), sellPosition, wallet);
         PositionCalculationResult preResult2 = positionCalculation.openPosition(currentPrice, preResult.positions(), sellPosition, wallet);
         PositionCalculationResult positionCalculationResult = positionCalculation.openPosition(currentPrice, preResult2.positions(), buyPosition2, wallet);
@@ -447,10 +525,39 @@ class PositionCalculationTest {
     @Test
     void closePositionIfSlOrTpReached() {
         doReturn(Decimal.ZERO).when(entryForMarginCalculation).getCloseSpread();
-        Position position1 = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromAmount(new Decimal("1."), Direction.BUY, new Decimal("1"), new Decimal("1"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
-        Position position2 = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromAmount(new Decimal("1."), Direction.SELL, new Decimal("6900000"), new Decimal("6900000"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
-        Position position3 = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromAmount(new Decimal("1."), Direction.BUY, new Decimal("20"), new Decimal("20"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
-        wallet.addMargin(MARGIN_PER_POSITION.multiply(3));
+
+        Pair pair = PairMock.eurUsd();
+        Position position1 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
+                .withOpenOrder(OrderBuilder.getInstance().withSize(Decimal.ONE).withDirection(Direction.BUY).withPair(pair).asMarketOrder())
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.4")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1"))).withTriggerDirection(TriggerDirection.DOWN_CROSS).withThresholdPrice(new Decimal("1")))
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .build());
+
+        Position position2 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
+                .withOpenOrder(OrderBuilder.getInstance().withSize(Decimal.ONE).withDirection(Direction.SELL).withPair(pair).asMarketOrder())
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("0.1")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("100"))).withTriggerDirection(TriggerDirection.UP_CROSS).withThresholdPrice(new Decimal("100")))
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .build());
+
+        Position position3 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
+                .withOpenOrder(OrderBuilder.getInstance().withSize(Decimal.ONE).withDirection(Direction.BUY).withPair(pair).asMarketOrder())
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.5")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.2"))).withTriggerDirection(TriggerDirection.DOWN_CROSS).withThresholdPrice(new Decimal("1.2")))
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .build());
+
+        position1.getOpenOrder().executeIfPossible(entryForMarginCalculation);
+        position2.getOpenOrder().executeIfPossible(entryForMarginCalculation);
+        position3.getOpenOrder().executeIfPossible(entryForMarginCalculation);
+
+        Decimal marginPerPosition = new Decimal("333.00");
+
+        wallet.addMargin(marginPerPosition.multiply(3));
         when(currentPrice.lowBid()).thenReturn(new Decimal("1.6"));
         when(currentPrice.lowAsk()).thenReturn(new Decimal("1.6"));
         when(currentPrice.highAsk()).thenReturn(new Decimal("1.6"));
@@ -462,39 +569,101 @@ class PositionCalculationTest {
 
         assertEquals(2, calculationResult.trades().size());
         assertEquals(1, calculationResult.positions().size());
-        assertEquals(new Decimal("9999989.00"), wallet.getAmount());
-        assertEquals(new Decimal(MARGIN_PER_POSITION.multiply(1)), wallet.getMargin());
+        assertEquals(new Decimal("8414277.71"), wallet.getAmount());
+        assertEquals(new Decimal(marginPerPosition.multiply(1)), wallet.getMargin());
     }
 
     @Test
     void closeAllBuyPositions() {
         doReturn(Decimal.ZERO).when(entryForMarginCalculation).getCloseSpread();
-        Position position1 = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromDistance(new Decimal("1.0"), Direction.BUY, new Decimal("1"), new Decimal("1"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
-        Position position2 = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromDistance(new Decimal("2.0"), Direction.SELL, new Decimal("1"), new Decimal("1"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
-        Position position3 = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromDistance(new Decimal("3.0"), Direction.BUY, new Decimal("6.9"), new Decimal("6.9"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
-        wallet.addMargin(new Decimal(MARGIN_PER_POSITION.multiply(6)));
+        Pair pair = PairMock.eurUsd();
+
+        Position position1 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
+                .withOpenOrder(OrderBuilder.getInstance().withSize(Decimal.ONE).withDirection(Direction.BUY).withPair(pair).asMarketOrder().asMarketOrder())
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.4")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1"))).withTriggerDirection(TriggerDirection.DOWN_CROSS).withThresholdPrice(new Decimal("1")))
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .build());
+
+        Position position2 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
+                .withOpenOrder(OrderBuilder.getInstance().withSize(new Decimal("2")).withDirection(Direction.SELL).withPair(pair).asMarketOrder())
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("0.1")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("100"))).withTriggerDirection(TriggerDirection.UP_CROSS).withThresholdPrice(new Decimal("100")))
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .build());
+
+        Position position3 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
+                .withOpenOrder(OrderBuilder.getInstance().withSize(new Decimal("3")).withDirection(Direction.BUY).withPair(pair).asMarketOrder())
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.5")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.2"))).withTriggerDirection(TriggerDirection.DOWN_CROSS).withThresholdPrice(new Decimal("1.2")))
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .build());
+
+        position1.getOpenOrder().executeIfPossible(entryForMarginCalculation);
+        position2.getOpenOrder().executeIfPossible(entryForMarginCalculation);
+        position3.getOpenOrder().executeIfPossible(entryForMarginCalculation);
+
+        Decimal marginPerPosition = new Decimal("333.00");
+
+        wallet.addMargin(new Decimal(marginPerPosition.multiply(6)));
 
         PositionCalculationResult calculationResult = positionCalculation.closeAllBuyPositions(currentPrice, List.of(position1, position2, position3), wallet);
 
         assertEquals(2, calculationResult.trades().size());
         assertEquals(1, calculationResult.positions().size());
         assertEquals(new Decimal("11714277.72"), wallet.getAmount());
-        assertEquals(MARGIN_PER_POSITION.multiply(2), wallet.getMargin());
+        assertMargin(marginPerPosition.multiply(2), wallet.getMargin());
     }
 
     @Test
     void closeAllSellPositions() {
         doReturn(Decimal.ZERO).when(entryForMarginCalculation).getCloseSpread();
-        Position position1 = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromDistance(new Decimal("1.0"), Direction.BUY, new Decimal("1"), new Decimal("1"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
-        Position position2 = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromDistance(new Decimal("2.0"), Direction.SELL, new Decimal("1"), new Decimal("1"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
-        Position position3 = demoPositionFactory.createStopLimitPosition(entrySignalFactory.fromDistance(new Decimal("3.0"), Direction.BUY, new Decimal("6.9"), new Decimal("6.9"), PositionBehaviour.HARD_LIMIT, entryForMarginCalculation, mock(TradeableQuantilMarketRegime.class)));
-        wallet.addMargin(MARGIN_PER_POSITION.multiply(6));
+        Pair pair = PairMock.eurUsd();
+
+        Position position1 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
+                .withOpenOrder(OrderBuilder.getInstance().withSize(Decimal.ONE).withDirection(Direction.BUY).withPair(pair).asMarketOrder())
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.4")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1"))).withTriggerDirection(TriggerDirection.DOWN_CROSS).withThresholdPrice(new Decimal("1")))
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .build());
+
+        Position position2 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
+                .withOpenOrder(OrderBuilder.getInstance().withSize(new Decimal("2")).withDirection(Direction.SELL).withPair(pair).asMarketOrder())
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("0.1")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("100"))).withTriggerDirection(TriggerDirection.UP_CROSS).withThresholdPrice(new Decimal("100")))
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .build());
+
+        Position position3 = demoPositionFactory.createStopLimitPosition(EntrySignalBuilder.getInstance()
+                .withOpenOrder(OrderBuilder.getInstance().withSize(new Decimal("3")).withDirection(Direction.BUY).withPair(pair).asMarketOrder())
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.5")))
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.2"))).withTriggerDirection(TriggerDirection.DOWN_CROSS).withThresholdPrice(new Decimal("1.2")))
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .withPositionBehaviour(PositionBehaviour.HARD_LIMIT)
+                .build());
+
+
+        position1.getOpenOrder().executeIfPossible(entryForMarginCalculation);
+        position2.getOpenOrder().executeIfPossible(entryForMarginCalculation);
+        position3.getOpenOrder().executeIfPossible(entryForMarginCalculation);
+
+        Decimal marginPerPosition = new Decimal("333.00");
+        wallet.addMargin(marginPerPosition.multiply(6));
 
         PositionCalculationResult calculationResult = positionCalculation.closeAllSellPositions(currentPrice, List.of(position1, position2, position3), wallet);
 
         assertEquals(1, calculationResult.trades().size());
         assertEquals(2, calculationResult.positions().size());
         assertEquals(new Decimal("9142853.14"), wallet.getAmount());
-        assertEquals(MARGIN_PER_POSITION.multiply(4), wallet.getMargin());
+        assertMargin(marginPerPosition.multiply(4), wallet.getMargin());
+    }
+
+    void assertMargin(Decimal expected, Decimal actual) {
+        assertEquals(expected.round(1), actual.round(1));
     }
 }

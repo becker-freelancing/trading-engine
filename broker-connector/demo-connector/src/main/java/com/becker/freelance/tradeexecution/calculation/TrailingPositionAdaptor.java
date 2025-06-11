@@ -8,7 +8,7 @@ import com.becker.freelance.math.Decimal;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PositionAdaptor {
+public class TrailingPositionAdaptor {
 
     public List<Position> adapt(TimeSeriesEntry entry, List<Position> positions) {
         return new ArrayList<>(positions.stream().map(position -> adapt(entry, position)).toList());
@@ -27,7 +27,7 @@ public class PositionAdaptor {
     private Position adaptSell(TimeSeriesEntry entry, TrailingPosition position) {
         Decimal currentClose = entry.closeBid();
         Decimal stopDistance = position.initialStopLevel().subtract(position.getOpenPrice());
-        Decimal currentStopDistance = position.getStopLevel().subtract(currentClose);
+        Decimal currentStopDistance = position.getStopOrder().getEstimatedExecutionLevel(entry).subtract(currentClose);
 
         if (currentStopDistance.isLessThan(stopDistance)) {
             return position;
@@ -41,7 +41,7 @@ public class PositionAdaptor {
     private Position adaptBuy(TimeSeriesEntry entry, TrailingPosition position) {
         Decimal currentClose = entry.closeAsk();
         Decimal stopDistance = position.getOpenPrice().subtract(position.initialStopLevel());
-        Decimal currentStopDistance = currentClose.subtract(position.getStopLevel());
+        Decimal currentStopDistance = currentClose.subtract(position.getStopOrder().getEstimatedExecutionLevel(entry));
 
         if (currentStopDistance.isLessThan(stopDistance)) {
             return position;

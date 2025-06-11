@@ -51,9 +51,10 @@ public interface TradingFeeCalculator {
 
 
     public default Decimal calculateTradingFeeInCounterCurrency(EntrySignal entrySignal, Decimal size) {
-        if (entrySignal.isOpenTaker()) {
-            return calculateTakerTradingFeeInCounterCurrency(entrySignal.openPrice().getCloseMid(), size);
-        }
-        return calculateMakerTradingFeeInCounterCurrency(entrySignal.openPrice().getCloseMid(), size);
+        throw new UnsupportedOperationException();
+//        if (entrySignal.isOpenTaker()) {
+//            return calculateTakerTradingFeeInCounterCurrency(entrySignal.openPrice().getCloseMid(), size);
+//        }
+//        return calculateMakerTradingFeeInCounterCurrency(entrySignal.openPrice().getCloseMid(), size);
     }
 }

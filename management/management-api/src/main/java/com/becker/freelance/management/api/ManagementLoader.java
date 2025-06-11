@@ -1,6 +1,7 @@
 package com.becker.freelance.management.api;
 
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
+import com.becker.freelance.commons.calculation.PriceRequestor;
 import com.becker.freelance.commons.calculation.TradingFeeCalculator;
 import com.becker.freelance.management.api.adaption.EntrySignalAdaptor;
 import com.becker.freelance.management.api.adaption.EntrySignalAdaptorComposite;
@@ -34,6 +35,7 @@ public class ManagementLoader {
                                                                  OpenPositionRequestor openPositionRequestor,
                                                                  ClosedTradesRequestor closedTradesRequestor,
                                                                  EurUsdRequestor eurUsdRequestor,
+                                                                 PriceRequestor priceRequestor,
                                                                  TradingFeeCalculator tradingFeeCalculator) {
 
         return new FileManagementEnvironmentProvider(accountBalanceRequestor,
@@ -41,6 +43,7 @@ public class ManagementLoader {
                 openPositionRequestor,
                 closedTradesRequestor,
                 eurUsdRequestor,
+                priceRequestor,
                 tradingFeeCalculator);
     }
 

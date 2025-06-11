@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 
 public class Trade implements Comparable<Trade> {
 
+    private String relatedPositionId;
     private LocalDateTime openTime;
     private LocalDateTime closeTime;
     private Pair pair;
@@ -26,9 +27,10 @@ public class Trade implements Comparable<Trade> {
 
     protected Trade(){}
 
-    public Trade(LocalDateTime openTime, LocalDateTime closeTime, Pair pair, Decimal profitInEuroWithFees,
+    public Trade(String relatedPositionId, LocalDateTime openTime, LocalDateTime closeTime, Pair pair, Decimal profitInEuroWithFees,
                  Decimal openLevel, Decimal closeLevel, Decimal openFee, Decimal closeFee, Decimal size, Direction direction,
                  Decimal conversionRate, PositionBehaviour positionBehaviour, TradeableQuantilMarketRegime openMarketRegime) {
+        this.relatedPositionId = relatedPositionId;
         this.openTime = openTime;
         this.closeTime = closeTime;
         this.pair = pair;
@@ -94,6 +96,10 @@ public class Trade implements Comparable<Trade> {
 
     public Decimal getCloseFee() {
         return closeFee;
+    }
+
+    public String getRelatedPositionId() {
+        return relatedPositionId;
     }
 
     @Override

@@ -66,4 +66,8 @@ public class CapitalSubscribableDataProvider extends SubscribableDataProvider im
                 Decimal.ZERO, Decimal.ZERO, marketData.pair());
     }
 
+    @Override
+    public TimeSeriesEntry getPriceForTime(Pair pair, LocalDateTime time) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 }

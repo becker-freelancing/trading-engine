@@ -2,9 +2,10 @@ package com.becker.freelance.engine;
 
 import com.becker.freelance.broker.BrokerRequestor;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
+import com.becker.freelance.commons.calculation.PriceRequestor;
 import com.becker.freelance.commons.calculation.TradingFeeCalculator;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.signal.EntrySignal;
+import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
@@ -37,7 +38,12 @@ public class StrategyEngine {
     private final EntrySignalValidator entrySignalValidator;
     private final ManagementEnvironmentProvider environmentProvider;
 
-    public StrategyEngine(Pair pair, StrategySupplier strategySupplier, TradeExecutor tradeExecutor, EurUsdRequestor eurUsdRequestor, Consumer<TimeChangeListener> timeChangeListenerConsumer) {
+    public StrategyEngine(Pair pair,
+                          StrategySupplier strategySupplier,
+                          TradeExecutor tradeExecutor,
+                          EurUsdRequestor eurUsdRequestor,
+                          PriceRequestor priceRequestor,
+                          Consumer<TimeChangeListener> timeChangeListenerConsumer) {
         this.tradeExecutor = tradeExecutor;
         ManagementLoader managementLoader = new ManagementLoader();
         this.entrySignalAdaptor = managementLoader.findEntrySignalAdaptor();
@@ -46,7 +52,9 @@ public class StrategyEngine {
         this.environmentProvider = managementLoader.findEnvironmentProvider(
                 brokerRequestor, brokerRequestor,
                 tradeExecutor, tradeExecutor,
-                eurUsdRequestor, TradingFeeCalculator.fromConfigFile()
+                eurUsdRequestor,
+                priceRequestor,
+                TradingFeeCalculator.fromConfigFile()
         );
         timeChangeListenerConsumer.accept(this.environmentProvider);
         this.strategy = strategySupplier.get(pair, brokerRequestor.getTradingCalculator(eurUsdRequestor));
@@ -63,7 +71,7 @@ public class StrategyEngine {
             shouldExit(new DefaultExitExecutionParameter(timeSeries, time, currentPrice), strategy);
             shouldEnter(new DefaultEntryExecutionParameter(timeSeries, time, currentPrice), strategy);
         } catch (Exception e) {
-            logger.error("Error while executing Strategy {}", strategy.getClass().getName(), e);
+            logger.error("Error while executing Strategy " + strategy.getClass().getName(), e);
         }
     }
 
@@ -72,9 +80,10 @@ public class StrategyEngine {
     }
 
     private void shouldEnter(EntryExecutionParameter entryParameter, TradingStrategy strategy) {
-        Optional<EntrySignal> entrySignal = strategy.shouldEnter(entryParameter);
+        Optional<EntrySignalBuilder> entrySignal = strategy.shouldEnter(entryParameter);
         entrySignal
                 .map(signal -> entrySignalAdaptor.adapt(environmentProvider, signal))
+                .map(builder -> builder.buildValidated(entryParameter.currentPrice()))
                 .filter(signal -> entrySignalValidator.isValidToExecute(environmentProvider, signal))
                 .ifPresent(signal -> tradeExecutor.entry(entryParameter.currentPrice(), entryParameter.timeSeries(), entryParameter.time(), signal));
     }

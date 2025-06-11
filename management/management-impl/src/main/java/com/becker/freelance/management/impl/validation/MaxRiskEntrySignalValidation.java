@@ -20,7 +20,9 @@ public class MaxRiskEntrySignalValidation implements EntrySignalValidator {
     }
 
     private boolean maxRiskValid(ManagementEnvironmentProvider environmentProvider, EntrySignal entrySignal) {
-        MaxRiskValidatorParams maxRiskValidatorParams = new MaxRiskValidatorParams(entrySignal.size(), entrySignal.stopInPoints(), entrySignal.pair());
+        MaxRiskValidatorParams maxRiskValidatorParams = new MaxRiskValidatorParams(entrySignal.size(),
+                entrySignal.estimatedStopInPoints(environmentProvider.getCurrentPrice(entrySignal.pair())),
+                entrySignal.pair());
         return maxRiskValidator.isValid(environmentProvider, maxRiskValidatorParams);
     }
 

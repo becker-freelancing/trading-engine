@@ -20,7 +20,9 @@ public class ChanceRiskEntrySignalValidation implements EntrySignalValidator {
     }
 
     private boolean chanceRiskValid(ManagementEnvironmentProvider environmentProvider, EntrySignal entrySignal) {
-        ChanceRiskRatioValidatorParams chanceRiskRatioValidatorParams = new ChanceRiskRatioValidatorParams(entrySignal.limitInPoints(), entrySignal.stopInPoints());
+        ChanceRiskRatioValidatorParams chanceRiskRatioValidatorParams = new ChanceRiskRatioValidatorParams(
+                entrySignal.estimatedLimitInPoints(environmentProvider.getCurrentPrice(entrySignal.pair())),
+                entrySignal.estimatedStopInPoints(environmentProvider.getCurrentPrice(entrySignal.pair())));
         return chanceRiskRatioValidator.isValid(environmentProvider, chanceRiskRatioValidatorParams);
     }
 }

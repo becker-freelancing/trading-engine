@@ -1,6 +1,6 @@
 package com.becker.freelance.management.api.adaption;
 
-import com.becker.freelance.commons.signal.EntrySignal;
+import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public class EntrySignalAdaptorComposite implements EntrySignalAdaptor {
     }
 
     @Override
-    public EntrySignal adapt(ManagementEnvironmentProvider environmentProvider, EntrySignal entrySignal) {
+    public EntrySignalBuilder adapt(ManagementEnvironmentProvider environmentProvider, EntrySignalBuilder entrySignal) {
         for (EntrySignalAdaptor adaptor : adaptors) {
             entrySignal = adaptor.adapt(environmentProvider, entrySignal);
         }

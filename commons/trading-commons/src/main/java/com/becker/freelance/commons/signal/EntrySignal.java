@@ -1,65 +1,75 @@
 package com.becker.freelance.commons.signal;
 
+import com.becker.freelance.commons.order.LazyOrder;
+import com.becker.freelance.commons.order.Order;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.PositionBehaviour;
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
-import java.time.LocalDateTime;
-
 public interface EntrySignal {
 
-    public static Decimal getOpenPriceForDirection(Direction direction, TimeSeriesEntry openPrice) {
-        return switch (direction) {
-            case SELL -> openPrice.closeBid();
-            case BUY -> openPrice.closeAsk();
-        };
-    }
+    public Order getOpenOrder();
 
-    public Decimal size();
+    public LazyOrder getStopOrder();
 
-    public Direction direction();
+    public LazyOrder getLimitOrder();
 
-    public Pair pair();
-
-    public TimeSeriesEntry openPrice();
-
-    public PositionBehaviour positionBehaviour();
+    public PositionBehaviour getPositionBehaviour();
 
     public TradeableQuantilMarketRegime openMarketRegime();
 
-    public default Decimal getOpenPriceForDirection() {
-        return getOpenPriceForDirection(direction(), openPrice());
-    }
-
-    public default LocalDateTime getOpenTime() {
-        return openPrice().time();
-    }
-
-
     public default boolean isOpenTaker() {
-        return true;
+        return getOpenOrder().isMarketOrder();
     }
 
-    public default boolean isCloseTaker() {
-        return true;
+    public default Decimal size() {
+        return getOpenOrder().getSize();
     }
 
-    public Decimal stopLevel();
-
-    public Decimal limitLevel();
-
-    public default Decimal stopInPoints() {
-        return getOpenPriceForDirection().subtract(stopLevel()).abs();
+    public default void setSize(Decimal size) {
+        getOpenOrder().setSize(size);
+        getStopOrder().setSize(size);
+        getLimitOrder().setSize(size);
     }
 
-    public default Decimal limitInPoints() {
-        return getOpenPriceForDirection().subtract(limitLevel()).abs();
+    default Pair pair() {
+        return getOpenOrder().getPair();
     }
 
-    default Decimal targetProfit() {
-        return getOpenPriceForDirection().subtract(limitLevel()).abs().multiply(size()).multiply(pair().profitPerPointForOneContract());
+    default Decimal estimatedOpenLevel(TimeSeriesEntry currentPrice) {
+        return getOpenOrder().getEstimatedExecutionLevel(currentPrice);
     }
+
+    default Decimal estimatedStopInPoints(TimeSeriesEntry currentPrice) {
+        return getOpenOrder().getEstimatedExecutionLevel(currentPrice)
+                .subtract(getStopOrder().getEstimatedExecutionLevel(currentPrice))
+                .abs();
+    }
+
+
+    default Decimal estimatedLimitInPoints(TimeSeriesEntry currentPrice) {
+        return getOpenOrder().getEstimatedExecutionLevel(currentPrice)
+                .subtract(getLimitOrder().getEstimatedExecutionLevel(currentPrice))
+                .abs();
+    }
+
+    default Decimal estimatedLimitLevel(TimeSeriesEntry currentPrice) {
+        return getLimitOrder().getEstimatedExecutionLevel(currentPrice);
+    }
+
+    default boolean isOneCloseTaker() {
+        return isStopCloseTaker() || isLimitCloseTaker();
+    }
+
+    default boolean isStopCloseTaker() {
+        return getStopOrder().isMarketOrder();
+    }
+
+    default boolean isLimitCloseTaker() {
+        return getLimitOrder().isMarketOrder();
+    }
+
+    Decimal estimatedTargetProfit(TimeSeriesEntry currentPrice);
 }

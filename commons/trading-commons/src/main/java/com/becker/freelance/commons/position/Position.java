@@ -1,12 +1,17 @@
 package com.becker.freelance.commons.position;
 
+import com.becker.freelance.commons.order.LazyOrder;
+import com.becker.freelance.commons.order.Order;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
 
 public interface Position extends Cloneable {
+
+    public Order getOpenOrder();
 
     public Decimal getSize();
 
@@ -22,9 +27,9 @@ public interface Position extends Cloneable {
 
     public Decimal getMargin();
 
-    public Decimal getStopLevel();
+    public LazyOrder getStopOrder();
 
-    public Decimal getLimitLevel();
+    public LazyOrder getLimitOrder();
 
     public Decimal getOpenFee();
 
@@ -32,7 +37,7 @@ public interface Position extends Cloneable {
 
     public boolean isOpenTaker();
 
-    public boolean isCloseTaker();
+    public boolean isAnyCloseTaker();
 
     public Position clone();
 
@@ -48,5 +53,21 @@ public interface Position extends Cloneable {
         Position clone = clone();
         clone.setSize(size);
         return clone;
+    }
+
+    default Decimal getEstimatedLimitLevel(TimeSeriesEntry currentPrice) {
+        return getLimitOrder().getEstimatedExecutionLevel(currentPrice);
+    }
+
+    default Decimal getEstimatedStopLevel(TimeSeriesEntry currentPrice) {
+        return getStopOrder().getEstimatedExecutionLevel(currentPrice);
+    }
+
+    default Decimal getExecutedStopPrice() {
+        return getStopOrder().executionPrice().orElseThrow(() -> new IllegalStateException("Position is not closed yet"));
+    }
+
+    default Decimal getExecutedLimitPrice() {
+        return getLimitOrder().executionPrice().orElseThrow(() -> new IllegalStateException("Position is not closed yet"));
     }
 }

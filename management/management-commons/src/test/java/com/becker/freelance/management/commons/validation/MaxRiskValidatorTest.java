@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -81,7 +82,7 @@ class MaxRiskValidatorTest {
     ) {
         Position position = mock(Position.class);
         doReturn(pair).when(position).getPair();
-        doReturn(stopLevel).when(position).getStopLevel();
+        doReturn(stopLevel).when(position).getEstimatedStopLevel(any());
         doReturn(openPrice).when(position).getOpenPrice();
         doReturn(size).when(position).getSize();
         return position;

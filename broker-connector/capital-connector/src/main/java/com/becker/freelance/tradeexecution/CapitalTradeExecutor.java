@@ -58,13 +58,14 @@ public class CapitalTradeExecutor extends TradeExecutor {
     @Override
     public void entry(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, EntrySignal entrySignal) {
 
-        tradeController.createPositionStopLimitLevel(
-                entrySignal.direction(),
-                currentPrice.pair(),
-                entrySignal.size(),
-                entrySignal.stopLevel(),
-                entrySignal.limitLevel()
-        );
+        throw new UnsupportedOperationException("Not implemented yet");
+//        tradeController.createPositionStopLimitLevel(
+//                entrySignal.direction(),
+//                currentPrice.pair(),
+//                entrySignal.size(),
+//                entrySignal.stopLevel(),
+//                entrySignal.limitLevel()
+//        );
     }
 
     @Override

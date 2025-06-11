@@ -78,4 +78,9 @@ public class BybitSubscribableDataProvider extends SubscribableDataProvider impl
                 marketData.volume(), Decimal.ZERO, marketData.pair());
     }
 
+    @Override
+    public TimeSeriesEntry getPriceForTime(Pair pair, LocalDateTime time) {
+
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 }

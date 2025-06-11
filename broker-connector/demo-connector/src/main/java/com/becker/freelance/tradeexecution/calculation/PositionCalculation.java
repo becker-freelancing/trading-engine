@@ -13,7 +13,9 @@ import com.becker.freelance.math.Decimal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class PositionCalculation {
 
@@ -31,7 +33,10 @@ public class PositionCalculation {
 
 
     public PositionCalculationResult openPosition(TimeSeriesEntry currentPrice, List<Position> positions, Position position, Wallet wallet) {
-        if (positions.isEmpty()){
+        if (!position.getOpenOrder().isExecuted()) {
+            throw new IllegalStateException("Open Order of Position must be executed first");
+        }
+        if (positions.isEmpty()) {
             return openSinglePosition(position, wallet);
         }
 
@@ -45,7 +50,7 @@ public class PositionCalculation {
     private PositionCalculationResult openSellPosition(TimeSeriesEntry currentPrice, List<Position> positions, Position position, Wallet wallet) {
         Direction existingDirection = positions.get(0).getDirection();
 
-        return switch (existingDirection){
+        return switch (existingDirection) {
             case BUY -> addBuyPositionToSellPositions(currentPrice, positions, position, wallet);
             case SELL -> addSameDirectionPosition(positions, position, wallet);
         };
@@ -55,7 +60,7 @@ public class PositionCalculation {
     private PositionCalculationResult openBuyPosition(TimeSeriesEntry currentPrice, List<Position> positions, Position position, Wallet wallet) {
         Direction existingDirection = positions.get(0).getDirection();
 
-        return switch (existingDirection){
+        return switch (existingDirection) {
             case BUY -> addSameDirectionPosition(positions, position, wallet);
             case SELL -> addBuyPositionToSellPositions(currentPrice, positions, position, wallet);
         };
@@ -69,7 +74,7 @@ public class PositionCalculation {
         Position positionToPartlyClose = null;
         for (Position openPosition : new ArrayList<>(positions)) {
             Decimal sizeAfterAdaption = sizeToOpen.subtract(openPosition.getSize());
-            if (sizeAfterAdaption.isEqualToZero()){
+            if (sizeAfterAdaption.isEqualToZero()) {
                 positionsToClose.add(openPosition);
                 completelyEliminated = true;
                 sizeToOpen = sizeAfterAdaption;
@@ -84,7 +89,7 @@ public class PositionCalculation {
             }
         }
 
-        if (!completelyEliminated && !sizeToOpenEliminated && sizeToOpen.isGreaterThanZero()){
+        if (!completelyEliminated && !sizeToOpenEliminated && sizeToOpen.isGreaterThanZero()) {
             //Close all existing and open new position with remaining size
             return closeAllExistingPositionsAndOpenNewPositionWithRemainingSize(currentPrice, positions, position, wallet, sizeToOpen);
         } else if (completelyEliminated) {
@@ -144,13 +149,13 @@ public class PositionCalculation {
         Decimal exitTradingFee = exitTradingFee(position, closePrice);
         Decimal openFee = position.getOpenFee();
         Decimal profitWithFees = profit.subtract(openFee).subtract(exitTradingFee);
-        return new Trade(position.getOpenTime(), currentPrice.time(), pair, profitWithFees,
+        return new Trade(position.getId(), position.getOpenTime(), currentPrice.time(), pair, profitWithFees,
                 position.getOpenPrice(), closePrice, openFee, exitTradingFee, position.getSize(), position.getDirection(),
                 conversionRate, position.getPositionType(), position.getOpenMarketRegime());
     }
 
     private Decimal exitTradingFee(Position position, Decimal closePrice) {
-        if (position.isCloseTaker()) {
+        if (position.isAnyCloseTaker()) {
             return tradingFeeCalculator.calculateTakerTradingFeeInCounterCurrency(closePrice, position.getSize());
         }
 
@@ -179,34 +184,62 @@ public class PositionCalculation {
         return new PositionCalculationResult(positions, trades);
     }
 
+    private PositionCalculationResult closeSlReachedPositions(TimeSeriesEntry currentPrice, List<Position> openPositions, Wallet wallet) {
+        List<Trade> stopReachedTrades = openPositions.stream()
+                .filter(position -> position.getStopOrder().canBeExecuted(currentPrice))
+                .filter(position -> isStopReached(position, currentPrice))
+                .map(Position::clone)
+                .peek(position -> position.getStopOrder().executeIfPossible(currentPrice))
+                .filter(position -> position.getStopOrder().isExecuted())
+                .peek(position -> wallet.removeMargin(position.getMargin()))
+                .map(position -> toTrade(position, position.getExecutedStopPrice(), currentPrice))
+                .peek(trade -> wallet.adjustAmount(trade.getProfitInEuroWithFees()))
+                .toList();
+
+        Set<String> closedPositionsIds = stopReachedTrades.stream().map(Trade::getRelatedPositionId).collect(Collectors.toSet());
+        List<Position> remainingPositions = openPositions.stream().filter(position -> !closedPositionsIds.contains(position.getId())).toList();
+        return new PositionCalculationResult(remainingPositions, stopReachedTrades);
+    }
+
+    private PositionCalculationResult closeTpReachedPositions(TimeSeriesEntry currentPrice, List<Position> openPositions, Wallet wallet) {
+        List<Trade> stopReachedTrades = openPositions.stream()
+                .filter(position -> position.getLimitOrder().canBeExecuted(currentPrice))
+                .filter(position -> isLimitReached(position, currentPrice))
+                .map(Position::clone)
+                .peek(position -> position.getLimitOrder().executeIfPossible(currentPrice))
+                .filter(position -> position.getLimitOrder().isExecuted())
+                .peek(position -> wallet.removeMargin(position.getMargin()))
+                .map(position -> toTrade(position, position.getExecutedLimitPrice(), currentPrice))
+                .peek(trade -> wallet.adjustAmount(trade.getProfitInEuroWithFees()))
+                .toList();
+
+        Set<String> closedPositionsIds = stopReachedTrades.stream().map(Trade::getRelatedPositionId).collect(Collectors.toSet());
+        List<Position> remainingPositions = openPositions.stream().filter(position -> !closedPositionsIds.contains(position.getId())).toList();
+        return new PositionCalculationResult(remainingPositions, stopReachedTrades);
+    }
+
 
     public PositionCalculationResult closePositionIfSlOrTpReached(TimeSeriesEntry currentPrice, List<Position> openPositions, Wallet wallet) {
-        List<Position> limitClose = openPositions.stream().filter(position -> isLimitReached(position, currentPrice)).toList();
-        List<Position> stopClose = openPositions.stream().filter(position -> isStopReached(position, currentPrice)).toList();
-        List<Position> remainingPositions = openPositions.stream().filter(position -> !isStopReached(position, currentPrice) && !isLimitReached(position, currentPrice)).toList();
-        List<Trade> limitCloseTrades = limitClose.stream().map(position -> {
-            ProfitLossCalculation profitInEuro = tradingCalculator.getProfitInEuroWithoutFees(position, position.getLimitLevel(), currentPrice.time());
-            return toTrade(profitInEuro.conversionRate(), profitInEuro.profit(), profitInEuro.closePrice(), position.getPair(), position, currentPrice);
-        }).toList();
-        List<Trade> stopCloseTrades = stopClose.stream().map(position -> {
-            ProfitLossCalculation profitInEuro = tradingCalculator.getProfitInEuroWithoutFees(position, position.getStopLevel(), currentPrice.time());
-            return toTrade(profitInEuro.conversionRate(), profitInEuro.profit(), profitInEuro.closePrice(), position.getPair(), position, currentPrice);
-        }).toList();
+        PositionCalculationResult slClosedResult = closeSlReachedPositions(currentPrice, openPositions, wallet);
+        PositionCalculationResult tpClosedResult = closeTpReachedPositions(currentPrice, slClosedResult.positions(), wallet);
 
-        List<Trade> trades = new ArrayList<>(limitCloseTrades);
-        trades.addAll(stopCloseTrades);
-        limitClose.forEach(position -> wallet.removeMargin(position.getMargin()));
-        stopClose.forEach(position -> wallet.removeMargin(position.getMargin()));
-        trades.forEach(trade -> wallet.adjustAmount(trade.getProfitInEuroWithFees()));
-        return new PositionCalculationResult(new ArrayList<>(remainingPositions), trades);
+        List<Trade> allClosedTrades = new ArrayList<>(slClosedResult.trades());
+        allClosedTrades.addAll(tpClosedResult.trades());
+        return new PositionCalculationResult(new ArrayList<>(tpClosedResult.positions()), allClosedTrades);
+    }
+
+    private Trade toTrade(Position position, Decimal executedPrice, TimeSeriesEntry currentPrice) {
+        ProfitLossCalculation profitInEuro = tradingCalculator.getProfitInEuroWithoutFees(position, executedPrice, currentPrice.time());
+        return toTrade(profitInEuro.conversionRate(), profitInEuro.profit(), profitInEuro.closePrice(), position.getPair(), position, currentPrice);
     }
 
 
     private boolean isLimitReached(Position position, TimeSeriesEntry currentPrice) {
         Decimal currentTpPrice = currentLimitPrice(position, currentPrice);
+        Decimal estimatedLimitLevel = position.getEstimatedLimitLevel(currentPrice);
         return switch (position.getDirection()) {
-            case BUY -> currentTpPrice.isGreaterThanOrEqualTo(position.getLimitLevel());
-            case SELL -> currentTpPrice.isLessThanOrEqualTo(position.getLimitLevel());
+            case BUY -> currentTpPrice.isGreaterThanOrEqualTo(estimatedLimitLevel);
+            case SELL -> currentTpPrice.isLessThanOrEqualTo(estimatedLimitLevel);
         };
     }
 
@@ -220,9 +253,10 @@ public class PositionCalculation {
 
     private boolean isStopReached(Position position, TimeSeriesEntry currentPrice) {
         Decimal currentSlPrice = currentStopPrice(position, currentPrice);
+        Decimal estimatedStopLevel = position.getEstimatedStopLevel(currentPrice);
         return switch (position.getDirection()) {
-            case BUY -> currentSlPrice.isLessThanOrEqualTo(position.getStopLevel());
-            case SELL -> currentSlPrice.isGreaterThanOrEqualTo(position.getStopLevel());
+            case BUY -> currentSlPrice.isLessThanOrEqualTo(estimatedStopLevel);
+            case SELL -> currentSlPrice.isGreaterThanOrEqualTo(estimatedStopLevel);
         };
     }
 
@@ -246,7 +280,7 @@ public class PositionCalculation {
         return closePositionsMatchingCriteria(openPositions, currentPrice, wallet, criteria);
     }
 
-    private PositionCalculationResult closePositionsMatchingCriteria(List<Position> positions, TimeSeriesEntry currentPrice, Wallet wallet, Predicate<Position> criteria){
+    private PositionCalculationResult closePositionsMatchingCriteria(List<Position> positions, TimeSeriesEntry currentPrice, Wallet wallet, Predicate<Position> criteria) {
         List<Position> positionsToClose = positions.stream().filter(criteria).toList();
         List<Position> remainingPositions = positions.stream().filter(position -> !positionsToClose.contains(position)).toList();
         PositionCalculationResult closePositionsResult = closePositions(currentPrice, positionsToClose, wallet);

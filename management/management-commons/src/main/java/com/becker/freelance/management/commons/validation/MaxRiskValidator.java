@@ -34,7 +34,7 @@ public class MaxRiskValidator implements Validator<MaxRiskValidatorParams> {
     private Decimal calculateRiskInPercent(Position position, ManagementEnvironmentProvider environmentProvider) {
         Pair pair = position.getPair();
         Decimal size = position.getSize();
-        Decimal stopLevel = position.getStopLevel();
+        Decimal stopLevel = position.getEstimatedStopLevel(environmentProvider.getCurrentPrice(position.getPair()));
         Decimal openPrice = position.getOpenPrice();
         Decimal currentAccountBalance = environmentProvider.getCurrentAccountBalance();
         Decimal stopDistance = openPrice.subtract(stopLevel).abs();

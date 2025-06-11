@@ -54,8 +54,13 @@ public class BacktestExecutor implements Runnable {
 
             for (Pair pair : backtestExecutionConfiguration.pairs()) {
                 SubscribableDataProvider dataProviderForPair = dataProviderFactory.createSubscribableDataProvider(pair, backtestSynchronizer);
-                Consumer<TimeChangeListener> timeChangeListenerConsumer = listener -> backtestSynchronizer.addSubscibor(new TimeChangeListenerSynchronizeable(listener));
-                StrategyEngine strategyEngine = new StrategyEngine(pair, strategySupplier, tradeExecutor, backtestExecutionConfiguration.getEurUsdRequestor(), timeChangeListenerConsumer);
+                Consumer<TimeChangeListener> timeChangeListenerConsumer = listener -> backtestSynchronizer.addPrioritySubscribor(new TimeChangeListenerSynchronizeable(listener));
+                StrategyEngine strategyEngine = new StrategyEngine(pair,
+                        strategySupplier,
+                        tradeExecutor,
+                        backtestExecutionConfiguration.getEurUsdRequestor(),
+                        dataProviderForPair,
+                        timeChangeListenerConsumer);
                 StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine);
                 dataProviderForPair.addSubscriber(strategyDataSubscriber);
             }

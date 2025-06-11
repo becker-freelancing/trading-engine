@@ -1,15 +1,18 @@
 package com.becker.freelance.tradeexecution.calculation.calculation;
 
+import com.becker.freelance.commons.calculation.MarginCalculator;
 import com.becker.freelance.commons.calculation.TradingFeeCalculator;
+import com.becker.freelance.commons.order.OrderBuilder;
+import com.becker.freelance.commons.order.TriggerDirection;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.position.PositionBehaviour;
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
-import com.becker.freelance.commons.signal.EntrySignalFactory;
+import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
-import com.becker.freelance.tradeexecution.calculation.PositionAdaptor;
+import com.becker.freelance.tradeexecution.calculation.TrailingPositionAdaptor;
 import com.becker.freelance.tradeexecution.calculation.mock.PairMock;
 import com.becker.freelance.tradeexecution.position.DemoPositionFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,14 +32,14 @@ class TrailingStopPositionTest {
     Position sellPosition;
     TimeSeries timeSeries;
     TimeSeriesEntry closeEntry;
-    PositionAdaptor positionAdaptor;
+    TrailingPositionAdaptor trailingPositionAdaptor;
 
 
     @BeforeEach
     void setUp() {
         timeSeries = mock(TimeSeries.class);
         closeEntry = mock(TimeSeriesEntry.class);
-        positionAdaptor = new PositionAdaptor();
+        trailingPositionAdaptor = new TrailingPositionAdaptor();
 
         when(timeSeries.getEntryForTime(any(LocalDateTime.class))).thenReturn(closeEntry);
         Mockito.doReturn(PairMock.eurUsd()).when(timeSeries).getPair();
@@ -45,10 +48,24 @@ class TrailingStopPositionTest {
         TimeSeriesEntry openPrice = buildEntry(new Decimal("1.05"));
         TimeSeriesEntry openPriceSell = buildEntry(new Decimal("6100"));
 
-        EntrySignalFactory entrySignalFactory = new EntrySignalFactory(null);
-        DemoPositionFactory positionFactory = new DemoPositionFactory(time -> closeEntry, mock(TradingFeeCalculator.class));
-        buyPosition = positionFactory.createTrailingPosition(entrySignalFactory.fromLevel(Decimal.ONE, Direction.BUY, new Decimal("1.02"), new Decimal("1.08"), PositionBehaviour.TRAILING, openPrice, mock(TradeableQuantilMarketRegime.class)));
-        sellPosition = positionFactory.createTrailingPosition(entrySignalFactory.fromLevel(Decimal.ONE, Direction.SELL, new Decimal("6200"), new Decimal("6000"), PositionBehaviour.TRAILING, openPriceSell, mock(TradeableQuantilMarketRegime.class)));
+        DemoPositionFactory positionFactory = new DemoPositionFactory(time -> closeEntry, mock(TradingFeeCalculator.class), mock(MarginCalculator.class));
+        buyPosition = positionFactory.createTrailingPosition(EntrySignalBuilder.getInstance()
+                .withOpenOrder(OrderBuilder.getInstance().withSize(Decimal.ONE).withDirection(Direction.BUY).withPair(PairMock.eurUsd()).asMarketOrder())
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.02"))).withThresholdPrice(new Decimal("1.02")).withTriggerDirection(TriggerDirection.DOWN_CROSS))
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.08")))
+                .withPositionBehaviour(PositionBehaviour.TRAILING)
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .buildValidated(openPrice), openPrice);
+        buyPosition.getOpenOrder().executeIfPossible(openPrice);
+
+        sellPosition = positionFactory.createTrailingPosition(EntrySignalBuilder.getInstance()
+                .withOpenOrder(OrderBuilder.getInstance().withSize(Decimal.ONE).withDirection(Direction.SELL).withPair(PairMock.eurUsd()).asMarketOrder())
+                .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("6200"))).withThresholdPrice(new Decimal("6200")).withTriggerDirection(TriggerDirection.UP_CROSS))
+                .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("6000")))
+                .withPositionBehaviour(PositionBehaviour.TRAILING)
+                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .buildValidated(openPriceSell), openPriceSell);
+        sellPosition.getOpenOrder().executeIfPossible(openPriceSell);
     }
 
     private static TimeSeriesEntry buildEntry(Decimal value) {
@@ -68,12 +85,12 @@ class TrailingStopPositionTest {
 
         List<Position> positions = List.of(buyPosition);
 
-        positions = positionAdaptor.adapt(adapt1, positions);
-        positions = positionAdaptor.adapt(adapt2, positions);
-        positions = positionAdaptor.adapt(adapt3, positions);
+        positions = trailingPositionAdaptor.adapt(adapt1, positions);
+        positions = trailingPositionAdaptor.adapt(adapt2, positions);
+        positions = trailingPositionAdaptor.adapt(adapt3, positions);
 
-        assertEquals(new Decimal("1.04"), positions.get(0).getStopLevel());
-        assertEquals(new Decimal("1.08"), positions.get(0).getLimitLevel());
+        assertEquals(new Decimal("1.04"), positions.get(0).getEstimatedStopLevel(null));
+        assertEquals(new Decimal("1.08"), positions.get(0).getEstimatedLimitLevel(null));
     }
 
     @Test
@@ -84,12 +101,12 @@ class TrailingStopPositionTest {
 
         List<Position> positions = List.of(buyPosition);
 
-        positions = positionAdaptor.adapt(adapt1, positions);
-        positions = positionAdaptor.adapt(adapt2, positions);
-        positions = positionAdaptor.adapt(adapt3, positions);
+        positions = trailingPositionAdaptor.adapt(adapt1, positions);
+        positions = trailingPositionAdaptor.adapt(adapt2, positions);
+        positions = trailingPositionAdaptor.adapt(adapt3, positions);
 
-        assertEquals(new Decimal("1.02"), positions.get(0).getStopLevel());
-        assertEquals(new Decimal("1.08"), positions.get(0).getLimitLevel());
+        assertEquals(new Decimal("1.02"), positions.get(0).getEstimatedStopLevel(null));
+        assertEquals(new Decimal("1.08"), positions.get(0).getEstimatedLimitLevel(null));
     }
 
     @Test
@@ -100,12 +117,12 @@ class TrailingStopPositionTest {
 
         List<Position> positions = List.of(sellPosition);
 
-        positions = positionAdaptor.adapt(adapt1, positions);
-        positions = positionAdaptor.adapt(adapt2, positions);
-        positions = positionAdaptor.adapt(adapt3, positions);
+        positions = trailingPositionAdaptor.adapt(adapt1, positions);
+        positions = trailingPositionAdaptor.adapt(adapt2, positions);
+        positions = trailingPositionAdaptor.adapt(adapt3, positions);
 
-        assertEquals(new Decimal("6150"), positions.get(0).getStopLevel());
-        assertEquals(new Decimal("6000"), positions.get(0).getLimitLevel());
+        assertEquals(new Decimal("6150"), positions.get(0).getEstimatedStopLevel(null));
+        assertEquals(new Decimal("6000"), positions.get(0).getEstimatedLimitLevel(null));
     }
 
     @Test
@@ -116,11 +133,11 @@ class TrailingStopPositionTest {
 
         List<Position> positions = List.of(sellPosition);
 
-        positions = positionAdaptor.adapt(adapt1, positions);
-        positions = positionAdaptor.adapt(adapt2, positions);
-        positions = positionAdaptor.adapt(adapt3, positions);
+        positions = trailingPositionAdaptor.adapt(adapt1, positions);
+        positions = trailingPositionAdaptor.adapt(adapt2, positions);
+        positions = trailingPositionAdaptor.adapt(adapt3, positions);
 
-        assertEquals(new Decimal("6200"), positions.get(0).getStopLevel());
-        assertEquals(new Decimal("6000"), positions.get(0).getLimitLevel());
+        assertEquals(new Decimal("6200"), positions.get(0).getEstimatedStopLevel(null));
+        assertEquals(new Decimal("6000"), positions.get(0).getEstimatedLimitLevel(null));
     }
 }

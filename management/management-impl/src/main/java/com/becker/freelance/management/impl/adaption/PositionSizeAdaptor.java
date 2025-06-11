@@ -1,6 +1,7 @@
 package com.becker.freelance.management.impl.adaption;
 
-import com.becker.freelance.commons.signal.EntrySignal;
+import com.becker.freelance.commons.signal.EntrySignalBuilder;
+import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.management.api.adaption.EntrySignalAdaptor;
 import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
 import com.becker.freelance.management.commons.calculation.Calculator;
@@ -20,9 +21,12 @@ public class PositionSizeAdaptor implements EntrySignalAdaptor {
     }
 
     @Override
-    public EntrySignal adapt(ManagementEnvironmentProvider environmentProvider, EntrySignal entrySignal) {
-        Decimal stopDistanceInPoints = entrySignal.stopInPoints();
-        PositionSizeCalculationParams positionSizeCalculationParams = new PositionSizeCalculationParams(stopDistanceInPoints, entrySignal.pair());
+    public EntrySignalBuilder adapt(ManagementEnvironmentProvider environmentProvider, EntrySignalBuilder entrySignal) {
+        TimeSeriesEntry currentPrice = environmentProvider.getCurrentPrice(entrySignal.getPair());
+        Decimal stopDistanceInPoints = entrySignal.getOpenOrderBuilder().getEstimatedExecutionLevel(currentPrice)
+                .subtract(entrySignal.getStopOrderBuilder().getEstimatedExecutionLevel(currentPrice))
+                .abs();
+        PositionSizeCalculationParams positionSizeCalculationParams = new PositionSizeCalculationParams(stopDistanceInPoints, entrySignal.getPair());
 
         Decimal positionSize = positionSizeCalculator.calculate(environmentProvider, positionSizeCalculationParams);
         if (environmentProvider.getMaxPositionSize().isLessThan(positionSize)) {
@@ -30,6 +34,8 @@ public class PositionSizeAdaptor implements EntrySignalAdaptor {
         }
         positionSize = positionSizeSanitizer.calculate(environmentProvider, positionSize);
 
-        return new EntrySignalImpl(entrySignal, positionSize);
+        entrySignal.setSize(positionSize);
+
+        return entrySignal;
     }
 }

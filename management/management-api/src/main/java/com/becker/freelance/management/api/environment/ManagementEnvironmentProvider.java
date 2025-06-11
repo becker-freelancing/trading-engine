@@ -3,6 +3,7 @@ package com.becker.freelance.management.api.environment;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Position;
+import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
 
@@ -40,4 +41,6 @@ public interface ManagementEnvironmentProvider extends TimeChangeListener {
     public Decimal calculateTakerTradingFeeInCounterCurrency(Decimal currentPrice, Decimal positionSize);
 
     public LocalDateTime currentTime();
+
+    TimeSeriesEntry getCurrentPrice(Pair pair);
 }

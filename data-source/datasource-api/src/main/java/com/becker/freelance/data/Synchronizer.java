@@ -7,6 +7,8 @@ public interface Synchronizer {
 
     void addSubscibor(Synchronizeable synchronizeable);
 
+    void addPrioritySubscribor(Synchronizeable synchronizeable);
+
     Optional<LocalDateTime> minTime();
 
     Optional<LocalDateTime> maxTime();

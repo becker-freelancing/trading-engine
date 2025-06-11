@@ -16,9 +16,10 @@ import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
-import com.becker.freelance.tradeexecution.calculation.PositionAdaptor;
+import com.becker.freelance.tradeexecution.calculation.MarginCalculatorImpl;
 import com.becker.freelance.tradeexecution.calculation.PositionCalculation;
 import com.becker.freelance.tradeexecution.calculation.PositionCalculation.PositionCalculationResult;
+import com.becker.freelance.tradeexecution.calculation.TrailingPositionAdaptor;
 import com.becker.freelance.tradeexecution.position.DemoPositionFactory;
 
 import java.time.Duration;
@@ -36,8 +37,8 @@ public class DemoTradeExecutor extends TradeExecutor {
     private PositionCalculation positionCalculation;
     private Pair pair;
     private PositionFactory positionFactory;
-    private PositionAdaptor positionAdaptor;
-    private TradingCalculator tradingCalculator;
+    private TrailingPositionAdaptor trailingPositionAdaptor;
+    private List<Position> positionsToExecuteBuffer;
 
     public DemoTradeExecutor(){
 
@@ -49,11 +50,12 @@ public class DemoTradeExecutor extends TradeExecutor {
         openPositions = new ArrayList<>();
         closedTrades = new ClosedTradesHolder();
         this.pair = pair;
-        tradingCalculator = new DemoBrokerRequestor().getTradingCalculator(eurUsdRequestor);
+        TradingCalculator tradingCalculator = new DemoBrokerRequestor().getTradingCalculator(eurUsdRequestor);
         TradingFeeCalculator tradingFeeCalculator = TradingFeeCalculator.getInstance();
         positionCalculation = new PositionCalculation(tradingCalculator, tradingFeeCalculator);
-        positionFactory = new DemoPositionFactory(eurUsdRequestor, tradingFeeCalculator);
-        positionAdaptor = new PositionAdaptor();
+        positionFactory = new DemoPositionFactory(eurUsdRequestor, tradingFeeCalculator, new MarginCalculatorImpl(eurUsdRequestor));
+        trailingPositionAdaptor = new TrailingPositionAdaptor();
+        positionsToExecuteBuffer = new ArrayList<>();
     }
 
     @Override
@@ -93,16 +95,25 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public void entry(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, EntrySignal entrySignal) {
-        Position position = toPosition(entrySignal);
+        Position position = toPosition(entrySignal, currentPrice);
+        if (position.getOpenOrder().canBeExecuted(currentPrice)) {
+            internalEntry(currentPrice, position);
+        } else {
+            positionsToExecuteBuffer.add(position);
+        }
+    }
+
+    private void internalEntry(TimeSeriesEntry currentPrice, Position position) {
+        position.getOpenOrder().executeIfPossible(currentPrice);
         PositionCalculationResult openPositionsResult = positionCalculation.openPosition(currentPrice, openPositions, position, wallet.get());
         openPositions = openPositionsResult.positions();
         closedTrades.addAll(openPositionsResult.trades());
     }
 
-    private Position toPosition(EntrySignal entrySignal) {
-        return switch (entrySignal.positionBehaviour()) {
+    private Position toPosition(EntrySignal entrySignal, TimeSeriesEntry currentPrice) {
+        return switch (entrySignal.getPositionBehaviour()) {
             case HARD_LIMIT -> positionFactory.createStopLimitPosition(entrySignal);
-            case TRAILING -> positionFactory.createTrailingPosition(entrySignal);
+            case TRAILING -> positionFactory.createTrailingPosition(entrySignal, currentPrice);
         };
     }
 
@@ -113,7 +124,20 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public void adaptPositions(TimeSeriesEntry currentPrice) {
-        openPositions = positionAdaptor.adapt(currentPrice, openPositions);
+        // Try Execution Pending Positions wich are not opened, e.g.  due to Limit Open Orders
+        List<Position> remainingPositionsToExecute = new ArrayList<>();
+        for (Position positionToExecute : positionsToExecuteBuffer) {
+            if (positionToExecute.getOpenOrder().canBeExecuted(currentPrice)) {
+                internalEntry(currentPrice, positionToExecute);
+            } else {
+                remainingPositionsToExecute.add(positionToExecute);
+            }
+        }
+        this.positionsToExecuteBuffer = remainingPositionsToExecute;
+
+
+        // Adapt Trailing Positions
+        openPositions = trailingPositionAdaptor.adapt(currentPrice, openPositions);
     }
 
     @Override

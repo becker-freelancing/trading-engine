@@ -2,6 +2,7 @@ package com.becker.freelance.data;
 
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeries;
+import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
@@ -49,5 +50,11 @@ public class KrakenSubscribableDataProvider extends SubscribableDataProvider {
         if (timeSeries.hasTime(time)) {
             subscribers.forEach(subscriber -> subscriber.consume(timeSeries, time));
         }
+    }
+
+    @Override
+    public TimeSeriesEntry getPriceForTime(Pair pair, LocalDateTime time) {
+
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

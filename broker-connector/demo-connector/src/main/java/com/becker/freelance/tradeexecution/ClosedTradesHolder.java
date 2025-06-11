@@ -37,7 +37,7 @@ public class ClosedTradesHolder {
     private static class SearchTrade extends Trade {
 
         SearchTrade(LocalDateTime start) {
-            super(null, start, null, null, null, null, null, null, null, null, null, null, null);
+            super(null, null, start, null, null, null, null, null, null, null, null, null, null, null);
         }
     }
 }

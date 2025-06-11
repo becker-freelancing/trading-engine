@@ -1,9 +1,9 @@
 package com.becker.freelance.strategies.strategy;
 
 
+import com.becker.freelance.commons.order.OrderBuilder;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.signal.EntrySignal;
-import com.becker.freelance.commons.signal.EntrySignalFactory;
+import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.indicators.ta.regime.DurationMarketRegime;
 import com.becker.freelance.indicators.ta.regime.MarketRegime;
@@ -25,7 +25,6 @@ import java.util.Optional;
 
 public abstract class BaseStrategy implements TradingStrategy {
 
-    protected final EntrySignalFactory entrySignalFactory;
     private final StrategyCreator strategyCreator;
     protected final BarSeries barSeries;
     protected final Indicator<Num> closePrice;
@@ -35,7 +34,6 @@ public abstract class BaseStrategy implements TradingStrategy {
 
     protected BaseStrategy(StrategyParameter strategyParameter) {
         this.strategyCreator = strategyParameter.strategyCreator();
-        this.entrySignalFactory = new EntrySignalFactory(strategyParameter.tradingCalculator());
         this.barSeries = new BaseBarSeries();
         this.closePrice = new ClosePriceIndicator(barSeries);
 
@@ -46,7 +44,7 @@ public abstract class BaseStrategy implements TradingStrategy {
         this.regimeIndicator = regimeIndicatorFactory.quantileMarketRegimeIndicator(pair.technicalName(), durationMarketRegimeIndicator);
     }
 
-    public Optional<EntrySignal> shouldEnter(EntryExecutionParameter entryParameter) {
+    public Optional<EntrySignalBuilder> shouldEnter(EntryExecutionParameter entryParameter) {
         addBarIfNeeded(entryParameter.currentPriceAsBar());
         if (canNotExecute()) {
             return Optional.empty();
@@ -74,7 +72,7 @@ public abstract class BaseStrategy implements TradingStrategy {
         lastAddedBarTime = currentPrice.getEndTime();
     }
 
-    protected abstract Optional<EntrySignal> internalShouldEnter(EntryExecutionParameter entryParameter);
+    protected abstract Optional<EntrySignalBuilder> internalShouldEnter(EntryExecutionParameter entryParameter);
 
     protected abstract Optional<ExitSignal> internalShouldExit(ExitExecutionParameter exitParameter);
 
@@ -95,5 +93,13 @@ public abstract class BaseStrategy implements TradingStrategy {
     @Override
     public QuantileMarketRegime currentMarketRegime() {
         return regimeIndicator.getValue(barSeries.getEndIndex());
+    }
+
+    protected OrderBuilder orderBuilder() {
+        return OrderBuilder.getInstance();
+    }
+
+    protected EntrySignalBuilder entrySignalBuilder() {
+        return EntrySignalBuilder.getInstance();
     }
 }

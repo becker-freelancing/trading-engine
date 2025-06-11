@@ -13,12 +13,14 @@ public class BacktestSynchronizer implements Synchronizer {
 
     private final LocalDateTime minTime;
     private final LocalDateTime maxTime;
+    private final Set<Synchronizeable> prioritySubscribors;
     private final Set<Synchronizeable> subscibors;
     private LocalDateTime currentTime;
 
 
     public BacktestSynchronizer(LocalDateTime minTime, LocalDateTime maxTime) {
         this.subscibors = new LinkedHashSet<>();
+        this.prioritySubscribors = new LinkedHashSet<>();
         this.minTime = minTime;
         this.maxTime = maxTime;
         this.currentTime = LocalDateTime.of(minTime.getYear(), minTime.getMonth(), minTime.getDayOfMonth(), minTime.getHour(), minTime.getMinute());
@@ -38,7 +40,13 @@ public class BacktestSynchronizer implements Synchronizer {
 
     public void setTime(LocalDateTime time) {
         currentTime = time;
+        prioritySubscribors.forEach(synchronizeable -> synchronizeable.synchronize(time));
         subscibors.forEach(synchronizeable -> synchronizeable.synchronize(time));
+    }
+
+    @Override
+    public void addPrioritySubscribor(Synchronizeable synchronizeable) {
+        prioritySubscribors.add(synchronizeable);
     }
 
     @Override

@@ -1,9 +1,11 @@
 package com.becker.freelance.management.api.environment;
 
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
+import com.becker.freelance.commons.calculation.PriceRequestor;
 import com.becker.freelance.commons.calculation.TradingFeeCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Position;
+import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.opentrades.AccountBalanceRequestor;
@@ -33,15 +35,17 @@ public class FileManagementEnvironmentProvider implements ManagementEnvironmentP
     private final OpenPositionRequestor openPositionRequestor;
     private final ClosedTradesRequestor closedTradesRequestor;
     private final EurUsdRequestor eurUsdRequestor;
+    private final PriceRequestor priceRequestor;
     private final TradingFeeCalculator tradingFeeCalculator;
     private LocalDateTime currentTime = LocalDateTime.MIN;
 
-    public FileManagementEnvironmentProvider(AccountBalanceRequestor accountBalanceRequestor, BrokerSpecificsRequestor brokerSpecificsRequestor, OpenPositionRequestor openPositionRequestor, ClosedTradesRequestor closedTradesRequestor, EurUsdRequestor eurUsdRequestor, TradingFeeCalculator tradingFeeCalculator) {
+    public FileManagementEnvironmentProvider(AccountBalanceRequestor accountBalanceRequestor, BrokerSpecificsRequestor brokerSpecificsRequestor, OpenPositionRequestor openPositionRequestor, ClosedTradesRequestor closedTradesRequestor, EurUsdRequestor eurUsdRequestor, PriceRequestor priceRequestor, TradingFeeCalculator tradingFeeCalculator) {
         this.accountBalanceRequestor = accountBalanceRequestor;
         this.brokerSpecificsRequestor = brokerSpecificsRequestor;
         this.openPositionRequestor = openPositionRequestor;
         this.closedTradesRequestor = closedTradesRequestor;
         this.eurUsdRequestor = eurUsdRequestor;
+        this.priceRequestor = priceRequestor;
         this.tradingFeeCalculator = tradingFeeCalculator;
         JSONObject managementConfig;
         try {
@@ -123,6 +127,11 @@ public class FileManagementEnvironmentProvider implements ManagementEnvironmentP
     @Override
     public LocalDateTime currentTime() {
         return currentTime;
+    }
+
+    @Override
+    public TimeSeriesEntry getCurrentPrice(Pair pair) {
+        return priceRequestor.getPriceForTime(pair, currentTime);
     }
 
     @Override

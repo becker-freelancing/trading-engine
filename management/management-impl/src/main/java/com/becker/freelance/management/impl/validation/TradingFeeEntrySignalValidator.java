@@ -11,23 +11,26 @@ public class TradingFeeEntrySignalValidator implements EntrySignalValidator {
     public boolean isValidToExecute(ManagementEnvironmentProvider environmentProvider, EntrySignal entrySignal) {
 
         Decimal tradingFee = calculateTradingFee(environmentProvider, entrySignal);
-        Decimal targetProfit = entrySignal.targetProfit();
+        Decimal targetProfit = entrySignal.estimatedTargetProfit(environmentProvider.getCurrentPrice(entrySignal.pair()));
 
         return targetProfit.isGreaterThan(tradingFee);
     }
 
     private Decimal calculateTradingFee(ManagementEnvironmentProvider environmentProvider, EntrySignal entrySignal) {
+        Decimal openLevel = entrySignal.estimatedOpenLevel(environmentProvider.getCurrentPrice(entrySignal.pair()));
+        Decimal limitLevel = entrySignal.estimatedLimitLevel(environmentProvider.getCurrentPrice(entrySignal.pair()));
+
         Decimal tradingFee = Decimal.ZERO;
         if (entrySignal.isOpenTaker()) {
-            tradingFee = tradingFee.add(environmentProvider.calculateTakerTradingFeeInCounterCurrency(entrySignal.openPrice().getCloseMid(), entrySignal.size()));
+            tradingFee = tradingFee.add(environmentProvider.calculateTakerTradingFeeInCounterCurrency(openLevel, entrySignal.size()));
         } else {
-            tradingFee = tradingFee.add(environmentProvider.calculateMakerTradingFeeInCounterCurrency(entrySignal.openPrice().getCloseMid(), entrySignal.size()));
+            tradingFee = tradingFee.add(environmentProvider.calculateMakerTradingFeeInCounterCurrency(openLevel, entrySignal.size()));
         }
 
-        if (entrySignal.isCloseTaker()) {
-            tradingFee = tradingFee.add(environmentProvider.calculateTakerTradingFeeInCounterCurrency(entrySignal.limitLevel(), entrySignal.size()));
+        if (entrySignal.isOneCloseTaker()) {
+            tradingFee = tradingFee.add(environmentProvider.calculateTakerTradingFeeInCounterCurrency(limitLevel, entrySignal.size()));
         } else {
-            tradingFee = tradingFee.add(environmentProvider.calculateMakerTradingFeeInCounterCurrency(entrySignal.limitLevel(), entrySignal.size()));
+            tradingFee = tradingFee.add(environmentProvider.calculateMakerTradingFeeInCounterCurrency(limitLevel, entrySignal.size()));
         }
 
         return tradingFee;
