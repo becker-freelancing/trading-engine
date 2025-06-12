@@ -3,12 +3,15 @@ package com.becker.freelance.strategies.strategy;
 
 import com.becker.freelance.commons.order.OrderBuilder;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.signal.ExitSignal;
+import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.indicators.ta.regime.DurationMarketRegime;
 import com.becker.freelance.indicators.ta.regime.MarketRegime;
 import com.becker.freelance.indicators.ta.regime.QuantileMarketRegime;
 import com.becker.freelance.indicators.ta.regime.RegimeIndicatorFactory;
+import com.becker.freelance.math.Decimal;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
 import com.becker.freelance.strategies.creation.StrategyCreator;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
@@ -101,5 +104,19 @@ public abstract class BaseStrategy implements TradingStrategy {
 
     protected EntrySignalBuilder entrySignalBuilder() {
         return EntrySignalBuilder.getInstance();
+    }
+
+    protected Decimal limitDistanceToLevel(TimeSeriesEntry currentPrice, Decimal distance, Direction direction) {
+        return switch (direction) {
+            case BUY -> currentPrice.getClosePriceForDirection(direction).add(distance);
+            case SELL -> currentPrice.getClosePriceForDirection(direction).subtract(distance);
+        };
+    }
+
+    protected Decimal stopDistanceToLevel(TimeSeriesEntry currentPrice, Decimal distance, Direction direction) {
+        return switch (direction) {
+            case BUY -> currentPrice.getClosePriceForDirection(direction).subtract(distance);
+            case SELL -> currentPrice.getClosePriceForDirection(direction).add(distance);
+        };
     }
 }

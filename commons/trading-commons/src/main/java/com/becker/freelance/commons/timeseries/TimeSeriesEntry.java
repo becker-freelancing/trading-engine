@@ -63,4 +63,8 @@ public record TimeSeriesEntry(LocalDateTime time, Decimal openBid, Decimal openA
         return String.format("TimeSeriesEntry(Time: %s, Pair: %s, Open: %f, High: %f, Low: %f, Close: %f, Volume: %f, Trades: %f)",
                 time, pair.technicalName(), openAsk, highAsk, lowAsk, closeAsk, volume, trades);
     }
+
+    public boolean isGreenCandle() {
+        return getCloseMid().isGreaterThan(getOpenMid());
+    }
 }
