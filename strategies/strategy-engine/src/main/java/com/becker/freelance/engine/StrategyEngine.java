@@ -63,6 +63,9 @@ public class StrategyEngine {
 
     public void executeForTime(TimeSeries timeSeries, LocalDateTime time, TradingStrategy strategy) {
         try {
+            if (environmentProvider.getCurrentAccountBalance().isLessThanZero()){
+                return;
+            }
             TimeSeriesEntry currentPrice = timeSeries.getEntryForTime(time);
 
             adaptPositions(currentPrice);
