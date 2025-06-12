@@ -26,12 +26,14 @@ class AbstractLocalBacktestApp implements Runnable {
     private final LocalDateTime fromTime;
     private final LocalDateTime toTime;
     private final BacktestAppInitiatingUtil appInitiatingUtil;
+    private final Runnable onFinished;
 
-    AbstractLocalBacktestApp(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime) {
+    AbstractLocalBacktestApp(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, Runnable onFinished) {
         this.initialWalletAmount = initialWalletAmount;
         this.fromTime = fromTime;
         this.toTime = toTime;
         this.appInitiatingUtil = new BacktestAppInitiatingUtil();
+        this.onFinished = onFinished;
     }
 
     @Override
@@ -61,7 +63,7 @@ class AbstractLocalBacktestApp implements Runnable {
         AppConfiguration appConfiguration = new AppConfiguration(appMode, LocalDateTime.now());
         BacktestExecutionConfiguration backtestExecutionConfiguration = new BacktestExecutionConfiguration(pairs, initialWalletAmount, eurusd, fromTime, toTime, numThreads);
 
-        BacktestEngine backtestEngine = new BacktestEngine(appConfiguration, backtestExecutionConfiguration, strategy);
+        BacktestEngine backtestEngine = new BacktestEngine(appConfiguration, backtestExecutionConfiguration, strategy, onFinished);
         backtestEngine.run();
     }
 

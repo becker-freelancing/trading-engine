@@ -13,6 +13,7 @@ public class AbstractLocalBacktestAppBuilder {
     private LocalDateTime fromTime;
     private LocalDateTime toTime;
     private boolean continueMode;
+    private Runnable onFinished = () -> {};
 
     public static AbstractLocalBacktestAppBuilder builder() {
         return new AbstractLocalBacktestAppBuilder();
@@ -38,6 +39,12 @@ public class AbstractLocalBacktestAppBuilder {
         return this;
     }
 
+
+    public AbstractLocalBacktestAppBuilder withOnFinished(Runnable runnable) {
+        this.onFinished = runnable;
+        return this;
+    }
+
     public Runnable build(){
 
         if (continueMode){
@@ -55,6 +62,6 @@ public class AbstractLocalBacktestAppBuilder {
         if (toTime == null){
             throw new IllegalStateException("To Time can not be null");
         }
-        return new AbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime);
+        return new AbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished);
     }
 }

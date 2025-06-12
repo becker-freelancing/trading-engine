@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -32,27 +33,29 @@ public class BacktestEngine {
     private final ParameterFilter parameterFilter;
     private final BiConsumer<List<Trade>, StrategyCreationParameter> onBacktestFinishedCallback;
     private final Consumer<Exception> onExceptionCallback;
+    private final Runnable onFinished;
 
     private int currentIteration = 0;
     private int requiredIterations;
 
 
-    public BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, StrategyCreator strategyCreator, ParameterFilter parameterFilter, Path writePath) {
+    public BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, StrategyCreator strategyCreator, ParameterFilter parameterFilter, Path writePath, Runnable onFinished) {
         this(appConfiguration,
                 backtestExecutionConfiguration,
                 strategyCreator,
                 Executors.newFixedThreadPool(backtestExecutionConfiguration.numberOfThreads()),
                 getBacktestResultWriter(appConfiguration, backtestExecutionConfiguration, strategyCreator, writePath),
-                parameterFilter
+                parameterFilter,
+                onFinished
         );
 
     }
 
-    public BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, StrategyCreator strategyCreator) {
-        this(appConfiguration, backtestExecutionConfiguration, strategyCreator, ParameterFilter.allOkFilter(), null);
+    public BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, StrategyCreator strategyCreator, Runnable onFinished) {
+        this(appConfiguration, backtestExecutionConfiguration, strategyCreator, ParameterFilter.allOkFilter(), null, onFinished);
     }
 
-    protected BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, StrategyCreator strategyCreator, ExecutorService executor, BacktestResultWriter resultWriter, ParameterFilter parameterFilter) {
+    protected BacktestEngine(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, StrategyCreator strategyCreator, ExecutorService executor, BacktestResultWriter resultWriter, ParameterFilter parameterFilter, Runnable onFinished) {
         this.appConfiguration = appConfiguration;
         this.backtestExecutionConfiguration = backtestExecutionConfiguration;
         this.strategyCreator = strategyCreator;
@@ -61,6 +64,7 @@ public class BacktestEngine {
         this.parameterFilter = parameterFilter;
         this.onBacktestFinishedCallback = this::writeBacktestResult;
         this.onExceptionCallback = this::shutdownNowOnException;
+        this.onFinished = onFinished;
     }
 
     private static BacktestResultWriter getBacktestResultWriter(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, StrategyCreator baseStrategy, Path writePath) {
@@ -99,6 +103,7 @@ public class BacktestEngine {
         }
 
         executor.shutdown();
+        onFinished.run();
     }
 
     private void addShutdownHook() {
