@@ -194,4 +194,18 @@ public class BacktestResultReader {
             throw new IllegalStateException("Could not read file " + resultPath, e);
         }
     }
+
+    public void readCsvContent(Path resultPath, ResultExtractor... resultExtractors) {
+        Consumer<String> mapper = line -> {
+            if (line.startsWith("pair")) {
+                return;
+            }
+            BacktestResultContent backtestResultContent = toBacktestResultContent(line);
+            for (ResultExtractor resultExtractor : resultExtractors) {
+                resultExtractor.consume(backtestResultContent);
+            }
+        };
+
+        readLines(resultPath, mapper);
+    }
 }

@@ -2,6 +2,10 @@ package com.becker.freelance.backtest.resultviewer.app;
 
 import com.becker.freelance.backtest.commons.BacktestResultContent;
 import com.becker.freelance.backtest.commons.BacktestResultReader;
+import com.becker.freelance.backtest.resultviewer.app.extractor.BaseDataExtractor;
+import com.becker.freelance.backtest.resultviewer.app.extractor.BestCumulativeExtractor;
+import com.becker.freelance.backtest.resultviewer.app.extractor.BestMaxExtractor;
+import com.becker.freelance.backtest.resultviewer.app.extractor.BestMinExtractor;
 import com.becker.freelance.backtest.resultviewer.app.metric.*;
 import com.becker.freelance.backtest.util.PathUtil;
 import com.becker.freelance.strategies.creation.StrategyCreator;
@@ -13,10 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 public class AbstractBacktestResultViewerApp implements Runnable {
@@ -95,29 +95,23 @@ public class AbstractBacktestResultViewerApp implements Runnable {
         Path resultPath = askForResultPath();
 
         logger.info("Reading Results from {}...", resultPath);
+
+        BestMinExtractor bestMinExtractor = new BestMinExtractor();
+        BestMaxExtractor bestMaxExtractor = new BestMaxExtractor();
+        BestCumulativeExtractor bestCumulativeExtractor = new BestCumulativeExtractor();
+        BaseDataExtractor baseDataExtractor = new BaseDataExtractor();
+
+        BacktestResultReader backtestResultReader = new BacktestResultReader(resultPath);
+        backtestResultReader.readCsvContent(resultPath, bestMinExtractor, bestMaxExtractor, bestCumulativeExtractor, baseDataExtractor);
+
+
+        List<BacktestResultContent> bestMin = bestMinExtractor.getResult();
+        List<BacktestResultContent> bestCumulative = bestCumulativeExtractor.getResult();
+        List<BacktestResultContent> bestMax = bestMaxExtractor.getResult();
+        BacktestResultContent baseData = baseDataExtractor.getResult().get(0);
+
         logger.info("Reading Results finished");
         logger.info("Processing Results...");
-
-        ExecutorService executorService = Executors.newFixedThreadPool(4);
-        Future<List<BacktestResultContent>> bestMinFuture = executorService.submit(() -> getBestMin(resultPath));
-        Future<List<BacktestResultContent>> bestCumulativeFuture = executorService.submit(() -> getBestCumulative(resultPath));
-        Future<List<BacktestResultContent>> bestMaxFuture = executorService.submit(() -> getBestMax(resultPath));
-        Future<BacktestResultContent> baseDataFuture = executorService.submit(() -> getBaseData(resultPath));
-
-        List<BacktestResultContent> bestMin;
-        List<BacktestResultContent> bestCumulative;
-        List<BacktestResultContent> bestMax;
-        BacktestResultContent baseData;
-        try {
-            bestMin = bestMinFuture.get();
-            bestCumulative = bestCumulativeFuture.get();
-            bestMax = bestMaxFuture.get();
-            baseData = baseDataFuture.get();
-        } catch (ExecutionException | InterruptedException e) {
-            throw new IllegalStateException("Could not read results", e);
-        }
-        executorService.shutdown();
-
 
         new BacktestResultConsoleWriter(bestCumulative, bestMax, bestMin, ALL_METRICS, baseData).run();
         new BacktestResultPlotter(bestCumulative, bestMax, bestMin).run();
