@@ -13,24 +13,28 @@ final class DefaultConditionalOrder implements ConditionalOrder {
 
     private final Order delegate;
     private final TriggerDirection triggerDirection;
+    private LocalDateTime lastAdaptionTime;
     private Decimal thresholdPrice;
     private boolean activated = false;
 
 
-    DefaultConditionalOrder(Order delegate, Decimal thresholdPrice) {
-        if (thresholdPrice.isLessThanZero()) {
-            throw new IllegalStateException("Threshold Price of Conditional Order cannot be 0 or less");
-        }
-        this.delegate = delegate;
+    DefaultConditionalOrder(Order delegate, Decimal thresholdPrice, LocalDateTime lastAdaptionTime) {
+        this.delegate = Objects.requireNonNull(delegate);
         this.triggerDirection = getDirection() == Direction.BUY ? TriggerDirection.UP_CROSS : TriggerDirection.DOWN_CROSS;
         this.thresholdPrice = thresholdPrice;
+        this.lastAdaptionTime = Objects.requireNonNull(lastAdaptionTime);
     }
 
     @Override
-    public void setExecutionLevel(Decimal level) {
+    public void setExecutionLevel(Decimal level, LocalDateTime currentTime) {
+        if (level.isLessThanZero()) {
+            throw new IllegalStateException("Threshold Price of Conditional Order cannot be 0 or less");
+        }
         thresholdPrice = level;
+        this.lastAdaptionTime = Objects.requireNonNull(currentTime);
+
         if (delegate instanceof LazyOrder lazyOrder) {
-            lazyOrder.setExecutionLevel(level);
+            lazyOrder.setExecutionLevel(level, currentTime);
         }
     }
 
@@ -38,7 +42,8 @@ final class DefaultConditionalOrder implements ConditionalOrder {
     public LazyOrder clone() {
         return new DefaultConditionalOrder(
                 delegate.clone(),
-                thresholdPrice
+                thresholdPrice,
+                lastAdaptionTime
         );
     }
 
@@ -107,6 +112,9 @@ final class DefaultConditionalOrder implements ConditionalOrder {
 
     @Override
     public boolean canBeExecuted(TimeSeriesEntry currentPrice) {
+        if (currentPrice.time().equals(lastAdaptionTime)) {
+            return false;
+        }
         return internalCanBeExecuted(currentPrice) && delegate().canBeExecuted(currentPrice);
     }
 

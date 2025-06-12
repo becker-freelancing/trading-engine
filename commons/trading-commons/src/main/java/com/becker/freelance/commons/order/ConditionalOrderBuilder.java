@@ -5,6 +5,8 @@ import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
+import java.time.LocalDateTime;
+
 public class ConditionalOrderBuilder implements LazyOrderBuilder {
 
     private Decimal size;
@@ -25,8 +27,8 @@ public class ConditionalOrderBuilder implements LazyOrderBuilder {
         return this;
     }
 
-    public ConditionalOrder build() {
-        return new DefaultConditionalOrder(delegate.build(), thresholdPrice);
+    public ConditionalOrder build(LocalDateTime currentTime) {
+        return new DefaultConditionalOrder(delegate.build(currentTime), thresholdPrice, currentTime);
     }
 
     @Override

@@ -5,6 +5,8 @@ import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
+import java.time.LocalDateTime;
+
 class BaseOrderBuilder implements OrderBuilder {
 
     private Decimal size;
@@ -63,7 +65,7 @@ class BaseOrderBuilder implements OrderBuilder {
     }
 
     @Override
-    public Order build() {
+    public Order build(LocalDateTime currentTime) {
         throw new UnsupportedOperationException("One Concrete Order Type must be selected");
     }
 

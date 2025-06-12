@@ -83,7 +83,7 @@ public class StrategyEngine {
         Optional<EntrySignalBuilder> entrySignal = strategy.shouldEnter(entryParameter);
         entrySignal
                 .map(signal -> entrySignalAdaptor.adapt(environmentProvider, signal))
-                .map(builder -> builder.buildValidated(entryParameter.currentPrice()))
+                .flatMap(builder -> builder.buildIfValid(entryParameter.currentPrice()))
                 .filter(signal -> entrySignalValidator.isValidToExecute(environmentProvider, signal))
                 .ifPresent(signal -> tradeExecutor.entry(entryParameter.currentPrice(), entryParameter.timeSeries(), entryParameter.time(), signal));
     }

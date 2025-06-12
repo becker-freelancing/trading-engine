@@ -5,6 +5,8 @@ import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
+import java.time.LocalDateTime;
+
 public class MarketOrderBuilder implements OrderBuilder {
 
     private Decimal size;
@@ -60,7 +62,7 @@ public class MarketOrderBuilder implements OrderBuilder {
     }
 
     @Override
-    public Order build() {
+    public Order build(LocalDateTime currentTime) {
         return new DefaultMarketOrder(size, direction, pair, reduceOnly);
     }
 

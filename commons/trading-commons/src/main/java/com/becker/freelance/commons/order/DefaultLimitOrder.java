@@ -14,6 +14,7 @@ final class DefaultLimitOrder implements LimitOrder {
     private final Direction direction;
     private final Pair pair;
     private final boolean reduceOnly;
+    private LocalDateTime lastAdaptionTime;
     private Decimal orderPrice;
     private Decimal size;
 
@@ -22,7 +23,7 @@ final class DefaultLimitOrder implements LimitOrder {
     private LocalDateTime executionTime;
 
 
-    DefaultLimitOrder(Decimal orderPrice, Decimal size, Direction direction, Pair pair, boolean reduceOnly) {
+    DefaultLimitOrder(Decimal orderPrice, Decimal size, Direction direction, Pair pair, boolean reduceOnly, LocalDateTime lastAdaptionTime) {
         if (size.isLessThanZero()) {
             throw new IllegalArgumentException("Size of Order cannot be 0 or less");
         }
@@ -31,16 +32,17 @@ final class DefaultLimitOrder implements LimitOrder {
         this.direction = Objects.requireNonNull(direction);
         this.pair = Objects.requireNonNull(pair);
         this.reduceOnly = reduceOnly;
-        setExecutionLevel(orderPrice);
+        setExecutionLevel(orderPrice, lastAdaptionTime);
     }
 
     @Override
-    public void setExecutionLevel(Decimal level) {
+    public void setExecutionLevel(Decimal level, LocalDateTime currentTime) {
         if (level.isLessThanZero()) {
             throw new IllegalArgumentException("Order Price of Limit  Order cannot be 0 or less");
         }
 
         this.orderPrice = level;
+        this.lastAdaptionTime = Objects.requireNonNull(currentTime);
     }
 
     @Override
@@ -50,7 +52,8 @@ final class DefaultLimitOrder implements LimitOrder {
                 size,
                 direction,
                 pair,
-                reduceOnly
+                reduceOnly,
+                lastAdaptionTime
         );
         order.executionTime = executionTime;
         order.executionPrice = executionPrice;
@@ -127,9 +130,12 @@ final class DefaultLimitOrder implements LimitOrder {
     }
 
     private boolean isLimitPriceReached(TimeSeriesEntry currentPrice) {
+        if (currentPrice.time().equals(lastAdaptionTime)) {
+            return false;
+        }
         return switch (getDirection()) {
-            case BUY -> currentPrice.getClosePriceForDirection(direction()).isLessThanOrEqualTo(getOrderPrice());
-            case SELL -> currentPrice.getClosePriceForDirection(direction()).isGreaterThanOrEqualTo(getOrderPrice());
+            case BUY -> currentPrice.getLowPriceForDirection(direction()).isLessThanOrEqualTo(getOrderPrice());
+            case SELL -> currentPrice.getHighPriceForDirection(direction()).isGreaterThanOrEqualTo(getOrderPrice());
         };
     }
 

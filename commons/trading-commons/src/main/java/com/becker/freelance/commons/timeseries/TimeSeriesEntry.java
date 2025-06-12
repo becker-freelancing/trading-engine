@@ -37,6 +37,27 @@ public record TimeSeriesEntry(LocalDateTime time, Decimal openBid, Decimal openA
         };
     }
 
+    public Decimal getLowPriceForDirection(Direction direction) {
+        return switch (direction) {
+            case BUY -> lowAsk();
+            case SELL -> lowBid();
+        };
+    }
+
+    public Decimal getHighPriceForDirection(Direction direction) {
+        return switch (direction) {
+            case BUY -> highAsk();
+            case SELL -> highBid();
+        };
+    }
+
+    public Decimal geOpenPriceForDirection(Direction direction) {
+        return switch (direction) {
+            case BUY -> openAsk();
+            case SELL -> openBid();
+        };
+    }
+
     @Override
     public String toString() {
         return String.format("TimeSeriesEntry(Time: %s, Pair: %s, Open: %f, High: %f, Low: %f, Close: %f, Volume: %f, Trades: %f)",
