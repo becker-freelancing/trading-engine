@@ -34,7 +34,7 @@ public class TrailingPositionAdaptor {
         }
 
         Decimal adjustedStopLevel = currentClose.add(stopDistance);
-        position.setStopLevel(adjustedStopLevel);
+        position.setStopLevel(adjustedStopLevel, entry.time());
         return position;
     }
 
@@ -48,7 +48,7 @@ public class TrailingPositionAdaptor {
         }
 
         Decimal adjustedStopLevel = currentClose.subtract(stopDistance);
-        position.setStopLevel(adjustedStopLevel);
+        position.setStopLevel(adjustedStopLevel, entry.time());
         return position;
     }
 }

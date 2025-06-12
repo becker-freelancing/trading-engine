@@ -5,6 +5,8 @@ import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
+import java.time.LocalDateTime;
+
 public class LimitOrderBuilder implements LazyOrderBuilder {
 
     private Decimal size;
@@ -18,8 +20,8 @@ public class LimitOrderBuilder implements LazyOrderBuilder {
         return this;
     }
 
-    public LimitOrder build() {
-        return new DefaultLimitOrder(orderPrice, size, direction, pair, reduceOnly);
+    public LimitOrder build(LocalDateTime currentTime) {
+        return new DefaultLimitOrder(orderPrice, size, direction, pair, reduceOnly, currentTime);
     }
 
     @Override

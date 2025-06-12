@@ -125,20 +125,13 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     public void adaptPositions(TimeSeriesEntry currentPrice) {
-        // Try Execution Pending Positions wich are not opened, e.g.  due to Limit Open Orders
-        List<Position> remainingPositionsToExecute = new ArrayList<>();
+        // Try Execution Pending Positions wich are not opened, e.g. due to Limit Open Orders
         for (Position positionToExecute : positionsToExecuteBuffer) {
-            if (true) {
-                //TODO: Wann sollen Orders aus dem Buffer rausgenomen werden?
-                throw new UnsupportedOperationException("Muss noch gecheckt werden");
-            }
             if (positionToExecute.getOpenOrder().canBeExecuted(currentPrice)) {
                 internalEntry(currentPrice, positionToExecute);
-            } else {
-                remainingPositionsToExecute.add(positionToExecute);
             }
         }
-        this.positionsToExecuteBuffer = remainingPositionsToExecute;
+        this.positionsToExecuteBuffer = new ArrayList<>();
 
 
         // Adapt Trailing Positions

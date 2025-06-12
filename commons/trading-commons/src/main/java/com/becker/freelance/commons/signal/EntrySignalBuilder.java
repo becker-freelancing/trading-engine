@@ -8,6 +8,7 @@ import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public class EntrySignalBuilder {
@@ -67,10 +68,10 @@ public class EntrySignalBuilder {
         return this;
     }
 
-    public EntrySignal build() {
-        Order openOrder = buildOpenOrder();
-        ConditionalOrder stopOrder = buildStopOrder(openOrder);
-        LazyOrder limitOrder = buildLimitOrder(openOrder);
+    public EntrySignal build(LocalDateTime currentTime) {
+        Order openOrder = buildOpenOrder(currentTime);
+        ConditionalOrder stopOrder = buildStopOrder(openOrder, currentTime);
+        LazyOrder limitOrder = buildLimitOrder(openOrder, currentTime);
 
         return new DefaultEntrySignal(
                 openOrder,
@@ -81,75 +82,99 @@ public class EntrySignalBuilder {
         );
     }
 
+    public Optional<EntrySignal> buildIfValid(TimeSeriesEntry currentPrice) {
+        EntrySignal entrySignal = build(currentPrice.time());
+        Optional<RuntimeException> validation = internalValidate(currentPrice, entrySignal);
+        if (validation.isPresent()) {
+            return Optional.empty();
+        }
+        return Optional.of(entrySignal);
+    }
+
     public EntrySignal buildValidated(TimeSeriesEntry currentPrice) {
-        EntrySignal entrySignal = build();
+        EntrySignal entrySignal = build(currentPrice.time());
         validate(currentPrice, entrySignal);
         return entrySignal;
     }
 
-    private LazyOrder buildLimitOrder(Order openOrder) {
+    private LazyOrder buildLimitOrder(Order openOrder, LocalDateTime currentTime) {
         return limitOrderBuilder
                 .withReduceOnly(true)
                 .withDirection(openOrder.getDirection().negate())
                 .withPair(openOrder.getPair())
                 .withSize(openOrder.getSize())
-                .build();
+                .build(currentTime);
     }
 
-    private ConditionalOrder buildStopOrder(Order openOrder) {
+    private ConditionalOrder buildStopOrder(Order openOrder, LocalDateTime currentTime) {
         return stopOrderBuilder
                 .withReduceOnly(true)
                 .withDirection(openOrder.getDirection().negate())
                 .withPair(openOrder.getPair())
                 .withSize(openOrder.getSize())
-                .build();
+                .build(currentTime);
     }
 
-    private Order buildOpenOrder() {
-        return openOrderBuilder.build();
+    private Order buildOpenOrder(LocalDateTime currentTime) {
+        return openOrderBuilder.build(currentTime);
     }
+
+    public boolean isValid(TimeSeriesEntry currentPrice, EntrySignal entrySignal) {
+        Optional<RuntimeException> validation = internalValidate(currentPrice, entrySignal);
+        return validation.isEmpty();
+    }
+
 
     private void validate(TimeSeriesEntry currentPrice, EntrySignal entrySignal) {
+        Optional<RuntimeException> validation = internalValidate(currentPrice, entrySignal);
+        if (validation.isPresent()) {
+            throw validation.get();
+        }
+    }
+
+    private Optional<RuntimeException> internalValidate(TimeSeriesEntry currentPrice, EntrySignal entrySignal) {
         Order openOrder = entrySignal.getOpenOrder();
         LazyOrder limitOrder = entrySignal.getLimitOrder();
         if (openOrder.getDirection() == limitOrder.getDirection()) {
-            throw new IllegalStateException("Direction of Open and Limit Order must be opposite");
+            return Optional.of(new IllegalStateException("Direction of Open and Limit Order must be opposite"));
         }
 
         LazyOrder stopOrder = entrySignal.getStopOrder();
         if (openOrder.getDirection() == stopOrder.getDirection()) {
-            throw new IllegalStateException("Direction of Open and Stop Order must be opposite");
+            return Optional.of(new IllegalStateException("Direction of Open and Stop Order must be opposite"));
         }
         Decimal stopLevel = stopOrder.getNearestExecutionPrice();
         Decimal limitLevel = limitOrder.getNearestExecutionPrice();
         if (stopLevel.isLessThan(Decimal.ZERO)) {
-            throw new IllegalStateException("Stop Level must be greater than zero");
+            return Optional.of(new IllegalStateException("Stop Level must be greater than zero"));
         }
         if (limitLevel.isLessThan(Decimal.ZERO)) {
-            throw new IllegalStateException("Limit Level must be grater than zero");
+            return Optional.of(new IllegalStateException("Limit Level must be grater than zero"));
         }
         if (openOrder.getDirection() == Direction.BUY) {
             if (stopLevel.isGreaterThan(limitLevel)) {
-                throw new IllegalStateException("Stop Level must be less than Limit Level for BUY-Positions");
+                return Optional.of(new IllegalStateException("Stop Level must be less than Limit Level for BUY-Positions"));
             }
             if (stopLevel.isGreaterThan(currentPrice.getClosePriceForDirection(Direction.BUY))) {
-                throw new IllegalStateException("Stop Level must be less than the current price for BUY-Positions");
+                return Optional.of(new IllegalStateException("Stop Level must be less than the current price for BUY-Positions"));
             }
             if (limitLevel.isLessThan(currentPrice.getClosePriceForDirection(Direction.BUY))) {
-                throw new IllegalStateException("Limit Level must be greater than the current price for BUY-Positions");
+                return Optional.of(new IllegalStateException("Limit Level must be greater than the current price for BUY-Positions"));
             }
         }
         if (openOrder.getDirection() == Direction.SELL) {
             if (stopLevel.isLessThan(limitLevel)) {
-                throw new IllegalStateException("Stop Level must be greater than Limit Level for SELL-Positions");
+                return Optional.of(new IllegalStateException("Stop Level must be greater than Limit Level for SELL-Positions"));
             }
             if (stopLevel.isLessThan(currentPrice.getClosePriceForDirection(Direction.SELL))) {
-                throw new IllegalStateException("Stop Level must be greater than the current price for SELL-Positions");
+                return Optional.of(new IllegalStateException("Stop Level must be greater than the current price for SELL-Positions"));
             }
             if (limitLevel.isGreaterThan(currentPrice.getClosePriceForDirection(Direction.SELL))) {
-                throw new IllegalStateException("Limit Level must be less than the current price for SELL-Positions");
+                return Optional.of(new IllegalStateException("Limit Level must be less than the current price for SELL-Positions"));
             }
         }
+
+        return Optional.empty();
     }
 
     public void setSize(Decimal positionSize) {
