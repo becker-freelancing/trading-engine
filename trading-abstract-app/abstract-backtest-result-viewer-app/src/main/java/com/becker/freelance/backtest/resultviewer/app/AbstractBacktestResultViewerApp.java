@@ -2,10 +2,7 @@ package com.becker.freelance.backtest.resultviewer.app;
 
 import com.becker.freelance.backtest.commons.BacktestResultContent;
 import com.becker.freelance.backtest.commons.BacktestResultReader;
-import com.becker.freelance.backtest.resultviewer.app.extractor.BaseDataExtractor;
-import com.becker.freelance.backtest.resultviewer.app.extractor.BestCumulativeExtractor;
-import com.becker.freelance.backtest.resultviewer.app.extractor.BestMaxExtractor;
-import com.becker.freelance.backtest.resultviewer.app.extractor.BestMinExtractor;
+import com.becker.freelance.backtest.resultviewer.app.extractor.*;
 import com.becker.freelance.backtest.resultviewer.app.metric.*;
 import com.becker.freelance.backtest.util.PathUtil;
 import com.becker.freelance.strategies.creation.StrategyCreator;
@@ -101,20 +98,24 @@ public class AbstractBacktestResultViewerApp implements Runnable {
         BestCumulativeExtractor bestCumulativeExtractor = new BestCumulativeExtractor();
         BaseDataExtractor baseDataExtractor = new BaseDataExtractor();
 
+        Runnable onFinish = () -> {
+            List<BacktestResultContent> bestMin = bestMinExtractor.getResult();
+            List<BacktestResultContent> bestCumulative = bestCumulativeExtractor.getResult();
+            List<BacktestResultContent> bestMax = bestMaxExtractor.getResult();
+            BacktestResultContent baseData = baseDataExtractor.getResult().get(0);
+
+            logger.info("Reading Results finished");
+            logger.info("Processing Results...");
+
+            new BacktestResultConsoleWriter(bestCumulative, bestMax, bestMin, ALL_METRICS, baseData).run();
+            new BacktestResultPlotter(bestCumulative, bestMax, bestMin).run();
+        };
+
         BacktestResultReader backtestResultReader = new BacktestResultReader(resultPath);
-        backtestResultReader.readCsvContent(resultPath, bestMinExtractor, bestMaxExtractor, bestCumulativeExtractor, baseDataExtractor);
+        backtestResultReader.readCsvContent(resultPath, onFinish, bestMinExtractor, bestMaxExtractor, bestCumulativeExtractor, baseDataExtractor, new BestCumulativeByRegimeExtractor());
 
 
-        List<BacktestResultContent> bestMin = bestMinExtractor.getResult();
-        List<BacktestResultContent> bestCumulative = bestCumulativeExtractor.getResult();
-        List<BacktestResultContent> bestMax = bestMaxExtractor.getResult();
-        BacktestResultContent baseData = baseDataExtractor.getResult().get(0);
 
-        logger.info("Reading Results finished");
-        logger.info("Processing Results...");
-
-        new BacktestResultConsoleWriter(bestCumulative, bestMax, bestMin, ALL_METRICS, baseData).run();
-        new BacktestResultPlotter(bestCumulative, bestMax, bestMin).run();
     }
 
     private Path askForResultPath() {

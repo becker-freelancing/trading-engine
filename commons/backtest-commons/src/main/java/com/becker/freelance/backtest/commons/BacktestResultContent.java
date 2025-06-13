@@ -1,6 +1,7 @@
 package com.becker.freelance.backtest.commons;
 
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,9 +12,7 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -30,6 +29,7 @@ public final class BacktestResultContent {
     private final String parametersJson;
     private final String tradesJson;
     private List<Trade> trades = null;
+    private Map<TradeableQuantilMarketRegime, List<Trade>> tradesByRegime;
 
     public BacktestResultContent(ObjectMapper objectMapper, String pairs, String appMode, LocalDateTime fromTime,
                                  LocalDateTime toTime, Decimal min, Decimal max, Decimal cumulative,
@@ -45,6 +45,19 @@ public final class BacktestResultContent {
         this.initialWalletAmount = initialWalletAmount;
         this.parametersJson = parametersJson;
         this.tradesJson = tradesJson;
+    }
+
+    public Map<TradeableQuantilMarketRegime, List<Trade>> tradeObjectsForRegime() {
+        if (tradesByRegime == null) {
+            tradesByRegime = new HashMap<>();
+            for (Trade trade : tradeObjects()) {
+                TradeableQuantilMarketRegime tradeRegime = trade.getOpenMarketRegime();
+                tradesByRegime.computeIfAbsent(tradeRegime, k -> new ArrayList<>());
+                tradesByRegime.get(tradeRegime).add(trade);
+            }
+        }
+
+        return tradesByRegime;
     }
 
     public List<Trade> tradeObjects() {

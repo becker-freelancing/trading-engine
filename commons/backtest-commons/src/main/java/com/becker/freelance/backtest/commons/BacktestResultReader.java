@@ -20,6 +20,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -161,13 +164,13 @@ public class BacktestResultReader {
         List<String> params = new ArrayList<>();
         boolean add = false;
         for (int i = 7; i < values.length; i++) {
-            if (values[i].equals("[]")){
+            if (values[i].equals("[]")) {
                 return "[]";
             }
             if (values[i].startsWith("[{")) {
                 add = true;
             }
-            if (values[i].contains("}]")){
+            if (values[i].contains("}]")) {
                 params.add(values[i]);
                 break;
             }
@@ -180,22 +183,47 @@ public class BacktestResultReader {
     }
 
     private void readLines(Path resultPath, Consumer<String> lineConsumer) {
+        readLines(resultPath, lineConsumer, () -> {
+        });
+    }
+
+    private void readLines(Path resultPath, Consumer<String> lineConsumer, Runnable onFisnish) {
+
+        ExecutorService executor = Executors.newFixedThreadPool(5);
+        List<Callable<Void>> tasks = new ArrayList<>();
         try (
                 FileInputStream fis = new FileInputStream(resultPath.toFile());
                 ZstdCompressorInputStream zis = new ZstdCompressorInputStream(fis);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(zis))
-        ){
-
+        ) {
             String line;
-            while ((line = reader.readLine()) != null){
-                lineConsumer.accept(line);
+            while (true) {
+                try {
+                    if (!((line = reader.readLine()) != null)) break;
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
+                final String finalLine = line;
+                Callable<Void> processLine = () -> {
+                    lineConsumer.accept(finalLine);
+                    return null;
+                };
+                tasks.add(processLine);
+                executor.submit(processLine);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Could not read file " + resultPath, e);
         }
+        executor.shutdown();
+        try {
+            executor.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e);
+        }
+        onFisnish.run();
     }
 
-    public void readCsvContent(Path resultPath, ResultExtractor... resultExtractors) {
+    public void readCsvContent(Path resultPath, Runnable onFinish, ResultExtractor... resultExtractors) {
         Consumer<String> mapper = line -> {
             if (line.startsWith("pair")) {
                 return;
@@ -206,6 +234,6 @@ public class BacktestResultReader {
             }
         };
 
-        readLines(resultPath, mapper);
+        readLines(resultPath, mapper, onFinish);
     }
 }
