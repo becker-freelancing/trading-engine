@@ -27,9 +27,20 @@ public class Trade implements Comparable<Trade> {
 
     protected Trade(){}
 
-    public Trade(String relatedPositionId, LocalDateTime openTime, LocalDateTime closeTime, Pair pair, Decimal profitInEuroWithFees,
-                 Decimal openLevel, Decimal closeLevel, Decimal openFee, Decimal closeFee, Decimal size, Direction direction,
-                 Decimal conversionRate, PositionBehaviour positionBehaviour, TradeableQuantilMarketRegime openMarketRegime) {
+    public Trade(String relatedPositionId,
+                 LocalDateTime openTime,
+                 LocalDateTime closeTime,
+                 Pair pair,
+                 Decimal profitInEuroWithFees,
+                 Decimal openLevel,
+                 Decimal closeLevel,
+                 Decimal openFee,
+                 Decimal closeFee,
+                 Decimal size,
+                 Direction direction,
+                 Decimal conversionRate,
+                 PositionBehaviour positionBehaviour,
+                 TradeableQuantilMarketRegime openMarketRegime) {
         this.relatedPositionId = relatedPositionId;
         this.openTime = openTime;
         this.closeTime = closeTime;

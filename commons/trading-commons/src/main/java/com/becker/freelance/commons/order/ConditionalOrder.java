@@ -15,4 +15,8 @@ public interface ConditionalOrder extends LazyOrder {
         return getThresholdPrice();
     }
 
+    @Override
+    default void visit(OrderVisitor visitor) {
+        visitor.accept(this);
+    }
 }

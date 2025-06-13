@@ -7,11 +7,14 @@ import java.math.RoundingMode;
 
 public class Decimal extends BigDecimal {
 
+
+    public static final Decimal MINUS_1 = new Decimal(-1);
     public static final Decimal ZERO = new Decimal(BigDecimal.ZERO);
     public static final Decimal ONE = new Decimal(BigDecimal.ONE);
     public static final Decimal TWO = new Decimal("2");
     public static final Decimal TEN = new Decimal(BigDecimal.TEN);
     public static final Decimal DOUBLE_MAX = new Decimal(Double.MAX_VALUE);
+    public static final Decimal MINUS_DOUBLE_MAX = DOUBLE_MAX.multiply(MINUS_1);
 
     public static Decimal valueOf(double val) {
         return new Decimal(val);

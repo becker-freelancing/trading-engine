@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class StrategyEngine {
@@ -43,7 +44,8 @@ public class StrategyEngine {
                           TradeExecutor tradeExecutor,
                           EurUsdRequestor eurUsdRequestor,
                           PriceRequestor priceRequestor,
-                          Consumer<TimeChangeListener> timeChangeListenerConsumer) {
+                          Consumer<TimeChangeListener> timeChangeListenerConsumer,
+                          BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator) {
         this.tradeExecutor = tradeExecutor;
         ManagementLoader managementLoader = new ManagementLoader();
         this.entrySignalAdaptor = managementLoader.findEntrySignalAdaptor();
@@ -59,6 +61,7 @@ public class StrategyEngine {
         timeChangeListenerConsumer.accept(this.environmentProvider);
         this.strategy = strategySupplier.get(pair, brokerRequestor.getTradingCalculator(eurUsdRequestor));
         this.strategy.setOpenPositionRequestor(tradeExecutor);
+        this.strategy.beforeFirstBar(strategyInitiator);
     }
 
     public void executeForTime(TimeSeries timeSeries, LocalDateTime time, TradingStrategy strategy) {

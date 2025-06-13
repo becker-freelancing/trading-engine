@@ -2,8 +2,13 @@ package com.becker.freelance.bybit.trades;
 
 import com.becker.freelance.bybit.env.BybitEnvironmentProvider;
 import com.becker.freelance.bybit.util.PairConverter;
+import com.becker.freelance.commons.order.ConditionalOrder;
+import com.becker.freelance.commons.order.LimitOrder;
+import com.becker.freelance.commons.order.MarketOrder;
+import com.becker.freelance.commons.order.TriggerDirection;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
+import com.becker.freelance.commons.position.PositionBehaviour;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
 import com.bybit.api.client.domain.CategoryType;
@@ -82,50 +87,6 @@ class TradeApiClient {
                 .toLocalDateTime();
     }
 
-
-    public Optional<String> createPositionStopLimitLevel(Direction direction, Pair pair, Decimal size, Decimal stopLevel, Decimal limitLevel) throws IOException, InterruptedException, URISyntaxException {
-        TradeOrderRequest orderRequest = TradeOrderRequest.builder()
-                .category(CategoryType.LINEAR)
-                .symbol(pairConverter.convert(pair))
-                .isLeverage(1)
-                .side(direction == Direction.BUY ? Side.BUY : Side.SELL)
-                .orderType(TradeOrderType.MARKET)
-                .qty(size.toPlainString())
-                .marketUnit(pair.baseCurrency())
-                .orderLinkId(UUID.randomUUID().toString())
-                .takeProfit(limitLevel.toPlainString())
-                .stopLoss(stopLevel.toPlainString())
-                .tpOrderType(TradeOrderType.MARKET)
-                .slOrderType(TradeOrderType.MARKET)
-                .tpslMode("Full")
-                .build();
-        Map<String, Object> order = (Map<String, Object>) tradeRestClient.createOrder(orderRequest);
-        if (!"OK".equals(order.get("retMsg"))) {
-            logger.warn("Could not open order for pair {}, because: {}", pair.technicalName(), order.get("retMsg"));
-            return Optional.empty();
-        }
-        logger.info("Order opened for {}, (Direction: {}, Stop: {}, Limit: {})", pair.technicalName(), direction, stopLevel, limitLevel);
-        Map<String, String> result = (Map<String, String>) order.get("result");
-        return Optional.ofNullable(result.get("id"));
-    }
-
-
-    public void marketOrder(Pair pair, Direction direction, Decimal size) {
-        TradeOrderRequest orderRequest = TradeOrderRequest.builder()
-                .category(CategoryType.LINEAR)
-                .symbol(pairConverter.convert(pair))
-                .isLeverage(1)
-                .side(direction == Direction.BUY ? Side.BUY : Side.SELL)
-                .orderType(TradeOrderType.MARKET)
-                .qty(size.toPlainString())
-                .marketUnit(pair.baseCurrency())
-                .orderLinkId(UUID.randomUUID().toString())
-                .reduceOnly(true)
-                .build();
-
-        tradeRestClient.createOrder(orderRequest);
-    }
-
     public Stream<Trade> getTradesInTime(LocalDateTime from, LocalDateTime to, Pair pair) {
         Stream<Trade> result = Stream.of();
         while (from.isBefore(to)) {
@@ -168,19 +129,146 @@ class TradeApiClient {
     }
 
     private Trade toTrade(Map<String, String> stringStringMap) {
-        throw new UnsupportedOperationException("Trading Fees are not implemented yet");
-//        return new Trade(
-//                Instant.ofEpochMilli(Long.valueOf(stringStringMap.get("createdTime"))).atZone(ZoneId.systemDefault()).toLocalDateTime(),
-//                Instant.ofEpochMilli(Long.valueOf(stringStringMap.get("createdTime"))).atZone(ZoneId.systemDefault()).toLocalDateTime(), //TODO
-//                pairConverter.convert(stringStringMap.get("symbol"), "1").orElseThrow(() -> new IllegalArgumentException("Could not convert pair: " + stringStringMap.get("symbol"))),
-//                new Decimal(stringStringMap.get("closedPnl")),
-//                new Decimal(stringStringMap.get("avgEntryPrice")),
-//                new Decimal(stringStringMap.get("avgExitPrice")),
-//                new Decimal(stringStringMap.get("qty")),
-//                stringStringMap.get("side").equalsIgnoreCase("BUY") ? Direction.BUY : Direction.SELL,
-//                Decimal.ZERO, //TODO
-//                PositionBehaviour.HARD_LIMIT, //TODO
-//                null //TODO
-//        );
+        return new Trade(
+                stringStringMap.get("orderId"),
+                Instant.ofEpochMilli(Long.valueOf(stringStringMap.get("createdTime"))).atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                Instant.ofEpochMilli(Long.valueOf(stringStringMap.get("updatedTime"))).atZone(ZoneId.systemDefault()).toLocalDateTime(), //TODO
+                pairConverter.convert(stringStringMap.get("symbol"), "1").orElseThrow(() -> new IllegalArgumentException("Could not convert pair: " + stringStringMap.get("symbol"))),
+                new Decimal(stringStringMap.get("closedPnl")),
+                new Decimal(stringStringMap.get("avgEntryPrice")),
+                new Decimal(stringStringMap.get("avgExitPrice")),
+                Decimal.ZERO,
+                Decimal.ZERO,
+                new Decimal(stringStringMap.get("qty")),
+                stringStringMap.get("side").equalsIgnoreCase("BUY") ? Direction.BUY : Direction.SELL,
+                Decimal.ONE,
+                PositionBehaviour.HARD_LIMIT,
+                null
+        );
+    }
+
+    public Optional<OrderPlacementResult> createConditionalOrder(ConditionalOrder conditionalOrder) {
+        TradeOrderRequest.TradeOrderRequestBuilder orderRequest = TradeOrderRequest.builder()
+                .category(CategoryType.LINEAR)
+                .symbol(pairConverter.convert(conditionalOrder.getPair()))
+                .isLeverage(1)
+                .side(map(conditionalOrder.getDirection()))
+                .qty(conditionalOrder.getSize().toPlainString())
+                .marketUnit(conditionalOrder.getPair().baseCurrency())
+                .reduceOnly(conditionalOrder.isReduceOnly())
+                .triggerPrice(conditionalOrder.getThresholdPrice().toPlainString())
+                .triggerDirection(map(conditionalOrder.getTriggerDirection()));
+
+        if (conditionalOrder.getDelegateOrder() instanceof MarketOrder) {
+            orderRequest = orderRequest
+                    .orderType(TradeOrderType.MARKET);
+        } else if (conditionalOrder.getDelegateOrder() instanceof LimitOrder limitOrder) {
+            orderRequest = orderRequest
+                    .orderType(TradeOrderType.LIMIT)
+                    .price(limitOrder.getOrderPrice().toPlainString());
+        } else {
+            throw new UnsupportedOperationException("Delegate of Type " + conditionalOrder.getDelegateOrder().getClass() + " is not supported");
+        }
+
+        Map<String, Object> order = (Map<String, Object>) tradeRestClient.createOrder(orderRequest.build());
+
+        if (!"OK".equals(order.get("retMsg"))) {
+            logger.warn("Could not place conditional order for pair {}, because: {}, Order: {}", conditionalOrder.getPair().technicalName(), order.get("retMsg"), conditionalOrder);
+            return Optional.empty();
+        }
+        logger.info("Conditional Order placed on {}, ({})", conditionalOrder.getPair().technicalName(), conditionalOrder);
+        Map<String, String> result = (Map<String, String>) order.get("result");
+
+        return Optional.of(new OrderPlacementResult(result.get("id")));
+    }
+
+    private Integer map(TriggerDirection triggerDirection) {
+        return switch (triggerDirection) {
+            case DOWN_CROSS -> 2;
+            case UP_CROSS -> 1;
+        };
+    }
+
+    public Optional<OrderPlacementResult> createLimitOrder(LimitOrder limitOrder) {
+        TradeOrderRequest orderRequest = TradeOrderRequest.builder()
+                .category(CategoryType.LINEAR)
+                .symbol(pairConverter.convert(limitOrder.getPair()))
+                .isLeverage(1)
+                .side(map(limitOrder.getDirection()))
+                .orderType(TradeOrderType.LIMIT)
+                .qty(limitOrder.getSize().toPlainString())
+                .marketUnit(limitOrder.getPair().baseCurrency())
+                .reduceOnly(limitOrder.isReduceOnly())
+                .price(limitOrder.getOrderPrice().toPlainString())
+                .build();
+
+        Map<String, Object> order = (Map<String, Object>) tradeRestClient.createOrder(orderRequest);
+
+        if (!"OK".equals(order.get("retMsg"))) {
+            logger.warn("Could not place Limit order for pair {}, because: {}, Order: {}", limitOrder.getPair().technicalName(), order.get("retMsg"), limitOrder);
+            return Optional.empty();
+        }
+        logger.info("Limit Order placed on {}, ({})", limitOrder.getPair().technicalName(), limitOrder);
+        Map<String, String> result = (Map<String, String>) order.get("result");
+
+        return Optional.of(new OrderPlacementResult(result.get("id")));
+    }
+
+
+    public Optional<OrderPlacementResult> marketOrder(MarketOrder marketOrder) {
+        TradeOrderRequest orderRequest = TradeOrderRequest.builder()
+                .category(CategoryType.LINEAR)
+                .symbol(pairConverter.convert(marketOrder.getPair()))
+                .isLeverage(1)
+                .side(map(marketOrder.getDirection()))
+                .orderType(TradeOrderType.MARKET)
+                .qty(marketOrder.getSize().toPlainString())
+                .marketUnit(marketOrder.getPair().baseCurrency())
+                .reduceOnly(marketOrder.isReduceOnly())
+                .build();
+
+        Map<String, Object> order = (Map<String, Object>) tradeRestClient.createOrder(orderRequest);
+
+        if (!"OK".equals(order.get("retMsg"))) {
+            logger.warn("Could not open market order for pair {}, because: {}", marketOrder.getPair().technicalName(), order.get("retMsg"));
+            return Optional.empty();
+        }
+        logger.info("Market Order placed on {}, (Direction: {})", marketOrder.getPair().technicalName(), marketOrder.getDirection());
+        Map<String, String> result = (Map<String, String>) order.get("result");
+
+        return Optional.of(new OrderPlacementResult(result.get("id")));
+    }
+
+    private Side map(Direction direction) {
+        return switch (direction) {
+            case BUY -> Side.BUY;
+            case SELL -> Side.SELL;
+        };
+    }
+
+    public Optional<OrderCancelFailReason> cancelOrder(String orderId, Pair pair) {
+        TradeOrderRequest orderRequest = TradeOrderRequest.builder()
+                .category(CategoryType.LINEAR)
+                .symbol(pairConverter.convert(pair))
+                .orderId(orderId)
+                .build();
+
+        Map<String, Object> result = (Map<String, Object>) tradeRestClient.cancelOrder(orderRequest);
+        if (!"OK".equals(result.get("retMsg"))) {
+            logger.warn("Could not cancel order for pair {} with id {}, because: {}", pair, orderId, result.get("retMsg"));
+            return Optional.of(OrderCancelFailReason.UNKNOWN);
+        }
+
+        return Optional.empty();
+    }
+
+    public void execute(TradeOrderRequest convert) {
+        Map<String, Object> result = (Map<String, Object>) tradeRestClient.cancelOrder(convert);
+        if (!"OK".equals(result.get("retMsg"))) {
+            logger.warn("Could not open Order, because: {}", result.get("retMsg"));
+            return;
+        }
+
+        logger.info("Order opened {}", convert);
     }
 }

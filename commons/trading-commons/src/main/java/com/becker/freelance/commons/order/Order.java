@@ -40,4 +40,6 @@ public interface Order {
 
     public Order clone();
 
+    public void visit(OrderVisitor visitor);
+
 }

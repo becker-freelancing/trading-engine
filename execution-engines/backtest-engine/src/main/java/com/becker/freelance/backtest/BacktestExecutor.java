@@ -60,7 +60,9 @@ public class BacktestExecutor implements Runnable {
                         tradeExecutor,
                         backtestExecutionConfiguration.getEurUsdRequestor(),
                         dataProviderForPair,
-                        timeChangeListenerConsumer);
+                        timeChangeListenerConsumer,
+                        (strategy, time) -> {
+                        });
                 StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine);
                 dataProviderForPair.addSubscriber(strategyDataSubscriber);
             }

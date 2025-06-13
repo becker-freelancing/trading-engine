@@ -6,6 +6,7 @@ import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.signal.ExitSignal;
+import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.indicators.ta.regime.DurationMarketRegime;
 import com.becker.freelance.indicators.ta.regime.MarketRegime;
@@ -23,17 +24,25 @@ import org.ta4j.core.Indicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 import org.ta4j.core.num.Num;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiConsumer;
 
 public abstract class BaseStrategy implements TradingStrategy {
 
+    private final Pair pair;
     private final StrategyCreator strategyCreator;
     protected final BarSeries barSeries;
     protected final Indicator<Num> closePrice;
     private final Indicator<QuantileMarketRegime> regimeIndicator;
+    private final Set<BiConsumer<TradingStrategy, LocalDateTime>> beforeFirstBar;
     private OpenPositionRequestor openPositionRequestor;
     private ZonedDateTime lastAddedBarTime;
+    private boolean initiated = false;
 
     protected BaseStrategy(StrategyParameter strategyParameter) {
         this.strategyCreator = strategyParameter.strategyCreator();
@@ -45,6 +54,8 @@ public abstract class BaseStrategy implements TradingStrategy {
         Indicator<MarketRegime> marketRegimeIndicator = regimeIndicatorFactory.marketRegimeIndicatorFromConfigFile(pair.technicalName(), closePrice);
         Indicator<DurationMarketRegime> durationMarketRegimeIndicator = regimeIndicatorFactory.durationMarketRegimeIndicator(marketRegimeIndicator);
         this.regimeIndicator = regimeIndicatorFactory.quantileMarketRegimeIndicator(pair.technicalName(), durationMarketRegimeIndicator);
+        this.beforeFirstBar = new HashSet<>();
+        this.pair = strategyParameter.pair();
     }
 
     public Optional<EntrySignalBuilder> shouldEnter(EntryExecutionParameter entryParameter) {
@@ -71,6 +82,10 @@ public abstract class BaseStrategy implements TradingStrategy {
         if (currentPrice.getEndTime().equals(lastAddedBarTime)) {
             return;
         }
+        if (!initiated && barSeries.isEmpty()) {
+            initiated = true;
+            beforeFirstBar.forEach(initiator -> initiator.accept(this, currentPrice.getEndTime().toLocalDateTime()));
+        }
         barSeries.addBar(currentPrice);
         lastAddedBarTime = currentPrice.getEndTime();
     }
@@ -96,6 +111,36 @@ public abstract class BaseStrategy implements TradingStrategy {
     @Override
     public QuantileMarketRegime currentMarketRegime() {
         return regimeIndicator.getValue(barSeries.getEndIndex());
+    }
+
+    @Override
+    public int unstableBars() {
+        return regimeIndicator.getUnstableBars();
+    }
+
+    @Override
+    public void beforeFirstBar(BiConsumer<TradingStrategy, LocalDateTime> beforeFirstBar) {
+        this.beforeFirstBar.add(beforeFirstBar);
+    }
+
+    @Override
+    public Pair getPair() {
+        return pair;
+    }
+
+    @Override
+    public void processInitData(TimeSeries initiationData) {
+        LocalDateTime minTime = initiationData.getMinTime();
+        LocalDateTime maxTime = initiationData.getMaxTime();
+        Duration duration = initiationData.getPair().toDuration();
+
+        while (!minTime.isAfter(maxTime)) {
+
+            Bar bar = initiationData.getEntryForTimeAsBar(minTime);
+            addBarIfNeeded(bar);
+
+            minTime = minTime.plus(duration);
+        }
     }
 
     protected OrderBuilder orderBuilder() {

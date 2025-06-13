@@ -1,12 +1,13 @@
 package com.becker.freelance.bybit.trades;
 
-import com.becker.freelance.commons.calculation.TradingFeeCalculator;
+import com.becker.freelance.commons.order.ConditionalOrder;
+import com.becker.freelance.commons.order.LimitOrder;
+import com.becker.freelance.commons.order.MarketOrder;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
-import com.becker.freelance.commons.signal.ExitSignal;
+import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.trade.Trade;
-import com.becker.freelance.math.Decimal;
+import com.bybit.api.client.domain.trade.request.TradeOrderRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,50 +45,32 @@ public class TradeController {
     }
 
 
-    public Optional<Position> createPositionStopLimitLevel(Direction direction, Pair pair, Decimal size, Decimal stopLevel, Decimal limitLevel, TradingFeeCalculator tradingFeeCalculator) {
-        Optional<String> dealReference;
-        try {
-            dealReference = apiClient.createPositionStopLimitLevel(
-                    direction,
-                    pair,
-                    size,
-                    stopLevel,
-                    limitLevel
-            );
-        } catch (IOException | InterruptedException | URISyntaxException e) {
-            logger.error("Could not create position", e);
-            return Optional.empty();
-        }
-
-        return dealReference.flatMap(this::getPosition);
-    }
-
-    public List<Trade> closePositions(Pair pair, ExitSignal exitSignal, TradingFeeCalculator tradingFeeCalculator) {
-        Optional<Decimal> sizeToClose = allPositions().stream()
-                .filter(position -> position.getDirection().equals(exitSignal.directionToClose()))
-                .map(Position::getSize)
-                .reduce(Decimal::add);
-
-        if (sizeToClose.isEmpty()) {
-            return List.of();
-        }
-
-        apiClient.marketOrder(pair, exitSignal.directionToClose().negate(), sizeToClose.get());
-
-
-        return List.of();//TODO
-
-    }
-
-    private Optional<Position> getPosition(String dealReference) {
-        return allPositions().stream()
-                .filter(position -> position.getId().equals(dealReference))
-                .findFirst();
-    }
-
     public List<Trade> getTradesForDurationUntilNowForPair(LocalDateTime to, Duration duration, Pair pair) {
         LocalDateTime from = to.minus(duration);
         return apiClient.getTradesInTime(from, to, pair)
                 .toList();
+    }
+
+    public Optional<OrderPlacementResult> createConditionalOrder(ConditionalOrder conditionalOrder) {
+        return apiClient.createConditionalOrder(conditionalOrder);
+    }
+
+    public Optional<OrderPlacementResult> createLimitOrder(LimitOrder limitOrder) {
+        return apiClient.createLimitOrder(limitOrder);
+    }
+
+    public Optional<OrderPlacementResult> createMarketOrder(MarketOrder marketOrder) {
+        return apiClient.marketOrder(marketOrder);
+
+    }
+
+    public Optional<OrderCancelFailReason> cancelOrder(String orderId, Pair pair) {
+        return apiClient.cancelOrder(orderId, pair);
+    }
+
+    public void entry(EntrySignal entrySignal) {
+        ByBitEntrySignalConverter byBitEntrySignalConverter = new ByBitEntrySignalConverter();
+        TradeOrderRequest convert = byBitEntrySignalConverter.convert(entrySignal);
+        apiClient.execute(convert);
     }
 }

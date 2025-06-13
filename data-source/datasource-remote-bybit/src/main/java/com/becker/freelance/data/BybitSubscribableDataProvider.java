@@ -2,6 +2,7 @@ package com.becker.freelance.data;
 
 import com.becker.freelance.broker.marketdata.MarketData;
 import com.becker.freelance.broker.marketdata.MarketDataListener;
+import com.becker.freelance.bybit.marketdata.MarketDataClient;
 import com.becker.freelance.bybit.marketdata.MarketDataSocketRegistry;
 import com.becker.freelance.bybit.orderbook.OrderbookSocketRegistry;
 import com.becker.freelance.commons.pair.Pair;
@@ -26,11 +27,12 @@ public class BybitSubscribableDataProvider extends SubscribableDataProvider impl
     private final Set<DataSubscriber> subscribers;
     private final Pair pair;
     private LocalDateTime lastAddedTime = LocalDateTime.MIN;
-
+    private final MarketDataClient marketDataClient;
 
     public BybitSubscribableDataProvider(Pair pair) {
         this.pair = pair;
         this.subscribers = new LinkedHashSet<>();
+        this.marketDataClient = new MarketDataClient();
         MarketDataSocketRegistry.registerListener(pair, this);
         OrderbookSocketRegistry.registerListener(pair, new OrderBookListener(pair));
     }
@@ -81,6 +83,6 @@ public class BybitSubscribableDataProvider extends SubscribableDataProvider impl
     @Override
     public TimeSeriesEntry getPriceForTime(Pair pair, LocalDateTime time) {
 
-        throw new UnsupportedOperationException("Not implemented yet");
+        return marketDataClient.getPriceForTime(pair, time);
     }
 }

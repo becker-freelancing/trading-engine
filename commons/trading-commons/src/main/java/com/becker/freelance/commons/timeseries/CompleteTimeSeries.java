@@ -32,6 +32,10 @@ public class CompleteTimeSeries implements TimeSeries {
         )));
     }
 
+    public CompleteTimeSeries(Pair pair, List<TimeSeriesEntry> initiationData) {
+        this(pair, initiationData.stream().collect(Collectors.toMap(TimeSeriesEntry::time, entry -> entry)));
+    }
+
     private static BaseBar mapBaseBar(Pair pair, LocalDateTime time, TimeSeriesEntry value) {
         return new BaseBar(pair.toDuration(), time.atZone(UTC),
                 value.getOpenMid(), value.getHighMid(), value.getLowMid(), value.getCloseMid(), value.volume());

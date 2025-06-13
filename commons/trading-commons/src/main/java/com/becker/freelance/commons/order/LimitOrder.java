@@ -16,4 +16,9 @@ public interface LimitOrder extends LazyOrder {
     default Decimal getEstimatedExecutionLevel(TimeSeriesEntry currentPrice) {
         return getOrderPrice();
     }
+
+    @Override
+    default void visit(OrderVisitor visitor) {
+        visitor.accept(this);
+    }
 }

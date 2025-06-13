@@ -59,21 +59,13 @@ public class BybitTradeExecutor extends TradeExecutor {
 
     @Override
     public void exit(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, ExitSignal exitSignal) {
-        tradeController.closePositions(currentPrice.pair(), exitSignal, tradingFeeCalculator);
+
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public void entry(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, EntrySignal entrySignal) {
-
-        throw new UnsupportedOperationException("Not implemented yet");
-//        tradeController.createPositionStopLimitLevel(
-//                entrySignal.getOpenOrder().getDirection(),
-//                currentPrice.pair(),
-//                entrySignal.size(),
-//                entrySignal.stopLevel(),
-//                entrySignal.limitLevel(),
-//                tradingFeeCalculator
-//        );
+        tradeController.entry(entrySignal);
     }
 
     @Override

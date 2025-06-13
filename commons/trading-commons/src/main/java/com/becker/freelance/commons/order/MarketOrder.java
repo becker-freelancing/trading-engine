@@ -9,4 +9,9 @@ public interface MarketOrder extends Order {
     default Decimal getEstimatedExecutionLevel(TimeSeriesEntry currentPrice) {
         return currentPrice.getClosePriceForDirection(getDirection());
     }
+
+    @Override
+    default void visit(OrderVisitor visitor) {
+        visitor.accept(this);
+    }
 }
