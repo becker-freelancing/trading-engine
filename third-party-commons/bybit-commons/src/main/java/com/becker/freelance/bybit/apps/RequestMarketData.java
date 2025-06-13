@@ -8,8 +8,6 @@ import com.bybit.api.client.service.BybitApiClientFactory;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,12 +29,14 @@ public class RequestMarketData {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd kk:mm:ss");
 
     public static void main(String[] args) throws Exception {
-        String symbol = "USDTEUR";
-        Function<String, String> transformator = (in) -> {
-            double price = Double.parseDouble(in);
-            price = new BigDecimal(1 / price).setScale(5, RoundingMode.HALF_UP).doubleValue();
-            return String.valueOf(price);
-        };
+        String symbol = "ETHUSDC";
+//        Function<String, String> transformator = (in) -> {
+//            double price = Double.parseDouble(in);
+//            price = new BigDecimal(1 / price).setScale(5, RoundingMode.HALF_UP).doubleValue();
+//            return String.valueOf(price);
+//        };
+
+        Function<String, String> transformator = in -> in;
 
         Path path = Path.of(getBasePath().toString(), "data-bybit", symbol + "_1.csv");
         createPath(path);
