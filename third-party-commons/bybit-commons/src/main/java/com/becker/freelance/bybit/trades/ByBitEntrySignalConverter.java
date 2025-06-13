@@ -32,7 +32,9 @@ public class ByBitEntrySignalConverter {
                 .qty(entrySignal.getOpenOrder().getSize().toPlainString())
                 .marketUnit(entrySignal.pair().baseCurrency())
                 .takeProfit(((LimitOrder) entrySignal.getLimitOrder()).getOrderPrice().toPlainString())
+                .tpLimitPrice(((LimitOrder) entrySignal.getLimitOrder()).getOrderPrice().toPlainString())
                 .tpOrderType(TradeOrderType.LIMIT)
+                .tpslMode("Partial")
                 .stopLoss(((ConditionalOrder) entrySignal.getStopOrder()).getThresholdPrice().toPlainString())
                 .slOrderType(TradeOrderType.MARKET)
                 .orderLinkId(UUID.randomUUID().toString());

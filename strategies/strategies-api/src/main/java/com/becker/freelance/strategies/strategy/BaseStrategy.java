@@ -75,7 +75,7 @@ public abstract class BaseStrategy implements TradingStrategy {
     }
 
     private boolean canNotExecute() {
-        return barSeries.getBarCount() < regimeIndicator.getUnstableBars();
+        return barSeries.getEndIndex() < regimeIndicator.getUnstableBars();
     }
 
     private void addBarIfNeeded(Bar currentPrice) {

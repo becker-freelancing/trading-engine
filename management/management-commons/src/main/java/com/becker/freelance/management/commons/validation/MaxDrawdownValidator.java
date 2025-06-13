@@ -39,6 +39,6 @@ public class MaxDrawdownValidator implements Validator<Pair> {
 
     private Decimal calcDrawDown(Decimal accountBalancesAfterTrade, Decimal maxAccountBalance) {
         Decimal diff = maxAccountBalance.subtract(accountBalancesAfterTrade);
-        return diff.divide(maxAccountBalance).multiply(Decimal.valueOf(100));
+        return diff.divide(maxAccountBalance);
     }
 }

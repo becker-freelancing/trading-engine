@@ -15,15 +15,40 @@ import java.time.LocalDateTime;
 class BybitPosition implements StopLimitPosition {
 
     private final PositionResponse position;
+    private final Order openOrder;
+    private final LazyOrder stopOrder;
+    private final LazyOrder limitOrder;
 
     public BybitPosition(PositionResponse positionResponse) {
         this.position = positionResponse;
+        this.openOrder = new ByBitExecutedOpenOrder(
+                positionResponse.isMarket(),
+                positionResponse.size(),
+                positionResponse.direction(),
+                positionResponse.pair(),
+                positionResponse.openPrice(),
+                positionResponse.openTime()
+        );
+        this.stopOrder = new ByBitStopLimitLimitOrder(
+                positionResponse.isStopMarket(),
+                positionResponse.size(),
+                positionResponse.direction().negate(),
+                positionResponse.pair(),
+                positionResponse.stopLevel()
+        );
+        this.limitOrder = new ByBitStopLimitLimitOrder(
+                positionResponse.isLimitMarket(),
+                positionResponse.size(),
+                positionResponse.direction().negate(),
+                positionResponse.pair(),
+                positionResponse.limitLevel()
+        );
     }
 
 
     @Override
     public Order getOpenOrder() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return openOrder;
     }
 
     @Override
@@ -63,12 +88,12 @@ class BybitPosition implements StopLimitPosition {
 
     @Override
     public LazyOrder getStopOrder() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return stopOrder;
     }
 
     @Override
     public LazyOrder getLimitOrder() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return limitOrder;
     }
 
     @Override
@@ -79,17 +104,17 @@ class BybitPosition implements StopLimitPosition {
 
     @Override
     public PositionBehaviour getPositionType() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return position.positionType();
     }
 
     @Override
     public boolean isOpenTaker() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return getOpenOrder().isMarketOrder();
     }
 
     @Override
     public boolean isAnyCloseTaker() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return getStopOrder().isMarketOrder() || getLimitOrder().isMarketOrder();
     }
 
     @Override

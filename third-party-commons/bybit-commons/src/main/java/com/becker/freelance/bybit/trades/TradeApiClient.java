@@ -28,10 +28,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 class TradeApiClient {
@@ -64,21 +61,284 @@ class TradeApiClient {
         List<Map<String, Object>> positionList = (List<Map<String, Object>>) result.get("list");
 
         return positionList.stream()
-                .map(this::mapPosition);
+                .flatMap(this::mapPosition);
     }
 
-    private PositionResponse mapPosition(Map<String, Object> position) {
-        return new PositionResponse(
-                pairConverter.convert((String) position.get("symbol"), "1").orElseThrow(() -> new IllegalArgumentException("Could not map Pair " + position.get("symbol"))), //TODO
-                new Decimal((String) position.get("size")),
-                "Buy".equals(position.get("side")) ? Direction.BUY : Direction.SELL,
-                new Decimal((String) position.get("avgPrice")), //TODO
-                toLocalDateTime((String) position.get("createdTime")),
-                new Decimal((String) position.get("positionIM")),
-                new Decimal((String) position.get("stopLoss")),
-                new Decimal((String) position.get("takeProfit")),
-                UUID.randomUUID().toString()
-        );
+    private Stream<PositionResponse> mapPosition(Map<String, Object> position) {
+
+        String stopLoss = (String) position.get("stopLoss");
+        String takeProfit = (String) position.get("takeProfit");
+
+        List<StopLossTakeProfit> stopLossTakeProfits = new ArrayList<>();
+        if (!stopLoss.isEmpty() && !takeProfit.isEmpty()) {
+            // Take Profit and Stop Loss set at order
+            stopLossTakeProfits.add(
+                    new StopLossTakeProfit(
+                            (String) position.get("size"),
+                            Map.of("triggerPrice", stopLoss),
+                            (String) position.get("size"),
+                            Map.of("triggerPrice", takeProfit)
+                    )
+            );
+        } else if (stopLoss.isEmpty() && !takeProfit.isEmpty()) {
+            // Only Take Profit set at order
+            List<Map<String, Object>> stopLossOrders = getStopLossOrders(position);
+            stopLossTakeProfits = stopLossOrders.stream()
+                    .map(map -> new StopLossTakeProfit(
+                            (String) map.get("qty"),
+                            map,
+                            (String) map.get("qty"),
+                            Map.of(
+                                    "triggerPrice", takeProfit
+                            )
+                    )).toList();
+        } else if (!stopLoss.isEmpty() && takeProfit.isEmpty()) {
+            // Only Stop Loss set on Order
+            List<Map<String, Object>> stopLossOrders = getTakeProfitOrders(position);
+            stopLossTakeProfits = stopLossOrders.stream()
+                    .map(map -> new StopLossTakeProfit(
+                            (String) map.get("qty"),
+                            Map.of(
+                                    "triggerPrice", stopLoss
+                            ),
+                            (String) map.get("qty"),
+                            map
+                    )).toList();
+        } else {
+            // Nothing set on Order
+            List<Map<String, Object>> stopLossOrders = getStopLossOrders(position);
+            List<Map<String, Object>> takeProfitOrders = getTakeProfitOrders(position);
+
+            for (Map<String, Object> stopLossOrder : stopLossOrders) {
+                String stopQty = (String) stopLossOrder.get("qty");
+                for (Map<String, Object> takeProfitOrder : takeProfitOrders) {
+                    String profitQty = (String) takeProfitOrder.get("qty");
+                    if (stopQty.equals(profitQty)) {
+                        stopLossTakeProfits.add(
+                                new StopLossTakeProfit(
+                                        stopQty,
+                                        stopLossOrder,
+                                        profitQty,
+                                        takeProfitOrder
+                                )
+                        );
+                        break;
+                    }
+                }
+            }
+
+
+        }
+
+
+        return createPositions(position, stopLossTakeProfits);
+
+    }
+
+    private Stream<PositionResponse> createPositions(Map<String, Object> position, List<StopLossTakeProfit> stopLossTakeProfits) {
+        return stopLossTakeProfits.stream()
+                .map(stopLossTakeProfit -> new PositionResponse(
+                        pairConverter.convert((String) position.get("symbol"), "1").orElseThrow(() -> new IllegalArgumentException("Could not map Pair " + position.get("symbol"))), //TODO
+                        new Decimal(stopLossTakeProfit.stopLossQty()),
+                        "Buy".equals(position.get("side")) ? Direction.BUY : Direction.SELL,
+                        new Decimal((String) position.get("avgPrice")), //TODO
+                        toLocalDateTime((String) position.get("createdTime")),
+                        new Decimal((String) position.get("positionIM")),
+                        new Decimal((String) stopLossTakeProfit.stopLoss().get("triggerPrice")),
+                        new Decimal((String) stopLossTakeProfit.takeProfit().get("triggerPrice")),
+                        UUID.randomUUID().toString(),
+                        false,
+                        "Market".equals(stopLossTakeProfit.stopLoss().get("orderType")),
+                        "Market".equals(stopLossTakeProfit.takeProfit().get("orderType")),
+                        "0".equals(position.get("trailingStop")) ? PositionBehaviour.HARD_LIMIT : PositionBehaviour.TRAILING
+                ));
+
+    }
+
+    private List<Map<String, Object>> getTakeProfitOrders(Map<String, Object> position) {
+        TradeOrderRequest orderRequest = TradeOrderRequest.builder()
+                .category(CategoryType.LINEAR)
+                .symbol((String) position.get("symbol"))
+                .build();
+        Map<String, Object> openOrders = (Map<String, Object>) tradeRestClient.getOpenOrders(orderRequest);
+
+
+        if (!"OK".equals(openOrders.get("retMsg"))) {
+            logger.warn("Could not query open orders for pair {}, because: {}", position.get("symbol"), openOrders.get("retMsg"));
+            throw new IllegalStateException("Could not query open orders");
+        }
+
+        Map<String, Object> result = (Map<String, Object>) openOrders.get("result");
+        List<Map<String, Object>> list = (List<Map<String, Object>>) result.get("list");
+
+        return list.stream()
+                .filter(map -> ((String) map.get("stopOrderType")).contains("TakeProfit"))
+                .toList();
+    }
+
+    private List<Map<String, Object>> getStopLossOrders(Map<String, Object> position) {
+        TradeOrderRequest orderRequest = TradeOrderRequest.builder()
+                .category(CategoryType.LINEAR)
+                .symbol((String) position.get("symbol"))
+                .build();
+        Map<String, Object> openOrders = (Map<String, Object>) tradeRestClient.getOpenOrders(orderRequest);
+
+
+        if (!"OK".equals(openOrders.get("retMsg"))) {
+            logger.warn("Could not query open orders for pair {}, because: {}", position.get("symbol"), openOrders.get("retMsg"));
+            throw new IllegalStateException("Could not query open orders");
+        }
+
+        Map<String, Object> result = (Map<String, Object>) openOrders.get("result");
+        List<Map<String, Object>> list = (List<Map<String, Object>>) result.get("list");
+
+        return list.stream()
+                .filter(map -> ((String) map.get("stopOrderType")).contains("StopLoss"))
+                .toList();
+    }
+
+    private String getTakeProfit(Map<String, Object> position) {
+        TradeOrderRequest orderRequest = TradeOrderRequest.builder()
+                .category(CategoryType.LINEAR)
+                .symbol((String) position.get("symbol"))
+                .build();
+        Map<String, Object> openOrders = (Map<String, Object>) tradeRestClient.getOpenOrders(orderRequest);
+
+
+        if (!"OK".equals(openOrders.get("retMsg"))) {
+            logger.warn("Could not query open orders for pair {}, because: {}", position.get("symbol"), openOrders.get("retMsg"));
+            throw new IllegalStateException("Could not query open orders");
+        }
+
+        Map<String, Object> result = (Map<String, Object>) openOrders.get("result");
+        List<Map<String, Object>> list = (List<Map<String, Object>>) result.get("list");
+
+//        return list.stream()
+//                .filter(map -> map.get("qty").equals(position.get("size")))
+//                .filter(map -> !map.get("side").equals(position.get("side")))
+//                .filter(map -> (boolean) map.get("reduceOnly"))
+        return "";
+    }
+
+    /**
+     * openOrders = {LinkedHashMap@5184}  size = 5
+     * "closeOnTrigger" -> {Boolean@5421} true
+     * "retCode" -> {Integer@5293} 0
+     * "takeProfit" -> ""
+     * "placeType" -> ""
+     * "side" -> "Buy"
+     * "placeType" -> ""
+     * "smpGroup" -> {Integer@5293} 0
+     * "list" -> {ArrayList@5312}  size = 2
+     * "reduceOnly" -> {Boolean@5421} true
+     * "category" -> "linear"
+     * "qty" -> "3.92"
+     * "marketUnit" -> ""
+     * "slLimitPrice" -> "0"
+     * "tpslMode" -> "Partial"
+     * "leavesValue" -> "0"
+     * "tpLimitPrice" -> "0"
+     * "orderIv" -> ""
+     * "result" -> {LinkedHashMap@5297}  size = 3
+     * "tpLimitPrice" -> "0"
+     * "stopOrderType" -> "PartialStopLoss"
+     * "tpTriggerBy" -> ""
+     * value = {LinkedHashMap@5297}  size = 3
+     * "nextPageCursor" -> "cad52571-b849-4abc-913a-fe1862f3d53e%3A1749788838844%2C8acd8f81-891f-424c-8a68-b1119530d16b%3A1749788838844"
+     * "orderType" -> "Market"
+     * "leavesValue" -> "9695.4536"
+     * "triggerBy" -> "LastPrice"
+     * "cumExecQty" -> "0"
+     * "triggerDirection" -> {Integer@5390} 1
+     * "smpOrderId" -> ""
+     * "cancelType" -> "UNKNOWN"
+     * "smpOrderId" -> ""
+     * "leavesQty" -> "3.92"
+     * "createdTime" -> "1749788838844"
+     * "rejectReason" -> "EC_NoError"
+     * "avgPrice" -> ""
+     * "triggerPrice" -> "2518.33"
+     * "updatedTime" -> "1749788838844"
+     * "stopOrderType" -> "PartialTakeProfit"
+     * "orderId" -> "8acd8f81-891f-424c-8a68-b1119530d16b"
+     * "leavesQty" -> "3.92"
+     * "time" -> {Long@5301} 1749790023008
+     * "price" -> "2473.33"
+     * "slLimitPrice" -> "0"
+     * "retMsg" -> "OK"
+     * "avgPrice" -> ""
+     * "createType" -> "CreateByPartialTakeProfit"
+     * "cumExecQty" -> "0"
+     * "qty" -> "3.92"
+     * "reduceOnly" -> {Boolean@5421} true
+     * "orderLinkId" -> ""
+     * "lastPriceOnCreated" -> "2504.73"
+     * "tpTriggerBy" -> ""
+     * "createType" -> "CreateByPartialStopLoss"
+     * value = {ArrayList@5312}  size = 2
+     * "cancelType" -> "UNKNOWN"
+     * "triggerBy" -> "LastPrice"
+     * "orderStatus" -> "Untriggered"
+     * "createdTime" -> "1749788838844"
+     * 0 = {LinkedHashMap@5314}  size = 43
+     * "marketUnit" -> ""
+     * "orderId" -> "cad52571-b849-4abc-913a-fe1862f3d53e"
+     * "price" -> "0"
+     * "orderType" -> "Limit"
+     * "rejectReason" -> "EC_NoError"
+     * "updatedTime" -> "1749788838844"
+     * "isLeverage" -> ""
+     * "cumExecFee" -> "0"
+     * "tpslMode" -> "Partial"
+     * "blockTradeId" -> ""
+     * "symbol" -> "ETHUSDT"
+     * "closeOnTrigger" -> {Boolean@5421} true
+     * "cumExecFee" -> "0"
+     * "slTriggerBy" -> ""
+     * "orderIv" -> ""
+     * key = "result"
+     * "retExtInfo" -> {LinkedHashMap@5299}  size = 0
+     * "symbol" -> "ETHUSDT"
+     * "orderStatus" -> "Untriggered"
+     * key = "list"
+     * "smpType" -> "None"
+     * "timeInForce" -> "IOC"
+     * "side" -> "Buy"
+     * "cumExecValue" -> "0"
+     * 1 = {LinkedHashMap@5315}  size = 43
+     * "smpType" -> "None"
+     * "timeInForce" -> "GTC"
+     * "positionIdx" -> {Integer@5293} 0
+     * "stopLoss" -> ""
+     * "triggerDirection" -> {Integer@5490} 2
+     * "takeProfit" -> ""
+     * "lastPriceOnCreated" -> "2504.73"
+     * "blockTradeId" -> ""
+     * "positionIdx" -> {Integer@5293} 0
+     * "stopLoss" -> ""
+     * "orderLinkId" -> ""
+     * "isLeverage" -> ""
+     * "slTriggerBy" -> ""
+     * "cumExecValue" -> "0"
+     * "triggerPrice" -> "2473.33"
+     * "smpGroup" -> {Integer@5293} 0
+     *
+     * @param position
+     * @return
+     */
+
+    private String getStopLoss(Map<String, Object> position) {
+        return "";
+    }
+
+    public void execute(TradeOrderRequest convert) {
+        Map<String, Object> result = (Map<String, Object>) tradeRestClient.createOrder(convert);
+        if (!"OK".equals(result.get("retMsg"))) {
+            logger.warn("Could not open Order, because: {}", result.get("retMsg"));
+            return;
+        }
+
+        logger.info("Order opened {}", convert);
     }
 
     private LocalDateTime toLocalDateTime(String createdTime) {
@@ -262,13 +522,7 @@ class TradeApiClient {
         return Optional.empty();
     }
 
-    public void execute(TradeOrderRequest convert) {
-        Map<String, Object> result = (Map<String, Object>) tradeRestClient.cancelOrder(convert);
-        if (!"OK".equals(result.get("retMsg"))) {
-            logger.warn("Could not open Order, because: {}", result.get("retMsg"));
-            return;
-        }
-
-        logger.info("Order opened {}", convert);
+    private static record StopLossTakeProfit(String stopLossQty, Map<String, Object> stopLoss, String takeProfitQty,
+                                             Map<String, Object> takeProfit) {
     }
 }
