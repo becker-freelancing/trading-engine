@@ -29,7 +29,7 @@ public class HourOfDayHitRate implements MetricCalculator {
 
             double hitRate = profit / ((double) hourProfit.getValue().size()) * 100;
 
-            result.add(new Metric("Hit Rate Hour " + hourProfit.getKey(), hitRate, "%"));
+            result.add(() -> List.of("Hit Rate Hour " + hourProfit.getKey() + ": " + hitRate + "%, Number of Trades: " + hourProfit.getValue().size()));
         }
 
         return new MultiMetric(result);

@@ -5,7 +5,6 @@ import com.becker.freelance.math.Decimal;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
-import org.knowm.xchart.style.Styler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +47,7 @@ class BacktestResultPlotter implements Runnable {
         });
 
         XYChart chart = new XYChartBuilder().title(title).xAxisTitle("Trade Index").yAxisTitle("Cumulative Profit").build();
-        chart.getStyler().setLegendPosition(Styler.LegendPosition.OutsideE);
+        chart.getStyler().setLegendVisible(false);
 
         for (int i = 0; i < data.size(); i++) {
             if (!data.get(i).isEmpty()) {

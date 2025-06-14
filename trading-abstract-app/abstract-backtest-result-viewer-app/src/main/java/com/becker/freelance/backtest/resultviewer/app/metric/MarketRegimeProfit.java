@@ -30,12 +30,7 @@ public class MarketRegimeProfit implements MetricCalculator {
 
             Decimal from = sum.divide(content.cumulative()).multiply(100);
 
-            result.add(new Writable() {
-                @Override
-                public List<String> getLines() {
-                    return List.of(String.format("Regime: %S, Total Profit: %s, Percentage Profit: %s", regime, sum, from));
-                }
-            });
+            result.add(() -> List.of(String.format("Regime: %S, Total Profit: %s, Percentage Profit: %s", regime.name(), sum, from)));
         });
 
         return new MultiMetric(result);

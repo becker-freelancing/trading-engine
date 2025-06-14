@@ -9,14 +9,26 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 class PairDeserializer extends JsonDeserializer<Pair> {
+
+    private final Map<String, Pair> pairs;
+
+    public PairDeserializer() {
+        this.pairs = new HashMap<>();
+        for (Pair pair : Pair.allPairs()) {
+            pairs.put(pair.technicalName(), pair);
+        }
+
+    }
 
     @Override
     public Pair deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         TreeNode node = p.getCodec().readTree(p);
         String technicalName = node.get("technicalName").toString();
-        Pair pair = Pair.fromTechnicalName(technicalName.replaceAll("\"", ""));
+        Pair pair = pairs.get(technicalName.replaceAll("\"", ""));
         return new UnmodifiablePair(pair);
     }
 

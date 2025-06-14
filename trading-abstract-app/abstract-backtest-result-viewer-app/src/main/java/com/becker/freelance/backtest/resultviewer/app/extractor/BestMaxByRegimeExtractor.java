@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BestCumulativeByRegimeExtractor implements RegimeResultExtractor {
+public class BestMaxByRegimeExtractor implements RegimeResultExtractor {
 
     private Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> results = new HashMap<>();
     private Map<TradeableQuantilMarketRegime, Decimal> bestValues = new HashMap<>();
@@ -27,13 +27,13 @@ public class BestCumulativeByRegimeExtractor implements RegimeResultExtractor {
         for (Map.Entry<TradeableQuantilMarketRegime, TradeStatistic> entry : tradeableQuantilMarketRegimeListMap.entrySet()) {
             TradeStatistic tradeStatistic = entry.getValue();
             TradeableQuantilMarketRegime regime = entry.getKey();
-            Decimal cumulative = tradeStatistic.getCumulative();
-            if (bestValues.getOrDefault(regime, Decimal.MINUS_DOUBLE_MAX).isLessThan(cumulative)) {
-                bestValues.put(regime, cumulative);
+            Decimal max = tradeStatistic.getMax();
+            if (bestValues.getOrDefault(regime, Decimal.MINUS_DOUBLE_MAX).isLessThan(max)) {
+                bestValues.put(regime, max);
                 results.put(regime, new ArrayList<>());
             }
 
-            if (bestValues.get(regime).isEqualTo(cumulative)) {
+            if (bestValues.get(regime).isEqualTo(max)) {
                 results.get(regime).add(new BacktestResultContent(
                         resultContent.objectMapper(),
                         resultContent.pairs(),

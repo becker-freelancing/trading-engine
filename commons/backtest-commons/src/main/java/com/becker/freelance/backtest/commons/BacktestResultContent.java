@@ -7,14 +7,12 @@ import com.becker.freelance.math.Decimal;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public final class BacktestResultContent {
     private final ObjectMapper objectMapper;
@@ -27,9 +25,9 @@ public final class BacktestResultContent {
     private final Decimal cumulative;
     private final Decimal initialWalletAmount;
     private final String parametersJson;
-    private final String tradesJson;
+    private String tradesJson;
     private List<Trade> trades = null;
-    private Map<TradeableQuantilMarketRegime, List<Trade>> tradesByRegime;
+    private Map<TradeableQuantilMarketRegime, TradeStatistic> tradesByRegime;
 
     public BacktestResultContent(ObjectMapper objectMapper, String pairs, String appMode, LocalDateTime fromTime,
                                  LocalDateTime toTime, Decimal min, Decimal max, Decimal cumulative,
@@ -47,13 +45,29 @@ public final class BacktestResultContent {
         this.tradesJson = tradesJson;
     }
 
-    public Map<TradeableQuantilMarketRegime, List<Trade>> tradeObjectsForRegime() {
+    public BacktestResultContent(ObjectMapper objectMapper, String pairs, String appMode, LocalDateTime fromTime,
+                                 LocalDateTime toTime, Decimal min, Decimal max, Decimal cumulative,
+                                 Decimal initialWalletAmount, String parametersJson, List<Trade> trades) {
+        this.objectMapper = objectMapper;
+        this.pairs = pairs;
+        this.appMode = appMode;
+        this.fromTime = fromTime;
+        this.toTime = toTime;
+        this.min = min;
+        this.max = max;
+        this.cumulative = cumulative;
+        this.initialWalletAmount = initialWalletAmount;
+        this.parametersJson = parametersJson;
+        this.trades = trades.stream().sorted(Comparator.comparing(Trade::getOpenTime)).toList();
+    }
+
+    public Map<TradeableQuantilMarketRegime, TradeStatistic> tradeObjectsForRegime() {
         if (tradesByRegime == null) {
             tradesByRegime = new HashMap<>();
             for (Trade trade : tradeObjects()) {
                 TradeableQuantilMarketRegime tradeRegime = trade.getOpenMarketRegime();
-                tradesByRegime.computeIfAbsent(tradeRegime, k -> new ArrayList<>());
-                tradesByRegime.get(tradeRegime).add(trade);
+                tradesByRegime.computeIfAbsent(tradeRegime, k -> new TradeStatistic());
+                tradesByRegime.get(tradeRegime).addTrade(trade);
             }
         }
 
@@ -73,10 +87,8 @@ public final class BacktestResultContent {
     }
 
     public List<Decimal> tradeProfits() {
-        JSONArray trades = new JSONArray(tradesJson());
-        return IntStream.range(0, trades.length()).mapToObj(trades::getJSONObject)
-                .map(trade -> trade.has("profitInEuro") ? trade.getBigDecimal("profitInEuro") : trade.getBigDecimal("profitInEuroWithFees"))
-                .map(Decimal::new)
+        return tradeObjects().stream()
+                .map(Trade::getProfitInEuroWithFees)
                 .toList();
     }
 

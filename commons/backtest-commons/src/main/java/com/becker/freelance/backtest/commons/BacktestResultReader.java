@@ -20,9 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -189,7 +187,7 @@ public class BacktestResultReader {
 
     private void readLines(Path resultPath, Consumer<String> lineConsumer, Runnable onFisnish) {
 
-        ExecutorService executor = Executors.newFixedThreadPool(5);
+        ExecutorService executor = Executors.newFixedThreadPool(30);
         List<Callable<Void>> tasks = new ArrayList<>();
         try (
                 FileInputStream fis = new FileInputStream(resultPath.toFile());
@@ -209,15 +207,17 @@ public class BacktestResultReader {
                     return null;
                 };
                 tasks.add(processLine);
-                executor.submit(processLine);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Could not read file " + resultPath, e);
         }
-        executor.shutdown();
         try {
-            executor.invokeAll(tasks);
-        } catch (InterruptedException e) {
+            List<Future<Void>> futures = executor.invokeAll(tasks);
+            for (Future<Void> future : futures) {
+                future.get();
+            }
+
+        } catch (InterruptedException | ExecutionException e) {
             throw new IllegalStateException(e);
         }
         onFisnish.run();

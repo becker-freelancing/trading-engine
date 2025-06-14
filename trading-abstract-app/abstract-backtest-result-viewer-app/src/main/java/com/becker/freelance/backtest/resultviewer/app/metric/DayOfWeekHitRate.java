@@ -29,7 +29,7 @@ public class DayOfWeekHitRate implements MetricCalculator {
 
             double hitRate = profit / ((double) dayProfit.getValue().size()) * 100;
 
-            result.add(new Metric("Hit Rate " + dayProfit.getKey(), hitRate, "%"));
+            result.add(() -> List.of("Hit Rate " + dayProfit.getKey() + ": " + hitRate + "%, Number of Trades: " + dayProfit.getValue().size()));
         }
 
         return new MultiMetric(result);
