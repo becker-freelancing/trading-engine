@@ -22,7 +22,7 @@ public class HistDataSubscribableDataProvider extends SubscribableDataProvider {
         this.pair = pair;
         this.synchronizer = synchronizer;
         this.subscribers = new LinkedHashSet<>();
-        this.synchronizer.addSubscibor(this);
+        this.synchronizer.addSubscriber(this);
     }
 
     @Override
