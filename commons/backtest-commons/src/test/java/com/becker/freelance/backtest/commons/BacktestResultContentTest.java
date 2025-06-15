@@ -1,9 +1,12 @@
 package com.becker.freelance.backtest.commons;
 
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.math.Decimal;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +23,11 @@ class BacktestResultContentTest {
     @BeforeEach
     void setUp() {
         ObjectMapper objectMapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.registerModule(new JavaTimeModule());
+        SimpleModule module = new SimpleModule(Pair.class.getName());
         module.addDeserializer(Pair.class, new PairDeserializer());
+        module.addDeserializer(TradeableQuantilMarketRegime.class, new TradeableMarketRegimeDeserializer());
         objectMapper.registerModule(module);
 
         resultContent = new BacktestResultContent(

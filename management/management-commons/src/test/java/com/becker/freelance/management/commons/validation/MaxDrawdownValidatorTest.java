@@ -28,8 +28,8 @@ class MaxDrawdownValidatorTest {
     void validIfLessThanMaxDrawdown() {
         ManagementEnvironmentProvider environmentProvider = mock(ManagementEnvironmentProvider.class);
         doReturn(List.of(
-                new MaxDrawdown(Decimal.valueOf(25), Duration.ZERO),
-                new MaxDrawdown(Decimal.valueOf(23.48), Duration.ZERO)
+                new MaxDrawdown(Decimal.valueOf(0.25), Duration.ZERO),
+                new MaxDrawdown(Decimal.valueOf(0.2348), Duration.ZERO)
         )).when(environmentProvider).getMaxDrawdowns();
         doReturn(buildTrades()).when(environmentProvider).getTradesForDurationUntilNowForPair(any(), any());
         doReturn(Decimal.valueOf(940)).when(environmentProvider).getCurrentAccountBalance();
@@ -43,8 +43,8 @@ class MaxDrawdownValidatorTest {
     void notValidIfLessThanMaxDrawdown() {
         ManagementEnvironmentProvider environmentProvider = mock(ManagementEnvironmentProvider.class);
         doReturn(List.of(
-                new MaxDrawdown(Decimal.valueOf(25), Duration.ZERO),
-                new MaxDrawdown(Decimal.valueOf(23.47), Duration.ZERO)
+                new MaxDrawdown(Decimal.valueOf(0.25), Duration.ZERO),
+                new MaxDrawdown(Decimal.valueOf(0.2347), Duration.ZERO)
         )).when(environmentProvider).getMaxDrawdowns();
         doReturn(buildTrades()).when(environmentProvider).getTradesForDurationUntilNowForPair(any(), any());
         doReturn(Decimal.valueOf(940)).when(environmentProvider).getCurrentAccountBalance();
