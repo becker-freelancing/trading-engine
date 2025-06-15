@@ -10,6 +10,7 @@ import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.engine.StrategySupplier;
 import com.becker.freelance.management.api.environment.TimeChangeListener;
 import com.becker.freelance.strategies.creation.StrategyCreationParameter;
+import com.becker.freelance.strategies.strategy.TradingStrategy;
 import com.becker.freelance.tradeexecution.TradeExecutor;
 
 import java.time.LocalDateTime;
@@ -55,14 +56,14 @@ public class BacktestExecutor implements Runnable {
             for (Pair pair : backtestExecutionConfiguration.pairs()) {
                 SubscribableDataProvider dataProviderForPair = dataProviderFactory.createSubscribableDataProvider(pair, backtestSynchronizer);
                 Consumer<TimeChangeListener> timeChangeListenerConsumer = listener -> backtestSynchronizer.addPrioritySubscriber(new TimeChangeListenerSynchronizeable(listener));
+                BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = getStrategyInitiator(pair, dataProviderForPair);
                 StrategyEngine strategyEngine = new StrategyEngine(pair,
                         strategySupplier,
                         tradeExecutor,
                         backtestExecutionConfiguration.getEurUsdRequestor(),
                         dataProviderForPair,
                         timeChangeListenerConsumer,
-                        (strategy, time) -> {
-                        });
+                        strategyInitiator);
                 StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine);
                 dataProviderForPair.addSubscriber(strategyDataSubscriber);
             }
@@ -81,4 +82,24 @@ public class BacktestExecutor implements Runnable {
     public StrategyCreationParameter getParameter() {
         return parameters;
     }
+
+    private BiConsumer<TradingStrategy, LocalDateTime> getStrategyInitiator(Pair pair, SubscribableDataProvider subscribableDataProvider) {
+        return (x, y) -> {
+        };
+//        BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = (tradingStrategy, currentTime) -> {
+//            int requiredBarCount = tradingStrategy.unstableBars();
+//            Pair strategyPair = tradingStrategy.getPair();
+//            long barLengthInMinutes = strategyPair.toDuration().toMinutes();
+//            List<TimeSeriesEntry> initiationData = new ArrayList<>();
+//            for (int i = 1; i < requiredBarCount; i++) {
+//                LocalDateTime requestTime = currentTime.minusMinutes(barLengthInMinutes * i);
+//                TimeSeriesEntry priceForTime = subscribableDataProvider.getPriceForTime(strategyPair, requestTime);
+//                initiationData.add(priceForTime);
+//            }
+//            TimeSeries timeSeries = new CompleteTimeSeries(pair, initiationData);
+//            tradingStrategy.processInitData(timeSeries);
+//        };
+//        return strategyInitiator;
+    }
+
 }

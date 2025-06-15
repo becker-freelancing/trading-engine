@@ -4,9 +4,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class CachableIndicator<K, V> {
+public class CachableIndicator<K extends Comparable<K>, V> {
 
-    private final Map<K, V> cache;
+    private final FixedSizeMap<K, V> cache;
 
     public CachableIndicator(int cacheSize) {
         cache = new FixedSizeMap<>(cacheSize);
@@ -26,6 +26,12 @@ public class CachableIndicator<K, V> {
 
     protected Stream<V> values() {
         return cache.values().stream();
+    }
+
+    protected Stream<V> valuesSorted() {
+        return cache.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(Map.Entry::getValue);
     }
 
     protected void removeFromCache(K index) {

@@ -2,28 +2,26 @@ package com.becker.freelance.indicators.ta.util;
 
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.Indicator;
-import org.ta4j.core.num.DecimalNum;
 import org.ta4j.core.num.Num;
 
-public class LogReturnIndicator implements Indicator<Num> {
+public class LaggedLogReturnIndicator implements Indicator<Num> {
 
     private final Indicator<Num> closePrice;
+    private final int lag;
 
-    public LogReturnIndicator(Indicator<Num> closePrice) {
+    public LaggedLogReturnIndicator(Indicator<Num> closePrice, int lag) {
         this.closePrice = closePrice;
+        this.lag = lag;
     }
 
     @Override
     public Num getValue(int index) {
-        if (index == 0) {
-            return DecimalNum.ZERO;
-        }
-        return closePrice.getValue(index).dividedBy(closePrice.getValue(index - 1)).log();
+        return closePrice.getValue(index).dividedBy(closePrice.getValue(index - lag)).log();
     }
 
     @Override
     public int getUnstableBars() {
-        return closePrice.getUnstableBars() + 1;
+        return closePrice.getUnstableBars() + lag + 1;
     }
 
     @Override
@@ -31,4 +29,3 @@ public class LogReturnIndicator implements Indicator<Num> {
         return closePrice.getBarSeries();
     }
 }
-

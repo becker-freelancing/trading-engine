@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public abstract class BaseStrategy implements TradingStrategy {
 
@@ -40,6 +41,7 @@ public abstract class BaseStrategy implements TradingStrategy {
     protected final Indicator<Num> closePrice;
     private final Indicator<QuantileMarketRegime> regimeIndicator;
     private final Set<BiConsumer<TradingStrategy, LocalDateTime>> beforeFirstBar;
+    private final Set<Consumer<Bar>> onBarAdded;
     private OpenPositionRequestor openPositionRequestor;
     private ZonedDateTime lastAddedBarTime;
     private boolean initiated = false;
@@ -56,6 +58,7 @@ public abstract class BaseStrategy implements TradingStrategy {
         this.regimeIndicator = regimeIndicatorFactory.quantileMarketRegimeIndicator(pair.technicalName(), durationMarketRegimeIndicator);
         this.beforeFirstBar = new HashSet<>();
         this.pair = strategyParameter.pair();
+        this.onBarAdded = new HashSet<>();
     }
 
     public Optional<EntrySignalBuilder> shouldEnter(EntryExecutionParameter entryParameter) {
@@ -88,6 +91,7 @@ public abstract class BaseStrategy implements TradingStrategy {
         }
         barSeries.addBar(currentPrice);
         lastAddedBarTime = currentPrice.getEndTime();
+        onBarAdded.forEach(consumer -> consumer.accept(currentPrice));
     }
 
     protected abstract Optional<EntrySignalBuilder> internalShouldEnter(EntryExecutionParameter entryParameter);
