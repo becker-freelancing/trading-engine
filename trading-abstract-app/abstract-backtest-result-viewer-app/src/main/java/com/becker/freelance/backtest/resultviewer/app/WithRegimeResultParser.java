@@ -69,7 +69,7 @@ public class WithRegimeResultParser implements ResultParser {
                                     resultContent.max(),
                                     resultContent.cumulative(),
                                     resultContent.initialWalletAmount(),
-                                    resultContent.parametersJson() + "\n" + regime.name() + ": " + resultContent.parametersJson(),
+                            "\n" + regime.name() + ": " + resultContent.parametersJson(),
                                     resultContent.tradeObjects()
                             )
                     );
