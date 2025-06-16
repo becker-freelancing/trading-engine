@@ -15,14 +15,21 @@ import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
 public class BybitTradeExecutor extends TradeExecutor {
+
+    private static final Logger logger = LoggerFactory.getLogger(BybitTradeExecutor.class);
+    private static final Duration MAX_ENTRY_SIGNAL_AGE = Duration.ofSeconds(5);
+    private static final Duration MAX_OPEN_ORDER_AGE = Duration.ofMinutes(1);
 
     private TradeController tradeController;
     private TradingCalculator tradingCalculator;
@@ -65,6 +72,12 @@ public class BybitTradeExecutor extends TradeExecutor {
 
     @Override
     public void entry(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, EntrySignal entrySignal) {
+        long durationSinceNewEntry = ChronoUnit.SECONDS.between(time, LocalDateTime.now());
+        if (MAX_ENTRY_SIGNAL_AGE.toSeconds() < durationSinceNewEntry) {
+            logger.warn("Rejected Entry Signal with age {} seconds. Max Age of Entry Signal is {}", durationSinceNewEntry, MAX_ENTRY_SIGNAL_AGE.toSeconds());
+            return;
+        }
+
         tradeController.entry(entrySignal);
     }
 
