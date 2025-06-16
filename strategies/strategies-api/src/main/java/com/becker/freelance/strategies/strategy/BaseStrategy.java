@@ -14,9 +14,10 @@ import com.becker.freelance.indicators.ta.regime.QuantileMarketRegime;
 import com.becker.freelance.indicators.ta.regime.RegimeIndicatorFactory;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
-import com.becker.freelance.strategies.creation.StrategyCreator;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ta4j.core.Bar;
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.BaseBarSeries;
@@ -35,8 +36,9 @@ import java.util.function.Consumer;
 
 public abstract class BaseStrategy implements TradingStrategy {
 
+    private static final Logger logger = LoggerFactory.getLogger(BaseStrategy.class);
+
     private final Pair pair;
-    private final StrategyCreator strategyCreator;
     protected final BarSeries barSeries;
     protected final Indicator<Num> closePrice;
     private final Indicator<QuantileMarketRegime> regimeIndicator;
@@ -47,7 +49,6 @@ public abstract class BaseStrategy implements TradingStrategy {
     private boolean initiated = false;
 
     protected BaseStrategy(StrategyParameter strategyParameter) {
-        this.strategyCreator = strategyParameter.strategyCreator();
         this.barSeries = new BaseBarSeries();
         this.closePrice = new ClosePriceIndicator(barSeries);
 
@@ -81,11 +82,12 @@ public abstract class BaseStrategy implements TradingStrategy {
         return barSeries.getEndIndex() < regimeIndicator.getUnstableBars();
     }
 
-    private void addBarIfNeeded(Bar currentPrice) {
+    protected void addBarIfNeeded(Bar currentPrice) {
         if (currentPrice.getEndTime().equals(lastAddedBarTime)) {
             return;
         }
         if (!initiated && barSeries.isEmpty()) {
+            logger.info("Initiating trading strategy");
             initiated = true;
             beforeFirstBar.forEach(initiator -> initiator.accept(this, currentPrice.getEndTime().toLocalDateTime()));
         }
@@ -105,11 +107,6 @@ public abstract class BaseStrategy implements TradingStrategy {
     @Override
     public void setOpenPositionRequestor(OpenPositionRequestor openPositionRequestor) {
         this.openPositionRequestor = openPositionRequestor;
-    }
-
-    @Override
-    public StrategyCreator strategyCreator() {
-        return strategyCreator;
     }
 
     @Override

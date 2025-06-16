@@ -1,23 +1,21 @@
 package com.becker.freelance.strategies.strategy;
 
-import com.becker.freelance.commons.calculation.TradingCalculator;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.creation.ParameterName;
 import com.becker.freelance.strategies.creation.StrategyCreationParameter;
-import com.becker.freelance.strategies.creation.StrategyCreator;
 
 import java.util.Map;
+import java.util.Set;
 
 public interface StrategyParameter extends StrategyCreationParameter {
 
     public StrategyCreationParameter strategyParameter();
 
-    public TradingCalculator tradingCalculator();
-
     public Pair pair();
 
-    public StrategyCreator strategyCreator();
+    public Set<? extends TradeableQuantilMarketRegime> activeOnRegimes();
 
     @Override
     default void addParameter(ParameterName name, Decimal value) {

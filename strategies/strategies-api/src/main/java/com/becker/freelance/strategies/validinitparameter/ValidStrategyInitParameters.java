@@ -77,7 +77,7 @@ public class ValidStrategyInitParameters {
     }
 
 
-    public DefaultStrategyCreationParameter defaultValues() {
+    public StrategyCreationParameter defaultValues() {
         DefaultStrategyCreationParameter parameter = new DefaultStrategyCreationParameter(Map.of());
         for (StrategyInitParameter param : strategyInitParameter) {
             parameter.addParameter(param.getName(), param.getDefaultValue());

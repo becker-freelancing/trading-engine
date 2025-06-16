@@ -5,6 +5,7 @@ import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguratio
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.engine.StrategySupplier;
+import com.becker.freelance.indicators.ta.regime.QuantileMarketRegime;
 import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 import com.becker.freelance.strategies.creation.StrategyCreator;
 import com.becker.freelance.strategies.strategy.DefaultStrategyParameter;
@@ -16,7 +17,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -88,7 +88,7 @@ public class BacktestEngine {
         requiredIterations = parameters.size();
         for (StrategyCreationParameter parameter : parameters) {
             StrategySupplier strategySupplier = (pair, tradingCalculator) -> {
-                DefaultStrategyParameter defaultStrategyParameter = new DefaultStrategyParameter(parameter, tradingCalculator, pair, strategyCreator);
+                DefaultStrategyParameter defaultStrategyParameter = new DefaultStrategyParameter(parameter, pair, QuantileMarketRegime.all());
                 return strategyCreator.build(defaultStrategyParameter);
             };
 

@@ -10,10 +10,10 @@ import java.util.stream.Collectors;
 
 public class DefaultStrategyCreationParameter implements StrategyCreationParameter {
 
-    private final Map<ParameterName, Decimal> parameters;
+    private final Map<String, Decimal> parameters;
 
     public DefaultStrategyCreationParameter(Map<ParameterName, Decimal> parameters) {
-        this.parameters = new HashMap<>(parameters);
+        this.parameters = new HashMap<>(parameters.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey().getName(), entry -> entry.getValue())));
     }
 
     public DefaultStrategyCreationParameter(ParameterName name, Decimal value) {
@@ -21,17 +21,17 @@ public class DefaultStrategyCreationParameter implements StrategyCreationParamet
     }
 
     private DefaultStrategyCreationParameter(DefaultStrategyCreationParameter parameter) {
-        this(parameter.parameters);
+        this.parameters = new HashMap<>(parameter.parameters);
     }
 
     @Override
     public void addParameter(ParameterName name, Decimal value) {
-        parameters.put(name, value);
+        parameters.put(name.getName(), value);
     }
 
     @Override
     public Decimal getParameter(ParameterName parameterName) {
-        return parameters.get(parameterName);
+        return parameters.get(parameterName.getName());
     }
 
     @Override
@@ -81,7 +81,7 @@ public class DefaultStrategyCreationParameter implements StrategyCreationParamet
     @Override
     public Map<String, Decimal> asMap() {
         return parameters.entrySet().stream()
-                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey().getName(), entry.getValue()))
+                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 

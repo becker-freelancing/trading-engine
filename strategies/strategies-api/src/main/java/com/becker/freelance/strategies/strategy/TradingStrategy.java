@@ -6,7 +6,6 @@ import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.indicators.ta.regime.QuantileMarketRegime;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
-import com.becker.freelance.strategies.creation.StrategyCreator;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
 
@@ -21,8 +20,6 @@ public interface TradingStrategy {
     Optional<EntrySignalBuilder> shouldEnter(EntryExecutionParameter entryParameter);
 
     Optional<ExitSignal> shouldExit(ExitExecutionParameter exitParameter);
-
-    public StrategyCreator strategyCreator();
 
     public QuantileMarketRegime currentMarketRegime();
 

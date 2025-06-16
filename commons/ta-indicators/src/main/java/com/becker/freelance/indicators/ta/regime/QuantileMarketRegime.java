@@ -2,6 +2,8 @@ package com.becker.freelance.indicators.ta.regime;
 
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 
+import java.util.Set;
+
 public enum QuantileMarketRegime implements TradeableQuantilMarketRegime {
     UP_LOW_VOLA_033(1),
     UP_LOW_VOLA_066(2),
@@ -26,6 +28,10 @@ public enum QuantileMarketRegime implements TradeableQuantilMarketRegime {
 
     QuantileMarketRegime(int id) {
         this.id = id;
+    }
+
+    public static Set<QuantileMarketRegime> all() {
+        return Set.of(QuantileMarketRegime.values());
     }
 
     public static QuantileMarketRegime fromId(int id) {
