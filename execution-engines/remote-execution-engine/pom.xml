@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>remote-backtest-engine</artifactId>
+    <artifactId>remote-execution-engine</artifactId>
 
 
     <dependencies>

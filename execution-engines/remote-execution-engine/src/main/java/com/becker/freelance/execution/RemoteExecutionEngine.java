@@ -1,16 +1,16 @@
-package com.becker.freelance.backtest;
+package com.becker.freelance.execution;
 
 import com.becker.freelance.commons.app.AppConfiguration;
 
 import java.util.List;
 
-public class RemoteBacktestEngine implements Runnable {
+public class RemoteExecutionEngine implements Runnable {
 
 
     private final AppConfiguration appConfiguration;
     private final List<StrategyWithPair> baseStrategies;
 
-    public RemoteBacktestEngine(List<StrategyWithPair> baseStrategies, AppConfiguration appConfiguration) {
+    public RemoteExecutionEngine(List<StrategyWithPair> baseStrategies, AppConfiguration appConfiguration) {
         this.baseStrategies = baseStrategies;
         this.appConfiguration = appConfiguration;
     }
@@ -18,8 +18,8 @@ public class RemoteBacktestEngine implements Runnable {
     @Override
     public void run() {
         for (StrategyWithPair baseStrategy : baseStrategies) {
-            RemoteBacktestExecutor remoteBacktestExecutor = new RemoteBacktestExecutor(baseStrategy, appConfiguration);
-            Thread executionThread = new Thread(remoteBacktestExecutor);
+            RemoteExecutionExecutor remoteExecutionExecutor = new RemoteExecutionExecutor(baseStrategy, appConfiguration);
+            Thread executionThread = new Thread(remoteExecutionExecutor);
             executionThread.start();
         }
 

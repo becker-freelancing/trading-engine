@@ -1,4 +1,4 @@
-package com.becker.freelance.backtest;
+package com.becker.freelance.execution;
 
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.pair.Pair;
@@ -22,15 +22,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-public class RemoteBacktestExecutor implements Runnable {
+public class RemoteExecutionExecutor implements Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(RemoteBacktestExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(RemoteExecutionExecutor.class);
 
     private final StrategySupplier strategySupplier;
     private final Pair pair;
     private final AppConfiguration appConfiguration;
 
-    public RemoteBacktestExecutor(StrategyWithPair baseStrategy, AppConfiguration appConfiguration) {
+    public RemoteExecutionExecutor(StrategyWithPair baseStrategy, AppConfiguration appConfiguration) {
         this.strategySupplier = baseStrategy.strategySupplier();
         this.pair = baseStrategy.pair();
         this.appConfiguration = appConfiguration;
