@@ -26,10 +26,10 @@ import java.util.stream.Stream;
 
 public class RequestMarketData {
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd kk:mm:ss");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd KK:mm:ss");
 
     public static void main(String[] args) throws Exception {
-        String symbol = "ETHUSDC";
+        String symbol = "ETHUSDT";
 //        Function<String, String> transformator = (in) -> {
 //            double price = Double.parseDouble(in);
 //            price = new BigDecimal(1 / price).setScale(5, RoundingMode.HALF_UP).doubleValue();
@@ -55,7 +55,7 @@ public class RequestMarketData {
             try {
 
                 marketLinesData = (Map<String, Object>) marketRestClient.getMarketLinesData(MarketDataRequest.builder()
-                        .category(CategoryType.SPOT)
+                        .category(CategoryType.LINEAR)
                         .symbol(symbol)
                         .marketInterval(MarketInterval.ONE_MINUTE)
                         .start(map(startTime))

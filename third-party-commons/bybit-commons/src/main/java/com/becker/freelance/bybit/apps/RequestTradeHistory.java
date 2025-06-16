@@ -23,8 +23,8 @@ import java.util.stream.Stream;
 public class RequestTradeHistory {
 
     public static void main(String[] args) throws IOException {
-        LocalDateTime exportStart = LocalDateTime.parse("2025-01-01T07:50:00");
-        LocalDateTime exportEnd = LocalDateTime.parse("2025-05-18T00:00:00");
+        LocalDateTime exportStart = LocalDateTime.parse("2025-06-15T07:50:00");
+        LocalDateTime exportEnd = LocalDateTime.parse("2025-06-16T09:00:00");
 
 
         String fileName = "pnls-" + exportStart + "-" + exportEnd + ".csv";
@@ -35,6 +35,7 @@ public class RequestTradeHistory {
         BybitApiPositionRestClient bybitApiPositionRestClient = bybitApiClientFactory.newPositionRestClient();
 
         Stream<Pnl> pnls = Stream.of();
+        exportStart = exportStart.minusHours(2);
         while (exportStart.isBefore(exportEnd)) {
             long startMillis = exportStart.toInstant(ZoneOffset.UTC).toEpochMilli();
             LocalDateTime currEnd = exportStart.plusHours(1);
