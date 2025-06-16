@@ -93,7 +93,7 @@ class RemoteBacktestAppInitiatingUtil {
 
     private Set<QuantileMarketRegime> map(JSONArray regimes) {
         if (regimes.isEmpty()) {
-            return QuantileMarketRegime.all();
+            return Set.of();
         }
 
         return IntStream.range(0, regimes.length())
