@@ -16,6 +16,8 @@ import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.commons.trade.Trade;
+import com.becker.freelance.commons.wallet.Wallet;
+import com.becker.freelance.math.Decimal;
 import com.becker.freelance.tradeexecution.calculation.MarginCalculatorImpl;
 import com.becker.freelance.tradeexecution.calculation.PositionCalculation;
 import com.becker.freelance.tradeexecution.calculation.PositionCalculation.PositionCalculationResult;
@@ -27,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class DemoTradeExecutor extends TradeExecutor {
@@ -60,17 +63,18 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     protected TradeExecutor construct(BacktestExecutionConfiguration backtestExecutionConfiguration, Pair pair, EurUsdRequestor eurUsdRequestor) {
-        return new DemoTradeExecutor(backtestExecutionConfiguration, pair, backtestExecutionConfiguration.getEurUsdRequestor());
+        return new DemoTradeExecutor(backtestExecutionConfiguration, pair, eurUsdRequestor);
     }
 
     @Override
     protected TradeExecutor construct(Pair pair, EurUsdRequestor eurUsdRequestor) {
-        throw new UnsupportedOperationException("DemoTrade Executor needs BacktestConfiguration for construction");
+        return construct(new BacktestExecutionConfiguration(null, new Decimal(4950.33), null, null, null, null), pair, eurUsdRequestor);
     }
 
     @Override
     protected boolean supports(AppMode appMode) {
-        return appMode.isDemo();
+//        return appMode.isDemo();
+        return true;
     }
 
     @Override
@@ -157,6 +161,11 @@ public class DemoTradeExecutor extends TradeExecutor {
     public List<Trade> getTradesForDurationUntilTimeForPair(LocalDateTime toTime, Duration duration, Pair pair) {
         LocalDateTime startTime = toTime.minus(duration);
         return new ArrayList<>(closedTrades.getTradesInRange(startTime, toTime));
+    }
+
+    @Override
+    public Optional<Wallet> getWallet() {
+        return Optional.of(wallet.get());
     }
 
     @Override

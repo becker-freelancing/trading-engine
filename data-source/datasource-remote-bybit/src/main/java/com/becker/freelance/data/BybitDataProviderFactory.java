@@ -3,13 +3,13 @@ package com.becker.freelance.data;
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.plugin.BybitDemoAppMode;
 
 public class BybitDataProviderFactory extends DataProviderFactory {
 
     @Override
     protected boolean supports(AppMode appMode) {
-        return new BybitDemoAppMode().equals(appMode);
+        return false;
+//        return new BybitDemoAppMode().equals(appMode);
     }
 
     @Override

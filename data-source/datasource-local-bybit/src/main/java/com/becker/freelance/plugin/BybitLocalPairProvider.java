@@ -8,7 +8,7 @@ import com.becker.freelance.math.Decimal;
 
 import java.util.List;
 
-public class BybitPairProvider implements PairProvider {
+public class BybitLocalPairProvider implements PairProvider {
     @Override
     public List<Pair> get() {
         return List.of(
@@ -31,7 +31,7 @@ public class BybitPairProvider implements PairProvider {
 
         @Override
         public boolean isExecutableInAppMode(AppMode appMode) {
-            return new BybitDemoAppMode().isEqual(appMode);
+            return new BybitLocalDemoAppMode().isEqual(appMode);
         }
     }
 }

@@ -2,7 +2,7 @@ package com.becker.freelance.plugin;
 
 import com.becker.freelance.commons.app.AppMode;
 
-public class BybitDemoAppMode implements AppMode {
+public class BybitLocalDemoAppMode implements AppMode {
 
 
     @Override

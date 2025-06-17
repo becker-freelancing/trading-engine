@@ -43,19 +43,18 @@ public class BybitDataProvider extends DataProvider {
         }
         Map<LocalDateTime, TimeSeriesEntry> entries;
         if (Pair.eurUsd1().equals(pair)) {
-            entries = readCsvContent(inputStream, from, to, EURUSD_MAPPING_INFO);
+            entries = readCsvContent(inputStream, from, to, EURUSD_MAPPING_INFO, DateTimeFormatter.ofPattern("yyyy-MM-dd kk:mm:ss"));
         } else {
-            entries = readCsvContent(inputStream, from, to, WITH_SPREAD_MAPPING_INFO);
+            entries = readCsvContent(inputStream, from, to, WITH_SPREAD_MAPPING_INFO, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
 
 
-        TimeSeries timeSeries = map(pair, from, to, entries);
+        TimeSeries timeSeries = map(pair, from.minusMinutes(137), to, entries);
         logger.info("Finished reading TimeSeries {}", pair.technicalName());
         return timeSeries;
     }
 
-    private Map<LocalDateTime, TimeSeriesEntry> readCsvContent(InputStream fileInputStream, LocalDateTime from, LocalDateTime to, RowMappingInfo mappingInfo) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd kk:mm:ss");
+    private Map<LocalDateTime, TimeSeriesEntry> readCsvContent(InputStream fileInputStream, LocalDateTime from, LocalDateTime to, RowMappingInfo mappingInfo, DateTimeFormatter formatter) {
         LocalDateTime beforeFrom = from.minusDays(3);
         return new CsvDataReader(mappingInfo, fileInputStream, formatter, pair).readCsvParallel()
                 .filter(entry -> entry.time().isAfter(beforeFrom))

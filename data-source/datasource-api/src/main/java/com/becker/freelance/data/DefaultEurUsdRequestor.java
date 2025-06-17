@@ -9,7 +9,7 @@ import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-class DefaultEurUsdRequestor implements EurUsdRequestor, DataSubscriber {
+public class DefaultEurUsdRequestor implements EurUsdRequestor, DataSubscriber {
 
     private TimeSeries eurUsd;
 

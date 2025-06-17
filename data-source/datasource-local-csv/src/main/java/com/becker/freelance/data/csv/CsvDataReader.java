@@ -29,7 +29,9 @@ public class CsvDataReader {
 
     public Stream<TimeSeriesEntry> readCsvParallel() {
         Stream<String[]> lines = readLines();
-        return lines.parallel().skip(rowMappingInfo.containsHeader() ? 1 : 0).map(this::mapLine);
+        return lines.parallel().skip(rowMappingInfo.containsHeader() ? 1 : 0)
+                .filter(line -> line.length > 1)
+                .map(this::mapLine);
     }
 
     private TimeSeriesEntry mapLine(String[] line) {

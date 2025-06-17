@@ -56,7 +56,8 @@ public class BybitTradeExecutor extends TradeExecutor {
 
     @Override
     protected boolean supports(AppMode appMode) {
-        return appMode.isDemo() && appMode.getDataSourceName().equals("BYBIT_REMOTE");
+        return false;
+//        return appMode.isDemo() && appMode.getDataSourceName().equals("BYBIT_REMOTE");
     }
 
     @Override

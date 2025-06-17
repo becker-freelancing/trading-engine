@@ -2,13 +2,13 @@ package com.becker.freelance.data;
 
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.plugin.BybitDemoAppMode;
 
 public class BybitDataProviderFactory extends DataProviderFactory {
 
     @Override
     protected boolean supports(AppMode appMode) {
-        return new BybitDemoAppMode().equals(appMode);
+        return true;
+//        return new BybitLocalDemoAppMode().equals(appMode);
     }
 
     @Override
@@ -19,5 +19,14 @@ public class BybitDataProviderFactory extends DataProviderFactory {
     @Override
     public DataProvider createDataProvider(Pair pair) {
         return new BybitDataProvider(pair);
+    }
+
+    @Override
+    public SubscribableDataProvider createSubscribableDataProvider(Pair pair) {
+        TestSynchronizer synchronizer = new TestSynchronizer();
+        BybitSubscribableDataProvider bybitSubscribableDataProvider = new BybitSubscribableDataProvider(pair, synchronizer);
+        synchronizer.set(bybitSubscribableDataProvider);
+        synchronizer.start();
+        return bybitSubscribableDataProvider;
     }
 }
