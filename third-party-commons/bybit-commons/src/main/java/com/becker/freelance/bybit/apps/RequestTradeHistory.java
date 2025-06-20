@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,8 +24,8 @@ import java.util.stream.Stream;
 public class RequestTradeHistory {
 
     public static void main(String[] args) throws IOException {
-        LocalDateTime exportStart = LocalDateTime.parse("2025-06-15T07:50:00");
-        LocalDateTime exportEnd = LocalDateTime.parse("2025-06-16T09:00:00");
+        LocalDateTime exportStart = LocalDateTime.parse("2025-06-18T07:00:00");
+        LocalDateTime exportEnd = LocalDateTime.parse("2025-06-20T09:00:00");
 
 
         String fileName = "pnls-" + exportStart + "-" + exportEnd + ".csv";
@@ -55,6 +56,7 @@ public class RequestTradeHistory {
         }
 
         String csv = pnls.distinct()
+                .sorted(Comparator.comparing(Pnl::createdTime))
                 .map(pnl -> {
                     return String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s",
                             pnl.symbol, pnl.orderType, pnl.leverage, pnl.side, pnl.qty, pnl.createdTime, pnl.pnl, pnl.entryPrice, pnl.exitPrice, pnl.correct ? "T" : "F", pnl.id);
@@ -68,31 +70,33 @@ public class RequestTradeHistory {
 
     @NotNull
     private static Stream<Pnl> requestData(BybitApiPositionRestClient bybitApiPositionRestClient, long startMillis, long endMillis, Stream<Pnl> pnls, String cursor) {
-        PositionDataRequest.PositionDataRequestBuilder positionDataRequestBuilder = PositionDataRequest.builder().category(CategoryType.LINEAR);
 
-        if (cursor == null) {
-            positionDataRequestBuilder = positionDataRequestBuilder
-                    .startTime(startMillis)
-                    .endTime(endMillis);
-        }
+        do {
+            PositionDataRequest.PositionDataRequestBuilder builder = PositionDataRequest.builder()
+                    .category(CategoryType.LINEAR);
 
-        if (cursor != null) {
-            positionDataRequestBuilder = positionDataRequestBuilder.cursor(cursor);
-        }
+            if (cursor == null) {
+                builder = builder.startTime(startMillis).endTime(endMillis).limit(200);
+            } else {
+                builder = builder.cursor(cursor);
+            }
 
-        Map<String, Object> closePnlList = (Map<String, Object>) bybitApiPositionRestClient.getClosePnlList(positionDataRequestBuilder
-                .build());
+            Map<String, Object> response = (Map<String, Object>) bybitApiPositionRestClient.getClosePnlList(builder.build());
 
-        if (0 != (int) closePnlList.get("retCode")) {
-            System.err.println(closePnlList.get("retMsg"));
-        }
+            if ((int) response.get("retCode") != 0) {
+                System.err.println(response.get("retMsg"));
+                break;
+            }
 
-        Map<String, Object> result = (Map<String, Object>) closePnlList.get("result");
-        List<Map<String, String>> list = (List<Map<String, String>>) result.get("list");
+            Map<String, Object> result = (Map<String, Object>) response.get("result");
+            List<Map<String, String>> list = (List<Map<String, String>>) result.get("list");
 
+            pnls = Stream.concat(pnls, list.stream().map(RequestTradeHistory::toPnl));
 
-        pnls = Stream.concat(pnls, list.stream()
-                .map(RequestTradeHistory::toPnl));
+            cursor = (String) result.get("nextPageCursor");
+
+        } while (cursor != null && !cursor.isEmpty());
+
         return pnls;
     }
 
