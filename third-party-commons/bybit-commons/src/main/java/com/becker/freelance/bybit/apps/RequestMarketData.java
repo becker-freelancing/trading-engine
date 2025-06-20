@@ -39,16 +39,17 @@ public class RequestMarketData {
         Function<String, String> transformator = in -> in;
 
         Path path = Path.of(getBasePath().toString(), "data-bybit", symbol + "_1.csv");
+        System.out.println(path);
         createPath(path);
 
         BybitApiMarketRestClient marketRestClient = BybitApiClientFactory.newInstance().newMarketDataRestClient();
 
-        LocalDateTime endTime = getMaxTime(path);
+        LocalDateTime endTime = LocalDateTime.of(2025, 6, 20, 7, 0);//getMaxTime(path);
         LocalDateTime startTime = endTime;
 
         int i = 0;
         Stream<String> lines = Stream.of();
-        while (true) {
+        while (startTime.isAfter(LocalDateTime.of(2025, 6, 17, 11, 30))) {
             startTime = endTime.minusMinutes(998);
             System.out.println("Requesting from " + startTime + " to " + endTime);
             Map<String, Object> marketLinesData;
@@ -86,6 +87,7 @@ public class RequestMarketData {
             endTime = startTime;
         }
 
+        write(path, lines);
         JOptionPane.showInputDialog("FINISHED");
     }
 
@@ -138,7 +140,7 @@ public class RequestMarketData {
         }
         if (!Files.exists(path)) {
             Files.createFile(path);
-            Files.writeString(path, "closeTime,openBid,openAsk,highBid,highAsk,lowBid,lowAsk,closeBid,closeAsk,volume\n");
+            Files.writeString(path, "closeTime,openBid,openAsk,highBid,highAsk,lowBid,lowAsk,closeBid,closeAsk,volume");
         }
     }
 
