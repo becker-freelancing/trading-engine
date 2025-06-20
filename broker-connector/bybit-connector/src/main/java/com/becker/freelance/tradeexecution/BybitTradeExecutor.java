@@ -74,10 +74,10 @@ public class BybitTradeExecutor extends TradeExecutor {
     @Override
     public void entry(TimeSeriesEntry currentPrice, TimeSeries timeSeries, LocalDateTime time, EntrySignal entrySignal) {
         long durationSinceNewEntry = ChronoUnit.SECONDS.between(time, LocalDateTime.now());
-        if (MAX_ENTRY_SIGNAL_AGE.toSeconds() < durationSinceNewEntry) {
-            logger.warn("Rejected Entry Signal with age {} seconds. Max Age of Entry Signal is {}", durationSinceNewEntry, MAX_ENTRY_SIGNAL_AGE.toSeconds());
-            return;
-        }
+//        if (MAX_ENTRY_SIGNAL_AGE.toSeconds() < durationSinceNewEntry) {
+//            logger.warn("Rejected Entry Signal with age {} seconds. Max Age of Entry Signal is {}", durationSinceNewEntry, MAX_ENTRY_SIGNAL_AGE.toSeconds());
+//            return;
+//        }
 
         tradeController.entry(entrySignal);
     }
