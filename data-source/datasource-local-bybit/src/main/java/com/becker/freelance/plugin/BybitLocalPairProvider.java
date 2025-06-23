@@ -12,7 +12,7 @@ public class BybitLocalPairProvider implements PairProvider {
     @Override
     public List<Pair> get() {
         return List.of(
-                from("ETH", "PERP", 1, "ETH/USDC M1", 1., 0.0001, 60., 0.05, 2., 2),
+                from("ETH", "PERP", 1, "ETH/USDC M1", 1., 0.0001, 60., 0.05, 1. / 10, 1),
                 from("ETH", "USDT", 1, "ETH/USDT M1", 1., 1., 2., 1., 1., 1),
                 from("EUR", "USD", 1, "EUR/USD M1", 1., 1., 2., 1., 1., 1)
         );
