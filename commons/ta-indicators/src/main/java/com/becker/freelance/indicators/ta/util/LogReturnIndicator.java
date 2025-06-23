@@ -18,7 +18,12 @@ public class LogReturnIndicator implements Indicator<Num> {
         if (index == 0) {
             return DecimalNum.ZERO;
         }
-        return closePrice.getValue(index).dividedBy(closePrice.getValue(index - 1)).log();
+        double v = closePrice.getValue(index).doubleValue();
+        double v1 = closePrice.getValue(index - 1).doubleValue();
+        double log = Math.log(v / v1);
+        DecimalNum decimalNum = DecimalNum.valueOf(log);
+        return decimalNum;
+//        return closePrice.getValue(index).dividedBy(closePrice.getValue(index - 1)).log();
     }
 
     @Override
