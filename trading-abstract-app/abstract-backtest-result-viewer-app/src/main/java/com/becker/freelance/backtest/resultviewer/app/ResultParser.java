@@ -9,5 +9,5 @@ public interface ResultParser {
 
     public List<ResultExtractor> getResultExtractors();
 
-    public void run(List<MetricCalculator> metrics);
+    public void run(List<MetricCalculator> metrics, String strategyName);
 }

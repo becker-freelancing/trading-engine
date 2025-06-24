@@ -11,16 +11,19 @@ import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStre
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -185,42 +188,50 @@ public class BacktestResultReader {
         });
     }
 
-    private void readLines(Path resultPath, Consumer<String> lineConsumer, Runnable onFisnish) {
+    public static void readLinesSafely(InputStream inputStream, Consumer<String> lineConsumer) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+            StringBuilder lineBuffer = new StringBuilder();
+            int ch;
+            while ((ch = reader.read()) != -1) {
+                if (ch == '\n') {
+                    lineConsumer.accept(lineBuffer.toString());
+                    lineBuffer.setLength(0);
+                } else if (ch != '\r') {
+                    lineBuffer.append((char) ch);
+                }
 
+                // Optional: Abbruchbedingung bei zu großer Zeile (z. B. 100 MB)
+                if (lineBuffer.length() > 100_000_000) {
+                    throw new IOException("Zeile zu groß – möglicherweise fehlerhafte Datei.");
+                }
+            }
+
+            if (!lineBuffer.isEmpty()) {
+                lineConsumer.accept(lineBuffer.toString());
+            }
+        }
+    }
+
+    private void readLines(Path resultPath, Consumer<String> lineConsumer, Runnable onFinish) {
         ExecutorService executor = Executors.newFixedThreadPool(30);
-        List<Callable<Void>> tasks = new ArrayList<>();
+
         try (
                 FileInputStream fis = new FileInputStream(resultPath.toFile());
-                ZstdCompressorInputStream zis = new ZstdCompressorInputStream(fis);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(zis))
+                ZstdCompressorInputStream zis = new ZstdCompressorInputStream(fis)
         ) {
-            String line;
-            while (true) {
-                try {
-                    if (!((line = reader.readLine()) != null)) break;
-                } catch (IOException e) {
-                    throw new IllegalStateException(e);
-                }
-                final String finalLine = line;
-                Callable<Void> processLine = () -> {
-                    lineConsumer.accept(finalLine);
+            readLinesSafely(zis, line -> {
+                executor.submit(() -> {
+                    lineConsumer.accept(line);
                     return null;
-                };
-                tasks.add(processLine);
-            }
-        } catch (IOException e) {
+                });
+            });
+            executor.shutdown();
+            executor.awaitTermination(1, TimeUnit.HOURS);
+        } catch (IOException | InterruptedException e) {
             throw new IllegalStateException("Could not read file " + resultPath, e);
         }
-        try {
-            List<Future<Void>> futures = executor.invokeAll(tasks);
-            for (Future<Void> future : futures) {
-                future.get();
-            }
 
-        } catch (InterruptedException | ExecutionException e) {
-            throw new IllegalStateException(e);
-        }
-        onFisnish.run();
+        onFinish.run();
     }
 
     public void readCsvContent(Path resultPath, Runnable onFinish, ResultExtractor... resultExtractors) {

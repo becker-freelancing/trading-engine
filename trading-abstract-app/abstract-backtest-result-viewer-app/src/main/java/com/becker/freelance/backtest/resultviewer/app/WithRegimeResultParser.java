@@ -2,10 +2,7 @@ package com.becker.freelance.backtest.resultviewer.app;
 
 import com.becker.freelance.backtest.commons.BacktestResultContent;
 import com.becker.freelance.backtest.commons.ResultExtractor;
-import com.becker.freelance.backtest.resultviewer.app.extractor.BaseDataExtractor;
-import com.becker.freelance.backtest.resultviewer.app.extractor.BestCumulativeByRegimeExtractor;
-import com.becker.freelance.backtest.resultviewer.app.extractor.BestMaxByRegimeExtractor;
-import com.becker.freelance.backtest.resultviewer.app.extractor.BestMinByRegimeExtractor;
+import com.becker.freelance.backtest.resultviewer.app.extractor.*;
 import com.becker.freelance.backtest.resultviewer.app.metric.MetricCalculator;
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.trade.Trade;
@@ -22,12 +19,14 @@ public class WithRegimeResultParser implements ResultParser {
     private final BestCumulativeByRegimeExtractor bestCumulativeExtractor;
     private final BestMaxByRegimeExtractor bestMaxExtractor;
     private final BestMinByRegimeExtractor bestMinExtractor;
+    private final MostTradesByRegimeExtractor mostTradesExtractor;
 
     public WithRegimeResultParser() {
         this.baseDataExtractor = new BaseDataExtractor();
         this.bestCumulativeExtractor = new BestCumulativeByRegimeExtractor();
         this.bestMaxExtractor = new BestMaxByRegimeExtractor();
         this.bestMinExtractor = new BestMinByRegimeExtractor();
+        this.mostTradesExtractor = new MostTradesByRegimeExtractor();
     }
 
     private static List<BacktestResultContent> permutate(Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> resultByRegime) {
@@ -100,18 +99,25 @@ public class WithRegimeResultParser implements ResultParser {
 
     @Override
     public List<ResultExtractor> getResultExtractors() {
-        return List.of(baseDataExtractor, bestCumulativeExtractor, bestMaxExtractor, bestMinExtractor);
+        return List.of(baseDataExtractor, bestCumulativeExtractor, bestMaxExtractor, bestMinExtractor, mostTradesExtractor);
     }
 
     @Override
-    public void run(List<MetricCalculator> metrics) {
+    public void run(List<MetricCalculator> metrics, String strategyName) {
         List<BacktestResultContent> bestMin = findBestMin();
         List<BacktestResultContent> bestMax = findBestMax();
         List<BacktestResultContent> bestCumulative = findBestCumulative();
+        List<BacktestResultContent> mostTrades = findMostTrades();
         BacktestResultContent baseData = baseDataExtractor.getResult().get(0);
 
         new BacktestResultConsoleWriter(bestCumulative, bestMax, bestMin, metrics, baseData).run();
-        new BacktestResultPlotter(bestCumulative, bestMax, bestMin).run();
+        new BacktestResultPlotter(strategyName, bestCumulative, bestMax, bestMin, mostTrades).run();
+    }
+
+    private List<BacktestResultContent> findMostTrades() {
+        Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> resultByRegime = mostTradesExtractor.getResultByRegime();
+
+        return permutate(resultByRegime);
     }
 
     private List<BacktestResultContent> findBestMin() {

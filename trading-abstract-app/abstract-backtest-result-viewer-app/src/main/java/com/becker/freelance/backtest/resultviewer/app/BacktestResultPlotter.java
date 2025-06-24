@@ -14,11 +14,15 @@ class BacktestResultPlotter implements Runnable {
     private final List<BacktestResultContent> bestCumulative;
     private final List<BacktestResultContent> bestMax;
     private final List<BacktestResultContent> bestMin;
+    private final List<BacktestResultContent> mostTrades;
+    private final String strategyName;
 
-    public BacktestResultPlotter(List<BacktestResultContent> bestCumulative, List<BacktestResultContent> bestMax, List<BacktestResultContent> bestMin) {
+    public BacktestResultPlotter(String strategyName, List<BacktestResultContent> bestCumulative, List<BacktestResultContent> bestMax, List<BacktestResultContent> bestMin, List<BacktestResultContent> mostTrades) {
         this.bestCumulative = bestCumulative;
         this.bestMax = bestMax;
         this.bestMin = bestMin;
+        this.strategyName = strategyName;
+        this.mostTrades = mostTrades;
     }
 
     @Override
@@ -26,8 +30,11 @@ class BacktestResultPlotter implements Runnable {
         XYChart cumulativeChart = plotResults(bestCumulative, "Bestes Kumulatives Ergebnis");
         XYChart maxChart = plotResults(bestMax, "Bestes Maximales Ergebnis");
         XYChart minChart = plotResults(bestMin, "Bestes Minimales Ergebnis");
+        XYChart mostChart = plotResults(mostTrades, "Meiste Trades");
 
-        new SwingWrapper<>(List.of(cumulativeChart, maxChart, minChart)).displayChartMatrix();
+        SwingWrapper<XYChart> wrapper = new SwingWrapper<>(List.of(cumulativeChart, maxChart, minChart, mostChart));
+        wrapper.setTitle(strategyName);
+        wrapper.displayChartMatrix();
     }
 
     private XYChart plotResults(List<BacktestResultContent> backtestResultContents, String title) {

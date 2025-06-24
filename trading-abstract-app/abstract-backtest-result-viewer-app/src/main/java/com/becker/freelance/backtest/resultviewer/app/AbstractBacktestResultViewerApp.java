@@ -84,6 +84,7 @@ public class AbstractBacktestResultViewerApp implements Runnable {
     @Override
     public void run() {
         Path resultPath = askForResultPath();
+        String strategyName = resultPath.getFileName().toString().split("\\.")[0];
         ResultParser resultParser = askForResultParser();
 
         logger.info("Reading Results from {}...", resultPath);
@@ -92,7 +93,7 @@ public class AbstractBacktestResultViewerApp implements Runnable {
             logger.info("Reading Results finished");
             logger.info("Processing Results...");
 
-            resultParser.run(ALL_METRICS);
+            resultParser.run(ALL_METRICS, strategyName);
         };
 
         BacktestResultReader backtestResultReader = new BacktestResultReader(resultPath);
