@@ -1,8 +1,7 @@
-package com.becker.freelance.app;
+package com.becker.freelance.strategies.creation;
 
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.indicators.ta.regime.QuantileMarketRegime;
-import com.becker.freelance.strategies.creation.StrategyCreator;
 import com.becker.freelance.strategies.strategy.DefaultStrategyParameter;
 import com.becker.freelance.strategies.strategy.StrategyParameter;
 import com.becker.freelance.strategies.strategy.TradingStrategy;

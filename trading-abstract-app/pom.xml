@@ -17,6 +17,7 @@
         <module>local-abstract-backtest-app</module>
         <module>abstract-backtest-result-viewer-app</module>
         <module>remote-abstract-backtest-app</module>
+        <module>abstract-app-commons</module>
     </modules>
 
     <dependencies>

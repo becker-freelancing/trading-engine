@@ -7,8 +7,8 @@ import com.becker.freelance.engine.StrategySupplier;
 import com.becker.freelance.execution.RemoteExecutionEngine;
 import com.becker.freelance.execution.StrategyWithPair;
 import com.becker.freelance.indicators.ta.regime.QuantileMarketRegime;
+import com.becker.freelance.strategies.creation.RegimeStrategyCreator;
 import com.becker.freelance.strategies.strategy.BaseStrategy;
-import com.becker.freelance.strategies.strategy.DefaultStrategyParameter;
 import com.becker.freelance.strategies.strategy.RegimeStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,19 +75,6 @@ public class AbstractRemoteBacktestApp implements Runnable {
             ));
 
             return new RegimeStrategy(pair, strategiesByRegime);
-        };
-    }
-
-    private StrategySupplier toSupplier(RegimeStrategyCreator strategy) {
-        return (pair, tradingCalculator) -> {
-            if (!strategy.pair().equals(pair)) {
-                throw new IllegalStateException("Could not construct Strategy for pair: " + pair.technicalName() + ". Expected Pair was " + strategy.pair().technicalName());
-            }
-            DefaultStrategyParameter defaultStrategyParameter = new DefaultStrategyParameter(
-                    strategy.strategyCreationParameter(),
-                    pair,
-                    strategy.regimes());
-            return strategy.build(defaultStrategyParameter);
         };
     }
 }

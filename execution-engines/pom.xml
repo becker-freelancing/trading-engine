@@ -15,6 +15,7 @@
     <modules>
         <module>backtest-engine</module>
         <module>remote-execution-engine</module>
+        <module>execution-callbacks</module>
     </modules>
 
 </project>

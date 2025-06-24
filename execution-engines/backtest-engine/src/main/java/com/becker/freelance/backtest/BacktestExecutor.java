@@ -8,6 +8,7 @@ import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.data.SubscribableDataProvider;
 import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.engine.StrategySupplier;
+import com.becker.freelance.execution.callback.backtest.BacktestFinishedCallback;
 import com.becker.freelance.management.api.environment.TimeChangeListener;
 import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 import com.becker.freelance.strategies.strategy.TradingStrategy;
@@ -22,7 +23,7 @@ public class BacktestExecutor implements Runnable {
 
     private final AppConfiguration appConfiguration;
     private final BacktestExecutionConfiguration backtestExecutionConfiguration;
-    private final BiConsumer<List<Trade>, StrategyCreationParameter> onBacktestFinished;
+    private final BacktestFinishedCallback onBacktestFinished;
     private final Consumer<Exception> onError;
     private final StrategyCreationParameter parameters;
     private final StrategySupplier strategySupplier;
@@ -30,7 +31,7 @@ public class BacktestExecutor implements Runnable {
 
     public BacktestExecutor(AppConfiguration appConfiguration,
                             BacktestExecutionConfiguration backtestExecutionConfiguration,
-                            BiConsumer<List<Trade>, StrategyCreationParameter> onBacktestFinished,
+                            BacktestFinishedCallback onBacktestFinished,
                             Consumer<Exception> onError,
                             StrategyCreationParameter parameters,
                             StrategySupplier strategySupplier) {
