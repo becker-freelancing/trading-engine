@@ -9,8 +9,10 @@ import com.becker.freelance.backtest.resultviewer.app.extractor.BestMinByRegimeE
 import com.becker.freelance.backtest.resultviewer.app.metric.MetricCalculator;
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.trade.Trade;
+import com.becker.freelance.math.Decimal;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -38,17 +40,19 @@ public class WithRegimeResultParser implements ResultParser {
             List<BacktestResultContent> newResults = new ArrayList<>();
             for (BacktestResultContent result : results) {
                 for (BacktestResultContent resultContent : resultContents) {
-                    ArrayList<Trade> trades = new ArrayList<>(result.tradeObjects());
+                    List<Trade> trades = new ArrayList<>(result.tradeObjects());
                     trades.addAll(resultContent.tradeObjects());
+                    trades = trades.stream().sorted(Comparator.comparing(Trade::getOpenTime)).toList();
+                    List<Decimal> cumulate = cumulative(trades);
                     newResults.add(new BacktestResultContent(
                                     result.objectMapper(),
                                     result.pairs(),
                                     result.appMode(),
                                     result.fromTime(),
                                     result.toTime(),
-                                    resultContent.min().min(result.min()),
-                                    resultContent.max().max(result.max()),
-                                    resultContent.cumulative().add(result.cumulative()),
+                                    cumulate.stream().min(Comparator.naturalOrder()).orElse(Decimal.ZERO),
+                                    cumulate.stream().max(Comparator.naturalOrder()).orElse(Decimal.ZERO),
+                                    cumulate.get(cumulate.size() - 1),
                                     result.initialWalletAmount(),
                                     result.parametersJson() + "\n" + regime.name() + ": " + resultContent.parametersJson(),
                                     trades
@@ -79,6 +83,19 @@ public class WithRegimeResultParser implements ResultParser {
         }
 
         return results;
+    }
+
+    private static List<Decimal> cumulative(List<Trade> trades) {
+        List<Decimal> cumulative = new ArrayList<>();
+        for (int i = 0; i < trades.size(); i++) {
+            if (i == 0){
+                cumulative.add(trades.get(i).getProfitInEuroWithFees());
+                continue;
+            }
+
+            cumulative.add(cumulative.get(i-1).add(trades.get(i).getProfitInEuroWithFees()));
+        }
+        return cumulative;
     }
 
     @Override

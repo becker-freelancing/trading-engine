@@ -18,8 +18,8 @@ public class BybitPairProvider implements PairProvider {
                 from("ETH", "USDT", 1, "ETH/USDT M1", 1., 0.0001, 60., 0.05, 2., 2),
                 from("ETH", "USDT", 5, "ETH/USDT M5", 1., 0.0001, 60., 0.05, 2., 2),
 
-                from("ETH", "PERP", 1, "ETH/USDC M1", 1., 0.0001, 60., 0.05, 2., 2),
-                from("ETH", "PERP", 5, "ETH/USDC M5", 1., 0.0001, 60., 0.05, 2., 2),
+                from("ETH", "PERP", 1, "ETH/USDC M1", 1., 0.0001, 60., 0.05, 1/ 10., 1),
+                from("ETH", "PERP", 5, "ETH/USDC M5", 1., 0.0001, 60., 0.05, 1 / 10., 1),
 
                 from("USDT", "EUR", 1, "USDT/EUR M1", 1., 0.0001, 60., 0.05, 2., 2),
                 from("EUR", "USDT", 1, "EUR/USDT M1", 1., 0.0001, 60., 0.05, 2., 2)
