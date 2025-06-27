@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class BacktestEngine {
@@ -115,6 +116,11 @@ public class BacktestEngine {
         }
 
         executor.shutdown();
+        try {
+            executor.awaitTermination(5, TimeUnit.HOURS);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException("Could not await termination", e);
+        }
         onFinished.run();
     }
 
