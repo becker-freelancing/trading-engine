@@ -1,6 +1,5 @@
 package com.becker.freelance.app;
 
-import com.becker.freelance.app.BacktestAppInitiatingUtil.LastExecutionProperties;
 import com.becker.freelance.backtest.BacktestEngine;
 import com.becker.freelance.backtest.StrategySupplierWithParameters;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
@@ -25,7 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class AbstractLocalBacktestApp implements Runnable {
+abstract class AbstractLocalBacktestApp implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractLocalBacktestApp.class);
 
@@ -46,26 +45,23 @@ class AbstractLocalBacktestApp implements Runnable {
         this.useStrategyConfig = strategyConfig;
     }
 
+    protected abstract void initiate();
+
+    protected abstract StrategyCreator getStrategyCreator();
+
+    protected abstract AppMode getAppMode();
+
+    protected abstract List<Pair> getPairs();
+
+    protected abstract Integer getNumThreads();
+
     @Override
     public void run() {
-        Optional<LastExecutionProperties> properties = appInitiatingUtil.findProperties();
-        StrategyCreator strategy;
-        AppMode appMode;
-        List<Pair> pairs;
-        Integer numThreads;
-        if (properties.isPresent()) {
-            LastExecutionProperties lastExecutionProperties = properties.get();
-            strategy = lastExecutionProperties.baseStrategy();
-            appMode = lastExecutionProperties.appMode();
-            pairs = lastExecutionProperties.pairs();
-            numThreads = lastExecutionProperties.numberOfThread();
-        } else {
-            strategy = appInitiatingUtil.askStrategy();
-            appMode = appInitiatingUtil.askAppMode();
-            pairs = appInitiatingUtil.askPair(appMode);
-            numThreads = appInitiatingUtil.askNumberOfThreads();
-        }
-        appInitiatingUtil.saveProperties(strategy, numThreads, pairs, appMode);
+        initiate();
+        StrategyCreator strategy = getStrategyCreator();
+        AppMode appMode = getAppMode();
+        List<Pair> pairs = getPairs();
+        Integer numThreads = getNumThreads();
 
 
         TimeSeries eurusd = DataProviderFactory.find(appMode).createDataProvider(Pair.eurUsd1()).readTimeSeries(fromTime.minusDays(1), toTime);

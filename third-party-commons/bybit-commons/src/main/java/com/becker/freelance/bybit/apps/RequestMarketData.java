@@ -29,7 +29,7 @@ public class RequestMarketData {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static void main(String[] args) throws Exception {
-        String symbol = "ETHPERP";
+        String symbol = "BTCPERP";
 //        Function<String, String> transformator = (in) -> {
 //            double price = Double.parseDouble(in);
 //            price = new BigDecimal(1 / price).setScale(5, RoundingMode.HALF_UP).doubleValue();
@@ -44,12 +44,12 @@ public class RequestMarketData {
 
         BybitApiMarketRestClient marketRestClient = BybitApiClientFactory.newInstance().newMarketDataRestClient();
 
-        LocalDateTime endTime = LocalDateTime.of(2025, 6, 20, 7, 0);//getMaxTime(path);
+        LocalDateTime endTime = getMaxTime(path);
         LocalDateTime startTime = endTime;
 
         int i = 0;
         Stream<String> lines = Stream.of();
-        while (startTime.isAfter(LocalDateTime.of(2025, 6, 17, 11, 30))) {
+        while (true) {
             startTime = endTime.minusMinutes(998);
             System.out.println("Requesting from " + startTime + " to " + endTime);
             Map<String, Object> marketLinesData;
@@ -75,6 +75,8 @@ public class RequestMarketData {
 
             Map<String, Object> result = (Map<String, Object>) marketLinesData.get("result");
             List<List<String>> list = (List<List<String>>) result.get("list");
+
+            System.out.println("Received " + list.size());
 
             lines = Stream.concat(lines, mapMarketData(list, transformator));
 

@@ -3,6 +3,7 @@ package com.becker.freelance.app;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class AbstractLocalBacktestAppBuilder {
 
@@ -15,9 +16,33 @@ public class AbstractLocalBacktestAppBuilder {
     private boolean continueMode;
     private Runnable onFinished = () -> {};
     private boolean strategyConfig;
+    private String strategyName;
+    private Integer numberOfThreads;
+    private String appMode;
+    private List<String> pair;
 
     public static AbstractLocalBacktestAppBuilder builder() {
         return new AbstractLocalBacktestAppBuilder();
+    }
+
+    public AbstractLocalBacktestAppBuilder withStrategyName(String strategyName) {
+        this.strategyName = strategyName;
+        return this;
+    }
+
+    public AbstractLocalBacktestAppBuilder withNumberOfThreads(Integer numberOfThreads) {
+        this.numberOfThreads = numberOfThreads;
+        return this;
+    }
+
+    public AbstractLocalBacktestAppBuilder withAppMode(String appMode) {
+        this.appMode = appMode;
+        return this;
+    }
+
+    public AbstractLocalBacktestAppBuilder withPair(String... pairs) {
+        this.pair = List.of(pairs);
+        return this;
     }
 
     public AbstractLocalBacktestAppBuilder withInitialWalletAmount(Decimal initialWalletAmount) {
@@ -70,6 +95,10 @@ public class AbstractLocalBacktestAppBuilder {
             throw new IllegalStateException("To Time can not be null");
         }
 
-        return new AbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig);
+        if (strategyName != null) {
+            return new ConfiguredAbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig, strategyName, appMode, pair, numberOfThreads);
+        }
+
+        return new CliAbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig);
     }
 }
