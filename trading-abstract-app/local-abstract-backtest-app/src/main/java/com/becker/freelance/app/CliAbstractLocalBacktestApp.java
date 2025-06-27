@@ -27,10 +27,6 @@ class CliAbstractLocalBacktestApp extends AbstractLocalBacktestApp {
     @Override
     protected void initiate() {
         Optional<LastExecutionProperties> properties = appInitiatingUtil.findProperties();
-        StrategyCreator strategy;
-        AppMode appMode;
-        List<Pair> pairs;
-        Integer numThreads;
         if (properties.isPresent()) {
             LastExecutionProperties lastExecutionProperties = properties.get();
             strategy = lastExecutionProperties.baseStrategy();
