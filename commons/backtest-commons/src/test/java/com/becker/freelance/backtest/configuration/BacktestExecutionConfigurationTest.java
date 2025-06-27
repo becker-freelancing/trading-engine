@@ -27,7 +27,7 @@ class BacktestExecutionConfigurationTest {
         endTime = LocalDateTime.of(2021, 1, 1, 0, 0);
         pair = List.of(Mockito.mock(Pair.class));
         timeSeries = Mockito.mock(TimeSeries.class);
-        configuration = new BacktestExecutionConfiguration(pair, Decimal.DOUBLE_MAX, timeSeries, startTime, endTime, 10);
+        configuration = new BacktestExecutionConfiguration(pair, Decimal.DOUBLE_MAX, timeSeries, startTime, endTime, 10, Integer.MAX_VALUE);
     }
 
     @Test

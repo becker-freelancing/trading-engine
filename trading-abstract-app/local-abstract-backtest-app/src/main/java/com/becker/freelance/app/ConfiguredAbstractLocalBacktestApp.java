@@ -15,13 +15,15 @@ class ConfiguredAbstractLocalBacktestApp extends AbstractLocalBacktestApp {
     private final String appMode;
     private final List<String> pairs;
     private final Integer numThreads;
+    private final int parameterLimit;
 
-    ConfiguredAbstractLocalBacktestApp(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, Runnable onFinished, boolean strategyConfig, String strategy, String appMode, List<String> pairs, Integer numThreads) {
+    ConfiguredAbstractLocalBacktestApp(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, Runnable onFinished, boolean strategyConfig, String strategy, String appMode, List<String> pairs, Integer numThreads, int parameterLimit) {
         super(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig);
         this.strategy = strategy;
         this.appMode = appMode;
         this.pairs = pairs;
         this.numThreads = numThreads;
+        this.parameterLimit = parameterLimit;
     }
 
     @Override
@@ -57,6 +59,11 @@ class ConfiguredAbstractLocalBacktestApp extends AbstractLocalBacktestApp {
     @Override
     protected Integer getNumThreads() {
         return numThreads;
+    }
+
+    @Override
+    protected Integer getParameterLimit() {
+        return parameterLimit;
     }
 
 }

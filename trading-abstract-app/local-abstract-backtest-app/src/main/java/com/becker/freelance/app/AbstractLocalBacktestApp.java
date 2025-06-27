@@ -55,6 +55,8 @@ abstract class AbstractLocalBacktestApp implements Runnable {
 
     protected abstract Integer getNumThreads();
 
+    protected abstract Integer getParameterLimit();
+
     @Override
     public void run() {
         initiate();
@@ -62,12 +64,13 @@ abstract class AbstractLocalBacktestApp implements Runnable {
         AppMode appMode = getAppMode();
         List<Pair> pairs = getPairs();
         Integer numThreads = getNumThreads();
+        Integer parameterLimit = getParameterLimit();
 
 
         TimeSeries eurusd = DataProviderFactory.find(appMode).createDataProvider(Pair.eurUsd1()).readTimeSeries(fromTime.minusDays(1), toTime);
 
         AppConfiguration appConfiguration = new AppConfiguration(appMode, LocalDateTime.now());
-        BacktestExecutionConfiguration backtestExecutionConfiguration = new BacktestExecutionConfiguration(pairs, initialWalletAmount, eurusd, fromTime, toTime, numThreads);
+        BacktestExecutionConfiguration backtestExecutionConfiguration = new BacktestExecutionConfiguration(pairs, initialWalletAmount, eurusd, fromTime, toTime, numThreads, parameterLimit);
 
 
         if (useStrategyConfig) {

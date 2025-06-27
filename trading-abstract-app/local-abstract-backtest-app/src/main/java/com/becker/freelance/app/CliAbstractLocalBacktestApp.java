@@ -62,4 +62,9 @@ class CliAbstractLocalBacktestApp extends AbstractLocalBacktestApp {
         return numThreads;
     }
 
+    @Override
+    protected Integer getParameterLimit() {
+        return Integer.MAX_VALUE;
+    }
+
 }

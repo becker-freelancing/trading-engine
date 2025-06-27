@@ -67,7 +67,7 @@ class AbstractLocalBacktestContinueApp implements Runnable {
 
 
         AppConfiguration appConfiguration = new AppConfiguration(appMode, LocalDateTime.now());
-        BacktestExecutionConfiguration backtestExecutionConfiguration = new BacktestExecutionConfiguration(pairs, initialWalletAmount, eurusd, fromTime, toTime, numThreads);
+        BacktestExecutionConfiguration backtestExecutionConfiguration = new BacktestExecutionConfiguration(pairs, initialWalletAmount, eurusd, fromTime, toTime, numThreads, Integer.MAX_VALUE);
 
         BacktestEngine backtestEngine = new BacktestEngine(appConfiguration, backtestExecutionConfiguration, strategy, new ExcludeExistingParametersFilter(parameters), resultWriteFile, () -> {});
         backtestEngine.run();

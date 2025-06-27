@@ -7,6 +7,7 @@ import java.util.List;
 
 public class AbstractLocalBacktestAppBuilder {
 
+
     AbstractLocalBacktestAppBuilder() {
     }
 
@@ -20,6 +21,7 @@ public class AbstractLocalBacktestAppBuilder {
     private Integer numberOfThreads;
     private String appMode;
     private List<String> pair;
+    private int parameterLimit;
 
     public static AbstractLocalBacktestAppBuilder builder() {
         return new AbstractLocalBacktestAppBuilder();
@@ -96,9 +98,14 @@ public class AbstractLocalBacktestAppBuilder {
         }
 
         if (strategyName != null) {
-            return new ConfiguredAbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig, strategyName, appMode, pair, numberOfThreads);
+            return new ConfiguredAbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig, strategyName, appMode, pair, numberOfThreads, parameterLimit);
         }
 
         return new CliAbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig);
+    }
+
+    public AbstractLocalBacktestAppBuilder withParameterPermutationLimit(int limit) {
+        this.parameterLimit = limit;
+        return this;
     }
 }

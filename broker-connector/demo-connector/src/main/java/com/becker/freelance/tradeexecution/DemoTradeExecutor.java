@@ -68,7 +68,7 @@ public class DemoTradeExecutor extends TradeExecutor {
 
     @Override
     protected TradeExecutor construct(Pair pair, EurUsdRequestor eurUsdRequestor) {
-        return construct(new BacktestExecutionConfiguration(null, new Decimal(4950.33), null, null, null, null), pair, eurUsdRequestor);
+        return construct(new BacktestExecutionConfiguration(null, new Decimal(4950.33), null, null, null, null, Integer.MAX_VALUE), pair, eurUsdRequestor);
     }
 
     @Override
