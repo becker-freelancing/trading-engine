@@ -29,7 +29,7 @@ public class RequestMarketData {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static void main(String[] args) throws Exception {
-        String symbol = "BTCPERP";
+        String symbol = "LTCUSDT";
 //        Function<String, String> transformator = (in) -> {
 //            double price = Double.parseDouble(in);
 //            price = new BigDecimal(1 / price).setScale(5, RoundingMode.HALF_UP).doubleValue();
@@ -77,6 +77,9 @@ public class RequestMarketData {
             List<List<String>> list = (List<List<String>>) result.get("list");
 
             System.out.println("Received " + list.size());
+            if (list.isEmpty()) {
+                return;
+            }
 
             lines = Stream.concat(lines, mapMarketData(list, transformator));
 
