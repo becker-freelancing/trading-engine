@@ -8,6 +8,7 @@ public enum DefaultParameterNames implements ParameterName {
     SMA_PERIOD("smaPeriod"),
     RSI_PERIOD("rsiPeriod"),
     EMA_PERIOD("emaPeriod"),
+    ATR_PERIOD("atrPeriod"),
     STOCH_K_PERIOD("stochKPeriod"),
     MACD_SHORT_PERIOD("macdShortPeriod"),
     MACD_LONG_PERIOD("macdLongPeriod"),
