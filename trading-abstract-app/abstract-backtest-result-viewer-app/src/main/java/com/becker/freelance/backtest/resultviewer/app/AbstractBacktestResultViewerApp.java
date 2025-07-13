@@ -2,6 +2,7 @@ package com.becker.freelance.backtest.resultviewer.app;
 
 import com.becker.freelance.backtest.commons.BacktestResultReader;
 import com.becker.freelance.backtest.commons.ResultExtractor;
+import com.becker.freelance.backtest.resultviewer.app.callback.ParsedCallback;
 import com.becker.freelance.backtest.resultviewer.app.metric.*;
 import com.becker.freelance.backtest.util.PathUtil;
 import com.becker.freelance.strategies.creation.StrategyCreator;
@@ -41,9 +42,15 @@ public class AbstractBacktestResultViewerApp implements Runnable {
             new HourOfDayHitRate()
     );
 
+    private final ParsedCallback parsedBacktestResultConsumer;
+
 
     public AbstractBacktestResultViewerApp() {
+        this(ParsedCallback.noop());
+    }
 
+    public AbstractBacktestResultViewerApp(ParsedCallback parsedBacktestResultConsumer) {
+        this.parsedBacktestResultConsumer = parsedBacktestResultConsumer;
     }
 
     private static Path askForResultFileName(StrategyCreator strategy) {
@@ -93,15 +100,13 @@ public class AbstractBacktestResultViewerApp implements Runnable {
             logger.info("Reading Results finished");
             logger.info("Processing Results...");
 
-            resultParser.run(ALL_METRICS, strategyName);
+            resultParser.run(ALL_METRICS, strategyName, parsedBacktestResultConsumer, resultPath);
         };
 
         BacktestResultReader backtestResultReader = new BacktestResultReader(resultPath);
         backtestResultReader.readCsvContent(resultPath,
                 onFinish,
                 resultParser.getResultExtractors().toArray(new ResultExtractor[0]));
-
-
 
     }
 

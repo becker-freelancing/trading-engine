@@ -2,12 +2,16 @@ package com.becker.freelance.backtest.resultviewer.app;
 
 import com.becker.freelance.backtest.commons.BacktestResultContent;
 import com.becker.freelance.backtest.commons.ResultExtractor;
+import com.becker.freelance.backtest.resultviewer.app.callback.ParsedBacktestResult;
+import com.becker.freelance.backtest.resultviewer.app.callback.ParsedCallback;
+import com.becker.freelance.backtest.resultviewer.app.callback.ParsedTrade;
 import com.becker.freelance.backtest.resultviewer.app.extractor.*;
 import com.becker.freelance.backtest.resultviewer.app.metric.MetricCalculator;
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -103,7 +107,7 @@ public class WithRegimeResultParser implements ResultParser {
     }
 
     @Override
-    public void run(List<MetricCalculator> metrics, String strategyName) {
+    public void run(List<MetricCalculator> metrics, String strategyName, ParsedCallback parsedCallback, Path resultPath) {
         List<BacktestResultContent> bestMin = findBestMin();
         List<BacktestResultContent> bestMax = findBestMax();
         List<BacktestResultContent> bestCumulative = findBestCumulative();
@@ -112,6 +116,23 @@ public class WithRegimeResultParser implements ResultParser {
 
         new BacktestResultConsoleWriter(bestCumulative, bestMax, bestMin, metrics, baseData).run();
         new BacktestResultPlotter(strategyName, bestCumulative, bestMax, bestMin, mostTrades).run();
+
+        parsedCallback.onBestCumulative(bestCumulative.stream().map(this::map).toList(), resultPath);
+        parsedCallback.onBestMax(bestMax.stream().map(this::map).toList(), resultPath);
+        parsedCallback.onBestMin(bestMin.stream().map(this::map).toList(), resultPath);
+        parsedCallback.onMostTrades(mostTrades.stream().map(this::map).toList(), resultPath);
+    }
+
+    private ParsedBacktestResult map(BacktestResultContent resultContent) {
+        List<ParsedTrade> parsedTrades = resultContent.tradeObjects().stream()
+                .map(this::map)
+                .toList();
+
+        return new ParsedBacktestResult(parsedTrades);
+    }
+
+    private ParsedTrade map(Trade trade) {
+        return new ParsedTrade(trade.getOpenTime(), trade.getProfitInEuroWithFees());
     }
 
     private List<BacktestResultContent> findMostTrades() {
