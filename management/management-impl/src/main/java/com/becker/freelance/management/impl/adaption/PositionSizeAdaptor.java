@@ -26,6 +26,10 @@ public class PositionSizeAdaptor implements EntrySignalAdaptor {
         Decimal stopDistanceInPoints = entrySignal.getOpenOrderBuilder().getEstimatedExecutionLevel(currentPrice)
                 .subtract(entrySignal.getStopOrderBuilder().getEstimatedExecutionLevel(currentPrice))
                 .abs();
+        if (stopDistanceInPoints.isEqualToZero()){
+            entrySignal.setSize(Decimal.ONE);
+            return entrySignal;
+        }
         PositionSizeCalculationParams positionSizeCalculationParams = new PositionSizeCalculationParams(stopDistanceInPoints, entrySignal.getPair());
 
         Decimal positionSize = positionSizeCalculator.calculate(environmentProvider, positionSizeCalculationParams);
