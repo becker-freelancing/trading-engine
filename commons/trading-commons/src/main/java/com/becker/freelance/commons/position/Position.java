@@ -46,7 +46,7 @@ public interface Position extends Cloneable {
     public TradeableQuantilMarketRegime getOpenMarketRegime();
 
     public default Decimal getLeverage() {
-        return Decimal.valueOf(10);
+        return Decimal.valueOf(2);
     }
 
     public default Position cloneWithSize(Decimal size) {

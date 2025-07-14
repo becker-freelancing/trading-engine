@@ -36,7 +36,7 @@ public class WithRegimeResultParser implements ResultParser {
     private static List<BacktestResultContent> permutate(Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> resultByRegime) {
         List<BacktestResultContent> results = new ArrayList<>();
 
-        for (Map.Entry<TradeableQuantilMarketRegime, List<BacktestResultContent>> entry : resultByRegime.entrySet()) {
+        for (Map.Entry<TradeableQuantilMarketRegime, List<BacktestResultContent>> entry : resultByRegime.entrySet().stream().limit(5).toList()) {
             TradeableQuantilMarketRegime regime = entry.getKey();
             List<BacktestResultContent> resultContents = entry.getValue();
 
@@ -138,7 +138,7 @@ public class WithRegimeResultParser implements ResultParser {
     private List<BacktestResultContent> findMostTrades() {
         Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> resultByRegime = mostTradesExtractor.getResultByRegime();
 
-        return permutate(resultByRegime);
+        return List.of();//permutate(resultByRegime);
     }
 
     private List<BacktestResultContent> findBestMin() {
