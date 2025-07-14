@@ -59,8 +59,8 @@ public class RegimeStrategy extends BaseStrategy {
         return Math.max(super.unstableBars(),
                 strategiesByRegime.values().stream()
                         .flatMap(List::stream)
+                        .findAny()
                         .map(BaseStrategy::unstableBars)
-                        .max(Comparator.naturalOrder())
                         .orElse(0)
         );
     }

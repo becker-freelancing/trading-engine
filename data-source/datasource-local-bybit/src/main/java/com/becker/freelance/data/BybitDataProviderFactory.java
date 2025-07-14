@@ -2,13 +2,13 @@ package com.becker.freelance.data;
 
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.plugin.BybitLocalDemoAppMode;
 
 public class BybitDataProviderFactory extends DataProviderFactory {
 
     @Override
     protected boolean supports(AppMode appMode) {
-        return true;
-//        return new BybitLocalDemoAppMode().equals(appMode);
+        return new BybitLocalDemoAppMode().equals(appMode);
     }
 
     @Override

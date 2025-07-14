@@ -4,7 +4,6 @@ import com.becker.freelance.broker.marketdata.MarketData;
 import com.becker.freelance.broker.marketdata.MarketDataListener;
 import com.becker.freelance.bybit.marketdata.MarketDataClient;
 import com.becker.freelance.bybit.marketdata.MarketDataSocketRegistry;
-import com.becker.freelance.bybit.orderbook.OrderbookSocketRegistry;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.CompleteTimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeries;
@@ -15,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,7 +34,7 @@ public class BybitSubscribableDataProvider extends SubscribableDataProvider impl
         this.subscribers = new LinkedHashSet<>();
         this.marketDataClient = new MarketDataClient();
         MarketDataSocketRegistry.registerListener(pair, this);
-        OrderbookSocketRegistry.registerListener(pair, new OrderBookListener(pair));
+        //OrderbookSocketRegistry.registerListener(pair, new OrderBookListener(pair));
     }
 
     @Override
@@ -84,5 +84,11 @@ public class BybitSubscribableDataProvider extends SubscribableDataProvider impl
     public TimeSeriesEntry getPriceForTime(Pair pair, LocalDateTime time) {
 
         return marketDataClient.getPriceForTime(pair, time);
+    }
+
+    @Override
+    public List<TimeSeriesEntry> getPriceInRange(Pair pair, LocalDateTime from, LocalDateTime to) {
+
+        return marketDataClient.getPriceInRange(pair, from, to);
     }
 }

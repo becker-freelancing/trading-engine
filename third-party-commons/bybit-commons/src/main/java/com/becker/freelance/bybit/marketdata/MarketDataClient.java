@@ -36,6 +36,33 @@ public class MarketDataClient {
                 .toLocalDateTime();
     }
 
+
+    public List<TimeSeriesEntry> getPriceInRange(Pair pair, LocalDateTime from, LocalDateTime to) {
+        MarketDataRequest request = MarketDataRequest.builder()
+                .category(CategoryType.LINEAR)
+                .symbol(pairConverter.convert(pair))
+                .start(map(from))
+                .end(map(to))
+                .marketInterval(MarketInterval.ONE_MINUTE)
+                .build();
+        Map<String, Object> marketLinesData = (Map<String, Object>) marketRestClient.getMarketLinesData(request);
+
+        if (!"OK".equals(marketLinesData.get("retMsg"))) {
+            logger.error("Could not request market data for pair {} from {} to {}, because of {}", pair.technicalName(), from, to, marketLinesData.get("retMsg"));
+            throw new IllegalStateException("Could not request market data");
+        }
+
+        Map<String, Object> result = (Map<String, Object>) marketLinesData.get("result");
+        List<List<String>> list = (List<List<String>>) result.get("list");
+
+        return list.stream()
+                .map(data -> map(data, pair))
+                .filter(entry -> entry.time().isBefore(to) || entry.time().equals(to))
+                .filter(entry -> entry.time().isAfter(from) || entry.time().equals(from))
+                .toList();
+
+    }
+
     public TimeSeriesEntry getPriceForTime(Pair pair, LocalDateTime time) {
         MarketDataRequest request = MarketDataRequest.builder()
                 .category(CategoryType.LINEAR)
@@ -80,6 +107,5 @@ public class MarketDataClient {
                 .toInstant(ZoneId.systemDefault().getRules().getOffset(time))
                 .toEpochMilli();
     }
-
 
 }

@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -71,12 +70,9 @@ public class RemoteExecutionExecutor implements Runnable {
             int requiredBarCount = tradingStrategy.unstableBars();
             Pair strategyPair = tradingStrategy.getPair();
             long barLengthInMinutes = strategyPair.toDuration().toMinutes();
-            List<TimeSeriesEntry> initiationData = new ArrayList<>();
-            for (int i = 1; i < requiredBarCount; i++) {
-                LocalDateTime requestTime = currentTime.minusMinutes(barLengthInMinutes * i);
-                TimeSeriesEntry priceForTime = subscribableDataProvider.getPriceForTime(strategyPair, requestTime);
-                initiationData.add(priceForTime);
-            }
+            List<TimeSeriesEntry> initiationData = subscribableDataProvider.getPriceInRange(strategyPair,
+                    currentTime.minusMinutes(barLengthInMinutes * requiredBarCount + 100),
+                    currentTime.minusMinutes(barLengthInMinutes));
             TimeSeries timeSeries = new CompleteTimeSeries(pair, initiationData);
             tradingStrategy.processInitData(timeSeries);
         };
