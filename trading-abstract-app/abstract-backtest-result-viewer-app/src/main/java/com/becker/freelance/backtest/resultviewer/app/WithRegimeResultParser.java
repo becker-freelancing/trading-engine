@@ -36,7 +36,9 @@ public class WithRegimeResultParser implements ResultParser {
     private static List<BacktestResultContent> permutate(Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> resultByRegime) {
         List<BacktestResultContent> results = new ArrayList<>();
 
-        for (Map.Entry<TradeableQuantilMarketRegime, List<BacktestResultContent>> entry : resultByRegime.entrySet().stream().limit(5).toList()) {
+        for (Map.Entry<TradeableQuantilMarketRegime, List<BacktestResultContent>> entry : resultByRegime.entrySet().stream()
+                .sorted(Comparator.comparing(entry -> entry.getKey().name()))
+                .toList()) {
             TradeableQuantilMarketRegime regime = entry.getKey();
             List<BacktestResultContent> resultContents = entry.getValue();
 
