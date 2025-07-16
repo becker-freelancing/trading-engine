@@ -9,11 +9,15 @@ import com.becker.freelance.opentrades.OpenPositionRequestor;
 import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ta4j.core.Bar;
 
 import java.util.*;
 
 public class RegimeStrategy extends BaseStrategy {
+
+    private static final Logger logger = LoggerFactory.getLogger(RegimeStrategy.class);
 
     private final Map<QuantileMarketRegime, List<BaseStrategy>> strategiesByRegime;
     private final List<BaseStrategy> allStrategies;
@@ -33,12 +37,18 @@ public class RegimeStrategy extends BaseStrategy {
     @Override
     protected Optional<EntrySignalBuilder> internalShouldEnter(EntryExecutionParameter entryParameter) {
         QuantileMarketRegime currentMarketRegime = currentMarketRegime();
+
+        logger.debug("Current market regime is {}", currentMarketRegime.name());
+
         for (BaseStrategy baseStrategy : strategiesByRegime.get(currentMarketRegime)) {
+            logger.debug("Asking Strategy {} for entry signal", baseStrategy);
             Optional<EntrySignalBuilder> entrySignalBuilder = baseStrategy.internalShouldEnter(entryParameter);
+            logger.debug("Got entry signal from strategy {}", baseStrategy);
             if (entrySignalBuilder.isPresent()) {
                 return entrySignalBuilder;
             }
         }
+        logger.debug("Did not got entry signal from strategies {}", strategiesByRegime.get(currentMarketRegime));
         return Optional.empty();
     }
 
