@@ -5,9 +5,13 @@ import com.becker.freelance.management.api.environment.ManagementEnvironmentProv
 import com.becker.freelance.management.api.validation.EntrySignalValidator;
 import com.becker.freelance.management.commons.validation.MaxRiskValidator;
 import com.becker.freelance.management.commons.validation.MaxRiskValidatorParams;
+import com.becker.freelance.management.impl.adaption.PositionSizeAdaptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MaxRiskEntrySignalValidation implements EntrySignalValidator {
 
+    private static final Logger logger = LoggerFactory.getLogger(PositionSizeAdaptor.class);
     private final MaxRiskValidator maxRiskValidator;
 
     public MaxRiskEntrySignalValidation() {
@@ -23,7 +27,9 @@ public class MaxRiskEntrySignalValidation implements EntrySignalValidator {
         MaxRiskValidatorParams maxRiskValidatorParams = new MaxRiskValidatorParams(entrySignal.size(),
                 entrySignal.estimatedStopInPoints(environmentProvider.getCurrentPrice(entrySignal.pair())),
                 entrySignal.pair());
-        return maxRiskValidator.isValid(environmentProvider, maxRiskValidatorParams);
+        boolean valid = maxRiskValidator.isValid(environmentProvider, maxRiskValidatorParams);
+        logger.debug("Max Risk is valid: {}. Calculation Params: {}", valid, maxRiskValidatorParams);
+        return valid;
     }
 
 }

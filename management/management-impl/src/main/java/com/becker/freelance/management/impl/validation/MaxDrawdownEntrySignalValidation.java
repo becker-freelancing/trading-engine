@@ -4,9 +4,12 @@ import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
 import com.becker.freelance.management.api.validation.EntrySignalValidator;
 import com.becker.freelance.management.commons.validation.MaxDrawdownValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MaxDrawdownEntrySignalValidation implements EntrySignalValidator {
 
+    private static final Logger logger = LoggerFactory.getLogger(MaxDrawdownEntrySignalValidation.class);
     private final MaxDrawdownValidator maxDrawdownValidator;
 
     public MaxDrawdownEntrySignalValidation() {
@@ -19,7 +22,9 @@ public class MaxDrawdownEntrySignalValidation implements EntrySignalValidator {
     }
 
     private boolean maxDrawdownValid(ManagementEnvironmentProvider environmentProvider, EntrySignal entrySignal) {
-        return maxDrawdownValidator.isValid(environmentProvider, entrySignal.pair());
+        boolean valid = maxDrawdownValidator.isValid(environmentProvider, entrySignal.pair());
+        logger.debug("Max Drawdown is valid: {}", valid);
+        return valid;
     }
 
 }

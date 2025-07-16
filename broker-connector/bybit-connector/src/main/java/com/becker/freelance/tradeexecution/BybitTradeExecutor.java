@@ -78,7 +78,7 @@ public class BybitTradeExecutor extends TradeExecutor {
 //            logger.warn("Rejected Entry Signal with age {} seconds. Max Age of Entry Signal is {}", durationSinceNewEntry, MAX_ENTRY_SIGNAL_AGE.toSeconds());
 //            return;
 //        }
-
+        logger.debug("Executing Entry Signal {}", entrySignal);
         tradeController.entry(entrySignal);
     }
 

@@ -9,8 +9,12 @@ import com.becker.freelance.management.commons.calculation.PositionSizeCalculati
 import com.becker.freelance.management.commons.calculation.PositionSizeCalculator;
 import com.becker.freelance.management.commons.calculation.PositionSizeSanitizer;
 import com.becker.freelance.math.Decimal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PositionSizeAdaptor implements EntrySignalAdaptor {
+
+    private static final Logger logger = LoggerFactory.getLogger(PositionSizeAdaptor.class);
 
     private final Calculator<Decimal, PositionSizeCalculationParams> positionSizeCalculator;
     private final Calculator<Decimal, Decimal> positionSizeSanitizer;
@@ -26,6 +30,9 @@ public class PositionSizeAdaptor implements EntrySignalAdaptor {
         Decimal stopDistanceInPoints = entrySignal.getOpenOrderBuilder().getEstimatedExecutionLevel(currentPrice)
                 .subtract(entrySignal.getStopOrderBuilder().getEstimatedExecutionLevel(currentPrice))
                 .abs();
+
+        logger.debug("Stop distance: {} points", stopDistanceInPoints);
+
         if (stopDistanceInPoints.isEqualToZero()){
             entrySignal.setSize(Decimal.ONE);
             return entrySignal;
@@ -38,6 +45,7 @@ public class PositionSizeAdaptor implements EntrySignalAdaptor {
         }
         positionSize = positionSizeSanitizer.calculate(environmentProvider, positionSize);
 
+        logger.debug("Calculated Position Size: {}", positionSize);
         entrySignal.setSize(positionSize);
 
         return entrySignal;
