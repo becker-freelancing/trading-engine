@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class PermutatedStrategyCreationParameter {
 
@@ -25,9 +26,22 @@ public class PermutatedStrategyCreationParameter {
         return this;
     }
 
-    public List<StrategyCreationParameter> asSearchList() {
+    public List<StrategyCreationParameter> asShuffeledList() {
         Collections.shuffle(strategyCreationParameters, new Random(42));
         return strategyCreationParameters;
+    }
+
+    public Stream<StrategyCreationParameter> evenlyDistributed(Integer limit) {
+        double totalSize = size();
+        if (totalSize < limit) {
+            return strategyCreationParameters.stream();
+        }
+        List<StrategyCreationParameter> result = new ArrayList<>();
+        for (double d = 0.; d < totalSize; d += totalSize / limit) {
+            result.add(strategyCreationParameters.get((int) Math.round(d)));
+        }
+
+        return result.stream();
     }
 
     public int size() {

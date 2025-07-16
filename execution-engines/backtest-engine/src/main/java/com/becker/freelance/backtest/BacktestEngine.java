@@ -133,9 +133,7 @@ public class BacktestEngine {
         try (parameterFilter) {
             parameters = strategyCreator.strategyParameters().permutate()
                     .filter(parameterFilter.getPredicate())
-                    .asSearchList()
-                    .stream()
-                    .limit(backtestExecutionConfiguration.parameterLimit())
+                    .evenlyDistributed(backtestExecutionConfiguration.parameterLimit())
                     .toList();
         }
         requiredIterations = parameters.size();
