@@ -18,6 +18,7 @@ public class RollingVarianceIndicator implements Indicator<Optional<Num>> {
     private int lastIndex = -1;
     private Num currentSum = DecimalNum.valueOf(0);
     private Num currentSumSq = DecimalNum.valueOf(0);
+
     public RollingVarianceIndicator(Indicator<Optional<Num>> baseIndicator, int variancePeriod) {
         this.baseIndicator = baseIndicator;
         this.variancePeriod = variancePeriod;
