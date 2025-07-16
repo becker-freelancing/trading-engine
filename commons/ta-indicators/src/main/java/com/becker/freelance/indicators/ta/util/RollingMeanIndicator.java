@@ -5,14 +5,16 @@ import org.ta4j.core.Indicator;
 import org.ta4j.core.num.DecimalNum;
 import org.ta4j.core.num.Num;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 public class RollingMeanIndicator implements Indicator<Optional<Num>> {
 
     private final Indicator<Num> baseIndicator;
     private final int meanPeriod;
     private final Num meanPeriodNum;
+    private final Map<Integer, Num> cache = new HashMap<>();
 
     public RollingMeanIndicator(Indicator<Num> baseIndicator, int meanPeriod) {
         this.baseIndicator = baseIndicator;
@@ -22,10 +24,16 @@ public class RollingMeanIndicator implements Indicator<Optional<Num>> {
 
     @Override
     public Optional<Num> getValue(int index) {
-        return IntStream.rangeClosed(index - meanPeriod + 1, index)
-                .mapToObj(baseIndicator::getValue)
-                .reduce(Num::plus)
-                .map(sum -> sum.dividedBy(meanPeriodNum));
+        cache.computeIfAbsent(index, idx -> {
+            double sum = 0.;
+            for (int i = index - meanPeriod + 1; i <= index; i++) {
+                sum += baseIndicator.getValue(i).doubleValue();
+            }
+
+            Num value = DecimalNum.valueOf(sum).dividedBy(meanPeriodNum);
+            return value;
+        });
+        return Optional.of(cache.get(index));
     }
 
     @Override
