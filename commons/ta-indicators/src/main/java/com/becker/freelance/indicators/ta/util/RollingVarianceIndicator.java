@@ -9,11 +9,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class RollingVarianceIndicator implements Indicator<Optional<Num>> {
+public class RollingVarianceIndicator implements Indicator<Optional<Double>> {
 
     private final Indicator<Optional<Num>> baseIndicator;
     private final int variancePeriod;
-    private Map<Integer, Num> cache = new HashMap<>();
+    private Map<Integer, Double> cache = new HashMap<>();
 
     public RollingVarianceIndicator(Indicator<Optional<Num>> baseIndicator, int variancePeriod) {
         this.baseIndicator = baseIndicator;
@@ -21,7 +21,7 @@ public class RollingVarianceIndicator implements Indicator<Optional<Num>> {
     }
 
     @Override
-    public Optional<Num> getValue(int index) {
+    public Optional<Double> getValue(int index) {
         cache.computeIfAbsent(index, idx -> {
             if (index - variancePeriod + 1 < 0) {
                 return null;
@@ -40,7 +40,7 @@ public class RollingVarianceIndicator implements Indicator<Optional<Num>> {
             double mean = sum / variancePeriod;
             double meanSq = sumsq / variancePeriod;
             double variance = meanSq - (mean * mean);
-            return DecimalNum.valueOf(variance);
+            return variance;
         });
         return Optional.ofNullable(cache.get(index));
     }

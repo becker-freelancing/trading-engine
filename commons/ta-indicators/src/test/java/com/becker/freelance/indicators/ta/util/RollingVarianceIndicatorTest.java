@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class RollingVarianceIndicatorTest {
 
     Indicator<Optional<Num>> baseIndicator;
-    Indicator<Optional<Num>> rollingVarIndicator;
+    Indicator<Optional<Double>> rollingVarIndicator;
 
     @BeforeEach
     void setUp() {
@@ -61,11 +61,11 @@ class RollingVarianceIndicatorTest {
         assertAlmostEquals(DecimalNum.valueOf(62 / 3.), rollingVarIndicator.getValue(8));
     }
 
-    void assertAlmostEquals(Num expected, Optional<Num> actual) {
+    void assertAlmostEquals(Num expected, Optional<Double> actual) {
         assertTrue(actual.isPresent());
-        Num num = actual.get();
+        Double num = actual.get();
         Num delta = DecimalNum.valueOf(0.000000001);
-        assertTrue(num.isLessThan(expected.plus(delta)));
-        assertTrue(num.isGreaterThan(expected.minus(delta)));
+        assertTrue(num< (expected.plus(delta).doubleValue()));
+        assertTrue(num > (expected.minus(delta).doubleValue()));
     }
 }

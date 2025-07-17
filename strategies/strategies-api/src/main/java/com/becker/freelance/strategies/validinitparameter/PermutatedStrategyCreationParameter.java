@@ -38,7 +38,12 @@ public class PermutatedStrategyCreationParameter {
         }
         List<StrategyCreationParameter> result = new ArrayList<>();
         for (double d = 0.; d < totalSize; d += totalSize / limit) {
-            result.add(strategyCreationParameters.get((int) Math.round(d)));
+            int idx = (int) Math.round(d);
+            if (idx >= strategyCreationParameters.size()){
+                result.add(strategyCreationParameters.get(strategyCreationParameters.size() - 1));
+                break;
+            }
+            result.add(strategyCreationParameters.get(idx));
         }
 
         return result.stream();
