@@ -29,9 +29,6 @@ public class BestMaxByRegimeExtractor implements RegimeResultExtractor {
             TradeableQuantilMarketRegime regime = entry.getKey();
             Decimal max = tradeStatistic.getMax();
 
-            if (max.isGreaterThan(Decimal.valueOf(10000))) {
-                continue;
-            }
             if (bestValues.getOrDefault(regime, Decimal.MINUS_DOUBLE_MAX).isLessThan(max)) {
                 bestValues.put(regime, max);
                 results.put(regime, new ArrayList<>());
