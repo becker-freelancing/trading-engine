@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RollingVarianceIndicatorTest {
 
-    Indicator<Num> baseIndicator;
+    Indicator<Optional<Num>> baseIndicator;
     Indicator<Optional<Num>> rollingVarIndicator;
 
     @BeforeEach
@@ -30,10 +30,10 @@ class RollingVarianceIndicatorTest {
                 7, 12,
                 8, 5
         );
-        baseIndicator = new Indicator<Num>() {
+        baseIndicator = new Indicator<>() {
             @Override
-            public Num getValue(int index) {
-                return DecimalNum.valueOf(baseValues.get(index));
+            public Optional<Num> getValue(int index) {
+                return Optional.ofNullable(baseValues.get(index)).map(DecimalNum::valueOf);
             }
 
             @Override
@@ -46,7 +46,7 @@ class RollingVarianceIndicatorTest {
                 return null;
             }
         };
-        rollingVarIndicator = RollingVarianceIndicator.ofBaseIndicator(baseIndicator, 3);
+        rollingVarIndicator = new RollingVarianceIndicator(baseIndicator, 3);
     }
 
     @Test

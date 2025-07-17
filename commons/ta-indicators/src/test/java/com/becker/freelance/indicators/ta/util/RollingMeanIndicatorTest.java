@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RollingMeanIndicatorTest {
 
-    Indicator<Num> baseIndicator;
+    Indicator<Optional<Num>> baseIndicator;
     Indicator<Optional<Num>> rollingMeanIndicator;
 
     @BeforeEach
@@ -29,10 +29,10 @@ class RollingMeanIndicatorTest {
                 7, 12,
                 8, 5
         );
-        baseIndicator = new Indicator<Num>() {
+        baseIndicator = new Indicator<Optional<Num>>() {
             @Override
-            public Num getValue(int index) {
-                return DecimalNum.valueOf(baseValues.get(index));
+            public Optional<Num> getValue(int index) {
+                return Optional.ofNullable(baseValues.get(index)).map(DecimalNum::valueOf);
             }
 
             @Override

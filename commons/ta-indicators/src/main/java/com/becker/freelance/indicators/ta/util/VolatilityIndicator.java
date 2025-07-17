@@ -14,7 +14,7 @@ public class VolatilityIndicator extends CachableIndicator<Integer, Num> impleme
     public VolatilityIndicator(Indicator<Num> closePriceIndicator, int period) {
         super(1000);
         LogReturnIndicator logReturnIndicator = new LogReturnIndicator(closePriceIndicator);
-        RollingMeanIndicator rollingMeanIndicator = new RollingMeanIndicator(logReturnIndicator, period);
+        RollingMeanIndicator rollingMeanIndicator = new RollingMeanIndicator(new OptionalIndicator<>(logReturnIndicator), period);
         this.varianceIndicator = new RollingVarianceIndicator(rollingMeanIndicator, period);
     }
 

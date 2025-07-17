@@ -28,6 +28,9 @@ public class BestCumulativeByRegimeExtractor implements RegimeResultExtractor {
             TradeStatistic tradeStatistic = entry.getValue();
             TradeableQuantilMarketRegime regime = entry.getKey();
             Decimal cumulative = tradeStatistic.getCumulative();
+            if (cumulative.isGreaterThan(Decimal.valueOf(10000))) {
+                continue;
+            }
             if (bestValues.getOrDefault(regime, Decimal.MINUS_DOUBLE_MAX).isLessThan(cumulative)) {
                 bestValues.put(regime, cumulative);
                 results.put(regime, new ArrayList<>());

@@ -52,7 +52,7 @@ public class WithoutRegimeResultParser implements ResultParser {
                 .map(this::map)
                 .toList();
 
-        return new ParsedBacktestResult(parsedTrades);
+        return new ParsedBacktestResult(parsedTrades, resultContent);
     }
 
     private ParsedTrade map(Trade trade) {
