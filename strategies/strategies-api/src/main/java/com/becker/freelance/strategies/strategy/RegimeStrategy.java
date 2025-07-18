@@ -43,8 +43,8 @@ public class RegimeStrategy extends BaseStrategy {
         for (BaseStrategy baseStrategy : strategiesByRegime.get(currentMarketRegime)) {
             logger.debug("Asking Strategy {} for entry signal", baseStrategy);
             Optional<EntrySignalBuilder> entrySignalBuilder = baseStrategy.internalShouldEnter(entryParameter);
-            logger.debug("Got entry signal from strategy {}", baseStrategy);
             if (entrySignalBuilder.isPresent()) {
+                logger.debug("Got entry signal from strategy {}", baseStrategy);
                 return entrySignalBuilder;
             }
         }

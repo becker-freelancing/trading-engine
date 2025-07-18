@@ -40,4 +40,6 @@ public class DemoBrokerRequestor extends BrokerRequestor {
     public TradingCalculator getTradingCalculator(EurUsdRequestor eurUsdRequestor) {
         return new TradingCalculatorImpl(eurUsdRequestor);
     }
+
+
 }
