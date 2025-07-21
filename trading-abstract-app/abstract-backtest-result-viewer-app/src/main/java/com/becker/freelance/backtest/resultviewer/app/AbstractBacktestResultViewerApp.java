@@ -32,6 +32,8 @@ public class AbstractBacktestResultViewerApp implements Runnable {
             new MaxDrawdownMetric(),
             new AverageProfitPerTrade(),
             new ReturnsStd(),
+            new MaxGain(),
+            new MaxLoss(),
             new AverageOpenFeeRate(),
             new AverageCloseFeeRate(),
             new TotalFeeRate(),
