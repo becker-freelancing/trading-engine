@@ -24,8 +24,8 @@ import java.util.stream.Stream;
 public class RequestTradeHistory {
 
     public static void main(String[] args) throws IOException {
-        LocalDateTime exportStart = LocalDateTime.parse("2025-06-18T07:00:00");
-        LocalDateTime exportEnd = LocalDateTime.parse("2025-06-20T09:00:00");
+        LocalDateTime exportStart = LocalDateTime.parse("2025-07-19T07:00:00");
+        LocalDateTime exportEnd = LocalDateTime.parse("2025-07-28T07:00:00");
 
 
         String fileName = "pnls-" + exportStart + "-" + exportEnd + ".csv";
