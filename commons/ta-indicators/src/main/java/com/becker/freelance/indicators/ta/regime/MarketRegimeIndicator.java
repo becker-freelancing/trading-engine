@@ -17,17 +17,15 @@ public class MarketRegimeIndicator extends CachableIndicator<Integer, MarketRegi
     private final double volaSplitThreshold;
     private final Num trendReversalSlopeThreshold;
     private final int trendSlopeShift;
-    private final Indicator<Num> closePrice;
     private final Indicator<Num> ema50;
     private final Indicator<Num> ema100;
-    private final Indicator<Optional<Num>> volaIndicator;
+    private final Indicator<Optional<Double>> volaIndicator;
 
     public MarketRegimeIndicator(Indicator<Num> closePrice, double volaSplitThreshold, double trendReversalSlopeThreshold, int trendSlopeShift) {
         super(100);
         this.volaSplitThreshold = volaSplitThreshold;
         this.trendReversalSlopeThreshold = DecimalNum.valueOf(trendReversalSlopeThreshold);
         this.trendSlopeShift = trendSlopeShift;
-        this.closePrice = closePrice;
         this.ema50 = new EMAIndicator(closePrice, 50);
         this.ema100 = new EMAIndicator(closePrice, 100);
         this.volaIndicator = new VolatilityIndicator(closePrice, 30);
@@ -68,7 +66,7 @@ public class MarketRegimeIndicator extends CachableIndicator<Integer, MarketRegi
     }
 
     private Vola getVola(int index) {
-        Double vola = volaIndicator.getValue(index).map(Num::doubleValue).orElse(0.);
+        Double vola = volaIndicator.getValue(index).orElse(0.);
 
         if (vola <= volaSplitThreshold) {
             return Vola.LOW;

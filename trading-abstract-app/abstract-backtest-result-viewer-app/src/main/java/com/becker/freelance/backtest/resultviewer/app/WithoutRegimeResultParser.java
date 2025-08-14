@@ -30,7 +30,7 @@ public class WithoutRegimeResultParser implements ResultParser {
 
 
     @Override
-    public void run(List<MetricCalculator> metrics, String strategyName, ParsedCallback parsedCallback, Path resultPath) {
+    public void run(List<MetricCalculator> metrics, String strategyName, ParsedCallback parsedCallback, Path resultPath, List<ResultVisualizer> visualizers) {
 
         List<BacktestResultContent> bestCumulative = bestCumulativeExtractor.getResult();
         List<BacktestResultContent> bestMax = bestMaxExtractor.getResult();
@@ -38,8 +38,7 @@ public class WithoutRegimeResultParser implements ResultParser {
         BacktestResultContent baseData = baseDataExtractor.getResult().get(0);
         List<BacktestResultContent> mostTrades = mostTradesExtractor.getResult();
 
-        new BacktestResultConsoleWriter(bestCumulative, bestMax, bestMin, metrics, baseData).run();
-        new BacktestResultPlotter(strategyName, bestCumulative, bestMax, bestMin, mostTrades).run();
+        visualizers.forEach(resultVisualizer -> resultVisualizer.visualize(strategyName, baseData, bestCumulative, bestMax, bestMin, mostTrades, metrics));
 
         parsedCallback.onBestCumulative(bestCumulative.stream().map(this::map).toList(), resultPath);
         parsedCallback.onBestMax(bestMax.stream().map(this::map).toList(), resultPath);
@@ -52,7 +51,7 @@ public class WithoutRegimeResultParser implements ResultParser {
                 .map(this::map)
                 .toList();
 
-        return new ParsedBacktestResult(parsedTrades);
+        return new ParsedBacktestResult(parsedTrades, resultContent);
     }
 
     private ParsedTrade map(Trade trade) {

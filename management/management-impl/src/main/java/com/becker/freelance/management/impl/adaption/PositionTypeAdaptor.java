@@ -7,8 +7,12 @@ import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.management.api.adaption.EntrySignalAdaptor;
 import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
 import com.becker.freelance.math.Decimal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PositionTypeAdaptor implements EntrySignalAdaptor {
+
+    private static final Logger logger = LoggerFactory.getLogger(PositionTypeAdaptor.class);
 
     private static final Decimal DELTA = Decimal.valueOf(0.05);
 
@@ -21,6 +25,8 @@ public class PositionTypeAdaptor implements EntrySignalAdaptor {
         Decimal orderPrice = calculateOrderPrice(currentPrice, direction);
         LimitOrderBuilder openOrder = entrySignal.getOpenOrderBuilder().asLimitOrder()
                 .withOrderPrice(orderPrice);
+
+        logger.debug("Setting open level of position to {}", orderPrice);
 
         entrySignal.withOpenOrder(openOrder);
 

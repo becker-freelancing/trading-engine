@@ -33,7 +33,7 @@ class PairDeserializer extends JsonDeserializer<Pair> {
     }
 
     /**
-     * @param delegate Da aktuell alle Pairs im Classpath sind und der Technical Name nicht eindeutig sit muss
+     * @param delegate Da aktuell alle Pairs im Classpath sind und der Technical Name nicht eindeutig ist muss
      *                 ein BugFix gemacht werden, welcher wirklich das richtige Pair heraussucht.
      *                 <p>
      *                 Aktuell funktioniert da Programm trotzdem noch, da mit dem Pair nichts mehr gemacht wird.
@@ -44,12 +44,12 @@ class PairDeserializer extends JsonDeserializer<Pair> {
 
         @Override
         public String baseCurrency() {
-            throw new UnsupportedOperationException("BugFix must be done");
+            return delegate.baseCurrency();
         }
 
         @Override
         public String counterCurrency() {
-            throw new UnsupportedOperationException("BugFix must be done");
+            return delegate.counterCurrency();
         }
 
         @Override
@@ -89,7 +89,7 @@ class PairDeserializer extends JsonDeserializer<Pair> {
 
         @Override
         public long timeInMinutes() {
-            throw new UnsupportedOperationException("BugFix must be done");
+            return delegate.timeInMinutes();
         }
 
         @Override

@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RollingVarianceIndicatorTest {
 
-    Indicator<Num> baseIndicator;
-    Indicator<Optional<Num>> rollingVarIndicator;
+    Indicator<Optional<Num>> baseIndicator;
+    Indicator<Optional<Double>> rollingVarIndicator;
 
     @BeforeEach
     void setUp() {
@@ -30,10 +30,10 @@ class RollingVarianceIndicatorTest {
                 7, 12,
                 8, 5
         );
-        baseIndicator = new Indicator<Num>() {
+        baseIndicator = new Indicator<>() {
             @Override
-            public Num getValue(int index) {
-                return DecimalNum.valueOf(baseValues.get(index));
+            public Optional<Num> getValue(int index) {
+                return Optional.ofNullable(baseValues.get(index)).map(DecimalNum::valueOf);
             }
 
             @Override
@@ -46,7 +46,7 @@ class RollingVarianceIndicatorTest {
                 return null;
             }
         };
-        rollingVarIndicator = RollingVarianceIndicator.ofBaseIndicator(baseIndicator, 3);
+        rollingVarIndicator = new RollingVarianceIndicator(baseIndicator, 3);
     }
 
     @Test
@@ -61,11 +61,11 @@ class RollingVarianceIndicatorTest {
         assertAlmostEquals(DecimalNum.valueOf(62 / 3.), rollingVarIndicator.getValue(8));
     }
 
-    void assertAlmostEquals(Num expected, Optional<Num> actual) {
+    void assertAlmostEquals(Num expected, Optional<Double> actual) {
         assertTrue(actual.isPresent());
-        Num num = actual.get();
+        Double num = actual.get();
         Num delta = DecimalNum.valueOf(0.000000001);
-        assertTrue(num.isLessThan(expected.plus(delta)));
-        assertTrue(num.isGreaterThan(expected.minus(delta)));
+        assertTrue(num< (expected.plus(delta).doubleValue()));
+        assertTrue(num > (expected.minus(delta).doubleValue()));
     }
 }

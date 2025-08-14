@@ -10,6 +10,8 @@ import com.becker.freelance.backtest.resultviewer.app.metric.MetricCalculator;
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -18,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 public class WithRegimeResultParser implements ResultParser {
+
+    private static final Logger logger = LoggerFactory.getLogger(WithRegimeResultParser.class);
 
     private final BaseDataExtractor baseDataExtractor;
     private final BestCumulativeByRegimeExtractor bestCumulativeExtractor;
@@ -36,7 +40,9 @@ public class WithRegimeResultParser implements ResultParser {
     private static List<BacktestResultContent> permutate(Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> resultByRegime) {
         List<BacktestResultContent> results = new ArrayList<>();
 
-        for (Map.Entry<TradeableQuantilMarketRegime, List<BacktestResultContent>> entry : resultByRegime.entrySet()) {
+        for (Map.Entry<TradeableQuantilMarketRegime, List<BacktestResultContent>> entry : resultByRegime.entrySet().stream()
+                .sorted(Comparator.comparing(entry -> entry.getKey().name()))
+                .toList()) {
             TradeableQuantilMarketRegime regime = entry.getKey();
             List<BacktestResultContent> resultContents = entry.getValue();
 
@@ -107,15 +113,14 @@ public class WithRegimeResultParser implements ResultParser {
     }
 
     @Override
-    public void run(List<MetricCalculator> metrics, String strategyName, ParsedCallback parsedCallback, Path resultPath) {
+    public void run(List<MetricCalculator> metrics, String strategyName, ParsedCallback parsedCallback, Path resultPath, List<ResultVisualizer> visualizers) {
         List<BacktestResultContent> bestMin = findBestMin();
         List<BacktestResultContent> bestMax = findBestMax();
         List<BacktestResultContent> bestCumulative = findBestCumulative();
         List<BacktestResultContent> mostTrades = findMostTrades();
         BacktestResultContent baseData = baseDataExtractor.getResult().get(0);
 
-        new BacktestResultConsoleWriter(bestCumulative, bestMax, bestMin, metrics, baseData).run();
-        new BacktestResultPlotter(strategyName, bestCumulative, bestMax, bestMin, mostTrades).run();
+        visualizers.forEach(resultVisualizer -> resultVisualizer.visualize(strategyName, baseData, bestCumulative, bestMax, bestMin, mostTrades, metrics));
 
         parsedCallback.onBestCumulative(bestCumulative.stream().map(this::map).toList(), resultPath);
         parsedCallback.onBestMax(bestMax.stream().map(this::map).toList(), resultPath);
@@ -123,12 +128,13 @@ public class WithRegimeResultParser implements ResultParser {
         parsedCallback.onMostTrades(mostTrades.stream().map(this::map).toList(), resultPath);
     }
 
+
     private ParsedBacktestResult map(BacktestResultContent resultContent) {
         List<ParsedTrade> parsedTrades = resultContent.tradeObjects().stream()
                 .map(this::map)
                 .toList();
 
-        return new ParsedBacktestResult(parsedTrades);
+        return new ParsedBacktestResult(parsedTrades, resultContent);
     }
 
     private ParsedTrade map(Trade trade) {
@@ -138,7 +144,7 @@ public class WithRegimeResultParser implements ResultParser {
     private List<BacktestResultContent> findMostTrades() {
         Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> resultByRegime = mostTradesExtractor.getResultByRegime();
 
-        return permutate(resultByRegime);
+        return List.of();//permutate(resultByRegime);
     }
 
     private List<BacktestResultContent> findBestMin() {

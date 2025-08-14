@@ -5,46 +5,42 @@ import org.ta4j.core.Indicator;
 import org.ta4j.core.num.DecimalNum;
 import org.ta4j.core.num.Num;
 
-import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Queue;
 
 public class RollingMeanIndicator implements Indicator<Optional<Num>> {
 
-    private final Indicator<Num> baseIndicator;
+    private final Indicator<Optional<Num>> baseIndicator;
     private final int meanPeriod;
     private final Num meanPeriodNum;
-    private final Queue<Num> meanValues;
-    private int lastIndex = -1;
-    private Num currentSum = DecimalNum.valueOf(0);
+    private final Map<Integer, Num> cache = new HashMap<>();
 
-    public RollingMeanIndicator(Indicator<Num> baseIndicator, int meanPeriod) {
+    public RollingMeanIndicator(Indicator<Optional<Num>> baseIndicator, int meanPeriod) {
         this.baseIndicator = baseIndicator;
         this.meanPeriod = meanPeriod;
         this.meanPeriodNum = DecimalNum.valueOf(meanPeriod);
-        this.meanValues = new ArrayDeque<>(meanPeriod);
     }
 
     @Override
     public Optional<Num> getValue(int index) {
-        if (lastIndex + 1 != index) {
-            currentSum = DecimalNum.valueOf(0);
-            meanValues.clear();
-        }
-        lastIndex = index;
-        Num baseValue = baseIndicator.getValue(index);
-        currentSum = currentSum.plus(baseValue);
+        cache.computeIfAbsent(index, idx -> {
+            if (index - meanPeriod + 1 < 0) {
+                return null;
+            }
+            double sum = 0.;
+            for (int i = index - meanPeriod + 1; i <= index; i++) {
+                Optional<Num> value = baseIndicator.getValue(i);
+                if (value.isEmpty()) {
+                    return null;
+                }
+                sum += value.get().doubleValue();
+            }
 
-        meanValues.add(baseValue);
-
-        if (meanValues.size() > meanPeriod) {
-            Num head = meanValues.poll();
-            currentSum = currentSum.minus(head);
-        } else if (meanValues.size() < meanPeriod) {
-            return Optional.empty();
-        }
-
-        return Optional.ofNullable(currentSum.dividedBy(meanPeriodNum));
+            Num value = DecimalNum.valueOf(sum).dividedBy(meanPeriodNum);
+            return value;
+        });
+        return Optional.ofNullable(cache.get(index));
     }
 
     @Override

@@ -32,6 +32,8 @@ public class AbstractBacktestResultViewerApp implements Runnable {
             new MaxDrawdownMetric(),
             new AverageProfitPerTrade(),
             new ReturnsStd(),
+            new MaxGain(),
+            new MaxLoss(),
             new AverageOpenFeeRate(),
             new AverageCloseFeeRate(),
             new TotalFeeRate(),
@@ -40,6 +42,12 @@ public class AbstractBacktestResultViewerApp implements Runnable {
             new SellProfitHitRate(),
             new DayOfWeekHitRate(),
             new HourOfDayHitRate()
+    );
+
+    private static final List<ResultVisualizer> ALL_VISUALIZER = List.of(
+            new BacktestResultConsoleWriter(),
+            new BacktestResultPlotter(),
+            new StrategyConfigConsoleWriter()
     );
 
     private final ParsedCallback parsedBacktestResultConsumer;
@@ -100,7 +108,7 @@ public class AbstractBacktestResultViewerApp implements Runnable {
             logger.info("Reading Results finished");
             logger.info("Processing Results...");
 
-            resultParser.run(ALL_METRICS, strategyName, parsedBacktestResultConsumer, resultPath);
+            resultParser.run(ALL_METRICS, strategyName, parsedBacktestResultConsumer, resultPath, ALL_VISUALIZER);
         };
 
         BacktestResultReader backtestResultReader = new BacktestResultReader(resultPath);
