@@ -6,9 +6,7 @@ import com.becker.freelance.backtest.resultviewer.app.callback.ParsedBacktestRes
 import com.becker.freelance.backtest.resultviewer.app.callback.ParsedCallback;
 import com.becker.freelance.backtest.resultviewer.app.callback.ParsedTrade;
 import com.becker.freelance.backtest.resultviewer.app.extractor.*;
-import com.becker.freelance.backtest.resultviewer.app.metric.MaxDrawdownMetric;
 import com.becker.freelance.backtest.resultviewer.app.metric.MetricCalculator;
-import com.becker.freelance.backtest.resultviewer.app.metric.ProfitHitRatio;
 import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
@@ -115,80 +113,21 @@ public class WithRegimeResultParser implements ResultParser {
     }
 
     @Override
-    public void run(List<MetricCalculator> metrics, String strategyName, ParsedCallback parsedCallback, Path resultPath) {
+    public void run(List<MetricCalculator> metrics, String strategyName, ParsedCallback parsedCallback, Path resultPath, List<ResultVisualizer> visualizers) {
         List<BacktestResultContent> bestMin = findBestMin();
         List<BacktestResultContent> bestMax = findBestMax();
         List<BacktestResultContent> bestCumulative = findBestCumulative();
         List<BacktestResultContent> mostTrades = findMostTrades();
         BacktestResultContent baseData = baseDataExtractor.getResult().get(0);
 
-        new BacktestResultConsoleWriter(bestCumulative, bestMax, bestMin, metrics, baseData).run();
-        new BacktestResultPlotter(strategyName, bestCumulative, bestMax, bestMin, mostTrades).run();
+        visualizers.forEach(resultVisualizer -> resultVisualizer.visualize(strategyName, baseData, bestCumulative, bestMax, bestMin, mostTrades, metrics));
 
-        printAdditionalInfos();
         parsedCallback.onBestCumulative(bestCumulative.stream().map(this::map).toList(), resultPath);
         parsedCallback.onBestMax(bestMax.stream().map(this::map).toList(), resultPath);
         parsedCallback.onBestMin(bestMin.stream().map(this::map).toList(), resultPath);
         parsedCallback.onMostTrades(mostTrades.stream().map(this::map).toList(), resultPath);
     }
 
-    private void printAdditionalInfos() {
-        if (true) {
-            logger.warn("ADDITIONAL STATISTICS FOR BEST CUMULATIVES BY REGIME (ONLY FIRST ONE)");
-
-            Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> resultByRegime = bestCumulativeExtractor.getResultByRegime();
-            MaxDrawdownMetric maxDrawdownMetric = new MaxDrawdownMetric();
-            ProfitHitRatio profitHitRatio = new ProfitHitRatio();
-            for (TradeableQuantilMarketRegime regime : resultByRegime.keySet().stream().sorted(Comparator.comparing(TradeableQuantilMarketRegime::name)).toList()) {
-
-                List<BacktestResultContent> resultContents = resultByRegime.get(regime);
-                if (resultContents == null || resultContents.isEmpty()) {
-                    logger.warn("Skipping regime {}", regime);
-                    continue;
-                }
-                BacktestResultContent backtestResultContent = resultContents.get(0);
-                List<Decimal> profits = backtestResultContent.tradeProfits();
-                List<Double> balances = toBalances(profits);
-
-                logger.info("regime: {}", regime);
-                logger.info("\tNumber of Trades: {}", backtestResultContent.tradeObjects().size());
-                logger.info("\tMax Gain: {}", profits.stream().mapToDouble(Decimal::doubleValue).max().orElse(0.));
-                logger.info("\tMax Loss: {}", profits.stream().mapToDouble(Decimal::doubleValue).min().orElse(0.));
-                logger.info("\tProfit Std: {}", std(profits));
-                logger.info("\tMin Equity: {}", balances.stream().mapToDouble(Double::doubleValue).min().orElse(0.));
-                logger.info("\tMax Equity: {}", balances.stream().mapToDouble(Double::doubleValue).max().orElse(0.));
-                logger.info("\tLast Equity: {}", balances.get(balances.size() - 1));
-                logger.info("\tMax Drawdown: {}", maxDrawdownMetric.calculate(backtestResultContent).value());
-                logger.info("\tWinRate: {}", profitHitRatio.calculate(backtestResultContent).value());
-
-            }
-        }
-    }
-
-    private List<Double> toBalances(List<Decimal> profits) {
-        List<Double> balances = new ArrayList<>();
-        balances.add(0.);
-        for (int i = 0; i < profits.size(); i++) {
-            balances.add(balances.get(i) + profits.get(i).doubleValue());
-        }
-        return balances;
-    }
-
-    private Double std(List<Decimal> decimals) {
-
-        double mean = decimals.stream()
-                .mapToDouble(Decimal::doubleValue)
-                .average()
-                .orElse(0.0);
-
-        double variance = decimals.stream()
-                .mapToDouble(d -> Math.pow(d.doubleValue() - mean, 2))
-                .average()
-                .orElse(0.0);
-
-        double stdDeviation = Math.sqrt(variance);
-        return stdDeviation;
-    }
 
     private ParsedBacktestResult map(BacktestResultContent resultContent) {
         List<ParsedTrade> parsedTrades = resultContent.tradeObjects().stream()

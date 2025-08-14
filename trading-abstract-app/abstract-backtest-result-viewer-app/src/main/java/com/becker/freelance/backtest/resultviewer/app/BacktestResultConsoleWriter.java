@@ -11,34 +11,19 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-class BacktestResultConsoleWriter implements Runnable{
+class BacktestResultConsoleWriter implements ResultVisualizer {
 
     private static final Logger logger = LoggerFactory.getLogger(BacktestResultConsoleWriter.class);
 
-    private final List<BacktestResultContent> bestCumulative;
-    private final List<BacktestResultContent> bestMax;
-    private final List<BacktestResultContent> bestMin;
-    private final List<MetricCalculator> metricCalculators;
-    private final BacktestResultContent baseData;
-
-    public BacktestResultConsoleWriter(List<BacktestResultContent> bestCumulative, List<BacktestResultContent> bestMax, List<BacktestResultContent> bestMin, List<MetricCalculator> metricCalculators, BacktestResultContent baseData) {
-        this.bestCumulative = bestCumulative;
-        this.bestMax = bestMax;
-        this.bestMin = bestMin;
-        this.metricCalculators = metricCalculators;
-        this.baseData = baseData;
-    }
-
     @Override
-    public void run() {
-        displayBaseData();
-        displayResults(bestCumulative, "Bestes Kumulatives Ergebnisse");
-        displayResults(bestMax, "Bestes Maximales Ergebnisse");
-        displayResults(bestMin, "Bestes Minimales Ergebnisse");
+    public void visualize(String strategyName, BacktestResultContent baseData, List<BacktestResultContent> bestCumulative, List<BacktestResultContent> bestMax, List<BacktestResultContent> bestMin, List<BacktestResultContent> mostTrades, List<MetricCalculator> metrics) {
+        displayBaseData(baseData);
+        displayResults(bestCumulative, "Bestes Kumulatives Ergebnisse", metrics);
+        displayResults(bestMax, "Bestes Maximales Ergebnisse", metrics);
+        displayResults(bestMin, "Bestes Minimales Ergebnisse", metrics);
     }
 
-
-    private void displayResults(List<BacktestResultContent> data, String name) {
+    private void displayResults(List<BacktestResultContent> data, String name, List<MetricCalculator> metricCalculators) {
 
         int curr = 0;
         for(BacktestResultContent result : data) {
@@ -56,7 +41,7 @@ class BacktestResultConsoleWriter implements Runnable{
         }
     }
 
-    private void displayBaseData() {
+    private void displayBaseData(BacktestResultContent baseData) {
         LocalDateTime fromTime = baseData.fromTime();
         LocalDateTime toTime = baseData.toTime();
         long daysBetween = ChronoUnit.DAYS.between(fromTime, toTime);
@@ -65,4 +50,5 @@ class BacktestResultConsoleWriter implements Runnable{
         logger.info("Testzeitraum: {} - {} ({} Tage)", fromTime.format(DateTimeFormatter.ISO_DATE_TIME), toTime.format(DateTimeFormatter.ISO_DATE_TIME), daysBetween);
         logger.info("=========================================== Strategien ===========================================");
     }
+
 }

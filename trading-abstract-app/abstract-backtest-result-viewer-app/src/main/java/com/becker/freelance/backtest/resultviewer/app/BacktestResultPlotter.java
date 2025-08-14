@@ -1,6 +1,7 @@
 package com.becker.freelance.backtest.resultviewer.app;
 
 import com.becker.freelance.backtest.commons.BacktestResultContent;
+import com.becker.freelance.backtest.resultviewer.app.metric.MetricCalculator;
 import com.becker.freelance.math.Decimal;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
@@ -12,24 +13,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-class BacktestResultPlotter implements Runnable {
-
-    private final List<BacktestResultContent> bestCumulative;
-    private final List<BacktestResultContent> bestMax;
-    private final List<BacktestResultContent> bestMin;
-    private final List<BacktestResultContent> mostTrades;
-    private final String strategyName;
-
-    public BacktestResultPlotter(String strategyName, List<BacktestResultContent> bestCumulative, List<BacktestResultContent> bestMax, List<BacktestResultContent> bestMin, List<BacktestResultContent> mostTrades) {
-        this.bestCumulative = bestCumulative;
-        this.bestMax = bestMax;
-        this.bestMin = bestMin;
-        this.strategyName = strategyName;
-        this.mostTrades = mostTrades;
-    }
+class BacktestResultPlotter implements ResultVisualizer {
 
     @Override
-    public void run() {
+    public void visualize(String strategyName, BacktestResultContent baseData, List<BacktestResultContent> bestCumulative, List<BacktestResultContent> bestMax, List<BacktestResultContent> bestMin, List<BacktestResultContent> mostTrades, List<MetricCalculator> metrics) {
         XYChart cumulativeChart = plotResults(bestCumulative, "Bestes Kumulatives Ergebnis");
         XYChart maxChart = plotResults(bestMax, "Bestes Maximales Ergebnis");
         XYChart minChart = plotResults(bestMin, "Bestes Minimales Ergebnis");

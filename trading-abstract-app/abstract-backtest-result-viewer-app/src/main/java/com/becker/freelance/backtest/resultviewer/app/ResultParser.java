@@ -11,5 +11,5 @@ public interface ResultParser {
 
     public List<ResultExtractor> getResultExtractors();
 
-    public void run(List<MetricCalculator> metrics, String strategyName, ParsedCallback parsedCallback, Path resultPath);
+    public void run(List<MetricCalculator> metrics, String strategyName, ParsedCallback parsedCallback, Path resultPath, List<ResultVisualizer> visualizers);
 }
