@@ -70,6 +70,6 @@ public class StrategyConfigConsoleWriter implements ResultVisualizer {
 
     private String parseStrategyName(String strategyName) {
         int first = strategyName.indexOf("__");
-        return strategyName.substring(0, strategyName.indexOf("__", first + 1));
+        return strategyName.substring(first + 2, strategyName.indexOf("__", first + 1));
     }
 }
