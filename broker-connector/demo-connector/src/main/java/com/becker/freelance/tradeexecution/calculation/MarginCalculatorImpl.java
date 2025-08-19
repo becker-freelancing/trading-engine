@@ -18,9 +18,9 @@ public class MarginCalculatorImpl implements MarginCalculator {
     @Override
     public Decimal getMarginCounterCurrency(Pair pair, Decimal size, Decimal openPrice) {
         return size
-                .multiply(pair.leverageFactor())
                 .multiply(openPrice)
-                .multiply(pair.sizeMultiplication());
+                .multiply(pair.sizeMultiplication())
+                .divide(pair.leverageFactor());
     }
 
     @Override

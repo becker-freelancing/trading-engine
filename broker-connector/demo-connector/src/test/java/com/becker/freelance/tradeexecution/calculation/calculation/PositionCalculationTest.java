@@ -29,7 +29,7 @@ import static org.mockito.Mockito.*;
 
 class PositionCalculationTest {
 
-    static final Decimal MARGIN_PER_POSITION = new Decimal("475.71");
+    static final Decimal MARGIN_PER_POSITION = new Decimal("4329");
 
     static LocalDateTime currentTime = LocalDateTime.of(2020, 1, 1, 0, 0, 0);
 
@@ -559,7 +559,7 @@ class PositionCalculationTest {
         position2.getOpenOrder().executeIfPossible(entryForMarginCalculation);
         position3.getOpenOrder().executeIfPossible(entryForMarginCalculation);
 
-        Decimal marginPerPosition = new Decimal("333.00");
+        Decimal marginPerPosition = new Decimal("3030.30");
 
         wallet.addMargin(marginPerPosition.multiply(3));
         when(currentPrice.openBid()).thenReturn(new Decimal("1.6"));
@@ -614,7 +614,7 @@ class PositionCalculationTest {
         position2.getOpenOrder().executeIfPossible(entryForMarginCalculation);
         position3.getOpenOrder().executeIfPossible(entryForMarginCalculation);
 
-        Decimal marginPerPosition = new Decimal("333.00");
+        Decimal marginPerPosition = new Decimal("3030.30");
 
         wallet.addMargin(new Decimal(marginPerPosition.multiply(6)));
 
@@ -660,7 +660,7 @@ class PositionCalculationTest {
         position2.getOpenOrder().executeIfPossible(entryForMarginCalculation);
         position3.getOpenOrder().executeIfPossible(entryForMarginCalculation);
 
-        Decimal marginPerPosition = new Decimal("333.00");
+        Decimal marginPerPosition = new Decimal("3030.30");
         wallet.addMargin(marginPerPosition.multiply(6));
 
         PositionCalculationResult calculationResult = positionCalculation.closeAllSellPositions(currentPrice, List.of(position1, position2, position3), wallet);

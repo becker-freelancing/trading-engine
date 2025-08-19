@@ -45,7 +45,6 @@ class BybitPosition implements StopLimitPosition {
         );
     }
 
-
     @Override
     public Order getOpenOrder() {
         return openOrder;

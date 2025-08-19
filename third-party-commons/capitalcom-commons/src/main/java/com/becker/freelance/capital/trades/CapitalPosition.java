@@ -107,4 +107,5 @@ class CapitalPosition implements StopLimitPosition {
     public TradeableQuantilMarketRegime getOpenMarketRegime() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
+
 }

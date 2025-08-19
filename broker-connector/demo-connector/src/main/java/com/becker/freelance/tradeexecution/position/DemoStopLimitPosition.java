@@ -73,7 +73,7 @@ public class DemoStopLimitPosition implements StopLimitPosition {
 
     @Override
     public Decimal getMargin() {
-        return marginCalculator.getMarginEurWithLeverage(getPair(), getSize(), getOpenPrice(), getOpenTime(), getLeverage());
+        return marginCalculator.getMarginEur(getPair(), getSize(), getOpenPrice(), getOpenTime());
     }
 
     @Override

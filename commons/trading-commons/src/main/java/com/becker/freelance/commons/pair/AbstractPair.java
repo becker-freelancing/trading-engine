@@ -5,6 +5,7 @@ import com.becker.freelance.math.Decimal;
 import java.util.Objects;
 
 public abstract class AbstractPair implements Pair {
+
     private final String baseCurrency;
     private final String counterCurrency;
     private final long timeInMinutes;
