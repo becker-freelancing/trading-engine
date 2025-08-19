@@ -7,7 +7,7 @@ import com.becker.freelance.backtest.resultviewer.app.callback.ParsedCallback;
 import com.becker.freelance.backtest.resultviewer.app.callback.ParsedTrade;
 import com.becker.freelance.backtest.resultviewer.app.extractor.*;
 import com.becker.freelance.backtest.resultviewer.app.metric.MetricCalculator;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
 import org.slf4j.Logger;
@@ -37,13 +37,13 @@ public class WithRegimeResultParser implements ResultParser {
         this.mostTradesExtractor = new MostTradesByRegimeExtractor();
     }
 
-    private static List<BacktestResultContent> permutate(Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> resultByRegime) {
+    private static List<BacktestResultContent> permutate(Map<TradeableMarketRegime, List<BacktestResultContent>> resultByRegime) {
         List<BacktestResultContent> results = new ArrayList<>();
 
-        for (Map.Entry<TradeableQuantilMarketRegime, List<BacktestResultContent>> entry : resultByRegime.entrySet().stream()
+        for (Map.Entry<TradeableMarketRegime, List<BacktestResultContent>> entry : resultByRegime.entrySet().stream()
                 .sorted(Comparator.comparing(entry -> entry.getKey().name()))
                 .toList()) {
-            TradeableQuantilMarketRegime regime = entry.getKey();
+            TradeableMarketRegime regime = entry.getKey();
             List<BacktestResultContent> resultContents = entry.getValue();
 
             List<BacktestResultContent> newResults = new ArrayList<>();
@@ -142,25 +142,25 @@ public class WithRegimeResultParser implements ResultParser {
     }
 
     private List<BacktestResultContent> findMostTrades() {
-        Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> resultByRegime = mostTradesExtractor.getResultByRegime();
+        Map<TradeableMarketRegime, List<BacktestResultContent>> resultByRegime = mostTradesExtractor.getResultByRegime();
 
         return List.of();//permutate(resultByRegime);
     }
 
     private List<BacktestResultContent> findBestMin() {
-        Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> resultByRegime = bestMinExtractor.getResultByRegime();
+        Map<TradeableMarketRegime, List<BacktestResultContent>> resultByRegime = bestMinExtractor.getResultByRegime();
 
         return permutate(resultByRegime);
     }
 
     private List<BacktestResultContent> findBestMax() {
-        Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> resultByRegime = bestMaxExtractor.getResultByRegime();
+        Map<TradeableMarketRegime, List<BacktestResultContent>> resultByRegime = bestMaxExtractor.getResultByRegime();
 
         return permutate(resultByRegime);
     }
 
     private List<BacktestResultContent> findBestCumulative() {
-        Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> resultByRegime = bestCumulativeExtractor.getResultByRegime();
+        Map<TradeableMarketRegime, List<BacktestResultContent>> resultByRegime = bestCumulativeExtractor.getResultByRegime();
 
         return permutate(resultByRegime);
     }

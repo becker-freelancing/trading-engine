@@ -1,7 +1,7 @@
 package com.becker.freelance.strategies.creation;
 
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.indicators.ta.regime.QuantileMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.strategies.strategy.DefaultStrategyParameter;
 import com.becker.freelance.strategies.strategy.StrategyParameter;
 import com.becker.freelance.strategies.strategy.TradingStrategy;
@@ -10,7 +10,7 @@ import com.becker.freelance.strategies.validinitparameter.ValidStrategyInitParam
 import java.util.Set;
 
 public record RegimeStrategyCreator(StrategyCreator baseCreator,
-                                    Set<QuantileMarketRegime> regimes,
+                                    Set<TradeableMarketRegime> regimes,
                                     int priority,
                                     Pair pair,
                                     StrategyParameter strategyCreationParameter) implements StrategyCreator {
@@ -26,7 +26,7 @@ public record RegimeStrategyCreator(StrategyCreator baseCreator,
         return baseCreator.strategyParameters();
     }
 
-    public StrategyParameter strategyParameterForRegime(QuantileMarketRegime regime) {
+    public StrategyParameter strategyParameterForRegime(TradeableMarketRegime regime) {
         if (!regimes().contains(regime)) {
             throw new IllegalArgumentException("Regime " + regime + " not supported for strategy " + strategyName());
         }

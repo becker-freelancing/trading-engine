@@ -4,7 +4,7 @@ import com.becker.freelance.commons.order.LazyOrder;
 import com.becker.freelance.commons.order.Order;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.PositionBehaviour;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
@@ -18,7 +18,7 @@ public interface EntrySignal {
 
     public PositionBehaviour getPositionBehaviour();
 
-    public TradeableQuantilMarketRegime openMarketRegime();
+    public TradeableMarketRegime openMarketRegime();
 
     public default boolean isOpenTaker() {
         return getOpenOrder().isMarketOrder();

@@ -3,7 +3,7 @@ package com.becker.freelance.commons.trade;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.PositionBehaviour;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
@@ -23,7 +23,7 @@ public class Trade implements Comparable<Trade> {
     private Direction direction;
     private Decimal conversionRate;
     private PositionBehaviour positionBehaviour;
-    private TradeableQuantilMarketRegime openMarketRegime;
+    private TradeableMarketRegime openMarketRegime;
 
     protected Trade(){}
 
@@ -40,7 +40,7 @@ public class Trade implements Comparable<Trade> {
                  Direction direction,
                  Decimal conversionRate,
                  PositionBehaviour positionBehaviour,
-                 TradeableQuantilMarketRegime openMarketRegime) {
+                 TradeableMarketRegime openMarketRegime) {
         this.relatedPositionId = relatedPositionId;
         this.openTime = openTime;
         this.closeTime = closeTime;
@@ -97,7 +97,7 @@ public class Trade implements Comparable<Trade> {
         return positionBehaviour;
     }
 
-    public TradeableQuantilMarketRegime getOpenMarketRegime() {
+    public TradeableMarketRegime getOpenMarketRegime() {
         return openMarketRegime;
     }
 

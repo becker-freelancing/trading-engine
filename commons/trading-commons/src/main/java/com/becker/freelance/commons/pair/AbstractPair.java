@@ -17,7 +17,7 @@ public abstract class AbstractPair implements Pair {
     private final Decimal leverageFactor;
     private final Decimal sizeMultiplication;
 
-    public AbstractPair(String baseCurrency, String counterCurrency, long timeInMinutes, String technicalName, Decimal profitPerPointForOneContract,
+    protected AbstractPair(String baseCurrency, String counterCurrency, long timeInMinutes, String technicalName, Decimal profitPerPointForOneContract,
                         Decimal minOrderSize, Decimal minStop, Decimal minLimit, Decimal leverageFactor, Decimal sizeMultiplication) {
         this.baseCurrency = baseCurrency;
         this.counterCurrency = counterCurrency;

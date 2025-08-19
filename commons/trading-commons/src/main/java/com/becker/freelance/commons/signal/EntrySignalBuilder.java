@@ -4,7 +4,7 @@ import com.becker.freelance.commons.order.*;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.PositionBehaviour;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
@@ -17,7 +17,7 @@ public class EntrySignalBuilder {
     private ConditionalOrderBuilder stopOrderBuilder;
     private LazyOrderBuilder limitOrderBuilder;
     private PositionBehaviour positionBehaviour;
-    private TradeableQuantilMarketRegime openMarketRegime;
+    private TradeableMarketRegime openMarketRegime;
 
     public static EntrySignalBuilder getInstance() {
         return new EntrySignalBuilder();
@@ -63,7 +63,7 @@ public class EntrySignalBuilder {
         return this;
     }
 
-    public EntrySignalBuilder withOpenMarketRegime(TradeableQuantilMarketRegime openMarketRegime) {
+    public EntrySignalBuilder withOpenMarketRegime(TradeableMarketRegime openMarketRegime) {
         this.openMarketRegime = openMarketRegime;
         return this;
     }

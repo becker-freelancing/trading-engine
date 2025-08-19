@@ -1,6 +1,8 @@
 package com.becker.freelance.indicators.ta.regime;
 
-public enum MarketRegime {
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
+
+public enum MarketRegime implements TradeableMarketRegime {
     DOWN_HIGH_VOLA(1),
     DOWN_LOW_VOLA(2),
     SIDE_HIGH_VOLA(3),
@@ -25,5 +27,16 @@ public enum MarketRegime {
 
     public int getId() {
         return id;
+    }
+
+
+    @Override
+    public int id() {
+        return id;
+    }
+
+    @Override
+    public boolean considersRegimeDuration() {
+        return true;
     }
 }

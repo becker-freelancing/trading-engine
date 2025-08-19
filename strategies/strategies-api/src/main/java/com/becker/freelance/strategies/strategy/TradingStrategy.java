@@ -1,10 +1,10 @@
 package com.becker.freelance.strategies.strategy;
 
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
-import com.becker.freelance.indicators.ta.regime.QuantileMarketRegime;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
@@ -21,7 +21,7 @@ public interface TradingStrategy {
 
     Optional<ExitSignal> shouldExit(ExitExecutionParameter exitParameter);
 
-    public QuantileMarketRegime currentMarketRegime();
+    public TradeableMarketRegime currentMarketRegime();
 
     public int unstableBars();
 

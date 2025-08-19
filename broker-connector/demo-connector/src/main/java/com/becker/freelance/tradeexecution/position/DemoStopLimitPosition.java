@@ -9,7 +9,7 @@ import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.position.PositionBehaviour;
 import com.becker.freelance.commons.position.StopLimitPosition;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
@@ -23,13 +23,13 @@ public class DemoStopLimitPosition implements StopLimitPosition {
     private final MarginCalculator marginCalculator;
     private final TradingFeeCalculator tradingFeeCalculator;
     private final String id;
-    private final TradeableQuantilMarketRegime openMarketRegime;
+    private final TradeableMarketRegime openMarketRegime;
 
-    public DemoStopLimitPosition(TradeableQuantilMarketRegime openMarketRegime, TradingFeeCalculator tradingFeeCalculator, MarginCalculator marginCalculator, LazyOrder limitOrder, LazyOrder stopOrder, Order openOrder) {
+    public DemoStopLimitPosition(TradeableMarketRegime openMarketRegime, TradingFeeCalculator tradingFeeCalculator, MarginCalculator marginCalculator, LazyOrder limitOrder, LazyOrder stopOrder, Order openOrder) {
         this(openMarketRegime, tradingFeeCalculator, marginCalculator, limitOrder, stopOrder, openOrder, UUID.randomUUID().toString());
     }
 
-    public DemoStopLimitPosition(TradeableQuantilMarketRegime openMarketRegime, TradingFeeCalculator tradingFeeCalculator, MarginCalculator marginCalculator, LazyOrder limitOrder, LazyOrder stopOrder, Order openOrder, String id) {
+    public DemoStopLimitPosition(TradeableMarketRegime openMarketRegime, TradingFeeCalculator tradingFeeCalculator, MarginCalculator marginCalculator, LazyOrder limitOrder, LazyOrder stopOrder, Order openOrder, String id) {
         this.openOrder = openOrder;
         this.stopOrder = stopOrder;
         this.limitOrder = limitOrder;
@@ -126,7 +126,7 @@ public class DemoStopLimitPosition implements StopLimitPosition {
     }
 
     @Override
-    public TradeableQuantilMarketRegime getOpenMarketRegime() {
+    public TradeableMarketRegime getOpenMarketRegime() {
         return openMarketRegime;
     }
 

@@ -1,5 +1,7 @@
 package com.becker.freelance.indicators.ta.regime;
 
+import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.ta4j.core.Indicator;
@@ -16,8 +18,21 @@ import java.util.stream.IntStream;
 
 public class RegimeIndicatorFactory {
 
-    public Indicator<MarketRegime> marketRegimeIndicatorFromConfigFile(String pairName, Indicator<Num> closePrice) {
-        JSONObject configForPair = loadConfigForPair(pairName);
+    public Indicator<? extends TradeableMarketRegime> marketRegimeIndicatorForStrategy(Pair pair, Indicator<Num> closePrice) {
+        Indicator<MarketRegime> marketRegimeIndicator = marketRegimeIndicatorFromConfigFile(pair, closePrice);
+        if (divideRegimesIntoQuantiles(pair)) {
+            Indicator<DurationMarketRegime> durationMarketRegimeIndicator = durationMarketRegimeIndicator(marketRegimeIndicator);
+            return quantileMarketRegimeIndicator(pair, durationMarketRegimeIndicator);
+        }
+        return marketRegimeIndicator;
+    }
+
+    private boolean divideRegimesIntoQuantiles(Pair pair) {
+        return loadConfigForPair(pair).getBoolean("divideRegimesIntoQuantiles");
+    }
+
+    public Indicator<MarketRegime> marketRegimeIndicatorFromConfigFile(Pair pair, Indicator<Num> closePrice) {
+        JSONObject configForPair = loadConfigForPair(pair);
         JSONObject regimeDetectorConfig = configForPair.getJSONObject("regimeDetector");
         return new MarketRegimeIndicator(closePrice,
                 regimeDetectorConfig.getDouble("volaSplitThreshold"),
@@ -30,8 +45,8 @@ public class RegimeIndicatorFactory {
         return new DurationMarketRegimeIndicator(marketRegimeIndicator);
     }
 
-    public Indicator<QuantileMarketRegime> quantileMarketRegimeIndicator(String pairName, Indicator<DurationMarketRegime> durationMarketRegimeIndicator) {
-        JSONObject configForPair = loadConfigForPair(pairName).getJSONObject("quantileRegimeDetector");
+    public Indicator<QuantileMarketRegime> quantileMarketRegimeIndicator(Pair pair, Indicator<DurationMarketRegime> durationMarketRegimeIndicator) {
+        JSONObject configForPair = loadConfigForPair(pair).getJSONObject("quantileRegimeDetector");
         Map<MarketRegime, List<Double>> quantiles = Arrays.stream(MarketRegime.values())
                 .map(regime -> new AbstractMap.SimpleEntry<>(regime, configForPair.getJSONArray(regime.toString())))
                 .collect(Collectors.toMap(
@@ -47,13 +62,13 @@ public class RegimeIndicatorFactory {
                 .toList();
     }
 
-    private JSONObject loadConfigForPair(String pairName) {
+    private JSONObject loadConfigForPair(Pair pair) {
         JSONArray configFile = new JSONArray(loadConfigFile());
         return IntStream.range(0, configFile.length())
                 .mapToObj(configFile::getJSONObject)
-                .filter(config -> pairName.equals(config.getString("pair")))
+                .filter(config -> pair.technicalName().equals(config.getString("pair")))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Could not find config for pair with name " + pairName));
+                .orElseThrow(() -> new IllegalStateException("Could not find config for pair with name " + pair.technicalName()));
     }
 
     private String loadConfigFile() {

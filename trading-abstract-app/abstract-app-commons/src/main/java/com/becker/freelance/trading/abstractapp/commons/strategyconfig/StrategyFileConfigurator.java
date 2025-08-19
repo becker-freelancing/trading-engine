@@ -1,7 +1,8 @@
 package com.becker.freelance.trading.abstractapp.commons.strategyconfig;
 
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.indicators.ta.regime.QuantileMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
+import com.becker.freelance.indicators.ta.regime.TradeableMarketRegimeWrapper;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.creation.*;
 import com.becker.freelance.strategies.strategy.DefaultStrategyParameter;
@@ -11,24 +12,36 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class StrategyFileConfigurator {
 
+    private static final Map<String, TradeableMarketRegime> ALL_REGIMES = new HashMap<>();
+
+    static {
+        for (TradeableMarketRegime tradeableMarketRegime : TradeableMarketRegimeWrapper.all()) {
+            String key = tradeableMarketRegime.toString();
+            if (ALL_REGIMES.containsKey(key)) {
+                throw new IllegalStateException("Duplicate Key " + key + " found for market regimes");
+            }
+
+            ALL_REGIMES.put(key, tradeableMarketRegime);
+        }
+
+    }
+
     //DUPLICATE
     public Stream<RegimeStrategyCreator> withConfigFile(StrategyCreator strategyCreator, Pair pair) {
         Optional<List<JSONObject>> configs = getConfigsForStrategy(strategyCreator.strategyName(), pair);
         return configs.flatMap(config -> map(config, strategyCreator, pair))
                 .orElse(Stream.of(new RegimeStrategyCreator(strategyCreator,
-                        QuantileMarketRegime.all(),
+                        new HashSet<>(ALL_REGIMES.values()),
                         100,
                         pair,
-                        new DefaultStrategyParameter(strategyCreator.strategyParameters().defaultValues(), pair, QuantileMarketRegime.all()))));
+                        new DefaultStrategyParameter(strategyCreator.strategyParameters().defaultValues(), pair, new HashSet<>(ALL_REGIMES.values())))));
     }
 
     private Optional<Stream<RegimeStrategyCreator>> map(List<JSONObject> configs, StrategyCreator strategyCreator, Pair pair) {
@@ -41,7 +54,7 @@ public class StrategyFileConfigurator {
 
     private RegimeStrategyCreator map(JSONObject config, StrategyCreator strategyCreator, Pair pair) {
         int priority = config.getInt("priority");
-        Set<QuantileMarketRegime> regimes = map(config.getJSONArray("regimes"));
+        Set<TradeableMarketRegime> regimes = map(config.getJSONArray("regimes"));
         StrategyParameter parameters = map(config.getJSONObject("parameters"), pair, regimes);
 
         return new RegimeStrategyCreator(
@@ -53,7 +66,7 @@ public class StrategyFileConfigurator {
         );
     }
 
-    private StrategyParameter map(JSONObject parameters, Pair pair, Set<QuantileMarketRegime> regimes) {
+    private StrategyParameter map(JSONObject parameters, Pair pair, Set<TradeableMarketRegime> regimes) {
         StrategyCreationParameter strategyCreationParameter = new DefaultStrategyCreationParameter(
                 parameters.toMap().entrySet().stream()
                         .collect(Collectors.toMap(
@@ -77,14 +90,19 @@ public class StrategyFileConfigurator {
         return new Decimal(String.valueOf(value));
     }
 
-    private Set<QuantileMarketRegime> map(JSONArray regimes) {
+    private Set<TradeableMarketRegime> map(JSONArray regimes) {
         if (regimes.isEmpty()) {
             return Set.of();
         }
 
         return IntStream.range(0, regimes.length())
                 .mapToObj(regimes::getString)
-                .map(QuantileMarketRegime::valueOf)
+                .map(ALL_REGIMES::get)
+                .peek(regime -> {
+                    if (regime == null) {
+                        throw new IllegalStateException("Regime found that is not supported in " + regimes);
+                    }
+                })
                 .collect(Collectors.toSet());
 
     }

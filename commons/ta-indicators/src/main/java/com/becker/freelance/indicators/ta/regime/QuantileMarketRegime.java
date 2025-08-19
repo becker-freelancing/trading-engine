@@ -1,10 +1,8 @@
 package com.becker.freelance.indicators.ta.regime;
 
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 
-import java.util.Set;
-
-public enum QuantileMarketRegime implements TradeableQuantilMarketRegime {
+public enum QuantileMarketRegime implements TradeableMarketRegime {
     UP_LOW_VOLA_033(1),
     UP_LOW_VOLA_066(2),
     UP_LOW_VOLA_1(3),
@@ -30,10 +28,6 @@ public enum QuantileMarketRegime implements TradeableQuantilMarketRegime {
         this.id = id;
     }
 
-    public static Set<QuantileMarketRegime> all() {
-        return Set.of(QuantileMarketRegime.values());
-    }
-
     public static QuantileMarketRegime fromId(int id) {
         for (QuantileMarketRegime regime : QuantileMarketRegime.values()) {
             if (regime.id() == id) {
@@ -57,4 +51,11 @@ public enum QuantileMarketRegime implements TradeableQuantilMarketRegime {
     public int id() {
         return id;
     }
+
+    @Override
+    public boolean considersRegimeDuration() {
+        return true;
+    }
+
+
 }

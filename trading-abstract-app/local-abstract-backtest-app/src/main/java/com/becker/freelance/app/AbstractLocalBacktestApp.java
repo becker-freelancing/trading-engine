@@ -6,10 +6,11 @@ import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguratio
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.engine.StrategySupplier;
-import com.becker.freelance.indicators.ta.regime.QuantileMarketRegime;
+import com.becker.freelance.indicators.ta.regime.TradeableMarketRegimeWrapper;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.creation.RegimeStrategyCreator;
 import com.becker.freelance.strategies.creation.StrategyCreator;
@@ -32,7 +33,6 @@ abstract class AbstractLocalBacktestApp implements Runnable {
     private final Decimal initialWalletAmount;
     private final LocalDateTime fromTime;
     private final LocalDateTime toTime;
-    private final BacktestAppInitiatingUtil appInitiatingUtil;
     private final Runnable onFinished;
     private final boolean useStrategyConfig;
 
@@ -40,7 +40,6 @@ abstract class AbstractLocalBacktestApp implements Runnable {
         this.initialWalletAmount = initialWalletAmount;
         this.fromTime = fromTime;
         this.toTime = toTime;
-        this.appInitiatingUtil = new BacktestAppInitiatingUtil();
         this.onFinished = onFinished;
         this.useStrategyConfig = strategyConfig;
     }
@@ -123,7 +122,7 @@ abstract class AbstractLocalBacktestApp implements Runnable {
 
     private StrategySupplier toRegimeStrategySupplier(List<RegimeStrategyCreator> strategyCreators) {
         return (pair, tradingCalculator) -> {
-            Map<QuantileMarketRegime, List<BaseStrategy>> strategiesByRegime = QuantileMarketRegime.all().stream().collect(Collectors.toMap(
+            Map<TradeableMarketRegime, List<BaseStrategy>> strategiesByRegime = TradeableMarketRegimeWrapper.all().stream().collect(Collectors.toMap(
                     regime -> regime,
                     regime -> strategyCreators.stream().filter(strategyCreator -> strategyCreator.regimes().contains(regime))
                             .sorted(Comparator.comparing(RegimeStrategyCreator::priority))

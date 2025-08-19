@@ -12,17 +12,17 @@ public class CapitalPairProvider implements PairProvider {
     @Override
     public List<Pair> get() {
         return List.of(
-                from("BTC", "USD", 1, "BTC/USD M1", 1., 0.0001, 60., 0.05, 2., 2),
-                from("BTC", "USD", 2, "BTC/USD M2", 1., 0.0001, 60., 0.05, 2., 2),
-                from("BTC", "USD", 3, "BTC/USD M3", 1., 0.0001, 60., 0.05, 2., 2),
-                from("BTC", "USD", 5, "BTC/USD M5", 1., 0.0001, 60., 0.05, 2., 2),
-                from("BTC", "USD", 15, "BTC/USD M15", 1., 0.0001, 60., 0.05, 2., 2),
-                from("BTC", "USD", 30, "BTC/USD M30", 1., 0.0001, 60., 0.05, 2., 2),
-                from("BTC", "USD", 60, "BTC/USD H1", 1., 0.0001, 60., 0.05, 2., 2),
-                from("BTC", "USD", 240, "BTC/USD H4", 1., 0.0001, 60., 0.05, 2., 2),
-                from("BTC", "USD", 1440, "BTC/USD D1", 1., 0.0001, 60., 0.05, 2., 2),
+                from("BTC", "USD", 1, "BTC/USD M1", 1., 0.0001, 60., 0.05, 2., 1),
+                from("BTC", "USD", 2, "BTC/USD M2", 1., 0.0001, 60., 0.05, 2., 1),
+                from("BTC", "USD", 3, "BTC/USD M3", 1., 0.0001, 60., 0.05, 2., 1),
+                from("BTC", "USD", 5, "BTC/USD M5", 1., 0.0001, 60., 0.05, 2., 1),
+                from("BTC", "USD", 15, "BTC/USD M15", 1., 0.0001, 60., 0.05, 2., 1),
+                from("BTC", "USD", 30, "BTC/USD M30", 1., 0.0001, 60., 0.05, 2., 1),
+                from("BTC", "USD", 60, "BTC/USD H1", 1., 0.0001, 60., 0.05, 2., 1),
+                from("BTC", "USD", 240, "BTC/USD H4", 1., 0.0001, 60., 0.05, 2., 1),
+                from("BTC", "USD", 1440, "BTC/USD D1", 1., 0.0001, 60., 0.05, 2., 1),
 
-                from("ETH", "USD", 1, "ETH/USD M1", 1., 0.0001, 60., 0.05, 2., 2)
+                from("ETH", "USD", 1, "ETH/USD M1", 1., 0.0001, 60., 0.05, 2., 1)
 
         );
     }

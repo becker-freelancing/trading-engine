@@ -1,7 +1,7 @@
 package com.becker.freelance.strategies.strategy;
 
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.creation.ParameterName;
 import com.becker.freelance.strategies.creation.StrategyCreationParameter;
@@ -15,7 +15,7 @@ public interface StrategyParameter extends StrategyCreationParameter {
 
     public Pair pair();
 
-    public Set<? extends TradeableQuantilMarketRegime> activeOnRegimes();
+    public Set<? extends TradeableMarketRegime> activeOnRegimes();
 
     @Override
     default void addParameter(ParameterName name, Decimal value) {

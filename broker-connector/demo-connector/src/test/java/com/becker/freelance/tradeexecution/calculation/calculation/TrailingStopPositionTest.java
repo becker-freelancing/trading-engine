@@ -6,7 +6,7 @@ import com.becker.freelance.commons.order.OrderBuilder;
 import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.position.PositionBehaviour;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
@@ -63,7 +63,7 @@ class TrailingStopPositionTest {
                 .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.02"))).withThresholdPrice(new Decimal("1.02")))
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("1.08")))
                 .withPositionBehaviour(PositionBehaviour.TRAILING)
-                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .withOpenMarketRegime(mock(TradeableMarketRegime.class))
                 .buildValidated(openPrice), openPrice);
         buyPosition.getOpenOrder().executeIfPossible(openPrice);
 
@@ -72,7 +72,7 @@ class TrailingStopPositionTest {
                 .withStopOrder(OrderBuilder.getInstance().asConditionalOrder().withDelegate(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("6200"))).withThresholdPrice(new Decimal("6200")))
                 .withLimitOrder(OrderBuilder.getInstance().asLimitOrder().withOrderPrice(new Decimal("6000")))
                 .withPositionBehaviour(PositionBehaviour.TRAILING)
-                .withOpenMarketRegime(mock(TradeableQuantilMarketRegime.class))
+                .withOpenMarketRegime(mock(TradeableMarketRegime.class))
                 .buildValidated(openPriceSell), openPriceSell);
         sellPosition.getOpenOrder().executeIfPossible(openPriceSell);
     }

@@ -12,21 +12,21 @@ public class BybitLocalPairProvider implements PairProvider {
     @Override
     public List<Pair> get() {
         return List.of(
-                from("ETH", "PERP", 1, "ETH/USDC M1", 1., 0.0001, 60., 0.05, 1. / 10, 1),
-                from("ETH", "USDT", 1, "ETH/USDT M1", 1., 1., 2., 1., 1., 1),
-                from("EUR", "USD", 1, "EUR/USD M1", 1., 1., 2., 1., 1., 1)
+                from("ETH", "PERP", 1, "ETH/USDC M1", 1., 0.0001, 60., 0.05, 10., 1),
+                from("ETH", "USDT", 1, "ETH/USDT M1", 1., 1., 2., 1., 10., 1),
+                from("EUR", "USD", 1, "EUR/USD M1", 1., 1., 2., 1., 10., 1)
         );
     }
 
     private Pair from(String baseCurrency, String counterCurrency, long timeInMinutes, String technicalName, Double profitPerPointForOneContract,
                       Double minOrderSize, Double minStop, Double minLimit, Double leverageFactor, long sizeMultiplication) {
-        return new BinancePair(baseCurrency, counterCurrency, timeInMinutes, technicalName, new Decimal(profitPerPointForOneContract), new Decimal(minOrderSize),
+        return new ByBitLocalPair(baseCurrency, counterCurrency, timeInMinutes, technicalName, new Decimal(profitPerPointForOneContract), new Decimal(minOrderSize),
                 new Decimal(minStop), new Decimal(minLimit), new Decimal(leverageFactor), new Decimal(sizeMultiplication));
     }
 
-    private static class BinancePair extends AbstractPair {
+    private static class ByBitLocalPair extends AbstractPair {
 
-        public BinancePair(String baseCurrency, String counterCurrency, long timeInMinutes, String technicalName, Decimal profitPerPointForOneContract, Decimal minOrderSize, Decimal minStop, Decimal minLimit, Decimal leverageFactor, Decimal sizeMultiplication) {
+        public ByBitLocalPair(String baseCurrency, String counterCurrency, long timeInMinutes, String technicalName, Decimal profitPerPointForOneContract, Decimal minOrderSize, Decimal minStop, Decimal minLimit, Decimal leverageFactor, Decimal sizeMultiplication) {
             super(baseCurrency, counterCurrency, timeInMinutes, technicalName, profitPerPointForOneContract, minOrderSize, minStop, minLimit, leverageFactor, sizeMultiplication);
         }
 

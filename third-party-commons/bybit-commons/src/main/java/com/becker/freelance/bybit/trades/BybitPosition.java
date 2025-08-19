@@ -7,7 +7,7 @@ import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.position.PositionBehaviour;
 import com.becker.freelance.commons.position.StopLimitPosition;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
@@ -127,7 +127,7 @@ class BybitPosition implements StopLimitPosition {
     }
 
     @Override
-    public TradeableQuantilMarketRegime getOpenMarketRegime() {
+    public TradeableMarketRegime getOpenMarketRegime() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 }
