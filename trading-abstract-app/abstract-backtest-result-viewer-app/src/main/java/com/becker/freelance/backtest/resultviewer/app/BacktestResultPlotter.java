@@ -25,6 +25,7 @@ class BacktestResultPlotter implements ResultVisualizer {
         ChartFrame chartFrame = new ChartFrame(cumulativeChart, maxChart, minChart, mostChart, bestCumulative.size() > 0 ? bestCumulative.get(0) : null);
         chartFrame.setTitle(strategyName);
         chartFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        chartFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         chartFrame.setVisible(true);
     }
 

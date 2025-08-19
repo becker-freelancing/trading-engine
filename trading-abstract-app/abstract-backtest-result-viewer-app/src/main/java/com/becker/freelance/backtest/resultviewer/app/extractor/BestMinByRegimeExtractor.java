@@ -2,7 +2,7 @@ package com.becker.freelance.backtest.resultviewer.app.extractor;
 
 import com.becker.freelance.backtest.commons.BacktestResultContent;
 import com.becker.freelance.backtest.commons.TradeStatistic;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.math.Decimal;
 
 import java.util.ArrayList;
@@ -12,21 +12,21 @@ import java.util.Map;
 
 public class BestMinByRegimeExtractor implements RegimeResultExtractor {
 
-    private Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> results = new HashMap<>();
-    private Map<TradeableQuantilMarketRegime, Decimal> bestValues = new HashMap<>();
+    private Map<TradeableMarketRegime, List<BacktestResultContent>> results = new HashMap<>();
+    private Map<TradeableMarketRegime, Decimal> bestValues = new HashMap<>();
 
     @Override
-    public Map<TradeableQuantilMarketRegime, List<BacktestResultContent>> getResultByRegime() {
+    public Map<TradeableMarketRegime, List<BacktestResultContent>> getResultByRegime() {
         return results;
     }
 
     @Override
     public void consume(BacktestResultContent resultContent) {
-        Map<TradeableQuantilMarketRegime, TradeStatistic> tradeableQuantilMarketRegimeListMap = resultContent.tradeObjectsForRegime();
+        Map<TradeableMarketRegime, TradeStatistic> tradeableQuantilMarketRegimeListMap = resultContent.tradeObjectsForRegime();
 
-        for (Map.Entry<TradeableQuantilMarketRegime, TradeStatistic> entry : tradeableQuantilMarketRegimeListMap.entrySet()) {
+        for (Map.Entry<TradeableMarketRegime, TradeStatistic> entry : tradeableQuantilMarketRegimeListMap.entrySet()) {
             TradeStatistic tradeStatistic = entry.getValue();
-            TradeableQuantilMarketRegime regime = entry.getKey();
+            TradeableMarketRegime regime = entry.getKey();
             Decimal min = tradeStatistic.getMin();
             if (bestValues.getOrDefault(regime, Decimal.MINUS_DOUBLE_MAX).isLessThan(min)) {
                 bestValues.put(regime, min);

@@ -1,10 +1,9 @@
 package com.becker.freelance.strategies.strategy;
 
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.signal.ExitSignal;
-import com.becker.freelance.indicators.ta.regime.QuantileMarketRegime;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
 import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
@@ -19,28 +18,23 @@ public class RegimeStrategy extends BaseStrategy {
 
     private static final Logger logger = LoggerFactory.getLogger(RegimeStrategy.class);
 
-    private final Map<QuantileMarketRegime, List<BaseStrategy>> strategiesByRegime;
+    private final Map<TradeableMarketRegime, List<BaseStrategy>> strategiesByRegime;
     private final List<BaseStrategy> allStrategies;
 
-    public RegimeStrategy(Pair pair, Map<QuantileMarketRegime, List<BaseStrategy>> strategiesByRegime) {
+    public RegimeStrategy(Pair pair, Map<TradeableMarketRegime, List<BaseStrategy>> strategiesByRegime) {
         super(new PairStrategyParameter(pair));
-        this.strategiesByRegime = new HashMap<>();
-
-        for (QuantileMarketRegime marketRegime : QuantileMarketRegime.all()) {
-            this.strategiesByRegime.put(marketRegime, strategiesByRegime.getOrDefault(marketRegime, new ArrayList<>()));
-        }
-
+        this.strategiesByRegime = strategiesByRegime;
         this.allStrategies = strategiesByRegime.values().stream().flatMap(Collection::stream).toList();
     }
 
 
     @Override
     protected Optional<EntrySignalBuilder> internalShouldEnter(EntryExecutionParameter entryParameter) {
-        QuantileMarketRegime currentMarketRegime = currentMarketRegime();
+        TradeableMarketRegime currentMarketRegime = currentMarketRegime();
 
         logger.debug("Current market regime is {}", currentMarketRegime.name());
 
-        for (BaseStrategy baseStrategy : strategiesByRegime.get(currentMarketRegime)) {
+        for (BaseStrategy baseStrategy : strategiesByRegime.getOrDefault(currentMarketRegime, new ArrayList<>())) {
             logger.debug("Asking Strategy {} for entry signal", baseStrategy);
             Optional<EntrySignalBuilder> entrySignalBuilder = baseStrategy.internalShouldEnter(entryParameter);
             if (entrySignalBuilder.isPresent()) {
@@ -54,8 +48,8 @@ public class RegimeStrategy extends BaseStrategy {
 
     @Override
     protected Optional<ExitSignal> internalShouldExit(ExitExecutionParameter exitParameter) {
-        QuantileMarketRegime currentMarketRegime = currentMarketRegime();
-        for (BaseStrategy baseStrategy : strategiesByRegime.get(currentMarketRegime)) {
+        TradeableMarketRegime currentMarketRegime = currentMarketRegime();
+        for (BaseStrategy baseStrategy : strategiesByRegime.getOrDefault(currentMarketRegime, new ArrayList<>())) {
             Optional<ExitSignal> exitSignal = baseStrategy.internalShouldExit(exitParameter);
             if (exitSignal.isPresent()) {
                 return exitSignal;
@@ -94,7 +88,7 @@ public class RegimeStrategy extends BaseStrategy {
         }
 
         @Override
-        public Set<? extends TradeableQuantilMarketRegime> activeOnRegimes() {
+        public Set<? extends TradeableMarketRegime> activeOnRegimes() {
             return Set.of();
         }
 

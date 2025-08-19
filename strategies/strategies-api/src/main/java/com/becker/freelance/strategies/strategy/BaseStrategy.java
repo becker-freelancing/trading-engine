@@ -4,6 +4,7 @@ package com.becker.freelance.strategies.strategy;
 import com.becker.freelance.commons.order.OrderBuilder;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.position.Direction;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
@@ -41,7 +42,8 @@ public abstract class BaseStrategy implements TradingStrategy {
     private final Pair pair;
     protected final BarSeries barSeries;
     protected final Indicator<Num> closePrice;
-    private final Indicator<QuantileMarketRegime> regimeIndicator;
+    private final Indicator<? extends TradeableMarketRegime> regimeIndicator;
+    private final Indicator<QuantileMarketRegime> quantileMarketRegimeIndicator;
     private final Set<BiConsumer<TradingStrategy, LocalDateTime>> beforeFirstBar;
     private final Set<Consumer<Bar>> onBarAdded;
     private OpenPositionRequestor openPositionRequestor;
@@ -54,9 +56,10 @@ public abstract class BaseStrategy implements TradingStrategy {
 
         Pair pair = strategyParameter.pair();
         RegimeIndicatorFactory regimeIndicatorFactory = new RegimeIndicatorFactory();
-        Indicator<MarketRegime> marketRegimeIndicator = regimeIndicatorFactory.marketRegimeIndicatorFromConfigFile(pair.technicalName(), closePrice);
+        Indicator<MarketRegime> marketRegimeIndicator = regimeIndicatorFactory.marketRegimeIndicatorFromConfigFile(pair, closePrice);
         Indicator<DurationMarketRegime> durationMarketRegimeIndicator = regimeIndicatorFactory.durationMarketRegimeIndicator(marketRegimeIndicator);
-        this.regimeIndicator = regimeIndicatorFactory.quantileMarketRegimeIndicator(pair.technicalName(), durationMarketRegimeIndicator);
+        this.quantileMarketRegimeIndicator = regimeIndicatorFactory.quantileMarketRegimeIndicator(pair, durationMarketRegimeIndicator);
+        this.regimeIndicator = regimeIndicatorFactory.marketRegimeIndicatorForStrategy(pair, closePrice);
         this.beforeFirstBar = new HashSet<>();
         this.pair = strategyParameter.pair();
         this.onBarAdded = new HashSet<>();
@@ -110,8 +113,12 @@ public abstract class BaseStrategy implements TradingStrategy {
     }
 
     @Override
-    public QuantileMarketRegime currentMarketRegime() {
+    public TradeableMarketRegime currentMarketRegime() {
         return regimeIndicator.getValue(barSeries.getEndIndex());
+    }
+
+    public QuantileMarketRegime currentQuantileMarketRegime() {
+        return quantileMarketRegimeIndicator.getValue(barSeries.getEndIndex());
     }
 
     @Override

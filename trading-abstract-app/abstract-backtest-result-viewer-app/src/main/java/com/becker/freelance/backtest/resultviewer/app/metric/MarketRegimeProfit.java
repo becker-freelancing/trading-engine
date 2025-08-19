@@ -1,7 +1,7 @@
 package com.becker.freelance.backtest.resultviewer.app.metric;
 
 import com.becker.freelance.backtest.commons.BacktestResultContent;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.math.Decimal;
 
@@ -15,10 +15,10 @@ public class MarketRegimeProfit implements MetricCalculator {
     public Writable calculate(BacktestResultContent content) {
         List<Trade> trades = content.tradeObjects();
 
-        Map<TradeableQuantilMarketRegime, List<Decimal>> profits = new HashMap<>();
+        Map<TradeableMarketRegime, List<Decimal>> profits = new HashMap<>();
 
         for (Trade trade : trades) {
-            TradeableQuantilMarketRegime regime = trade.getOpenMarketRegime();
+            TradeableMarketRegime regime = trade.getOpenMarketRegime();
             profits.computeIfAbsent(regime, k -> new ArrayList<>());
             profits.get(regime).add(trade.getProfitInEuroWithFees());
         }

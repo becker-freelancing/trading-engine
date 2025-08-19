@@ -9,7 +9,7 @@ import com.becker.freelance.commons.position.Direction;
 import com.becker.freelance.commons.position.Position;
 import com.becker.freelance.commons.position.PositionBehaviour;
 import com.becker.freelance.commons.position.TrailingPosition;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
@@ -24,13 +24,13 @@ public class DemoTrailingPosition implements TrailingPosition {
     private final MarginCalculator marginCalculator;
     private final TradingFeeCalculator tradingFeeCalculator;
     private final String id;
-    private final TradeableQuantilMarketRegime openMarketRegime;
+    private final TradeableMarketRegime openMarketRegime;
 
-    public DemoTrailingPosition(Decimal initialStopLevel, TradeableQuantilMarketRegime openMarketRegime, TradingFeeCalculator tradingFeeCalculator, MarginCalculator marginCalculator, LazyOrder limitOrder, LazyOrder stopOrder, Order openOrder) {
+    public DemoTrailingPosition(Decimal initialStopLevel, TradeableMarketRegime openMarketRegime, TradingFeeCalculator tradingFeeCalculator, MarginCalculator marginCalculator, LazyOrder limitOrder, LazyOrder stopOrder, Order openOrder) {
         this(initialStopLevel, openMarketRegime, tradingFeeCalculator, marginCalculator, limitOrder, stopOrder, openOrder, UUID.randomUUID().toString());
     }
 
-    public DemoTrailingPosition(Decimal initialStopLevel, TradeableQuantilMarketRegime openMarketRegime, TradingFeeCalculator tradingFeeCalculator, MarginCalculator marginCalculator, LazyOrder limitOrder, LazyOrder stopOrder, Order openOrder, String id) {
+    public DemoTrailingPosition(Decimal initialStopLevel, TradeableMarketRegime openMarketRegime, TradingFeeCalculator tradingFeeCalculator, MarginCalculator marginCalculator, LazyOrder limitOrder, LazyOrder stopOrder, Order openOrder, String id) {
         this.initialStopLevel = initialStopLevel;
         this.openMarketRegime = openMarketRegime;
         this.tradingFeeCalculator = tradingFeeCalculator;
@@ -75,7 +75,7 @@ public class DemoTrailingPosition implements TrailingPosition {
 
     @Override
     public Decimal getMargin() {
-        return marginCalculator.getMarginEurWithLeverage(getPair(), getSize(), getOpenPrice(), getOpenTime(), getLeverage());
+        return marginCalculator.getMarginEur(getPair(), getSize(), getOpenPrice(), getOpenTime());
     }
 
     @Override
@@ -132,7 +132,7 @@ public class DemoTrailingPosition implements TrailingPosition {
     }
 
     @Override
-    public TradeableQuantilMarketRegime getOpenMarketRegime() {
+    public TradeableMarketRegime getOpenMarketRegime() {
         return openMarketRegime;
     }
 

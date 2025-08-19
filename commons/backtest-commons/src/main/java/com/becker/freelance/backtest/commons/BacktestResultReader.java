@@ -1,7 +1,7 @@
 package com.becker.freelance.backtest.commons;
 
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.math.Decimal;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,7 +42,7 @@ public class BacktestResultReader {
         objectMapper.registerModule(new JavaTimeModule());
         SimpleModule module = new SimpleModule(Pair.class.getName());
         module.addDeserializer(Pair.class, new PairDeserializer());
-        module.addDeserializer(TradeableQuantilMarketRegime.class, new TradeableMarketRegimeDeserializer());
+        module.addDeserializer(TradeableMarketRegime.class, new TradeableMarketRegimeDeserializer());
         objectMapper.registerModule(module);
     }
 

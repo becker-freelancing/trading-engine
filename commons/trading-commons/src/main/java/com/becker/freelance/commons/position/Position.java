@@ -3,7 +3,7 @@ package com.becker.freelance.commons.position;
 import com.becker.freelance.commons.order.LazyOrder;
 import com.becker.freelance.commons.order.Order;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
@@ -43,11 +43,7 @@ public interface Position extends Cloneable {
 
     public String getId();
 
-    public TradeableQuantilMarketRegime getOpenMarketRegime();
-
-    public default Decimal getLeverage() {
-        return Decimal.valueOf(10);
-    }
+    public TradeableMarketRegime getOpenMarketRegime();
 
     public default Position cloneWithSize(Decimal size) {
         Position clone = clone();

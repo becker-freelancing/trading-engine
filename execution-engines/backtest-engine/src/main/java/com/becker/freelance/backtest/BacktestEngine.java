@@ -6,7 +6,7 @@ import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguratio
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.execution.callback.backtest.BacktestFinishedCallback;
 import com.becker.freelance.execution.callback.backtest.BacktestFinishedCallbackComposite;
-import com.becker.freelance.indicators.ta.regime.QuantileMarketRegime;
+import com.becker.freelance.indicators.ta.regime.TradeableMarketRegimeWrapper;
 import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 import com.becker.freelance.strategies.creation.StrategyCreator;
 import com.becker.freelance.strategies.strategy.DefaultStrategyParameter;
@@ -143,7 +143,7 @@ public class BacktestEngine {
 
     private StrategySupplierWithParameters toStrategySupplier(StrategyCreationParameter parameter) {
         return new StrategySupplierWithParameters((pair, tradingCalculator) -> {
-            DefaultStrategyParameter defaultStrategyParameter = new DefaultStrategyParameter(parameter, pair, QuantileMarketRegime.all());
+            DefaultStrategyParameter defaultStrategyParameter = new DefaultStrategyParameter(parameter, pair, TradeableMarketRegimeWrapper.all());
             return strategyCreator.build(defaultStrategyParameter);
         }, parameter);
     }

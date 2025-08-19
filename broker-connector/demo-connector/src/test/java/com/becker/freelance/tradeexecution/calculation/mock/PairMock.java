@@ -9,19 +9,19 @@ import java.util.Objects;
 public class PairMock implements Pair {
 
     public static Pair eurUsd(){
-        return new PairMock("EUR", "USD", 100_000, 0.0333);
+        return new PairMock("EUR", "USD", 100_000, 33);
     }
 
     public static Pair ethEur(){
-        return new PairMock("ETH", "EUR", 1, 0.5);
+        return new PairMock("ETH", "EUR", 1, 2);
     }
 
     public static Pair gldUsd(){
-        return new PairMock("GLD", "USD", 1, 0.05);
+        return new PairMock("GLD", "USD", 1, 20);
     }
 
     public static Pair xbtEur(){
-       return new PairMock("XBT", "EUR", 1, 0.5);
+        return new PairMock("XBT", "EUR", 1, 2);
     }
 
     private final String baseCurrency;

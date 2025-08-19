@@ -12,8 +12,8 @@ public class HistDataPairProvider implements PairProvider {
     @Override
     public List<Pair> get() {
         return List.of(
-                from("EUR", "USD", 1, "EUR/USD M1", 100_000., 1., 2., 1., 0.0333, 100_000),
-                from("EUR", "USD", 5, "EUR/USD M5", 100_000., 1., 2., 1., 0.0333, 100_000)
+                from("EUR", "USD", 1, "EUR/USD M1", 100_000., 1., 2., 1., 30., 100_000),
+                from("EUR", "USD", 5, "EUR/USD M5", 100_000., 1., 2., 1., 30., 100_000)
         );
     }
 

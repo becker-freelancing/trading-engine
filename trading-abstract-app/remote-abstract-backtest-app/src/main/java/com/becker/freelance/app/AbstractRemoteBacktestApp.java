@@ -3,10 +3,11 @@ package com.becker.freelance.app;
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.engine.StrategySupplier;
 import com.becker.freelance.execution.RemoteExecutionEngine;
 import com.becker.freelance.execution.StrategyWithPair;
-import com.becker.freelance.indicators.ta.regime.QuantileMarketRegime;
+import com.becker.freelance.indicators.ta.regime.TradeableMarketRegimeWrapper;
 import com.becker.freelance.strategies.creation.RegimeStrategyCreator;
 import com.becker.freelance.strategies.strategy.BaseStrategy;
 import com.becker.freelance.strategies.strategy.RegimeStrategy;
@@ -66,7 +67,7 @@ public class AbstractRemoteBacktestApp implements Runnable {
 
     private StrategySupplier toRegimeStrategySupplier(List<RegimeStrategyCreator> strategyCreators) {
         return (pair, tradingCalculator) -> {
-            Map<QuantileMarketRegime, List<BaseStrategy>> strategiesByRegime = QuantileMarketRegime.all().stream().collect(Collectors.toMap(
+            Map<TradeableMarketRegime, List<BaseStrategy>> strategiesByRegime = TradeableMarketRegimeWrapper.all().stream().collect(Collectors.toMap(
                     regime -> regime,
                     regime -> strategyCreators.stream().filter(strategyCreator -> strategyCreator.regimes().contains(regime))
                             .sorted(Comparator.comparing(RegimeStrategyCreator::priority))

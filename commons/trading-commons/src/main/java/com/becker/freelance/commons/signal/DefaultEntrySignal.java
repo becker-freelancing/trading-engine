@@ -3,7 +3,7 @@ package com.becker.freelance.commons.signal;
 import com.becker.freelance.commons.order.LazyOrder;
 import com.becker.freelance.commons.order.Order;
 import com.becker.freelance.commons.position.PositionBehaviour;
-import com.becker.freelance.commons.regime.TradeableQuantilMarketRegime;
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
@@ -13,7 +13,7 @@ record DefaultEntrySignal(Order openOrder,
                           LazyOrder stopOrder,
                           LazyOrder limitOrder,
                           PositionBehaviour positionBehaviour,
-                          TradeableQuantilMarketRegime openMarketRegime) implements EntrySignal {
+                          TradeableMarketRegime openMarketRegime) implements EntrySignal {
 
     DefaultEntrySignal {
         requireNonNull(openOrder);

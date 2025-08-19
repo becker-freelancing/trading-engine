@@ -36,7 +36,7 @@ class MarginCalculatorImplTest {
 
         Decimal margin = marginCalculatorEurUsd.getMarginEur(eurUsd, Decimal.ONE, new Decimal("1.04"), LocalDateTime.now());
 
-        assertEquals(new Decimal("3284.21"), margin);
+        assertEquals(new Decimal("2988.63"), margin);
     }
 
     @Test
@@ -47,7 +47,7 @@ class MarginCalculatorImplTest {
 
         Decimal margin = marginCalculatorEurUsd.getMarginEur(eurUsd, new Decimal("0.5"), new Decimal("1.04"), LocalDateTime.now());
 
-        assertEquals(new Decimal("1642.11"), margin);
+        assertEquals(new Decimal("1494.32"), margin);
     }
 
     @Test
