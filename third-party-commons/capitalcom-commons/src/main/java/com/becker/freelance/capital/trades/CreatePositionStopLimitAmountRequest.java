@@ -1,8 +1,5 @@
 package com.becker.freelance.capital.trades;
 
-import lombok.Getter;
-
-@Getter
 class CreatePositionStopLimitAmountRequest extends CreatePositionRequest {
 
     private Double stopAmount;
@@ -14,5 +11,11 @@ class CreatePositionStopLimitAmountRequest extends CreatePositionRequest {
         this.limitAmount = limitAmount;
     }
 
+    public Double getStopAmount() {
+        return stopAmount;
+    }
 
+    public Double getLimitAmount() {
+        return limitAmount;
+    }
 }

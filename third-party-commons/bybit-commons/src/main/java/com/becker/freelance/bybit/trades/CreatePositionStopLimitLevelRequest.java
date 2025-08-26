@@ -1,8 +1,5 @@
 package com.becker.freelance.bybit.trades;
 
-import lombok.Getter;
-
-@Getter
 class CreatePositionStopLimitLevelRequest extends CreatePositionRequest {
 
     private Double stopLevel;
@@ -12,5 +9,13 @@ class CreatePositionStopLimitLevelRequest extends CreatePositionRequest {
         super(epic, direction, size);
         this.stopLevel = stopLevel;
         this.limitLevel = limitLevel;
+    }
+
+    public Double getStopLevel() {
+        return stopLevel;
+    }
+
+    public Double getLimitLevel() {
+        return limitLevel;
     }
 }

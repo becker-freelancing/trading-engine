@@ -6,7 +6,6 @@ import com.becker.freelance.math.Decimal;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.websocket.MessageHandler;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +85,6 @@ class MarketDataMessageHandler implements MessageHandler.Whole<String> {
         bidConsumer.accept(bidMarketData);
     }
 
-    @Getter
     private static class OHLCMessage {
         private String status;
         private String destination;
@@ -100,9 +98,20 @@ class MarketDataMessageHandler implements MessageHandler.Whole<String> {
                     ", payload=" + payload +
                     '}';
         }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public String getDestination() {
+            return destination;
+        }
+
+        public Payload getPayload() {
+            return payload;
+        }
     }
 
-    @Getter
     private static class Payload {
         private String resolution;
         private String epic;
@@ -127,6 +136,42 @@ class MarketDataMessageHandler implements MessageHandler.Whole<String> {
                     ", o=" + o +
                     ", c=" + c +
                     '}';
+        }
+
+        public String getResolution() {
+            return resolution;
+        }
+
+        public String getEpic() {
+            return epic;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getPriceType() {
+            return priceType;
+        }
+
+        public long getT() {
+            return t;
+        }
+
+        public double getH() {
+            return h;
+        }
+
+        public double getL() {
+            return l;
+        }
+
+        public double getO() {
+            return o;
+        }
+
+        public double getC() {
+            return c;
         }
     }
 }

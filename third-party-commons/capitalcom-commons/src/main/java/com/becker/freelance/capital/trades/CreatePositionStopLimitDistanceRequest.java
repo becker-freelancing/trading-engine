@@ -1,8 +1,5 @@
 package com.becker.freelance.capital.trades;
 
-import lombok.Getter;
-
-@Getter
 class CreatePositionStopLimitDistanceRequest extends CreatePositionRequest {
 
     private Double stopDistance;
@@ -12,5 +9,13 @@ class CreatePositionStopLimitDistanceRequest extends CreatePositionRequest {
         super(epic, direction, size);
         this.stopDistance = stopDistance;
         this.limitDistance = limitDistance;
+    }
+
+    public Double getStopDistance() {
+        return stopDistance;
+    }
+
+    public Double getLimitDistance() {
+        return limitDistance;
     }
 }

@@ -1,8 +1,5 @@
 package com.becker.freelance.capital.ws;
 
-import lombok.NoArgsConstructor;
-
-@NoArgsConstructor
 public class OHLCBar {
     String resolution;
     String epic; // Symbol
@@ -13,6 +10,9 @@ public class OHLCBar {
     double l; // Low
     double o; // Open
     double c; // Close
+
+    public OHLCBar() {
+    }
 
     public OHLCBar(String id, String resolution, long timestamp, double price, String type, String priceType) {
         this.epic = id;
