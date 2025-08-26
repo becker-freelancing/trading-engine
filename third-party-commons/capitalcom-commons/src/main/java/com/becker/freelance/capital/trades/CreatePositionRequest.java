@@ -1,8 +1,5 @@
 package com.becker.freelance.capital.trades;
 
-import lombok.Getter;
-
-@Getter
 abstract class CreatePositionRequest {
 
     private String epic;
@@ -13,5 +10,17 @@ abstract class CreatePositionRequest {
         this.epic = epic;
         this.direction = direction;
         this.size = size;
+    }
+
+    public String getEpic() {
+        return epic;
+    }
+
+    public String getDirection() {
+        return direction;
+    }
+
+    public Double getSize() {
+        return size;
     }
 }

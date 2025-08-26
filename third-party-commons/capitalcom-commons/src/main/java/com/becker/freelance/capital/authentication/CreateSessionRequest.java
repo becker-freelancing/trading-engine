@@ -1,13 +1,9 @@
 package com.becker.freelance.capital.authentication;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Objects;
 
-@Getter
-@Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class CreateSessionRequest {
     private final String identifier;
@@ -59,4 +55,19 @@ public final class CreateSessionRequest {
                 "encryptPassword=" + encryptPassword + ']';
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public Boolean getEncryptPassword() {
+        return encryptPassword;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
