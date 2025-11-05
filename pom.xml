@@ -7,19 +7,15 @@
     <groupId>com.becker-freelance.trading</groupId>
     <artifactId>trading-engine</artifactId>
     <version>1.0-SNAPSHOT</version>
-
     <packaging>pom</packaging>
     <modules>
-        <module>data-source</module>
-        <module>strategies</module>
-        <module>broker-connector</module>
+        <module>api</module>
+        <module>application</module>
+        <module>domain</module>
+        <module>spi</module>
         <module>commons</module>
-        <module>trading-abstract-app</module>
-        <module>execution-engines</module>
-        <module>third-party-commons</module>
-        <module>management</module>
+        <module>adapter</module>
     </modules>
-
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -70,4 +66,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

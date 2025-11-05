@@ -1,4 +1,0 @@
-com.becker.freelance.management.impl.validation.MaxRiskEntrySignalValidation
-com.becker.freelance.management.impl.validation.ChanceRiskEntrySignalValidation
-com.becker.freelance.management.impl.validation.MaxDrawdownEntrySignalValidation
-com.becker.freelance.management.impl.validation.TradingFeeEntrySignalValidator
