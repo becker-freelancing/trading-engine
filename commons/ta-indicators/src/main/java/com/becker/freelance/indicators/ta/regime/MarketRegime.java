@@ -16,20 +16,6 @@ public enum MarketRegime implements TradeableMarketRegime {
         this.id = id;
     }
 
-    public static MarketRegime fromId(int id) {
-        for (MarketRegime regime : MarketRegime.values()) {
-            if (regime.getId() == id) {
-                return regime;
-            }
-        }
-        throw new IllegalArgumentException("Could not find regime with id " + id);
-    }
-
-    public int getId() {
-        return id;
-    }
-
-
     @Override
     public int id() {
         return id;

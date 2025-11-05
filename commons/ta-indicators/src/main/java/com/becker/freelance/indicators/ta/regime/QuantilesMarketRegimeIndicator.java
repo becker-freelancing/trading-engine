@@ -1,5 +1,6 @@
 package com.becker.freelance.indicators.ta.regime;
 
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.indicators.ta.cache.CachableIndicator;
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.Indicator;
@@ -8,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class QuantilesMarketRegimeIndicator extends CachableIndicator<Integer, QuantileMarketRegime> implements Indicator<QuantileMarketRegime> {
+public class QuantilesMarketRegimeIndicator extends CachableIndicator<Integer, QuantileMarketRegime> implements Indicator<TradeableMarketRegime> {
 
     private final Indicator<DurationMarketRegime> regimeIndicator;
     private final Map<MarketRegime, List<Double>> quantiles;
@@ -27,7 +28,7 @@ public class QuantilesMarketRegimeIndicator extends CachableIndicator<Integer, Q
         }
 
         DurationMarketRegime durationMarketRegime = regimeIndicator.getValue(index);
-        MarketRegime marketRegime = durationMarketRegime.marketRegime();
+        MarketRegime marketRegime = (MarketRegime) durationMarketRegime.marketRegime();
         List<Double> quantiles = this.quantiles.get(marketRegime);
         int duration = durationMarketRegime.duration();
         QuantileMarketRegime quantileMarketRegime = QuantileMarketRegime.maxQuantile(marketRegime);

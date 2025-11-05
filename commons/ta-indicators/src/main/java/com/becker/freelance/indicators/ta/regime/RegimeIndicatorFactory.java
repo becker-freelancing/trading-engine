@@ -4,6 +4,7 @@ import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.ta4j.core.BarSeries;
 import org.ta4j.core.Indicator;
 import org.ta4j.core.num.Num;
 
@@ -18,20 +19,20 @@ import java.util.stream.IntStream;
 
 public class RegimeIndicatorFactory {
 
-    public Indicator<? extends TradeableMarketRegime> marketRegimeIndicatorForStrategy(Pair pair, Indicator<Num> closePrice) {
-        Indicator<MarketRegime> marketRegimeIndicator = marketRegimeIndicatorFromConfigFile(pair, closePrice);
-        if (divideRegimesIntoQuantiles(pair)) {
-            Indicator<DurationMarketRegime> durationMarketRegimeIndicator = durationMarketRegimeIndicator(marketRegimeIndicator);
-            return quantileMarketRegimeIndicator(pair, durationMarketRegimeIndicator);
+    public Indicator<TradeableMarketRegime> marketRegimeIndicatorForStrategy(Pair pair, Indicator<Num> closePrice) {
+        if (isRegimeDetectionDisabled()){
+            return getDisabledIndicator(closePrice);
         }
-        return marketRegimeIndicator;
+        if (divideRegimesIntoQuantiles(pair)) {
+            return quantileMarketRegimeIndicator(pair, closePrice);
+        }
+        return marketRegimeIndicatorFromConfigFile(pair, closePrice);
     }
 
-    private boolean divideRegimesIntoQuantiles(Pair pair) {
-        return loadConfigForPair(pair).getBoolean("divideRegimesIntoQuantiles");
-    }
-
-    public Indicator<MarketRegime> marketRegimeIndicatorFromConfigFile(Pair pair, Indicator<Num> closePrice) {
+    public Indicator<TradeableMarketRegime> marketRegimeIndicatorFromConfigFile(Pair pair, Indicator<Num> closePrice) {
+        if (isRegimeDetectionDisabled()){
+            throw new IllegalStateException("Market Regime Detection is disabled");
+        }
         JSONObject configForPair = loadConfigForPair(pair);
         JSONObject regimeDetectorConfig = configForPair.getJSONObject("regimeDetector");
         return new MarketRegimeIndicator(closePrice,
@@ -41,11 +42,14 @@ public class RegimeIndicatorFactory {
         );
     }
 
-    public Indicator<DurationMarketRegime> durationMarketRegimeIndicator(Indicator<MarketRegime> marketRegimeIndicator) {
+    private Indicator<DurationMarketRegime> durationMarketRegimeIndicator(Indicator<TradeableMarketRegime> marketRegimeIndicator) {
+
         return new DurationMarketRegimeIndicator(marketRegimeIndicator);
     }
 
-    public Indicator<QuantileMarketRegime> quantileMarketRegimeIndicator(Pair pair, Indicator<DurationMarketRegime> durationMarketRegimeIndicator) {
+    public Indicator<TradeableMarketRegime> quantileMarketRegimeIndicator(Pair pair, Indicator<Num> closePrice) {
+        Indicator<TradeableMarketRegime> regimeIndicator = marketRegimeIndicatorFromConfigFile(pair, closePrice);
+        Indicator<DurationMarketRegime> durationMarketRegimeIndicator = durationMarketRegimeIndicator(regimeIndicator);
         JSONObject configForPair = loadConfigForPair(pair).getJSONObject("quantileRegimeDetector");
         Map<MarketRegime, List<Double>> quantiles = Arrays.stream(MarketRegime.values())
                 .map(regime -> new AbstractMap.SimpleEntry<>(regime, configForPair.getJSONArray(regime.toString())))
@@ -56,6 +60,22 @@ public class RegimeIndicatorFactory {
         return new QuantilesMarketRegimeIndicator(durationMarketRegimeIndicator, quantiles);
     }
 
+    private Indicator<TradeableMarketRegime> getDisabledIndicator(Indicator<Num> closePrice){
+        return getDisabledIndicator(closePrice.getBarSeries()) ;
+    }
+
+    private Indicator<TradeableMarketRegime> getDisabledIndicator(BarSeries barSeries) {
+        return new DisabledMarketRegimeIndicator(barSeries);
+    }
+
+    private boolean isRegimeDetectionDisabled() {
+        return loadConfigFile().getBoolean("disabled");
+    }
+
+    private boolean divideRegimesIntoQuantiles(Pair pair) {
+        return loadConfigForPair(pair).getBoolean("divideRegimesIntoQuantiles");
+    }
+
     private List<Double> toList(JSONArray array) {
         return IntStream.range(0, array.length())
                 .mapToObj(array::getDouble)
@@ -63,7 +83,7 @@ public class RegimeIndicatorFactory {
     }
 
     private JSONObject loadConfigForPair(Pair pair) {
-        JSONArray configFile = new JSONArray(loadConfigFile());
+        JSONArray configFile = loadConfigFile().getJSONArray("configuration");
         return IntStream.range(0, configFile.length())
                 .mapToObj(configFile::getJSONObject)
                 .filter(config -> pair.technicalName().equals(config.getString("pair")))
@@ -71,11 +91,11 @@ public class RegimeIndicatorFactory {
                 .orElseThrow(() -> new IllegalStateException("Could not find config for pair with name " + pair.technicalName()));
     }
 
-    private String loadConfigFile() {
+    private JSONObject loadConfigFile() {
         String fileName = "regime-config.json";
         InputStream fileInput = RegimeIndicatorFactory.class.getClassLoader().getResourceAsStream(fileName);
         try {
-            return new String(fileInput.readAllBytes());
+            return new JSONObject(new String(fileInput.readAllBytes()));
         } catch (IOException e) {
             throw new IllegalStateException("Could not load regime config file with name " + fileName);
         }

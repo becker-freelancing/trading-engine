@@ -1,5 +1,6 @@
 package com.becker.freelance.indicators.ta.regime;
 
+import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.indicators.ta.cache.CachableIndicator;
 import com.becker.freelance.indicators.ta.util.VolatilityIndicator;
 import org.ta4j.core.BarSeries;
@@ -10,7 +11,7 @@ import org.ta4j.core.num.Num;
 
 import java.util.Optional;
 
-public class MarketRegimeIndicator extends CachableIndicator<Integer, MarketRegime> implements Indicator<MarketRegime> {
+public class MarketRegimeIndicator extends CachableIndicator<Integer, MarketRegime> implements Indicator<TradeableMarketRegime> {
 
     private final Num MINUS_1 = DecimalNum.valueOf(-1);
 

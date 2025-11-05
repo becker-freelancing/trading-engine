@@ -12,6 +12,7 @@ public enum DefaultParameterNames implements ParameterName {
     STOCH_K_PERIOD("stochKPeriod"),
     MACD_SHORT_PERIOD("macdShortPeriod"),
     MACD_LONG_PERIOD("macdLongPeriod"),
+    MACD_SIGNAL_PERIOD("macdSignalPeriod"),
     SHORT_MA_PERIOD("shortMaPeriod"),
     MID_MA_PERIOD("midMaPeriod"),
     LONG_MA_PERIOD("longMaPeriod"),
