@@ -14,6 +14,8 @@ import com.becker.freelance.math.Decimal;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
+import com.becker.freelance.trading.external.services.ExternalServiceBuilder;
+import com.becker.freelance.trading.external.services.ExternalServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ta4j.core.Bar;
@@ -30,7 +32,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public abstract class BaseStrategy implements TradingStrategy {
 
@@ -40,7 +41,7 @@ public abstract class BaseStrategy implements TradingStrategy {
     private final Pair pair;
     private final Indicator<TradeableMarketRegime> regimeIndicator;
     private final Set<BiConsumer<TradingStrategy, LocalDateTime>> beforeFirstBar;
-    private final Set<Consumer<Bar>> onBarAdded;
+    private final ExternalServiceRegistry externalServiceRegistry;
     private OpenPositionRequestor openPositionRequestor;
     private ZonedDateTime lastAddedBarTime;
     private boolean initiated = false;
@@ -48,13 +49,13 @@ public abstract class BaseStrategy implements TradingStrategy {
     protected BaseStrategy(StrategyParameter strategyParameter) {
         this.barSeries = new BaseBarSeries();
         this.closePrice = new ClosePriceIndicator(barSeries);
+        this.externalServiceRegistry = new ExternalServiceRegistry();
 
         Pair pair = strategyParameter.pair();
         RegimeIndicatorFactory regimeIndicatorFactory = new RegimeIndicatorFactory();
         this.regimeIndicator = regimeIndicatorFactory.marketRegimeIndicatorForStrategy(pair, closePrice);
         this.beforeFirstBar = new HashSet<>();
         this.pair = strategyParameter.pair();
-        this.onBarAdded = new HashSet<>();
     }
 
     public Optional<EntrySignalBuilder> shouldEnter(EntryExecutionParameter entryParameter) {
@@ -88,7 +89,6 @@ public abstract class BaseStrategy implements TradingStrategy {
         }
         barSeries.addBar(currentPrice);
         lastAddedBarTime = currentPrice.getEndTime();
-        onBarAdded.forEach(consumer -> consumer.accept(currentPrice));
     }
 
     protected abstract Optional<EntrySignalBuilder> internalShouldEnter(EntryExecutionParameter entryParameter);
@@ -159,5 +159,10 @@ public abstract class BaseStrategy implements TradingStrategy {
             case BUY -> currentPrice.getClosePriceForDirection(direction).subtract(distance);
             case SELL -> currentPrice.getClosePriceForDirection(direction).add(distance);
         };
+    }
+
+    protected <S extends ExternalServiceBuilder> S requireExternalService(Class<S> externalServiceBuilderClass) {
+        return externalServiceRegistry.findServiceBuilder(externalServiceBuilderClass)
+                .orElseThrow(() -> new IllegalStateException("Could not find service builder of type " + externalServiceBuilderClass));
     }
 }
