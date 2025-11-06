@@ -14,14 +14,14 @@ import org.ta4j.core.Bar;
 
 import java.util.*;
 
-public class RegimeStrategy extends BaseStrategy {
+public class RegimeStrategy extends SingleTimeFrameBaseStrategy {
 
     private static final Logger logger = LoggerFactory.getLogger(RegimeStrategy.class);
 
-    private final Map<TradeableMarketRegime, List<BaseStrategy>> strategiesByRegime;
-    private final List<BaseStrategy> allStrategies;
+    private final Map<TradeableMarketRegime, List<SingleTimeFrameBaseStrategy>> strategiesByRegime;
+    private final List<SingleTimeFrameBaseStrategy> allStrategies;
 
-    public RegimeStrategy(Pair pair, Map<TradeableMarketRegime, List<BaseStrategy>> strategiesByRegime) {
+    public RegimeStrategy(Pair pair, Map<TradeableMarketRegime, List<SingleTimeFrameBaseStrategy>> strategiesByRegime) {
         super(new PairStrategyParameter(pair));
         this.strategiesByRegime = strategiesByRegime;
         this.allStrategies = strategiesByRegime.values().stream().flatMap(Collection::stream).toList();
@@ -34,7 +34,7 @@ public class RegimeStrategy extends BaseStrategy {
 
         logger.debug("Current market regime is {}", currentMarketRegime.name());
 
-        for (BaseStrategy baseStrategy : strategiesByRegime.getOrDefault(currentMarketRegime, new ArrayList<>())) {
+        for (SingleTimeFrameBaseStrategy baseStrategy : strategiesByRegime.getOrDefault(currentMarketRegime, new ArrayList<>())) {
             logger.debug("Asking Strategy {} for entry signal", baseStrategy);
             Optional<EntrySignalBuilder> entrySignalBuilder = baseStrategy.internalShouldEnter(entryParameter);
             if (entrySignalBuilder.isPresent()) {
@@ -49,7 +49,7 @@ public class RegimeStrategy extends BaseStrategy {
     @Override
     protected Optional<ExitSignal> internalShouldExit(ExitExecutionParameter exitParameter) {
         TradeableMarketRegime currentMarketRegime = currentMarketRegime();
-        for (BaseStrategy baseStrategy : strategiesByRegime.getOrDefault(currentMarketRegime, new ArrayList<>())) {
+        for (SingleTimeFrameBaseStrategy baseStrategy : strategiesByRegime.getOrDefault(currentMarketRegime, new ArrayList<>())) {
             Optional<ExitSignal> exitSignal = baseStrategy.internalShouldExit(exitParameter);
             if (exitSignal.isPresent()) {
                 return exitSignal;
@@ -64,7 +64,7 @@ public class RegimeStrategy extends BaseStrategy {
                 strategiesByRegime.values().stream()
                         .flatMap(List::stream)
                         .findAny()
-                        .map(BaseStrategy::unstableBars)
+                        .map(SingleTimeFrameBaseStrategy::unstableBars)
                         .orElse(0)
         );
     }

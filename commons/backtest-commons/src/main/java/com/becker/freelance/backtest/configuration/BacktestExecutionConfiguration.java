@@ -14,7 +14,9 @@ public record BacktestExecutionConfiguration(List<Pair> pairs,
                                              TimeSeries eurUsd,
                                              LocalDateTime startTime,
                                              LocalDateTime endTime,
-                                             Integer numberOfThreads, Integer parameterLimit) {
+                                             Integer numberOfThreads,
+                                             Integer parameterLimit,
+                                             BacktestMode backtestMode) {
 
     public TimeSeries getEurUsdTimeSeries() {
         return eurUsd;

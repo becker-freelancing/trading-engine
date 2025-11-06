@@ -14,6 +14,7 @@ import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 import com.becker.freelance.strategies.strategy.TradingStrategy;
 import com.becker.freelance.tradeexecution.TradeExecutor;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -52,7 +53,7 @@ public class BacktestExecutor implements Runnable {
 
             LocalDateTime minTime = backtestExecutionConfiguration.startTime();
             LocalDateTime maxTime = backtestExecutionConfiguration.endTime();
-            BacktestSynchronizer backtestSynchronizer = new BacktestSynchronizer(minTime, maxTime);
+            BacktestSynchronizer backtestSynchronizer = new BacktestSynchronizer(minTime, maxTime, findMaximumTimeShift(backtestExecutionConfiguration.pairs()), new BacktestModeTimeValidator(backtestExecutionConfiguration.backtestMode(), backtestExecutionConfiguration.pairs()));
 
             for (Pair pair : backtestExecutionConfiguration.pairs()) {
                 SubscribableDataProvider dataProviderForPair = dataProviderFactory.createSubscribableDataProvider(pair, backtestSynchronizer);
@@ -70,7 +71,7 @@ public class BacktestExecutor implements Runnable {
             }
 
             while (backtestSynchronizer.getCurrentTime().isBefore(maxTime)) {
-                backtestSynchronizer.shiftOneMinute();
+                backtestSynchronizer.shiftTime();
             }
 
             List<Trade> allClosedTrades = tradeExecutor.getAllClosedTrades();
@@ -78,6 +79,25 @@ public class BacktestExecutor implements Runnable {
         } catch (Exception e) {
             onError.accept(e);
         }
+    }
+
+    private Duration findMaximumTimeShift(List<Pair> pairs) {
+        Long ggt = pairs.stream().map(Pair::toDuration)
+                .map(Duration::getSeconds)
+                .reduce(0L, this::ggt);
+
+        return Duration.ofSeconds(ggt);
+    }
+
+    private long ggt(long n1, long n2) {
+        while (n2 != 0) {
+            if (n1 > n2) {
+                n1 = n1 - n2;
+            } else {
+                n2 = n2 - n1;
+            }
+        }
+        return n1;
     }
 
     public StrategyCreationParameter getParameter() {

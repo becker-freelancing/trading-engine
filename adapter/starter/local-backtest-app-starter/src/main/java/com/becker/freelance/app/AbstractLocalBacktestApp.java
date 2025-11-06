@@ -9,8 +9,8 @@ import com.becker.freelance.indicators.ta.regime.TradeableMarketRegimeWrapper;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.creation.RegimeStrategyCreator;
 import com.becker.freelance.strategies.creation.StrategyCreator;
-import com.becker.freelance.strategies.strategy.BaseStrategy;
 import com.becker.freelance.strategies.strategy.RegimeStrategy;
+import com.becker.freelance.strategies.strategy.SingleTimeFrameBaseStrategy;
 import com.becker.freelance.trading.abstractapp.commons.strategyconfig.StrategyFileConfigurator;
 import com.becker.freelance.trading.api.LocalBacktestPort;
 import com.becker.freelance.trading.application.LocalBacktestInteractor;
@@ -123,11 +123,11 @@ abstract class AbstractLocalBacktestApp {
 
     private StrategySupplier toRegimeStrategySupplier(List<RegimeStrategyCreator> strategyCreators) {
         return (pair, tradingCalculator) -> {
-            Map<TradeableMarketRegime, List<BaseStrategy>> strategiesByRegime = TradeableMarketRegimeWrapper.all().stream().collect(Collectors.toMap(
+            Map<TradeableMarketRegime, List<SingleTimeFrameBaseStrategy>> strategiesByRegime = TradeableMarketRegimeWrapper.all().stream().collect(Collectors.toMap(
                     regime -> regime,
                     regime -> strategyCreators.stream().filter(strategyCreator -> strategyCreator.regimes().contains(regime))
                             .sorted(Comparator.comparing(RegimeStrategyCreator::priority))
-                            .map(strategyCreator -> (BaseStrategy) strategyCreator.build(strategyCreator.strategyParameterForRegime(regime)))
+                            .map(strategyCreator -> (SingleTimeFrameBaseStrategy) strategyCreator.build(strategyCreator.strategyParameterForRegime(regime)))
                             .toList()
             ));
 

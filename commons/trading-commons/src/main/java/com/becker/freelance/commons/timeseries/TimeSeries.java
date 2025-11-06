@@ -28,5 +28,9 @@ public interface TimeSeries {
 
     boolean hasTime(LocalDateTime time);
 
+    default boolean isTimeEntryPossible(LocalDateTime time) {
+        return TimeUtil.isAligned(time, getPair().toDuration());
+    }
+
     void addEntry(TimeSeriesEntry timeSeriesEntry);
 }

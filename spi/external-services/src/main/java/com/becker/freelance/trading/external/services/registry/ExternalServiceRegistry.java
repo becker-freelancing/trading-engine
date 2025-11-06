@@ -1,4 +1,4 @@
-package com.becker.freelance.trading.external.services;
+package com.becker.freelance.trading.external.services.registry;
 
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -26,5 +26,9 @@ public class ExternalServiceRegistry {
                 .findAny()
                 .map(builder -> builder.build(params))
                 .map(serviceClass::cast);
+    }
+
+    public <S extends ExternalService> S requireService(Class<S> serviceClass, Object params) {
+        return findService(serviceClass, params).orElseThrow(() -> new IllegalStateException("Could not find service of type " + serviceClass));
     }
 }

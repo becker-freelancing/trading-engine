@@ -14,8 +14,8 @@ import com.becker.freelance.math.Decimal;
 import com.becker.freelance.opentrades.OpenPositionRequestor;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
-import com.becker.freelance.trading.external.services.ExternalServiceBuilder;
-import com.becker.freelance.trading.external.services.ExternalServiceRegistry;
+import com.becker.freelance.trading.external.services.registry.ExternalServiceBuilder;
+import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ta4j.core.Bar;
@@ -33,9 +33,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-public abstract class BaseStrategy implements TradingStrategy {
+public abstract class SingleTimeFrameBaseStrategy implements TradingStrategy {
 
-    private static final Logger logger = LoggerFactory.getLogger(BaseStrategy.class);
+    private static final Logger logger = LoggerFactory.getLogger(SingleTimeFrameBaseStrategy.class);
     protected final BarSeries barSeries;
     protected final Indicator<Num> closePrice;
     private final Pair pair;
@@ -46,7 +46,7 @@ public abstract class BaseStrategy implements TradingStrategy {
     private ZonedDateTime lastAddedBarTime;
     private boolean initiated = false;
 
-    protected BaseStrategy(StrategyParameter strategyParameter) {
+    protected SingleTimeFrameBaseStrategy(StrategyParameter strategyParameter) {
         this.barSeries = new BaseBarSeries();
         this.closePrice = new ClosePriceIndicator(barSeries);
         this.externalServiceRegistry = new ExternalServiceRegistry();

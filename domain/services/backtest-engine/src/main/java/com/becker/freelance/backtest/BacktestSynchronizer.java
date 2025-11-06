@@ -1,5 +1,6 @@
 package com.becker.freelance.backtest;
 
+import com.becker.freelance.commons.timeseries.TimeUtil;
 import com.becker.freelance.data.Synchronizeable;
 import com.becker.freelance.data.Synchronizer;
 
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public class BacktestSynchronizer implements Synchronizer {
 
@@ -15,23 +17,27 @@ public class BacktestSynchronizer implements Synchronizer {
     private final LocalDateTime maxTime;
     private final Set<Synchronizeable> prioritySubscribers;
     private final Set<Synchronizeable> subscribers;
+    private final Duration timeShift;
+    private final Predicate<LocalDateTime> validTimes;
     private LocalDateTime currentTime;
 
 
-    public BacktestSynchronizer(LocalDateTime minTime, LocalDateTime maxTime) {
+    public BacktestSynchronizer(LocalDateTime minTime, LocalDateTime maxTime, Duration timeShift, Predicate<LocalDateTime> validTimes) {
+        this.timeShift = timeShift;
+        this.validTimes = validTimes;
         this.subscribers = new LinkedHashSet<>();
         this.prioritySubscribers = new LinkedHashSet<>();
         this.minTime = minTime;
         this.maxTime = maxTime;
-        this.currentTime = LocalDateTime.of(minTime.getYear(), minTime.getMonth(), minTime.getDayOfMonth(), minTime.getHour(), minTime.getMinute());
+        this.currentTime = TimeUtil.nextAligned(minTime, timeShift);
     }
 
     public LocalDateTime getCurrentTime() {
         return currentTime;
     }
 
-    public void shiftOneMinute() {
-        shiftTime(Duration.ofMinutes(1));
+    public void shiftTime() {
+        shiftTime(timeShift);
     }
 
     public void shiftTime(Duration duration) {
@@ -39,6 +45,9 @@ public class BacktestSynchronizer implements Synchronizer {
     }
 
     public void setTime(LocalDateTime time) {
+        if (!validTimes.test(time)) {
+            return;
+        }
         currentTime = time;
         prioritySubscribers.forEach(synchronizeable -> synchronizeable.synchronize(time));
         subscribers.forEach(synchronizeable -> synchronizeable.synchronize(time));
