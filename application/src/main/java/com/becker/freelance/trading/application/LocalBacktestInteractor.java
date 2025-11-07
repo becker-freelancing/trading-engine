@@ -2,11 +2,10 @@ package com.becker.freelance.trading.application;
 
 import com.becker.freelance.backtest.BacktestEngine;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
+import com.becker.freelance.backtest.configuration.BacktestMode;
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.timeseries.TimeSeries;
-import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.creation.StrategyCreator;
 import com.becker.freelance.trading.api.LocalBacktestPort;
@@ -29,8 +28,9 @@ public class LocalBacktestInteractor implements LocalBacktestPort {
     private final List<Pair> pairs;
     private final Integer numThreads;
     private final Integer parameterLimit;
+    private final BacktestMode backtestMode;
 
-    public LocalBacktestInteractor(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, Runnable onFinished, StrategyCreator strategy, AppMode appMode, List<Pair> pairs, Integer numThreads, Integer parameterLimit) {
+    public LocalBacktestInteractor(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, Runnable onFinished, StrategyCreator strategy, AppMode appMode, List<Pair> pairs, Integer numThreads, Integer parameterLimit, BacktestMode backtestMode) {
         this.initialWalletAmount = initialWalletAmount;
         this.fromTime = fromTime;
         this.toTime = toTime;
@@ -40,14 +40,21 @@ public class LocalBacktestInteractor implements LocalBacktestPort {
         this.pairs = pairs;
         this.numThreads = numThreads;
         this.parameterLimit = parameterLimit;
+        this.backtestMode = backtestMode;
     }
 
     @Override
     public void run() {
-        TimeSeries eurusd = DataProviderFactory.find(appMode).createDataProvider(Pair.eurUsd1()).readTimeSeries(fromTime.minusDays(1), toTime);
 
         AppConfiguration appConfiguration = new AppConfiguration(appMode, LocalDateTime.now());
-        BacktestExecutionConfiguration backtestExecutionConfiguration = new BacktestExecutionConfiguration(pairs, initialWalletAmount, eurusd, fromTime, toTime, numThreads, parameterLimit);
+        BacktestExecutionConfiguration backtestExecutionConfiguration = new BacktestExecutionConfiguration(
+                pairs,
+                initialWalletAmount,
+                fromTime,
+                toTime,
+                numThreads,
+                parameterLimit,
+                backtestMode);
 
 
         runWithoutStrategyConfig(appConfiguration, backtestExecutionConfiguration, strategy, onFinished);

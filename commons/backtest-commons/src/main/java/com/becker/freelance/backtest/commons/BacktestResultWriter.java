@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class BacktestResultWriter {
 
-    private static final String HEADER = "pairs;app_mode;from_time;to_time;min;max;cumulative;initial_wallet_amount;parameter;trades\n";
+    private static final String HEADER = "pairs;app_mode;backtest_mode;from_time;to_time;min;max;cumulative;initial_wallet_amount;parameter;trades\n";
     private static final DateTimeFormatter FILE_NAME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_kk-mm-ss");
 
     private final Path writePath;
@@ -60,8 +60,9 @@ public class BacktestResultWriter {
     private static String formatBaseString(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, ObjectMapper objectMapper) {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
         try {
-            return String.format("%s;%s;%s;%s;",
+            return String.format("%s;%s;%s;%s;%s;",
                     objectMapper.writeValueAsString(backtestExecutionConfiguration.pairs()), appConfiguration.appMode().getDescription(),
+                    backtestExecutionConfiguration.backtestMode(),
                     timeFormatter.format(backtestExecutionConfiguration.startTime()),
                     timeFormatter.format(backtestExecutionConfiguration.endTime())) + "%s;%s;%s;" + backtestExecutionConfiguration.initialWalletAmount() + ";%s;%s\n";
         } catch (JsonProcessingException e) {

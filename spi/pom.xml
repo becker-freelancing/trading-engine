@@ -13,11 +13,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>broker-connector</module>
-        <module>data-source</module>
         <module>strategies</module>
-        <module>management</module>
         <module>external-services</module>
+        <module>external-services-backtest</module>
+        <module>external-services-remote</module>
     </modules>
 
 </project>

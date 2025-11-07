@@ -1,6 +1,5 @@
 package com.becker.freelance.engine;
 
-import com.becker.freelance.broker.BrokerRequestor;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.calculation.PriceRequestor;
 import com.becker.freelance.commons.calculation.TradingFeeCalculator;
@@ -9,18 +8,25 @@ import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
-import com.becker.freelance.management.api.ManagementLoader;
-import com.becker.freelance.management.api.adaption.EntrySignalAdaptor;
-import com.becker.freelance.management.api.environment.ManagementEnvironmentProvider;
-import com.becker.freelance.management.api.environment.TimeChangeListener;
-import com.becker.freelance.management.api.validation.CompositeStrategy;
-import com.becker.freelance.management.api.validation.EntrySignalValidator;
 import com.becker.freelance.strategies.executionparameter.DefaultEntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.DefaultExitExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
 import com.becker.freelance.strategies.strategy.TradingStrategy;
-import com.becker.freelance.tradeexecution.TradeExecutor;
+import com.becker.freelance.trading.external.services.broker.AccountBalanceRequestor;
+import com.becker.freelance.trading.external.services.broker.BrokerSpecificsRequestor;
+import com.becker.freelance.trading.external.services.broker.BrokerSpecificsRequestorBuilder;
+import com.becker.freelance.trading.external.services.management.adaption.EntrySignalAdaptor;
+import com.becker.freelance.trading.external.services.management.adaption.EntrySignalAdaptorBuilder;
+import com.becker.freelance.trading.external.services.management.environment.ManagementEnvironmentProvider;
+import com.becker.freelance.trading.external.services.management.environment.ManagementEnvironmentProviderBuilder;
+import com.becker.freelance.trading.external.services.management.environment.ManagementEnvironmentProviderBuilderParams;
+import com.becker.freelance.trading.external.services.management.environment.TimeChangeListener;
+import com.becker.freelance.trading.external.services.management.validation.CompositeStrategy;
+import com.becker.freelance.trading.external.services.management.validation.EntrySignalValidator;
+import com.becker.freelance.trading.external.services.management.validation.EntrySignalValidatorBuilder;
+import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
+import com.becker.freelance.trading.external.services.tradeexecution.TradeExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,21 +51,26 @@ public class StrategyEngine {
                           EurUsdRequestor eurUsdRequestor,
                           PriceRequestor priceRequestor,
                           Consumer<TimeChangeListener> timeChangeListenerConsumer,
-                          BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator) {
+                          BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator,
+                          AccountBalanceRequestor accountBalanceRequestor) {
         this.tradeExecutor = tradeExecutor;
-        ManagementLoader managementLoader = new ManagementLoader();
-        this.entrySignalAdaptor = managementLoader.findEntrySignalAdaptor();
-        this.entrySignalValidator = managementLoader.findEntrySignalValidator(CompositeStrategy.ALL_MATCH);
-        BrokerRequestor brokerRequestor = BrokerRequestor.find(tradeExecutor);
-        this.environmentProvider = managementLoader.findEnvironmentProvider(
-                brokerRequestor, brokerRequestor,
-                tradeExecutor, tradeExecutor,
-                eurUsdRequestor,
-                priceRequestor,
-                TradingFeeCalculator.fromConfigFile()
-        );
+
+        ExternalServiceRegistry externalServiceRegistry = ExternalServiceRegistry.newInstance();
+        this.entrySignalAdaptor = externalServiceRegistry.requireServiceBuilder(EntrySignalAdaptorBuilder.class).build();
+        this.entrySignalValidator = externalServiceRegistry.requireServiceBuilder(EntrySignalValidatorBuilder.class).build(CompositeStrategy.ALL_MATCH);
+        BrokerSpecificsRequestor brokerSpecificsRequestor = externalServiceRegistry.requireServiceBuilder(BrokerSpecificsRequestorBuilder.class).build();
+        this.environmentProvider = externalServiceRegistry.requireServiceBuilder(ManagementEnvironmentProviderBuilder.class)
+                .build(new ManagementEnvironmentProviderBuilderParams(
+                        accountBalanceRequestor,
+                        brokerSpecificsRequestor,
+                        tradeExecutor,
+                        tradeExecutor,
+                        eurUsdRequestor,
+                        priceRequestor,
+                        TradingFeeCalculator.fromConfigFile()
+                ));
         timeChangeListenerConsumer.accept(this.environmentProvider);
-        this.strategy = strategySupplier.get(pair, brokerRequestor.getTradingCalculator(eurUsdRequestor));
+        this.strategy = strategySupplier.get(pair, brokerSpecificsRequestor.getTradingCalculator(eurUsdRequestor));
         this.strategy.setOpenPositionRequestor(tradeExecutor);
         this.strategy.beforeFirstBar(strategyInitiator);
     }

@@ -2,20 +2,29 @@ package com.becker.freelance.backtest;
 
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.commons.app.AppConfiguration;
+import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.trade.Trade;
-import com.becker.freelance.data.DataProviderFactory;
-import com.becker.freelance.data.SubscribableDataProvider;
 import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.engine.StrategySupplier;
 import com.becker.freelance.execution.callback.backtest.BacktestFinishedCallback;
-import com.becker.freelance.management.api.environment.TimeChangeListener;
 import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 import com.becker.freelance.strategies.strategy.TradingStrategy;
-import com.becker.freelance.tradeexecution.TradeExecutor;
+import com.becker.freelance.trading.external.services.backtest.candles.BacktestCandleDataSource;
+import com.becker.freelance.trading.external.services.backtest.candles.BacktestCandleDataSourceBuilder;
+import com.becker.freelance.trading.external.services.backtest.candles.BacktestCandleSourceBuilderParams;
+import com.becker.freelance.trading.external.services.backtest.tradeexecution.BacktestTradeExecutor;
+import com.becker.freelance.trading.external.services.backtest.tradeexecution.BacktestTradeExecutorBuildParams;
+import com.becker.freelance.trading.external.services.backtest.tradeexecution.BacktestTradeExecutorBuilder;
+import com.becker.freelance.trading.external.services.broker.AccountBalanceRequestor;
+import com.becker.freelance.trading.external.services.broker.AccountBalanceRequestorBuilder;
+import com.becker.freelance.trading.external.services.management.environment.TimeChangeListener;
+import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -47,25 +56,34 @@ public class BacktestExecutor implements Runnable {
     @Override
     public void run() {
         try {
-            TradeExecutor tradeExecutor = TradeExecutor.find(appConfiguration, backtestExecutionConfiguration);
-
-            DataProviderFactory dataProviderFactory = DataProviderFactory.find(appConfiguration.appMode());
+            ExternalServiceRegistry externalServiceRegistry = ExternalServiceRegistry.newInstance();
+            EurUsdRequestor euroUsdRequestor = externalServiceRegistry.requireServiceBuilder(BacktestCandleDataSourceBuilder.class)
+                    .createEuroUsdRequestor();
+            BacktestTradeExecutorBuilder tradeExecutorBuilder = externalServiceRegistry.requireSupportsServiceBuilder(BacktestTradeExecutorBuilder.class, appConfiguration.appMode());
+            BacktestCandleDataSourceBuilder dataProviderFactory = externalServiceRegistry.requireSupportsServiceBuilder(BacktestCandleDataSourceBuilder.class, appConfiguration.appMode());
+            AccountBalanceRequestor accountBalanceRequestor = externalServiceRegistry.requireServiceBuilder(AccountBalanceRequestorBuilder.class).build();
 
             LocalDateTime minTime = backtestExecutionConfiguration.startTime();
             LocalDateTime maxTime = backtestExecutionConfiguration.endTime();
             BacktestSynchronizer backtestSynchronizer = new BacktestSynchronizer(minTime, maxTime, findMaximumTimeShift(backtestExecutionConfiguration.pairs()), new BacktestModeTimeValidator(backtestExecutionConfiguration.backtestMode(), backtestExecutionConfiguration.pairs()));
 
+            List<BacktestTradeExecutor> tradeExecutors = new ArrayList<>();
+
             for (Pair pair : backtestExecutionConfiguration.pairs()) {
-                SubscribableDataProvider dataProviderForPair = dataProviderFactory.createSubscribableDataProvider(pair, backtestSynchronizer);
+                BacktestTradeExecutor tradeExecutor = tradeExecutorBuilder.build(new BacktestTradeExecutorBuildParams(backtestExecutionConfiguration, pair, euroUsdRequestor));
+                tradeExecutors.add(tradeExecutor);
+
+                BacktestCandleDataSource dataProviderForPair = dataProviderFactory.build(new BacktestCandleSourceBuilderParams(pair, backtestSynchronizer));
                 Consumer<TimeChangeListener> timeChangeListenerConsumer = listener -> backtestSynchronizer.addPrioritySubscriber(new TimeChangeListenerSynchronizeable(listener));
                 BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = getStrategyInitiator(pair, dataProviderForPair);
                 StrategyEngine strategyEngine = new StrategyEngine(pair,
                         strategySupplier,
                         tradeExecutor,
-                        backtestExecutionConfiguration.getEurUsdRequestor(),
+                        dataProviderFactory.createEuroUsdRequestor(),
                         dataProviderForPair,
                         timeChangeListenerConsumer,
-                        strategyInitiator);
+                        strategyInitiator,
+                        accountBalanceRequestor);
                 StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine);
                 dataProviderForPair.addSubscriber(strategyDataSubscriber);
             }
@@ -74,7 +92,11 @@ public class BacktestExecutor implements Runnable {
                 backtestSynchronizer.shiftTime();
             }
 
-            List<Trade> allClosedTrades = tradeExecutor.getAllClosedTrades();
+            List<Trade> allClosedTrades = tradeExecutors.stream()
+                    .map(BacktestTradeExecutor::getAllClosedTrades)
+                    .flatMap(List::stream)
+                    .sorted(Comparator.comparing(Trade::getCloseTime))
+                    .toList();
             onBacktestFinished.accept(allClosedTrades, parameters);
         } catch (Exception e) {
             onError.accept(e);
@@ -104,7 +126,7 @@ public class BacktestExecutor implements Runnable {
         return parameters;
     }
 
-    private BiConsumer<TradingStrategy, LocalDateTime> getStrategyInitiator(Pair pair, SubscribableDataProvider subscribableDataProvider) {
+    private BiConsumer<TradingStrategy, LocalDateTime> getStrategyInitiator(Pair pair, BacktestCandleDataSource subscribableDataProvider) {
         return (x, y) -> {
         };
 //        BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = (tradingStrategy, currentTime) -> {

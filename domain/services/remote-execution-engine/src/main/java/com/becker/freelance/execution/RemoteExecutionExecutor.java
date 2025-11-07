@@ -1,17 +1,22 @@
 package com.becker.freelance.execution;
 
-import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.CompleteTimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
-import com.becker.freelance.data.DataProviderFactory;
-import com.becker.freelance.data.SubscribableDataProvider;
 import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.engine.StrategySupplier;
-import com.becker.freelance.management.api.environment.TimeChangeListener;
 import com.becker.freelance.strategies.strategy.TradingStrategy;
-import com.becker.freelance.tradeexecution.TradeExecutor;
+import com.becker.freelance.trading.external.services.broker.AccountBalanceRequestor;
+import com.becker.freelance.trading.external.services.broker.AccountBalanceRequestorBuilder;
+import com.becker.freelance.trading.external.services.management.environment.TimeChangeListener;
+import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
+import com.becker.freelance.trading.external.services.remote.candles.RemoteCandleDataSource;
+import com.becker.freelance.trading.external.services.remote.candles.RemoteCandleDataSourceBuilder;
+import com.becker.freelance.trading.external.services.remote.candles.RemoteCandleSourceBuilderParams;
+import com.becker.freelance.trading.external.services.remote.tradeexecution.RemoteTradeExecutorBuildParams;
+import com.becker.freelance.trading.external.services.remote.tradeexecution.RemoteTradeExecutorBuilder;
+import com.becker.freelance.trading.external.services.tradeexecution.TradeExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,45 +32,52 @@ public class RemoteExecutionExecutor implements Runnable {
 
     private final StrategySupplier strategySupplier;
     private final Pair pair;
-    private final AppConfiguration appConfiguration;
 
-    public RemoteExecutionExecutor(StrategyWithPair baseStrategy, AppConfiguration appConfiguration) {
+    public RemoteExecutionExecutor(StrategyWithPair baseStrategy) {
         this.strategySupplier = baseStrategy.strategySupplier();
         this.pair = baseStrategy.pair();
-        this.appConfiguration = appConfiguration;
     }
 
     @Override
     public void run() {
         try {
 
-            DataProviderFactory dataProviderFactory = DataProviderFactory.find(appConfiguration.appMode());
+            ExternalServiceRegistry externalServiceRegistry = ExternalServiceRegistry.newInstance();
+            RemoteCandleDataSourceBuilder dataSourceBuilder = externalServiceRegistry.requireServiceBuilder(RemoteCandleDataSourceBuilder.class);
 
-            TradeExecutor tradeExecutor = TradeExecutor.find(appConfiguration, pair, dataProviderFactory.createEurUsdRequestor());
+            RemoteTradeExecutorBuilder tradeExecutorBuilder = externalServiceRegistry.requireServiceBuilder(RemoteTradeExecutorBuilder.class);
+            TradeExecutor tradeExecutor = tradeExecutorBuilder.build(new RemoteTradeExecutorBuildParams(
+                    pair,
+                    dataSourceBuilder.createEuroUsdRequestor()
+            ));
 
-            SubscribableDataProvider subscribableDataProvider = dataProviderFactory.createSubscribableDataProvider(pair);
+            AccountBalanceRequestor accountBalanceRequestor = externalServiceRegistry.requireServiceBuilder(AccountBalanceRequestorBuilder.class).build();
 
-            BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = getStrategyInitiator(subscribableDataProvider);
+            RemoteCandleDataSource candleDataSource = dataSourceBuilder.build(new RemoteCandleSourceBuilderParams(pair));
+
+            BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = getStrategyInitiator(candleDataSource);
 
 
             Set<TimeChangeListener> timeChangeListeners = new HashSet<>();
 
-            StrategyEngine strategyEngine = new StrategyEngine(pair,
+            StrategyEngine strategyEngine = new StrategyEngine(
+                    pair,
                     strategySupplier,
                     tradeExecutor,
-                    dataProviderFactory.createEurUsdRequestor(),
-                    subscribableDataProvider,
+                    dataSourceBuilder.createEuroUsdRequestor(),
+                    candleDataSource,
                     timeChangeListeners::add,
-                    strategyInitiator);
+                    strategyInitiator,
+                    accountBalanceRequestor);
 
             StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine, timeChangeListeners);
-            subscribableDataProvider.addSubscriber(strategyDataSubscriber);
+            candleDataSource.addSubscriber(strategyDataSubscriber);
         } catch (Exception e) {
             logger.error("Error while executing Strategy", e);
         }
     }
 
-    private BiConsumer<TradingStrategy, LocalDateTime> getStrategyInitiator(SubscribableDataProvider subscribableDataProvider) {
+    private BiConsumer<TradingStrategy, LocalDateTime> getStrategyInitiator(RemoteCandleDataSource subscribableDataProvider) {
         BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = (tradingStrategy, currentTime) -> {
             int requiredBarCount = tradingStrategy.unstableBars();
             Pair strategyPair = tradingStrategy.getPair();

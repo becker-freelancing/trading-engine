@@ -18,6 +18,7 @@ public final class BacktestResultContent {
     private final ObjectMapper objectMapper;
     private final String pairs;
     private final String appMode;
+    private final String backtestMode;
     private final LocalDateTime fromTime;
     private final LocalDateTime toTime;
     private final Decimal min;
@@ -29,12 +30,13 @@ public final class BacktestResultContent {
     private List<Trade> trades = null;
     private Map<TradeableMarketRegime, TradeStatistic> tradesByRegime;
 
-    public BacktestResultContent(ObjectMapper objectMapper, String pairs, String appMode, LocalDateTime fromTime,
+    public BacktestResultContent(ObjectMapper objectMapper, String pairs, String appMode, String backtestMode, LocalDateTime fromTime,
                                  LocalDateTime toTime, Decimal min, Decimal max, Decimal cumulative,
                                  Decimal initialWalletAmount, String parametersJson, String tradesJson) {
         this.objectMapper = objectMapper;
         this.pairs = pairs;
         this.appMode = appMode;
+        this.backtestMode = backtestMode;
         this.fromTime = fromTime;
         this.toTime = toTime;
         this.min = min;
@@ -45,12 +47,13 @@ public final class BacktestResultContent {
         this.tradesJson = tradesJson;
     }
 
-    public BacktestResultContent(ObjectMapper objectMapper, String pairs, String appMode, LocalDateTime fromTime,
+    public BacktestResultContent(ObjectMapper objectMapper, String pairs, String appMode, String backtestMode, LocalDateTime fromTime,
                                  LocalDateTime toTime, Decimal min, Decimal max, Decimal cumulative,
                                  Decimal initialWalletAmount, String parametersJson, List<Trade> trades) {
         this.objectMapper = objectMapper;
         this.pairs = pairs;
         this.appMode = appMode;
+        this.backtestMode = backtestMode;
         this.fromTime = fromTime;
         this.toTime = toTime;
         this.min = min;
@@ -127,6 +130,10 @@ public final class BacktestResultContent {
 
     public String pairs() {
         return pairs;
+    }
+
+    public String getBacktestMode() {
+        return backtestMode;
     }
 
     public String appMode() {

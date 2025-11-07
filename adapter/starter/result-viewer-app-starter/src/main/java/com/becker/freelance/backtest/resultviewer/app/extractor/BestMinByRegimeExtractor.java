@@ -38,6 +38,7 @@ public class BestMinByRegimeExtractor implements RegimeResultExtractor {
                         resultContent.objectMapper(),
                         resultContent.pairs(),
                         resultContent.appMode(),
+                        resultContent.getBacktestMode(),
                         resultContent.fromTime(),
                         resultContent.toTime(),
                         tradeStatistic.getMin(),

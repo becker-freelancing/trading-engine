@@ -1,7 +1,6 @@
 package com.becker.freelance.backtest.configuration;
 
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.math.Decimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,21 +18,15 @@ class BacktestExecutionConfigurationTest {
     LocalDateTime startTime;
     LocalDateTime endTime;
     List<Pair> pair;
-    TimeSeries timeSeries;
 
     @BeforeEach
     void setUp() {
         startTime = LocalDateTime.of(2020, 1, 1, 0, 0);
         endTime = LocalDateTime.of(2021, 1, 1, 0, 0);
         pair = List.of(Mockito.mock(Pair.class));
-        timeSeries = Mockito.mock(TimeSeries.class);
-        configuration = new BacktestExecutionConfiguration(pair, Decimal.DOUBLE_MAX, timeSeries, startTime, endTime, 10, Integer.MAX_VALUE);
+        configuration = new BacktestExecutionConfiguration(pair, Decimal.DOUBLE_MAX, startTime, endTime, 10, Integer.MAX_VALUE, BacktestMode.TEST);
     }
 
-    @Test
-    void getEurUsdTimeSeries() {
-        assertEquals(timeSeries, configuration.getEurUsdTimeSeries());
-    }
 
     @Test
     void pair() {
@@ -43,11 +36,6 @@ class BacktestExecutionConfigurationTest {
     @Test
     void initialWalletAmount() {
         assertEquals(Decimal.DOUBLE_MAX, configuration.initialWalletAmount());
-    }
-
-    @Test
-    void eurUsd() {
-        assertEquals(timeSeries, configuration.eurUsd());
     }
 
     @Test

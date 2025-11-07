@@ -18,7 +18,7 @@ public class RemoteExecutionEngine implements Runnable {
     @Override
     public void run() {
         for (StrategyWithPair baseStrategy : baseStrategies) {
-            RemoteExecutionExecutor remoteExecutionExecutor = new RemoteExecutionExecutor(baseStrategy, appConfiguration);
+            RemoteExecutionExecutor remoteExecutionExecutor = new RemoteExecutionExecutor(baseStrategy);
             Thread executionThread = new Thread(remoteExecutionExecutor);
             executionThread.start();
         }

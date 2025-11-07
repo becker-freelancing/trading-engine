@@ -1,7 +1,7 @@
 package com.becker.freelance.backtest;
 
-import com.becker.freelance.data.Synchronizeable;
-import com.becker.freelance.management.api.environment.TimeChangeListener;
+import com.becker.freelance.trading.external.services.candles.Synchronizeable;
+import com.becker.freelance.trading.external.services.management.environment.TimeChangeListener;
 
 import java.time.LocalDateTime;
 

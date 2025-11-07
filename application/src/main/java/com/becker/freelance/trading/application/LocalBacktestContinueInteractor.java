@@ -3,11 +3,10 @@ package com.becker.freelance.trading.application;
 import com.becker.freelance.backtest.BacktestEngine;
 import com.becker.freelance.backtest.ExcludeExistingParametersFilter;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
+import com.becker.freelance.backtest.configuration.BacktestMode;
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.timeseries.TimeSeries;
-import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 import com.becker.freelance.strategies.creation.StrategyCreator;
@@ -33,8 +32,9 @@ public class LocalBacktestContinueInteractor implements LocalBacktestPort {
     private final Integer numThreads;
     private final Set<StrategyCreationParameter> parameters;
     private final Path resultWriteFile;
+    private final BacktestMode backtestMode;
 
-    public LocalBacktestContinueInteractor(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, StrategyCreator strategy, AppMode appMode, List<Pair> pairs, Integer numThreads, Set<StrategyCreationParameter> parameters, Path resultWriteFile) {
+    public LocalBacktestContinueInteractor(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, StrategyCreator strategy, AppMode appMode, List<Pair> pairs, Integer numThreads, Set<StrategyCreationParameter> parameters, Path resultWriteFile, BacktestMode backtestMode) {
         this.initialWalletAmount = initialWalletAmount;
         this.fromTime = fromTime;
         this.toTime = toTime;
@@ -44,14 +44,21 @@ public class LocalBacktestContinueInteractor implements LocalBacktestPort {
         this.numThreads = numThreads;
         this.parameters = parameters;
         this.resultWriteFile = resultWriteFile;
+        this.backtestMode = backtestMode;
     }
 
     @Override
     public void run() {
-        TimeSeries eurusd = DataProviderFactory.find(appMode).createDataProvider(Pair.eurUsd1()).readTimeSeries(fromTime.minusDays(1), toTime);
 
         AppConfiguration appConfiguration = new AppConfiguration(appMode, LocalDateTime.now());
-        BacktestExecutionConfiguration backtestExecutionConfiguration = new BacktestExecutionConfiguration(pairs, initialWalletAmount, eurusd, fromTime, toTime, numThreads, Integer.MAX_VALUE);
+        BacktestExecutionConfiguration backtestExecutionConfiguration = new BacktestExecutionConfiguration(
+                pairs,
+                initialWalletAmount,
+                fromTime,
+                toTime,
+                numThreads,
+                Integer.MAX_VALUE,
+                backtestMode);
 
 
         BacktestEngine backtestEngine = new BacktestEngine(appConfiguration, backtestExecutionConfiguration, strategy,

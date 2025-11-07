@@ -1,8 +1,8 @@
 package com.becker.freelance.backtest;
 
 import com.becker.freelance.commons.timeseries.TimeSeries;
-import com.becker.freelance.data.DataSubscriber;
 import com.becker.freelance.engine.StrategyEngine;
+import com.becker.freelance.trading.external.services.candles.DataSubscriber;
 
 import java.time.LocalDateTime;
 

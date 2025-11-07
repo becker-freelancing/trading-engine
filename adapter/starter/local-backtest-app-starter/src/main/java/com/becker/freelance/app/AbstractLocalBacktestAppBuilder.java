@@ -1,5 +1,6 @@
 package com.becker.freelance.app;
 
+import com.becker.freelance.backtest.configuration.BacktestMode;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.trading.api.LocalBacktestPort;
 
@@ -21,6 +22,8 @@ public class AbstractLocalBacktestAppBuilder {
     private String appMode;
     private List<String> pair;
     private int parameterLimit;
+    private String backtestMode;
+
     AbstractLocalBacktestAppBuilder() {
     }
 
@@ -45,6 +48,11 @@ public class AbstractLocalBacktestAppBuilder {
 
     public AbstractLocalBacktestAppBuilder withPair(String... pairs) {
         this.pair = List.of(pairs);
+        return this;
+    }
+
+    public AbstractLocalBacktestAppBuilder withBacktestMode(String backtestMode) {
+        this.backtestMode = backtestMode;
         return this;
     }
 
@@ -98,11 +106,13 @@ public class AbstractLocalBacktestAppBuilder {
             throw new IllegalStateException("To Time can not be null");
         }
 
+        BacktestMode mode = BacktestMode.valueOf(backtestMode);
+
         if (strategyName != null) {
-            return new ConfiguredAbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig, strategyName, appMode, pair, numberOfThreads, parameterLimit).build();
+            return new ConfiguredAbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig, strategyName, appMode, pair, numberOfThreads, parameterLimit, mode).build();
         }
 
-        return new CliAbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig).build();
+        return new CliAbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig, mode).build();
     }
 
     public AbstractLocalBacktestAppBuilder withParameterPermutationLimit(int limit) {

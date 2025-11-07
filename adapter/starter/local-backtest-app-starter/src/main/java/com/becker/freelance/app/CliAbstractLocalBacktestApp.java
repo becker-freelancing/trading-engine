@@ -1,6 +1,7 @@
 package com.becker.freelance.app;
 
 import com.becker.freelance.app.BacktestAppInitiatingUtil.LastExecutionProperties;
+import com.becker.freelance.backtest.configuration.BacktestMode;
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.math.Decimal;
@@ -19,8 +20,8 @@ class CliAbstractLocalBacktestApp extends AbstractLocalBacktestApp {
     private List<Pair> pairs;
     private Integer numThreads;
 
-    CliAbstractLocalBacktestApp(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, Runnable onFinished, boolean strategyConfig) {
-        super(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig);
+    CliAbstractLocalBacktestApp(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, Runnable onFinished, boolean strategyConfig, BacktestMode backtestMode) {
+        super(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig, backtestMode);
         this.appInitiatingUtil = new BacktestAppInitiatingUtil();
     }
 

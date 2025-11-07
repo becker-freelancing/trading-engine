@@ -3,11 +3,10 @@ package com.becker.freelance.app;
 import com.becker.freelance.backtest.commons.BacktestResultContent;
 import com.becker.freelance.backtest.commons.BacktestResultReader;
 import com.becker.freelance.backtest.commons.BacktestResultZipper;
+import com.becker.freelance.backtest.configuration.BacktestMode;
 import com.becker.freelance.backtest.util.PathUtil;
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.timeseries.TimeSeries;
-import com.becker.freelance.data.DataProviderFactory;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.creation.DefaultStrategyCreationParameter;
 import com.becker.freelance.strategies.creation.StrategyCreationParameter;
@@ -70,7 +69,8 @@ class AbstractLocalBacktestContinueApp {
                 pairs,
                 numThreads,
                 parameters,
-                resultWriteFile
+                resultWriteFile,
+                BacktestMode.valueOf(backtestResultContents.stream().findAny().orElseThrow().getBacktestMode())
         );
     }
 
@@ -94,10 +94,5 @@ class AbstractLocalBacktestContinueApp {
         initialWalletAmount = result.initialWalletAmount();
         pairs = result.parsePairs();
         appMode = AppMode.fromDescription(result.appMode());
-    }
-
-    private TimeSeries readEurUsdTimeSeries(AppMode appMode) {
-
-        return DataProviderFactory.find(appMode).createDataProvider(Pair.eurUsd1()).readTimeSeries(fromTime.minusDays(1), toTime);
     }
 }

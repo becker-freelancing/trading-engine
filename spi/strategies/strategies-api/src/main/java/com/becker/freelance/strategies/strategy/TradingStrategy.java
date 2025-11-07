@@ -5,9 +5,9 @@ import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
-import com.becker.freelance.opentrades.OpenPositionRequestor;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
+import com.becker.freelance.trading.external.services.broker.OpenPositionRequestor;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

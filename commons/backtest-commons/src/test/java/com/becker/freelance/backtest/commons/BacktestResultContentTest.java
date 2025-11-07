@@ -31,7 +31,7 @@ class BacktestResultContentTest {
         objectMapper.registerModule(module);
 
         resultContent = new BacktestResultContent(
-                objectMapper, "EUR/USD M1", "TEST_DEMO", LocalDateTime.MIN, LocalDateTime.MAX, Decimal.ZERO, Decimal.TEN, Decimal.TWO, Decimal.DOUBLE_MAX,
+                objectMapper, "EUR/USD M1", "TEST_DEMO", "TRAIN", LocalDateTime.MIN, LocalDateTime.MAX, Decimal.ZERO, Decimal.TEN, Decimal.TWO, Decimal.DOUBLE_MAX,
                 """
                         {"size": 0.2, "tp": 20}
                         """,

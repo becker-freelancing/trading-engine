@@ -143,15 +143,15 @@ public class BacktestResultReader {
     private BacktestResultContent toBacktestResultContent(String line) {
         String[] split = line.split(";");
         return new BacktestResultContent(objectMapper,
-                split[0], split[1], LocalDateTime.parse(split[2]), LocalDateTime.parse(split[3]),
-                new Decimal(split[4]), new Decimal(split[5]), new Decimal(split[6]), new Decimal(split[7]),
+                split[0], split[1], split[2], LocalDateTime.parse(split[3]), LocalDateTime.parse(split[4]),
+                new Decimal(split[5]), new Decimal(split[6]), new Decimal(split[7]), new Decimal(split[8]),
                 parseParameters(split), parseTrades(split)
         );
     }
 
     public String parseParameters(String[] values) {
         List<String> params = new ArrayList<>();
-        for (int i = 8; i < values.length; i++) {
+        for (int i = 9; i < values.length; i++) {
             if (values[i].startsWith("[{")) {
                 break;
             }
@@ -164,7 +164,7 @@ public class BacktestResultReader {
     public String parseTrades(String[] values) {
         List<String> params = new ArrayList<>();
         boolean add = false;
-        for (int i = 7; i < values.length; i++) {
+        for (int i = 8; i < values.length; i++) {
             if (values[i].equals("[]")) {
                 return "[]";
             }

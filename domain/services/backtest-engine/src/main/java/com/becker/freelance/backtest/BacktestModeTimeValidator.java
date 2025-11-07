@@ -2,8 +2,7 @@ package com.becker.freelance.backtest;
 
 import com.becker.freelance.backtest.configuration.BacktestMode;
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.trading.external.services.backtest.BacktestDataTotalTimeProvider;
-import com.becker.freelance.trading.external.services.registry.EmptyParams;
+import com.becker.freelance.trading.external.services.backtest.candles.BacktestDataTotalTimeProvider;
 import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
 import org.json.JSONObject;
 
@@ -40,7 +39,7 @@ class BacktestModeTimeValidator implements Predicate<LocalDateTime> {
         this.executionDuration = getExecutionDuration(backtestMode, trainDuration, valDuration, testDuration);
         this.skipDuration = getSkipDuration(backtestMode, trainDuration, valDuration, testDuration);
 
-        BacktestDataTotalTimeProvider backtestDataTotalTimeProvider = new ExternalServiceRegistry().requireService(BacktestDataTotalTimeProvider.class, new EmptyParams());
+        BacktestDataTotalTimeProvider backtestDataTotalTimeProvider = new ExternalServiceRegistry().requireService(BacktestDataTotalTimeProvider.class);
 
         LocalDateTime startTime = pairs.stream()
                 .map(backtestDataTotalTimeProvider::getAbsoluteMinTime)

@@ -1,8 +1,8 @@
 package com.becker.freelance.backtest;
 
 import com.becker.freelance.commons.timeseries.TimeUtil;
-import com.becker.freelance.data.Synchronizeable;
-import com.becker.freelance.data.Synchronizer;
+import com.becker.freelance.trading.external.services.backtest.candles.Synchronizer;
+import com.becker.freelance.trading.external.services.candles.Synchronizeable;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
