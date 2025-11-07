@@ -9,7 +9,7 @@ import com.becker.freelance.trading.external.services.candles.DataSubscriber;
 
 import java.time.LocalDateTime;
 
-class BacktestEurUsdRequestor implements EurUsdRequestor, DataSubscriber {
+public class BacktestEurUsdRequestor implements EurUsdRequestor, DataSubscriber {
 
     private TimeSeries eurUsd;
 

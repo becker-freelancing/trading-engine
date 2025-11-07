@@ -57,8 +57,7 @@ public class BacktestExecutor implements Runnable {
     public void run() {
         try {
             ExternalServiceRegistry externalServiceRegistry = ExternalServiceRegistry.newInstance();
-            EurUsdRequestor euroUsdRequestor = externalServiceRegistry.requireServiceBuilder(BacktestCandleDataSourceBuilder.class)
-                    .createEuroUsdRequestor();
+
             BacktestTradeExecutorBuilder tradeExecutorBuilder = externalServiceRegistry.requireSupportsServiceBuilder(BacktestTradeExecutorBuilder.class, appConfiguration.appMode());
             BacktestCandleDataSourceBuilder dataProviderFactory = externalServiceRegistry.requireSupportsServiceBuilder(BacktestCandleDataSourceBuilder.class, appConfiguration.appMode());
             AccountBalanceRequestor accountBalanceRequestor = externalServiceRegistry.requireServiceBuilder(AccountBalanceRequestorBuilder.class).build();
@@ -66,6 +65,9 @@ public class BacktestExecutor implements Runnable {
             LocalDateTime minTime = backtestExecutionConfiguration.startTime();
             LocalDateTime maxTime = backtestExecutionConfiguration.endTime();
             BacktestSynchronizer backtestSynchronizer = new BacktestSynchronizer(minTime, maxTime, findMaximumTimeShift(backtestExecutionConfiguration.pairs()), new BacktestModeTimeValidator(backtestExecutionConfiguration.backtestMode(), backtestExecutionConfiguration.pairs()));
+
+            EurUsdRequestor euroUsdRequestor = externalServiceRegistry.requireServiceBuilder(BacktestCandleDataSourceBuilder.class)
+                    .createEuroUsdRequestor(backtestSynchronizer);
 
             List<BacktestTradeExecutor> tradeExecutors = new ArrayList<>();
 
@@ -79,7 +81,7 @@ public class BacktestExecutor implements Runnable {
                 StrategyEngine strategyEngine = new StrategyEngine(pair,
                         strategySupplier,
                         tradeExecutor,
-                        dataProviderFactory.createEuroUsdRequestor(),
+                        euroUsdRequestor,
                         dataProviderForPair,
                         timeChangeListenerConsumer,
                         strategyInitiator,

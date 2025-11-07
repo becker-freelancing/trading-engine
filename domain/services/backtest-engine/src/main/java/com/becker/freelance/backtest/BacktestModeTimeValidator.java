@@ -3,6 +3,7 @@ package com.becker.freelance.backtest;
 import com.becker.freelance.backtest.configuration.BacktestMode;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.trading.external.services.backtest.candles.BacktestDataTotalTimeProvider;
+import com.becker.freelance.trading.external.services.backtest.candles.BacktestDataTotalTimeProviderBuilder;
 import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
 import org.json.JSONObject;
 
@@ -39,12 +40,12 @@ class BacktestModeTimeValidator implements Predicate<LocalDateTime> {
         this.executionDuration = getExecutionDuration(backtestMode, trainDuration, valDuration, testDuration);
         this.skipDuration = getSkipDuration(backtestMode, trainDuration, valDuration, testDuration);
 
-        BacktestDataTotalTimeProvider backtestDataTotalTimeProvider = new ExternalServiceRegistry().requireService(BacktestDataTotalTimeProvider.class);
+        BacktestDataTotalTimeProvider backtestDataTotalTimeProvider = ExternalServiceRegistry.newInstance().requireServiceBuilder(BacktestDataTotalTimeProviderBuilder.class).build();
 
         LocalDateTime startTime = pairs.stream()
                 .map(backtestDataTotalTimeProvider::getAbsoluteMinTime)
                 .max(Comparator.naturalOrder())
-                .orElseThrow(IllegalStateException::new)
+                .orElseThrow(() -> new IllegalStateException("could not find min time for pairs " + pairs))
                 .plus(initialSkipDuration);
 
         this.currentExecutionStartTime = startTime.plus(initialSkipDuration);

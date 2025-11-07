@@ -16,11 +16,13 @@ public class ExternalServiceRegistry {
         REGISTERED_BUILDERS = ServiceLoader.load(ExternalServiceBuilder.class).stream()
                 .map(ServiceLoader.Provider::get)
                 .collect(Collectors.toSet());
-        NO_PARAMS_REGISTERED_BUILDERS = ServiceLoader.load(NoParamsExternalServiceBuilder.class).stream()
-                .map(ServiceLoader.Provider::get)
+        NO_PARAMS_REGISTERED_BUILDERS = REGISTERED_BUILDERS.stream()
+                .filter(builder -> NoParamsExternalServiceBuilder.class.isAssignableFrom(builder.getClass()))
+                .map(builder -> (NoParamsExternalServiceBuilder) builder)
                 .collect(Collectors.toSet());
-        PARAMS_REGISTERED_BUILDERS = ServiceLoader.load(ParamsExternalServiceBuilder.class).stream()
-                .map(ServiceLoader.Provider::get)
+        PARAMS_REGISTERED_BUILDERS = REGISTERED_BUILDERS.stream()
+                .filter(builder -> ParamsExternalServiceBuilder.class.isAssignableFrom(builder.getClass()))
+                .map(builder -> (ParamsExternalServiceBuilder) builder)
                 .collect(Collectors.toSet());
     }
 
@@ -29,7 +31,7 @@ public class ExternalServiceRegistry {
     }
 
     public <B extends ExternalServiceBuilder> Optional<B> findServiceBuilder(Class<B> builderClass) {
-        return REGISTERED_BUILDERS.stream().filter(builder -> builderClass.equals(builder.getClass()))
+        return REGISTERED_BUILDERS.stream().filter(builder -> builderClass.isAssignableFrom(builder.getClass()))
                 .findAny()
                 .map(builderClass::cast);
     }
@@ -39,7 +41,7 @@ public class ExternalServiceRegistry {
     }
 
     public <B extends SupportableExternalServiceBuilder<?, SP, ?>, SP> B requireSupportsServiceBuilder(Class<B> builderClass, SP supportsParam) {
-        return REGISTERED_BUILDERS.stream().filter(builder -> builderClass.equals(builder.getClass()))
+        return REGISTERED_BUILDERS.stream().filter(builder -> builderClass.isAssignableFrom(builder.getClass()))
                 .map(builder -> (SupportableExternalServiceBuilder) builder)
                 .filter(builder -> builder.supports(supportsParam))
                 .findAny()
@@ -47,25 +49,4 @@ public class ExternalServiceRegistry {
                 .orElseThrow(() -> new IllegalStateException("Could not find supportable service builder of type " + builderClass));
     }
 
-    public <S extends ExternalService> Optional<S> findService(Class<S> serviceClass, Object params) {
-        return PARAMS_REGISTERED_BUILDERS.stream().filter(builder -> serviceClass.equals(builder.getServiceClass()))
-                .findAny()
-                .map(builder -> builder.build(params))
-                .map(serviceClass::cast);
-    }
-
-    public <S extends ExternalService> Optional<S> findService(Class<S> serviceClass) {
-        return NO_PARAMS_REGISTERED_BUILDERS.stream().filter(builder -> serviceClass.equals(builder.getServiceClass()))
-                .findAny()
-                .map(builder -> builder.build())
-                .map(serviceClass::cast);
-    }
-
-    public <S extends ExternalService> S requireService(Class<S> serviceClass, Object params) {
-        return findService(serviceClass, params).orElseThrow(() -> new IllegalStateException("Could not find service of type " + serviceClass));
-    }
-
-    public <S extends ExternalService> S requireService(Class<S> serviceClass) {
-        return findService(serviceClass).orElseThrow(() -> new IllegalStateException("Could not find service of type " + serviceClass));
-    }
 }
