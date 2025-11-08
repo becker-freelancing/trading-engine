@@ -15,8 +15,4 @@ public interface EntrySignalAdaptorBuilder extends NoParamsExternalServiceBuilde
         return new EntrySignalAdaptorComposite(adaptors);
     }
 
-    @Override
-    default Class<? extends EntrySignalAdaptor> getServiceClass() {
-        return EntrySignalAdaptor.class;
-    }
 }

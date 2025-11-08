@@ -1,6 +1,5 @@
 package com.becker.freelance.trading.external.services.registry;
 
-public interface ExternalServiceBuilder<SERVICE extends ExternalService> {
+public interface ExternalServiceBuilder {
 
-    public Class<? extends SERVICE> getServiceClass();
 }

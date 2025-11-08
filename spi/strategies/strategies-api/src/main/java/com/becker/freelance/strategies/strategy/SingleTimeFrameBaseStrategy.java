@@ -14,7 +14,6 @@ import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
 import com.becker.freelance.trading.external.services.broker.OpenPositionRequestor;
-import com.becker.freelance.trading.external.services.registry.ExternalServiceBuilder;
 import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -159,10 +158,5 @@ public abstract class SingleTimeFrameBaseStrategy implements TradingStrategy {
             case BUY -> currentPrice.getClosePriceForDirection(direction).subtract(distance);
             case SELL -> currentPrice.getClosePriceForDirection(direction).add(distance);
         };
-    }
-
-    protected <S extends ExternalServiceBuilder> S requireExternalService(Class<S> externalServiceBuilderClass) {
-        return externalServiceRegistry.findServiceBuilder(externalServiceBuilderClass)
-                .orElseThrow(() -> new IllegalStateException("Could not find service builder of type " + externalServiceBuilderClass));
     }
 }

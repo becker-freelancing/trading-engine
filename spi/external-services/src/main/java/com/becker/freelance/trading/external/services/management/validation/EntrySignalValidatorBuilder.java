@@ -15,8 +15,4 @@ public interface EntrySignalValidatorBuilder extends ParamsExternalServiceBuilde
         return new EntrySignalValidatorComposite(validators, compositeStrategy);
     }
 
-    @Override
-    default Class<? extends EntrySignalValidator> getServiceClass() {
-        return EntrySignalValidator.class;
-    }
 }

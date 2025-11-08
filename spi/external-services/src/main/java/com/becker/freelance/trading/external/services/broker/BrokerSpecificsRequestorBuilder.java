@@ -4,8 +4,4 @@ import com.becker.freelance.trading.external.services.registry.NoParamsExternalS
 
 public interface BrokerSpecificsRequestorBuilder extends NoParamsExternalServiceBuilder<BrokerSpecificsRequestor> {
 
-    @Override
-    default Class<? extends BrokerSpecificsRequestor> getServiceClass() {
-        return BrokerSpecificsRequestor.class;
-    }
 }

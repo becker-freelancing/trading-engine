@@ -4,8 +4,4 @@ import com.becker.freelance.trading.external.services.tradeexecution.TradeExecut
 
 public interface BacktestTradeExecutorBuilder extends TradeExecutorBuilder<BacktestTradeExecutorBuildParams, BacktestTradeExecutor> {
 
-    @Override
-    default Class<? extends BacktestTradeExecutor> getServiceClass() {
-        return BacktestTradeExecutor.class;
-    }
 }

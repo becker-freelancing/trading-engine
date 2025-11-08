@@ -8,8 +8,4 @@ public interface BacktestCandleDataSourceBuilder extends CandleDataSourceBuilder
 
     public EurUsdRequestor createEuroUsdRequestor(Synchronizer synchronizer);
 
-    @Override
-    default Class<? extends BacktestCandleDataSource> getServiceClass() {
-        return BacktestCandleDataSource.class;
-    }
 }

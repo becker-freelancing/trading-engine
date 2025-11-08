@@ -189,4 +189,9 @@ public class Decimal extends BigDecimal {
     public Decimal setScale(int newScale, RoundingMode roundingMode) {
         return new Decimal(super.setScale(newScale, roundingMode));
     }
+
+    @Override
+    public Decimal divide(BigDecimal divisor, int scale, RoundingMode roundingMode) {
+        return new Decimal(super.divide(divisor, scale, roundingMode));
+    }
 }

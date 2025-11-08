@@ -14,12 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -105,8 +103,6 @@ public class BacktestEngine {
         addShutdownHook();
         onBacktestFinishedCallback.initiate(appConfiguration, backtestExecutionConfiguration, strategyName);
 
-        List<Future<?>> futures = new ArrayList<>();
-
         for (StrategySupplierWithParameters strategySupplier : getStrategySupplier()) {
 
             BacktestExecutor backtestExecutor = new BacktestExecutor(appConfiguration,
@@ -116,15 +112,11 @@ public class BacktestEngine {
                     strategySupplier.parameter(),
                     strategySupplier.strategySupplier());
 
-            Future<?> future = executor.submit(() -> execute(backtestExecutor));
-            futures.add(future);
+            executor.submit(() -> execute(backtestExecutor));
         }
 
         executor.shutdown();
         try {
-//            for (Future<?> future : futures) {
-//                future.get(5, TimeUnit.HOURS);
-//            }
 
             executor.awaitTermination(5, TimeUnit.HOURS);
         } catch (InterruptedException e) {
