@@ -51,7 +51,7 @@ public class AbstractLocalBacktestAppBuilder {
         return this;
     }
 
-    public AbstractLocalBacktestAppBuilder withPair(String... pairs) {
+    public AbstractLocalBacktestAppBuilder withSimoultaniouslyTestedPairs(String... pairs) {
         this.pair = List.of(pairs);
         return this;
     }

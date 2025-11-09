@@ -23,6 +23,8 @@ import com.becker.freelance.trading.external.services.broker.AccountBalanceReque
 import com.becker.freelance.trading.external.services.management.environment.TimeChangeListener;
 import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
 import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -33,6 +35,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class BacktestExecutor implements Runnable {
+
+    private static final Logger logger = LoggerFactory.getLogger(BacktestExecutor.class);
 
     private final Decimal executionId;
     private final AppConfiguration appConfiguration;
@@ -69,7 +73,9 @@ public class BacktestExecutor implements Runnable {
 
             LocalDateTime minTime = backtestExecutionConfiguration.startTime();
             LocalDateTime maxTime = backtestExecutionConfiguration.endTime();
-            BacktestSynchronizer backtestSynchronizer = new BacktestSynchronizer(minTime, maxTime, findMaximumTimeShift(backtestExecutionConfiguration.pairs()), new BacktestModeTimeValidator(backtestExecutionConfiguration.backtestMode(), backtestExecutionConfiguration.pairs()));
+            BacktestSynchronizer backtestSynchronizer = new BacktestSynchronizer(minTime, maxTime,
+                    findMaximumTimeShift(backtestExecutionConfiguration.pairs()),
+                    new BacktestModeTimeValidator(backtestExecutionConfiguration.backtestMode(), backtestExecutionConfiguration.pairs()));
 
             EurUsdRequestor euroUsdRequestor = externalServiceRegistry.requireServiceBuilder(BacktestCandleDataSourceBuilder.class)
                     .createEuroUsdRequestor(backtestSynchronizer);
@@ -117,11 +123,16 @@ public class BacktestExecutor implements Runnable {
     }
 
     private Duration findMaximumTimeShift(List<Pair> pairs) {
+        if (pairs.isEmpty()) {
+            throw new IllegalStateException("Can not find maximum shift time if no pairs are provided");
+        }
         Long ggt = pairs.stream().map(Pair::toDuration)
                 .map(Duration::getSeconds)
-                .reduce(0L, this::ggt);
+                .reduce(pairs.get(0).toDuration().getSeconds(), this::ggt);
 
-        return Duration.ofSeconds(ggt);
+        Duration timeShift = Duration.ofSeconds(ggt);
+        logger.info("Using time shift: {}", timeShift);
+        return timeShift;
     }
 
     private long ggt(long n1, long n2) {
