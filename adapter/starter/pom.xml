@@ -15,7 +15,6 @@
 
     <modules>
         <module>local-backtest-app-starter</module>
-        <module>result-viewer-app-starter</module>
         <module>remote-execution-app-starter</module>
         <module>starter-commons</module>
     </modules>
