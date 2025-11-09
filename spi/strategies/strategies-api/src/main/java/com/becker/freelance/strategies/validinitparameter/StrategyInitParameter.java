@@ -1,7 +1,7 @@
 package com.becker.freelance.strategies.validinitparameter;
 
 import com.becker.freelance.math.Decimal;
-import com.becker.freelance.strategies.creation.ParameterName;
+import com.becker.freelance.trading.external.services.strategies.ParameterName;
 
 public class StrategyInitParameter {
 
@@ -55,6 +55,10 @@ public class StrategyInitParameter {
 
     public Decimal getStepSize() {
         return stepSize;
+    }
+
+    public int getSize() {
+        return maxValue.subtract(minValue).divide(stepSize).round(0).intValue();
     }
 }
 

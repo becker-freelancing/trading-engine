@@ -8,9 +8,9 @@ import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.math.Decimal;
-import com.becker.freelance.strategies.creation.StrategyCreationParameter;
 import com.becker.freelance.strategies.creation.StrategyCreator;
 import com.becker.freelance.trading.api.LocalBacktestPort;
+import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

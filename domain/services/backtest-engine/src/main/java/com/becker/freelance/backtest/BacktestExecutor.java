@@ -7,12 +7,14 @@ import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.engine.StrategySupplier;
-import com.becker.freelance.execution.callback.backtest.BacktestFinishedCallback;
-import com.becker.freelance.strategies.creation.StrategyCreationParameter;
+import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.strategy.TradingStrategy;
+import com.becker.freelance.trading.external.services.backtest.callbacks.BacktestFinishedCallback;
 import com.becker.freelance.trading.external.services.backtest.candles.BacktestCandleDataSource;
 import com.becker.freelance.trading.external.services.backtest.candles.BacktestCandleDataSourceBuilder;
 import com.becker.freelance.trading.external.services.backtest.candles.BacktestCandleSourceBuilderParams;
+import com.becker.freelance.trading.external.services.backtest.earlystop.EarlyStopCallbackResult;
+import com.becker.freelance.trading.external.services.backtest.earlystop.NoStopEarlyStopCallbackResult;
 import com.becker.freelance.trading.external.services.backtest.tradeexecution.BacktestTradeExecutor;
 import com.becker.freelance.trading.external.services.backtest.tradeexecution.BacktestTradeExecutorBuildParams;
 import com.becker.freelance.trading.external.services.backtest.tradeexecution.BacktestTradeExecutorBuilder;
@@ -20,6 +22,7 @@ import com.becker.freelance.trading.external.services.broker.AccountBalanceReque
 import com.becker.freelance.trading.external.services.broker.AccountBalanceRequestorBuilder;
 import com.becker.freelance.trading.external.services.management.environment.TimeChangeListener;
 import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
+import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -31,6 +34,7 @@ import java.util.function.Consumer;
 
 public class BacktestExecutor implements Runnable {
 
+    private final Decimal executionId;
     private final AppConfiguration appConfiguration;
     private final BacktestExecutionConfiguration backtestExecutionConfiguration;
     private final BacktestFinishedCallback onBacktestFinished;
@@ -39,12 +43,13 @@ public class BacktestExecutor implements Runnable {
     private final StrategySupplier strategySupplier;
 
 
-    public BacktestExecutor(AppConfiguration appConfiguration,
+    public BacktestExecutor(Decimal executionId, AppConfiguration appConfiguration,
                             BacktestExecutionConfiguration backtestExecutionConfiguration,
                             BacktestFinishedCallback onBacktestFinished,
                             Consumer<Exception> onError,
                             StrategyCreationParameter parameters,
                             StrategySupplier strategySupplier) {
+        this.executionId = executionId;
         this.appConfiguration = appConfiguration;
         this.backtestExecutionConfiguration = backtestExecutionConfiguration;
         this.onBacktestFinished = onBacktestFinished;
@@ -71,8 +76,11 @@ public class BacktestExecutor implements Runnable {
 
             List<BacktestTradeExecutor> tradeExecutors = new ArrayList<>();
 
+            EarlyStopCallbackImpl earlyStopCallback = new EarlyStopCallbackImpl(backtestExecutionConfiguration.initialWalletAmount());
+
             for (Pair pair : backtestExecutionConfiguration.pairs()) {
                 BacktestTradeExecutor tradeExecutor = tradeExecutorBuilder.build(new BacktestTradeExecutorBuildParams(backtestExecutionConfiguration, pair, euroUsdRequestor));
+                tradeExecutor.addClosedTradeSubscriber(earlyStopCallback);
                 tradeExecutors.add(tradeExecutor);
 
                 BacktestCandleDataSource dataProviderForPair = dataProviderFactory.build(new BacktestCandleSourceBuilderParams(pair, backtestSynchronizer));
@@ -90,8 +98,11 @@ public class BacktestExecutor implements Runnable {
                 dataProviderForPair.addSubscriber(strategyDataSubscriber);
             }
 
-            while (backtestSynchronizer.getCurrentTime().isBefore(maxTime)) {
+            EarlyStopCallbackResult earlyStopCallbackResult = new NoStopEarlyStopCallbackResult();
+
+            while (!earlyStopCallbackResult.shouldStop() && backtestSynchronizer.getCurrentTime().isBefore(maxTime)) {
                 backtestSynchronizer.shiftTime();
+                earlyStopCallbackResult = earlyStopCallback.shouldStop();
             }
 
             List<Trade> allClosedTrades = tradeExecutors.stream()
@@ -99,7 +110,7 @@ public class BacktestExecutor implements Runnable {
                     .flatMap(List::stream)
                     .sorted(Comparator.comparing(Trade::getCloseTime))
                     .toList();
-            onBacktestFinished.accept(allClosedTrades, parameters);
+            onBacktestFinished.accept(executionId, allClosedTrades, parameters, earlyStopCallbackResult);
         } catch (Exception e) {
             onError.accept(e);
         }

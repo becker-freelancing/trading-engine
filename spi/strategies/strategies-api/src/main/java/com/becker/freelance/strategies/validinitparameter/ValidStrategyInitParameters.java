@@ -2,8 +2,8 @@ package com.becker.freelance.strategies.validinitparameter;
 
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.creation.DefaultStrategyCreationParameter;
-import com.becker.freelance.strategies.creation.ParameterName;
-import com.becker.freelance.strategies.creation.StrategyCreationParameter;
+import com.becker.freelance.trading.external.services.strategies.ParameterName;
+import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,6 +83,15 @@ public class ValidStrategyInitParameters {
             parameter.addParameter(param.getName(), param.getDefaultValue());
         }
         return parameter;
+    }
+
+    public int unfilteredPermutationSize() {
+        int size = 1;
+        for (StrategyInitParameter initParameter : strategyInitParameter) {
+            size *= initParameter.getSize();
+        }
+
+        return size;
     }
 }
 

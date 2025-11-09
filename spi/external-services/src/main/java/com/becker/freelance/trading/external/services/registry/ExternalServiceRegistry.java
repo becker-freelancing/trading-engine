@@ -25,7 +25,7 @@ public class ExternalServiceRegistry {
                 .filter(builder -> builderClass.isAssignableFrom(builder.getClass()))
                 .toList();
         if (builders.size() != 1) {
-            throw new IllegalStateException("Found " + builders.size() + " builders, for type " + builders + ", where 1 was expected: " + builders);
+            throw new IllegalStateException("Found " + builders.size() + " builders, for type " + builderClass + ", where 1 was expected: " + builders);
         }
         return builderClass.cast(builders.get(0));
     }
@@ -39,4 +39,10 @@ public class ExternalServiceRegistry {
                 .orElseThrow(() -> new IllegalStateException("Could not find supportable service builder of type " + builderClass));
     }
 
+    public <B extends ExternalServiceBuilder> List<B> requireServiceBuilders(Class<B> builderClass) {
+        return REGISTERED_BUILDERS.stream()
+                .filter(builder -> builderClass.isAssignableFrom(builder.getClass()))
+                .map(builderClass::cast)
+                .toList();
+    }
 }

@@ -4,9 +4,13 @@ import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.indicators.ta.regime.TradeableMarketRegimeWrapper;
 import com.becker.freelance.math.Decimal;
-import com.becker.freelance.strategies.creation.*;
+import com.becker.freelance.strategies.creation.DefaultStrategyCreationParameter;
+import com.becker.freelance.strategies.creation.RegimeStrategyCreator;
+import com.becker.freelance.strategies.creation.StrategyCreator;
+import com.becker.freelance.strategies.creation.StringParameterName;
 import com.becker.freelance.strategies.strategy.DefaultStrategyParameter;
 import com.becker.freelance.strategies.strategy.StrategyParameter;
+import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

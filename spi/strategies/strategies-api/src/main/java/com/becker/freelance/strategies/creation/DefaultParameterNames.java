@@ -1,5 +1,7 @@
 package com.becker.freelance.strategies.creation;
 
+import com.becker.freelance.trading.external.services.strategies.ParameterName;
+
 public enum DefaultParameterNames implements ParameterName {
     SIZE("size"),
     TAKE_PROFIT("takeProfit"),

@@ -61,7 +61,7 @@ public class LocalBacktestInteractor implements LocalBacktestPort {
     }
 
     private void runWithoutStrategyConfig(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, StrategyCreator strategy, Runnable onFinished) {
-        logger.info("\t\tAnzahl Permutationen {}", strategy.strategyParameters().permutate().size());
+        logger.info("Number of Permutations without filtering {}", strategy.strategyParameters().unfilteredPermutationSize());
 
         BacktestEngine backtestEngine = new BacktestEngine(appConfiguration, backtestExecutionConfiguration, strategy, onFinished);
         backtestEngine.run();

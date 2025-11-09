@@ -91,7 +91,8 @@ public class AbstractLocalBacktestAppBuilder {
     public LocalBacktestPort build() {
 
         if (continueMode) {
-            return new AbstractLocalBacktestContinueApp().build();
+            throw new UnsupportedOperationException("Must be implemented");
+//            return new AbstractLocalBacktestContinueApp().build();
         }
 
         if (initialWalletAmount == null) {

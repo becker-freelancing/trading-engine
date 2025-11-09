@@ -3,7 +3,7 @@ package com.becker.freelance.backtest;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.creation.DefaultParameterNames;
 import com.becker.freelance.strategies.creation.DefaultStrategyCreationParameter;
-import com.becker.freelance.strategies.creation.StrategyCreationParameter;
+import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

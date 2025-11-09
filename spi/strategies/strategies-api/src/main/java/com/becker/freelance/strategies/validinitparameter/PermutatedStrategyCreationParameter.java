@@ -1,6 +1,6 @@
 package com.becker.freelance.strategies.validinitparameter;
 
-import com.becker.freelance.strategies.creation.StrategyCreationParameter;
+import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 
 import java.util.ArrayList;
 import java.util.Collections;

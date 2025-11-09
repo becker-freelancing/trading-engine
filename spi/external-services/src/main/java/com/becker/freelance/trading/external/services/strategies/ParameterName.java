@@ -1,4 +1,4 @@
-package com.becker.freelance.strategies.creation;
+package com.becker.freelance.trading.external.services.strategies;
 
 public interface ParameterName {
 

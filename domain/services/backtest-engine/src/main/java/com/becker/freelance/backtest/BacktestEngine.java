@@ -1,21 +1,21 @@
 package com.becker.freelance.backtest;
 
-import com.becker.freelance.backtest.callbacks.BacktestResultWriterCallback;
-import com.becker.freelance.backtest.commons.BacktestResultWriter;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.commons.app.AppConfiguration;
-import com.becker.freelance.execution.callback.backtest.BacktestFinishedCallback;
-import com.becker.freelance.execution.callback.backtest.BacktestFinishedCallbackComposite;
 import com.becker.freelance.indicators.ta.regime.TradeableMarketRegimeWrapper;
-import com.becker.freelance.strategies.creation.StrategyCreationParameter;
+import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.creation.StrategyCreator;
 import com.becker.freelance.strategies.strategy.DefaultStrategyParameter;
+import com.becker.freelance.trading.external.services.backtest.callbacks.BacktestFinishedCallback;
+import com.becker.freelance.trading.external.services.backtest.callbacks.BacktestFinishedCallbackBuilder;
+import com.becker.freelance.trading.external.services.backtest.callbacks.BacktestFinishedCallbackBuilderParams;
+import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
+import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +45,6 @@ public class BacktestEngine {
         this(appConfiguration,
                 backtestExecutionConfiguration,
                 strategyCreator,
-                getBacktestResultWriter(appConfiguration, backtestExecutionConfiguration, strategyCreator.strategyName(), writePath),
                 parameterFilter,
                 onFinished,
                 null,
@@ -61,7 +60,6 @@ public class BacktestEngine {
     protected BacktestEngine(AppConfiguration appConfiguration,
                              BacktestExecutionConfiguration backtestExecutionConfiguration,
                              StrategyCreator strategyCreator,
-                             BacktestResultWriter resultWriter,
                              ParameterFilter parameterFilter,
                              Runnable onFinished,
                              List<StrategySupplierWithParameters> supplierWithParameters,
@@ -71,7 +69,7 @@ public class BacktestEngine {
         this.strategyCreator = strategyCreator;
         this.executor = Executors.newFixedThreadPool(backtestExecutionConfiguration.numberOfThreads());
         this.parameterFilter = parameterFilter;
-        this.onBacktestFinishedCallback = new BacktestFinishedCallbackComposite(Set.of(new BacktestResultWriterCallback(resultWriter)));
+        this.onBacktestFinishedCallback = ExternalServiceRegistry.newInstance().requireServiceBuilder(BacktestFinishedCallbackBuilder.class).build(new BacktestFinishedCallbackBuilderParams(backtestExecutionConfiguration.pairs(), strategyName, appConfiguration.applicationStartTime()));
         this.onExceptionCallback = this::shutdownNowOnException;
         this.onFinished = onFinished;
         this.strategySuppliers = supplierWithParameters;
@@ -82,30 +80,24 @@ public class BacktestEngine {
         this(appConfiguration,
                 backtestExecutionConfiguration,
                 null,
-                getBacktestResultWriter(appConfiguration, backtestExecutionConfiguration, strategyName, null),
                 null,
                 onFinished,
                 strategySuppliers,
                 strategyName);
     }
 
-    private static BacktestResultWriter getBacktestResultWriter(AppConfiguration appConfiguration, BacktestExecutionConfiguration backtestExecutionConfiguration, String strategyName, Path writePath) {
-        final BacktestResultWriter resultWriter;
-        if (writePath == null) {
-            resultWriter = new BacktestResultWriter(appConfiguration, backtestExecutionConfiguration, strategyName);
-        } else {
-            resultWriter = new BacktestResultWriter(appConfiguration, backtestExecutionConfiguration, writePath);
-        }
-        return resultWriter;
-    }
-
     public void run() {
         addShutdownHook();
         onBacktestFinishedCallback.initiate(appConfiguration, backtestExecutionConfiguration, strategyName);
 
-        for (StrategySupplierWithParameters strategySupplier : getStrategySupplier()) {
+        List<StrategySupplierWithParameters> strategySuppliers = getStrategySupplier();
+        for (int i = 0; i < strategySuppliers.size(); i++) {
 
-            BacktestExecutor backtestExecutor = new BacktestExecutor(appConfiguration,
+            StrategySupplierWithParameters strategySupplier = strategySuppliers.get(i);
+
+            BacktestExecutor backtestExecutor = new BacktestExecutor(
+                    new Decimal(i),
+                    appConfiguration,
                     backtestExecutionConfiguration,
                     onBacktestFinishedCallback,
                     onExceptionCallback,
@@ -126,6 +118,7 @@ public class BacktestEngine {
     }
 
     private List<StrategySupplierWithParameters> getStrategySupplier() {
+        logger.info("Creating strategy suppliers...");
         if (strategySuppliers != null) {
             return strategySuppliers;
         }
@@ -150,7 +143,10 @@ public class BacktestEngine {
     }
 
     private void addShutdownHook() {
-        Runtime.getRuntime().addShutdownHook(new Thread(executor::shutdownNow, "Shutdown-BacktestApp-0"));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            onBacktestFinishedCallback.onAllFinished();
+            executor.shutdownNow();
+        }, "Shutdown-BacktestApp-0"));
     }
 
     private synchronized int getNextIteration() {

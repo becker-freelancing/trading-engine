@@ -1,6 +1,6 @@
 package com.becker.freelance.backtest;
 
-import com.becker.freelance.strategies.creation.StrategyCreationParameter;
+import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 
 import java.util.HashSet;
 import java.util.Set;

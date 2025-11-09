@@ -4,11 +4,13 @@ import com.becker.freelance.commons.signal.EntrySignal;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
+import com.becker.freelance.commons.trade.Trade;
 import com.becker.freelance.trading.external.services.broker.ClosedTradesRequestor;
 import com.becker.freelance.trading.external.services.broker.OpenPositionRequestor;
 import com.becker.freelance.trading.external.services.registry.ExternalService;
 
 import java.time.LocalDateTime;
+import java.util.function.Consumer;
 
 public interface TradeExecutor extends ExternalService, OpenPositionRequestor, ClosedTradesRequestor {
 
@@ -19,4 +21,6 @@ public interface TradeExecutor extends ExternalService, OpenPositionRequestor, C
     void adaptPositions(TimeSeriesEntry currentPrice);
 
     void closePositionsIfSlOrTpReached(TimeSeriesEntry currentPrice);
+
+    void addClosedTradeSubscriber(Consumer<Trade> consumer);
 }

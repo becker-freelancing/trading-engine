@@ -1,8 +1,8 @@
 package com.becker.freelance.app;
 
 import com.becker.freelance.math.Decimal;
-import com.becker.freelance.strategies.creation.ParameterName;
-import com.becker.freelance.strategies.creation.StrategyCreationParameter;
+import com.becker.freelance.trading.external.services.strategies.ParameterName;
+import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 
 import java.util.Map;
 
