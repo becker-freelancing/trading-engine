@@ -4,6 +4,7 @@ import com.becker.freelance.backtest.BacktestEngine;
 import com.becker.freelance.backtest.ExcludeExistingParametersFilter;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.backtest.configuration.BacktestMode;
+import com.becker.freelance.backtest.configuration.BacktestStage;
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
@@ -33,8 +34,9 @@ public class LocalBacktestContinueInteractor implements LocalBacktestPort {
     private final Set<StrategyCreationParameter> parameters;
     private final Path resultWriteFile;
     private final BacktestMode backtestMode;
+    private final BacktestStage backtestStage;
 
-    public LocalBacktestContinueInteractor(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, StrategyCreator strategy, AppMode appMode, List<Pair> pairs, Integer numThreads, Set<StrategyCreationParameter> parameters, Path resultWriteFile, BacktestMode backtestMode) {
+    public LocalBacktestContinueInteractor(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, StrategyCreator strategy, AppMode appMode, List<Pair> pairs, Integer numThreads, Set<StrategyCreationParameter> parameters, Path resultWriteFile, BacktestMode backtestMode, BacktestStage backtestStage) {
         this.initialWalletAmount = initialWalletAmount;
         this.fromTime = fromTime;
         this.toTime = toTime;
@@ -45,6 +47,7 @@ public class LocalBacktestContinueInteractor implements LocalBacktestPort {
         this.parameters = parameters;
         this.resultWriteFile = resultWriteFile;
         this.backtestMode = backtestMode;
+        this.backtestStage = backtestStage;
     }
 
     @Override
@@ -58,7 +61,8 @@ public class LocalBacktestContinueInteractor implements LocalBacktestPort {
                 toTime,
                 numThreads,
                 Integer.MAX_VALUE,
-                backtestMode);
+                backtestMode,
+                backtestStage);
 
 
         BacktestEngine backtestEngine = new BacktestEngine(appConfiguration, backtestExecutionConfiguration, strategy,

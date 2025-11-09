@@ -1,5 +1,6 @@
 package com.becker.freelance.backtest;
 
+import com.becker.freelance.trading.external.services.backtest.strategies.ParameterFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

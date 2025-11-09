@@ -2,6 +2,7 @@ package com.becker.freelance.app;
 
 import com.becker.freelance.backtest.StrategySupplierWithParameters;
 import com.becker.freelance.backtest.configuration.BacktestMode;
+import com.becker.freelance.backtest.configuration.BacktestStage;
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
@@ -35,14 +36,16 @@ abstract class AbstractLocalBacktestApp {
     private final Runnable onFinished;
     private final boolean useStrategyConfig;
     private final BacktestMode backtestMode;
+    private final BacktestStage backtestStage;
 
-    AbstractLocalBacktestApp(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, Runnable onFinished, boolean strategyConfig, BacktestMode backtestMode) {
+    AbstractLocalBacktestApp(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, Runnable onFinished, boolean strategyConfig, BacktestMode backtestMode, BacktestStage backtestStage) {
         this.initialWalletAmount = initialWalletAmount;
         this.fromTime = fromTime;
         this.toTime = toTime;
         this.onFinished = onFinished;
         this.useStrategyConfig = strategyConfig;
         this.backtestMode = backtestMode;
+        this.backtestStage = backtestStage;
     }
 
     protected abstract void initiate();
@@ -79,7 +82,8 @@ abstract class AbstractLocalBacktestApp {
                 getPairs(),
                 getNumThreads(),
                 getParameterLimit(),
-                backtestMode
+                backtestMode,
+                backtestStage
         );
     }
 
@@ -103,7 +107,8 @@ abstract class AbstractLocalBacktestApp {
                 getNumThreads(),
                 getParameterLimit(),
                 strategySuppliers,
-                backtestMode
+                backtestMode,
+                backtestStage
         );
     }
 

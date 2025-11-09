@@ -1,4 +1,4 @@
-package com.becker.freelance.backtest;
+package com.becker.freelance.trading.external.services.backtest.strategies;
 
 import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 

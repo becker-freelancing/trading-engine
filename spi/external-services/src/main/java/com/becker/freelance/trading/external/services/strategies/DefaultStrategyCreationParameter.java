@@ -1,8 +1,6 @@
-package com.becker.freelance.strategies.creation;
+package com.becker.freelance.trading.external.services.strategies;
 
 import com.becker.freelance.math.Decimal;
-import com.becker.freelance.trading.external.services.strategies.ParameterName;
-import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 
 import java.util.AbstractMap;
 import java.util.HashMap;

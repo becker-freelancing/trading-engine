@@ -1,14 +1,20 @@
 package com.becker.freelance.backtest;
 
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
+import com.becker.freelance.backtest.configuration.BacktestStage;
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.indicators.ta.regime.TradeableMarketRegimeWrapper;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.creation.StrategyCreator;
 import com.becker.freelance.strategies.strategy.DefaultStrategyParameter;
+import com.becker.freelance.strategies.validinitparameter.ValidStrategyInitParameters;
 import com.becker.freelance.trading.external.services.backtest.callbacks.BacktestFinishedCallback;
 import com.becker.freelance.trading.external.services.backtest.callbacks.BacktestFinishedCallbackBuilder;
 import com.becker.freelance.trading.external.services.backtest.callbacks.BacktestFinishedCallbackBuilderParams;
+import com.becker.freelance.trading.external.services.backtest.strategies.ParameterFilter;
+import com.becker.freelance.trading.external.services.backtest.strategies.StrategyParamsSampler;
+import com.becker.freelance.trading.external.services.backtest.strategies.StrategyParamsSamplerBuilder;
+import com.becker.freelance.trading.external.services.backtest.strategies.StrategyParamsSamplerBuilderParams;
 import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
 import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 import org.slf4j.Logger;
@@ -90,7 +96,7 @@ public class BacktestEngine {
         addShutdownHook();
         onBacktestFinishedCallback.initiate(appConfiguration, backtestExecutionConfiguration, strategyName);
 
-        List<StrategySupplierWithParameters> strategySuppliers = getStrategySupplier();
+        List<StrategySupplierWithParameters> strategySuppliers = getStrategySupplier(backtestExecutionConfiguration.backtestStage());
         for (int i = 0; i < strategySuppliers.size(); i++) {
 
             StrategySupplierWithParameters strategySupplier = strategySuppliers.get(i);
@@ -117,7 +123,7 @@ public class BacktestEngine {
         onFinished.run();
     }
 
-    private List<StrategySupplierWithParameters> getStrategySupplier() {
+    private List<StrategySupplierWithParameters> getStrategySupplier(BacktestStage backtestStage) {
         logger.info("Creating strategy suppliers...");
         if (strategySuppliers != null) {
             return strategySuppliers;
@@ -125,9 +131,15 @@ public class BacktestEngine {
 
         List<StrategyCreationParameter> parameters;
         try (parameterFilter) {
-            parameters = strategyCreator.strategyParameters().permutate()
+            StrategyParamsSampler paramsSampler = ExternalServiceRegistry.newInstance()
+                    .requireSupportsServiceBuilder(StrategyParamsSamplerBuilder.class, backtestStage)
+                    .build(new StrategyParamsSamplerBuilderParams(
+                            backtestExecutionConfiguration.parameterLimit()
+                    ));
+
+            ValidStrategyInitParameters validStrategyInitParameters = strategyCreator.strategyParameters();
+            parameters = paramsSampler.sample(validStrategyInitParameters.getStrategyInitParameter(), validStrategyInitParameters.getParameterValidation()).stream()
                     .filter(parameterFilter.getPredicate())
-                    .evenlyDistributed(backtestExecutionConfiguration.parameterLimit())
                     .toList();
         }
         requiredIterations = parameters.size();

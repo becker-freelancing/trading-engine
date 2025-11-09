@@ -3,6 +3,7 @@ package com.becker.freelance.trading.application;
 import com.becker.freelance.backtest.BacktestEngine;
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
 import com.becker.freelance.backtest.configuration.BacktestMode;
+import com.becker.freelance.backtest.configuration.BacktestStage;
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.app.AppMode;
 import com.becker.freelance.commons.pair.Pair;
@@ -29,8 +30,9 @@ public class LocalBacktestInteractor implements LocalBacktestPort {
     private final Integer numThreads;
     private final Integer parameterLimit;
     private final BacktestMode backtestMode;
+    private final BacktestStage backtestStage;
 
-    public LocalBacktestInteractor(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, Runnable onFinished, StrategyCreator strategy, AppMode appMode, List<Pair> pairs, Integer numThreads, Integer parameterLimit, BacktestMode backtestMode) {
+    public LocalBacktestInteractor(Decimal initialWalletAmount, LocalDateTime fromTime, LocalDateTime toTime, Runnable onFinished, StrategyCreator strategy, AppMode appMode, List<Pair> pairs, Integer numThreads, Integer parameterLimit, BacktestMode backtestMode, BacktestStage backtestStage) {
         this.initialWalletAmount = initialWalletAmount;
         this.fromTime = fromTime;
         this.toTime = toTime;
@@ -41,6 +43,7 @@ public class LocalBacktestInteractor implements LocalBacktestPort {
         this.numThreads = numThreads;
         this.parameterLimit = parameterLimit;
         this.backtestMode = backtestMode;
+        this.backtestStage = backtestStage;
     }
 
     @Override
@@ -54,7 +57,8 @@ public class LocalBacktestInteractor implements LocalBacktestPort {
                 toTime,
                 numThreads,
                 parameterLimit,
-                backtestMode);
+                backtestMode,
+                backtestStage);
 
 
         runWithoutStrategyConfig(appConfiguration, backtestExecutionConfiguration, strategy, onFinished);

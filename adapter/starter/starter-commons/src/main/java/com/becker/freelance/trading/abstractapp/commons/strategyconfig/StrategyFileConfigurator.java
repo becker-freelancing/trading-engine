@@ -4,12 +4,12 @@ import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.indicators.ta.regime.TradeableMarketRegimeWrapper;
 import com.becker.freelance.math.Decimal;
-import com.becker.freelance.strategies.creation.DefaultStrategyCreationParameter;
 import com.becker.freelance.strategies.creation.RegimeStrategyCreator;
 import com.becker.freelance.strategies.creation.StrategyCreator;
 import com.becker.freelance.strategies.creation.StringParameterName;
 import com.becker.freelance.strategies.strategy.DefaultStrategyParameter;
 import com.becker.freelance.strategies.strategy.StrategyParameter;
+import com.becker.freelance.trading.external.services.strategies.DefaultStrategyCreationParameter;
 import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,12 +40,13 @@ public class StrategyFileConfigurator {
     //DUPLICATE
     public Stream<RegimeStrategyCreator> withConfigFile(StrategyCreator strategyCreator, Pair pair) {
         Optional<List<JSONObject>> configs = getConfigsForStrategy(strategyCreator.strategyName(), pair);
-        return configs.flatMap(config -> map(config, strategyCreator, pair))
-                .orElse(Stream.of(new RegimeStrategyCreator(strategyCreator,
-                        new HashSet<>(ALL_REGIMES.values()),
-                        100,
-                        pair,
-                        new DefaultStrategyParameter(strategyCreator.strategyParameters().defaultValues(), pair, new HashSet<>(ALL_REGIMES.values())))));
+        throw new UnsupportedOperationException("TODO");
+//        return configs.flatMap(config -> map(config, strategyCreator, pair))
+//                .orElse(Stream.of(new RegimeStrategyCreator(strategyCreator,
+//                        new HashSet<>(ALL_REGIMES.values()),
+//                        100,
+//                        pair,
+//                        new DefaultStrategyParameter(strategyCreator.strategyParameters().defaultValues(), pair, new HashSet<>(ALL_REGIMES.values())))));
     }
 
     private Optional<Stream<RegimeStrategyCreator>> map(List<JSONObject> configs, StrategyCreator strategyCreator, Pair pair) {

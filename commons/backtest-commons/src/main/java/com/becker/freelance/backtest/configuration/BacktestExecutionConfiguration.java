@@ -12,6 +12,7 @@ public record BacktestExecutionConfiguration(List<Pair> pairs,
                                              LocalDateTime endTime,
                                              Integer numberOfThreads,
                                              Integer parameterLimit,
-                                             BacktestMode backtestMode) {
+                                             BacktestMode backtestMode,
+                                             BacktestStage backtestStage) {
 
 }

@@ -1,14 +1,18 @@
 package com.becker.freelance.app;
 
 import com.becker.freelance.backtest.configuration.BacktestMode;
+import com.becker.freelance.backtest.configuration.BacktestStage;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.trading.api.LocalBacktestPort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class AbstractLocalBacktestAppBuilder {
 
+    private static final Logger logger = LoggerFactory.getLogger(AbstractLocalBacktestAppBuilder.class);
 
     private Decimal initialWalletAmount;
     private LocalDateTime fromTime;
@@ -23,6 +27,7 @@ public class AbstractLocalBacktestAppBuilder {
     private List<String> pair;
     private int parameterLimit;
     private String backtestMode;
+    private String backtestStage;
 
     AbstractLocalBacktestAppBuilder() {
     }
@@ -53,6 +58,11 @@ public class AbstractLocalBacktestAppBuilder {
 
     public AbstractLocalBacktestAppBuilder withBacktestMode(String backtestMode) {
         this.backtestMode = backtestMode;
+        return this;
+    }
+
+    public AbstractLocalBacktestAppBuilder withBacktestStage(String backtestStage) {
+        this.backtestStage = backtestStage;
         return this;
     }
 
@@ -108,12 +118,26 @@ public class AbstractLocalBacktestAppBuilder {
         }
 
         BacktestMode mode = BacktestMode.valueOf(backtestMode);
+        BacktestStage stage = BacktestStage.valueOf(backtestStage);
+
+        logConfiguration();
 
         if (strategyName != null) {
-            return new ConfiguredAbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig, strategyName, appMode, pair, numberOfThreads, parameterLimit, mode).build();
+            return new ConfiguredAbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig, strategyName, appMode, pair, numberOfThreads, parameterLimit, mode, stage).build();
         }
 
-        return new CliAbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig, mode).build();
+        return new CliAbstractLocalBacktestApp(initialWalletAmount, fromTime, toTime, onFinished, strategyConfig, mode, stage).build();
+    }
+
+    private void logConfiguration() {
+        logger.info("Initial Wallet Amount: {}", initialWalletAmount);
+        logger.info("From Time: {}", fromTime);
+        logger.info("To Time: {}", toTime);
+        logger.info("Strategy Name: {}", strategyName);
+        logger.info("Pairs: {}", pair);
+        logger.info("Parameter Limit: {}", parameterLimit);
+        logger.info("Backtest Mode: {}", backtestMode);
+        logger.info("Backtest Stage: {}", backtestStage);
     }
 
     public AbstractLocalBacktestAppBuilder withParameterPermutationLimit(int limit) {
