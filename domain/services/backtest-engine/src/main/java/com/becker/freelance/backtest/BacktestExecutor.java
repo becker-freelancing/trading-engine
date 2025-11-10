@@ -77,9 +77,9 @@ public class BacktestExecutor implements Runnable {
 
             LocalDateTime minTime = backtestExecutionConfiguration.startTime();
             LocalDateTime maxTime = backtestExecutionConfiguration.endTime();
-            BacktestSynchronizer backtestSynchronizer = new BacktestSynchronizer(minTime, maxTime,
+            BacktestSynchronizer backtestSynchronizer = new BacktestSynchronizer(minTime,
                     findMaximumTimeShift(backtestExecutionConfiguration.pairs()),
-                    new BacktestModeTimeValidator(backtestExecutionConfiguration.backtestMode(), backtestExecutionConfiguration.pairs()));
+                    new BacktestModeTimeValidator(backtestExecutionConfiguration.backtestMode(), backtestExecutionConfiguration.startTime(), backtestExecutionConfiguration.pairs()));
 
             scopedExternalServiceRegistry.registerScopedExternalService(backtestSynchronizer);
 

@@ -9,5 +9,4 @@ public interface BacktestDataTotalTimeProvider extends ExternalService {
 
     public LocalDateTime getAbsoluteMinTime(Pair pair);
 
-    public LocalDateTime getAbsoluteMaxTime(Pair pair);
 }

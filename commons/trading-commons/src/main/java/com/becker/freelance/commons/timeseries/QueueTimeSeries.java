@@ -109,7 +109,7 @@ public class QueueTimeSeries implements TimeSeries {
 
     @Override
     public String toString() {
-        return String.format("TimeSeries(For: %s, From: %s, To: %s, Entries: %d)",
+        return String.format("QueueTimeSeries(For: %s, From: %s, To: %s, Entries: %d)",
                 pair.technicalName(), getMinTime(), getMaxTime(), index.size());
     }
 

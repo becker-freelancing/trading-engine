@@ -1,6 +1,6 @@
 package com.becker.freelance.trading.external.services.backtest.candles;
 
-import com.becker.freelance.trading.external.services.registry.NoParamsExternalServiceBuilder;
+import com.becker.freelance.trading.external.services.registry.ParamsExternalServiceBuilder;
 
-public interface BacktestDataTotalTimeProviderBuilder extends NoParamsExternalServiceBuilder<BacktestDataTotalTimeProvider> {
+public interface BacktestDataTotalTimeProviderBuilder extends ParamsExternalServiceBuilder<BacktestDataTotalTimeProviderBuilderParams, BacktestDataTotalTimeProvider> {
 }

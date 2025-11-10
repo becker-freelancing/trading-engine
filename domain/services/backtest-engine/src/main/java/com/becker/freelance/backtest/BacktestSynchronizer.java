@@ -14,12 +14,14 @@ public class BacktestSynchronizer implements Synchronizer {
 
     private final Set<Synchronizeable> prioritySubscribers;
     private final Set<Synchronizeable> subscribers;
+    private final LocalDateTime minTime;
     private final Duration timeShift;
     private final Predicate<LocalDateTime> validTimes;
     private LocalDateTime currentTime;
 
 
-    public BacktestSynchronizer(LocalDateTime minTime, LocalDateTime maxTime, Duration timeShift, Predicate<LocalDateTime> validTimes) {
+    public BacktestSynchronizer(LocalDateTime minTime, Duration timeShift, Predicate<LocalDateTime> validTimes) {
+        this.minTime = minTime;
         this.timeShift = timeShift;
         this.validTimes = validTimes;
         this.subscribers = new LinkedHashSet<>();
@@ -51,6 +53,11 @@ public class BacktestSynchronizer implements Synchronizer {
     @Override
     public void addPrioritySubscriber(Synchronizeable synchronizeable) {
         prioritySubscribers.add(synchronizeable);
+    }
+
+    @Override
+    public LocalDateTime minTime() {
+        return minTime;
     }
 
     @Override

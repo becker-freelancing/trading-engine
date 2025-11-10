@@ -107,7 +107,7 @@ public class CompleteTimeSeries implements TimeSeries {
 
     @Override
     public String toString() {
-        return String.format("TimeSeries(For: %s, From: %s, To: %s, Entries: %d)",
+        return String.format("CompleteTimeSeries(For: %s, From: %s, To: %s, Entries: %d)",
                 pair.technicalName(), getMinTime(), getMaxTime(), index.size());
     }
 
