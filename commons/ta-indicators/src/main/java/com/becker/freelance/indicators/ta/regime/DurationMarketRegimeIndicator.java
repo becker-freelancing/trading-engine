@@ -2,22 +2,23 @@ package com.becker.freelance.indicators.ta.regime;
 
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.indicators.ta.cache.CachableIndicator;
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.Indicator;
+import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
+import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
-public class DurationMarketRegimeIndicator extends CachableIndicator<Integer, DurationMarketRegimeImpl> implements Indicator<DurationMarketRegime> {
+public class DurationMarketRegimeIndicator extends CachableIndicator<LocalDateTime, DurationMarketRegimeImpl> implements TemporalIndicator<DurationMarketRegime> {
 
-    private final Indicator<TradeableMarketRegime> marketRegimeIndicator;
+    private final TemporalIndicator<TradeableMarketRegime> marketRegimeIndicator;
 
-    public DurationMarketRegimeIndicator(Indicator<TradeableMarketRegime> marketRegimeIndicator) {
+    public DurationMarketRegimeIndicator(TemporalIndicator<TradeableMarketRegime> marketRegimeIndicator) {
         super(100);
         this.marketRegimeIndicator = marketRegimeIndicator;
     }
 
     @Override
-    public DurationMarketRegime getValue(int index) {
+    public DurationMarketRegime getValue(LocalDateTime index) {
         Optional<DurationMarketRegimeImpl> inCache = findInCache(index);
         if (inCache.isPresent()) {
             return inCache.get();
@@ -25,11 +26,13 @@ public class DurationMarketRegimeIndicator extends CachableIndicator<Integer, Du
 
         TradeableMarketRegime currentRegime = marketRegimeIndicator.getValue(index);
         int duration = 1;
-        for (int i = index - 1; i >= getUnstableBars(); i--) {
-            if (!marketRegimeIndicator.getValue(i).equals(currentRegime)) {
+        LocalDateTime time = index;
+        while (marketRegimeIndicator.getValue(time) != null) {
+            if (!marketRegimeIndicator.getValue(time).equals(currentRegime)) {
                 break;
             }
-            duration += 1;
+            duration++;
+            time = time.minus(getBarSeries().getPairDuration());
         }
 
         DurationMarketRegimeImpl durationMarketRegime = new DurationMarketRegimeImpl(currentRegime, duration);
@@ -43,7 +46,7 @@ public class DurationMarketRegimeIndicator extends CachableIndicator<Integer, Du
     }
 
     @Override
-    public BarSeries getBarSeries() {
+    public TemporalBarSeries getBarSeries() {
         return marketRegimeIndicator.getBarSeries();
     }
 }

@@ -2,45 +2,46 @@ package com.becker.freelance.indicators.ta.regime;
 
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.indicators.ta.cache.CachableIndicator;
+import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
+import com.becker.freelance.indicators.ta.temporal.TemporalEMAIndicator;
+import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
 import com.becker.freelance.indicators.ta.util.VolatilityIndicator;
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.Indicator;
-import org.ta4j.core.indicators.EMAIndicator;
 import org.ta4j.core.num.DecimalNum;
 import org.ta4j.core.num.Num;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
-public class MarketRegimeIndicator extends CachableIndicator<Integer, MarketRegime> implements Indicator<TradeableMarketRegime> {
+public class MarketRegimeIndicator extends CachableIndicator<LocalDateTime, MarketRegime> implements TemporalIndicator<TradeableMarketRegime> {
 
     private final Num MINUS_1 = DecimalNum.valueOf(-1);
 
     private final double volaSplitThreshold;
     private final Num trendReversalSlopeThreshold;
     private final int trendSlopeShift;
-    private final Indicator<Num> ema50;
-    private final Indicator<Num> ema100;
-    private final Indicator<Optional<Double>> volaIndicator;
+    private final TemporalIndicator<Num> ema50;
+    private final TemporalIndicator<Num> ema100;
+    private final TemporalIndicator<Optional<Double>> volaIndicator;
 
-    public MarketRegimeIndicator(Indicator<Num> closePrice, double volaSplitThreshold, double trendReversalSlopeThreshold, int trendSlopeShift) {
+    public MarketRegimeIndicator(TemporalIndicator<Num> closePrice, double volaSplitThreshold, double trendReversalSlopeThreshold, int trendSlopeShift) {
         super(100);
         this.volaSplitThreshold = volaSplitThreshold;
         this.trendReversalSlopeThreshold = DecimalNum.valueOf(trendReversalSlopeThreshold);
         this.trendSlopeShift = trendSlopeShift;
-        this.ema50 = new EMAIndicator(closePrice, 50);
-        this.ema100 = new EMAIndicator(closePrice, 100);
+        this.ema50 = new TemporalEMAIndicator(closePrice, 50);
+        this.ema100 = new TemporalEMAIndicator(closePrice, 100);
         this.volaIndicator = new VolatilityIndicator(closePrice, 30);
     }
 
     @Override
-    public MarketRegime getValue(int index) {
+    public MarketRegime getValue(LocalDateTime index) {
         Optional<MarketRegime> cache = findInCache(index);
         if (cache.isPresent()) {
             return cache.get();
         }
         Num ema50Value = ema50.getValue(index);
         Num ema100Value = ema100.getValue(index);
-        Num ema50Slope = ema50Value.minus(ema50.getValue(index - trendSlopeShift)).dividedBy(DecimalNum.valueOf(trendSlopeShift));
+        Num ema50Slope = ema50Value.minus(ema50.getValue(index.minus(getBarSeries().getPairDuration().multipliedBy(trendSlopeShift)))).dividedBy(DecimalNum.valueOf(trendSlopeShift));
         TrendDirection trendDirection = getTrendDirection(ema50Value, ema100Value, ema50Slope);
         Vola vola = getVola(index);
 
@@ -66,7 +67,7 @@ public class MarketRegimeIndicator extends CachableIndicator<Integer, MarketRegi
         };
     }
 
-    private Vola getVola(int index) {
+    private Vola getVola(LocalDateTime index) {
         Double vola = volaIndicator.getValue(index).orElse(0.);
 
         if (vola <= volaSplitThreshold) {
@@ -92,9 +93,10 @@ public class MarketRegimeIndicator extends CachableIndicator<Integer, MarketRegi
     }
 
     @Override
-    public BarSeries getBarSeries() {
+    public TemporalBarSeries getBarSeries() {
         return ema50.getBarSeries();
     }
+
 
     private static enum TrendDirection {
         UP,

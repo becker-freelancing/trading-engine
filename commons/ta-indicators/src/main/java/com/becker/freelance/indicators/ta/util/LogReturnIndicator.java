@@ -1,27 +1,25 @@
 package com.becker.freelance.indicators.ta.util;
 
 import com.becker.freelance.indicators.ta.cache.CachableIndicator;
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.Indicator;
+import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
+import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
 import org.ta4j.core.num.DecimalNum;
 import org.ta4j.core.num.Num;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
-public class LogReturnIndicator extends CachableIndicator<Integer, Num> implements Indicator<Num> {
+public class LogReturnIndicator extends CachableIndicator<LocalDateTime, Num> implements TemporalIndicator<Num> {
 
-    private final Indicator<Num> closePrice;
+    private final TemporalIndicator<Num> closePrice;
 
-    public LogReturnIndicator(Indicator<Num> closePrice) {
+    public LogReturnIndicator(TemporalIndicator<Num> closePrice) {
         super(1000);
         this.closePrice = closePrice;
     }
 
     @Override
-    public Num getValue(int index) {
-        if (index == 0) {
-            return DecimalNum.ZERO;
-        }
+    public Num getValue(LocalDateTime index) {
         Optional<Num> inCache = findInCache(index);
 
         if (inCache.isPresent()) {
@@ -29,7 +27,7 @@ public class LogReturnIndicator extends CachableIndicator<Integer, Num> implemen
         }
 
         double v = closePrice.getValue(index).doubleValue();
-        double v1 = closePrice.getValue(index - 1).doubleValue();
+        double v1 = closePrice.getValue(index.minus(getBarSeries().getPairDuration())).doubleValue();
         double log = Math.log(v / v1);
         DecimalNum decimalNum = DecimalNum.valueOf(log);
         putInCache(index, decimalNum);
@@ -43,7 +41,7 @@ public class LogReturnIndicator extends CachableIndicator<Integer, Num> implemen
     }
 
     @Override
-    public BarSeries getBarSeries() {
+    public TemporalBarSeries getBarSeries() {
         return closePrice.getBarSeries();
     }
 }

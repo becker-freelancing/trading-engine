@@ -1,21 +1,23 @@
 package com.becker.freelance.indicators.ta.regime;
 
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.Indicator;
+import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
+import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
 
-class DisabledMarketRegimeIndicator implements Indicator<TradeableMarketRegime> {
+import java.time.LocalDateTime;
+
+class DisabledMarketRegimeIndicator implements TemporalIndicator<TradeableMarketRegime> {
 
     private static final TradeableMarketRegime REGIME = new DisabledMarketRegime();
 
-    private final BarSeries barSeries;
+    private final TemporalBarSeries barSeries;
 
-    DisabledMarketRegimeIndicator(BarSeries barSeries) {
+    public DisabledMarketRegimeIndicator(TemporalBarSeries barSeries) {
         this.barSeries = barSeries;
     }
 
     @Override
-    public TradeableMarketRegime getValue(int i) {
+    public TradeableMarketRegime getValue(LocalDateTime i) {
         return REGIME;
     }
 
@@ -25,7 +27,7 @@ class DisabledMarketRegimeIndicator implements Indicator<TradeableMarketRegime> 
     }
 
     @Override
-    public BarSeries getBarSeries() {
+    public TemporalBarSeries getBarSeries() {
         return barSeries;
     }
 

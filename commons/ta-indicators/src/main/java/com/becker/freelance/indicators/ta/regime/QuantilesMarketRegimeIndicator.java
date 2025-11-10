@@ -2,26 +2,27 @@ package com.becker.freelance.indicators.ta.regime;
 
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.indicators.ta.cache.CachableIndicator;
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.Indicator;
+import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
+import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class QuantilesMarketRegimeIndicator extends CachableIndicator<Integer, QuantileMarketRegime> implements Indicator<TradeableMarketRegime> {
+public class QuantilesMarketRegimeIndicator extends CachableIndicator<LocalDateTime, QuantileMarketRegime> implements TemporalIndicator<TradeableMarketRegime> {
 
-    private final Indicator<DurationMarketRegime> regimeIndicator;
+    private final TemporalIndicator<DurationMarketRegime> regimeIndicator;
     private final Map<MarketRegime, List<Double>> quantiles;
 
-    public QuantilesMarketRegimeIndicator(Indicator<DurationMarketRegime> regimeIndicator, Map<MarketRegime, List<Double>> quantiles) {
+    public QuantilesMarketRegimeIndicator(TemporalIndicator<DurationMarketRegime> regimeIndicator, Map<MarketRegime, List<Double>> quantiles) {
         super(1000);
         this.regimeIndicator = regimeIndicator;
         this.quantiles = quantiles;
     }
 
     @Override
-    public QuantileMarketRegime getValue(int index) {
+    public QuantileMarketRegime getValue(LocalDateTime index) {
         Optional<QuantileMarketRegime> inCache = findInCache(index);
         if (inCache.isPresent()) {
             return inCache.get();
@@ -68,7 +69,7 @@ public class QuantilesMarketRegimeIndicator extends CachableIndicator<Integer, Q
     }
 
     @Override
-    public BarSeries getBarSeries() {
+    public TemporalBarSeries getBarSeries() {
         return regimeIndicator.getBarSeries();
     }
 }

@@ -2,10 +2,10 @@ package com.becker.freelance.indicators.ta.regime;
 
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
+import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
+import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.Indicator;
 import org.ta4j.core.num.Num;
 
 import java.io.IOException;
@@ -19,9 +19,9 @@ import java.util.stream.IntStream;
 
 public class RegimeIndicatorFactory {
 
-    public Indicator<TradeableMarketRegime> marketRegimeIndicatorForStrategy(Pair pair, Indicator<Num> closePrice) {
+    public TemporalIndicator<TradeableMarketRegime> marketRegimeIndicatorForStrategy(Pair pair, TemporalIndicator<Num> closePrice) {
         if (isRegimeDetectionDisabled()){
-            return getDisabledIndicator(closePrice);
+            return getDisabledIndicator(closePrice.getBarSeries());
         }
         if (divideRegimesIntoQuantiles(pair)) {
             return quantileMarketRegimeIndicator(pair, closePrice);
@@ -29,7 +29,7 @@ public class RegimeIndicatorFactory {
         return marketRegimeIndicatorFromConfigFile(pair, closePrice);
     }
 
-    public Indicator<TradeableMarketRegime> marketRegimeIndicatorFromConfigFile(Pair pair, Indicator<Num> closePrice) {
+    public TemporalIndicator<TradeableMarketRegime> marketRegimeIndicatorFromConfigFile(Pair pair, TemporalIndicator<Num> closePrice) {
         if (isRegimeDetectionDisabled()){
             throw new IllegalStateException("Market Regime Detection is disabled");
         }
@@ -42,14 +42,14 @@ public class RegimeIndicatorFactory {
         );
     }
 
-    private Indicator<DurationMarketRegime> durationMarketRegimeIndicator(Indicator<TradeableMarketRegime> marketRegimeIndicator) {
+    private TemporalIndicator<DurationMarketRegime> durationMarketRegimeIndicator(TemporalIndicator<TradeableMarketRegime> marketRegimeIndicator) {
 
         return new DurationMarketRegimeIndicator(marketRegimeIndicator);
     }
 
-    public Indicator<TradeableMarketRegime> quantileMarketRegimeIndicator(Pair pair, Indicator<Num> closePrice) {
-        Indicator<TradeableMarketRegime> regimeIndicator = marketRegimeIndicatorFromConfigFile(pair, closePrice);
-        Indicator<DurationMarketRegime> durationMarketRegimeIndicator = durationMarketRegimeIndicator(regimeIndicator);
+    public TemporalIndicator<TradeableMarketRegime> quantileMarketRegimeIndicator(Pair pair, TemporalIndicator<Num> closePrice) {
+        TemporalIndicator<TradeableMarketRegime> regimeIndicator = marketRegimeIndicatorFromConfigFile(pair, closePrice);
+        TemporalIndicator<DurationMarketRegime> durationMarketRegimeIndicator = durationMarketRegimeIndicator(regimeIndicator);
         JSONObject configForPair = loadConfigForPair(pair).getJSONObject("quantileRegimeDetector");
         Map<MarketRegime, List<Double>> quantiles = Arrays.stream(MarketRegime.values())
                 .map(regime -> new AbstractMap.SimpleEntry<>(regime, configForPair.getJSONArray(regime.toString())))
@@ -60,11 +60,7 @@ public class RegimeIndicatorFactory {
         return new QuantilesMarketRegimeIndicator(durationMarketRegimeIndicator, quantiles);
     }
 
-    private Indicator<TradeableMarketRegime> getDisabledIndicator(Indicator<Num> closePrice){
-        return getDisabledIndicator(closePrice.getBarSeries()) ;
-    }
-
-    private Indicator<TradeableMarketRegime> getDisabledIndicator(BarSeries barSeries) {
+    private TemporalIndicator<TradeableMarketRegime> getDisabledIndicator(TemporalBarSeries barSeries) {
         return new DisabledMarketRegimeIndicator(barSeries);
     }
 

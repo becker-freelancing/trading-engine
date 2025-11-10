@@ -1,13 +1,14 @@
 package com.becker.freelance.indicators.ta.util;
 
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.Indicator;
+import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
+import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
-public record OptionalIndicator<T>(Indicator<T> baseIndicator) implements Indicator<Optional<T>> {
+public record OptionalIndicator<T>(TemporalIndicator<T> baseIndicator) implements TemporalIndicator<Optional<T>> {
     @Override
-    public Optional<T> getValue(int index) {
+    public Optional<T> getValue(LocalDateTime index) {
         return Optional.ofNullable(baseIndicator().getValue(index));
     }
 
@@ -17,7 +18,7 @@ public record OptionalIndicator<T>(Indicator<T> baseIndicator) implements Indica
     }
 
     @Override
-    public BarSeries getBarSeries() {
+    public TemporalBarSeries getBarSeries() {
         return baseIndicator().getBarSeries();
     }
 }

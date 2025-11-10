@@ -1,41 +1,44 @@
 package com.becker.freelance.indicators.ta.util;
 
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.Indicator;
-import org.ta4j.core.num.DecimalNum;
+import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
+import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
 import org.ta4j.core.num.Num;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class RollingVarianceIndicator implements Indicator<Optional<Double>> {
+public class RollingVarianceIndicator implements TemporalIndicator<Optional<Double>> {
 
-    private final Indicator<Optional<Num>> baseIndicator;
+    private final TemporalIndicator<Optional<Num>> baseIndicator;
     private final int variancePeriod;
-    private Map<Integer, Double> cache = new HashMap<>();
+    private Map<LocalDateTime, Double> cache = new HashMap<>();
 
-    public RollingVarianceIndicator(Indicator<Optional<Num>> baseIndicator, int variancePeriod) {
+    public RollingVarianceIndicator(TemporalIndicator<Optional<Num>> baseIndicator, int variancePeriod) {
         this.baseIndicator = baseIndicator;
         this.variancePeriod = variancePeriod;
     }
 
     @Override
-    public Optional<Double> getValue(int index) {
+    public Optional<Double> getValue(LocalDateTime index) {
         cache.computeIfAbsent(index, idx -> {
-            if (index - variancePeriod + 1 < 0) {
+            LocalDateTime start = index.minus(getBarSeries().getPairDuration().multipliedBy(variancePeriod - 1));
+            if (start.isBefore(getBarSeries().getMinTime())) {
                 return null;
             }
             double sum = 0.;
             double sumsq = 0.;
-            for (int i = index - variancePeriod + 1; i <= index; i++) {
-                Optional<Num> value = baseIndicator.getValue(i);
+
+            while (start.isBefore(index) || start.equals(index)) {
+                Optional<Num> value = baseIndicator.getValue(index);
                 if (value.isEmpty()) {
                     return null;
                 }
                 double baseValue = value.get().doubleValue();
                 sum += baseValue;
                 sumsq += (baseValue * baseValue);
+                start = start.plus(getBarSeries().getPairDuration());
             }
             double mean = sum / variancePeriod;
             double meanSq = sumsq / variancePeriod;
@@ -51,7 +54,7 @@ public class RollingVarianceIndicator implements Indicator<Optional<Double>> {
     }
 
     @Override
-    public BarSeries getBarSeries() {
+    public TemporalBarSeries getBarSeries() {
         return baseIndicator.getBarSeries();
     }
 }

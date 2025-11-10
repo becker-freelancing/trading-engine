@@ -1,40 +1,44 @@
 package com.becker.freelance.indicators.ta.util;
 
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.Indicator;
+import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
+import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
 import org.ta4j.core.num.DecimalNum;
 import org.ta4j.core.num.Num;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class RollingMeanIndicator implements Indicator<Optional<Num>> {
+public class RollingMeanIndicator implements TemporalIndicator<Optional<Num>> {
 
-    private final Indicator<Optional<Num>> baseIndicator;
+    private final TemporalIndicator<Optional<Num>> baseIndicator;
     private final int meanPeriod;
     private final Num meanPeriodNum;
-    private final Map<Integer, Num> cache = new HashMap<>();
+    private final Map<LocalDateTime, Num> cache = new HashMap<>();
 
-    public RollingMeanIndicator(Indicator<Optional<Num>> baseIndicator, int meanPeriod) {
+    public RollingMeanIndicator(TemporalIndicator<Optional<Num>> baseIndicator, int meanPeriod) {
         this.baseIndicator = baseIndicator;
         this.meanPeriod = meanPeriod;
         this.meanPeriodNum = DecimalNum.valueOf(meanPeriod);
     }
 
     @Override
-    public Optional<Num> getValue(int index) {
+    public Optional<Num> getValue(LocalDateTime index) {
         cache.computeIfAbsent(index, idx -> {
-            if (index - meanPeriod + 1 < 0) {
+
+            LocalDateTime start = index.minus(getBarSeries().getPairDuration().multipliedBy(meanPeriod - 1));
+            if (start.isBefore(getBarSeries().getMinTime())) {
                 return null;
             }
             double sum = 0.;
-            for (int i = index - meanPeriod + 1; i <= index; i++) {
-                Optional<Num> value = baseIndicator.getValue(i);
+            while (start.isBefore(index) || start.isEqual(index)) {
+                Optional<Num> value = baseIndicator.getValue(start);
                 if (value.isEmpty()) {
                     return null;
                 }
                 sum += value.get().doubleValue();
+                start = start.plus(getBarSeries().getPairDuration());
             }
 
             Num value = DecimalNum.valueOf(sum).dividedBy(meanPeriodNum);
@@ -49,7 +53,7 @@ public class RollingMeanIndicator implements Indicator<Optional<Num>> {
     }
 
     @Override
-    public BarSeries getBarSeries() {
+    public TemporalBarSeries getBarSeries() {
         return baseIndicator.getBarSeries();
     }
 }

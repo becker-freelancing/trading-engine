@@ -1,18 +1,18 @@
 package com.becker.freelance.indicators.ta.util;
 
 import com.becker.freelance.indicators.ta.cache.CachableIndicator;
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.Indicator;
-import org.ta4j.core.num.DecimalNum;
+import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
+import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
 import org.ta4j.core.num.Num;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
-public class VolatilityIndicator extends CachableIndicator<Integer, Double> implements Indicator<Optional<Double>> {
+public class VolatilityIndicator extends CachableIndicator<LocalDateTime, Double> implements TemporalIndicator<Optional<Double>> {
 
-    private final Indicator<Optional<Double>> varianceIndicator;
+    private final TemporalIndicator<Optional<Double>> varianceIndicator;
 
-    public VolatilityIndicator(Indicator<Num> closePriceIndicator, int period) {
+    public VolatilityIndicator(TemporalIndicator<Num> closePriceIndicator, int period) {
         super(1000);
         LogReturnIndicator logReturnIndicator = new LogReturnIndicator(closePriceIndicator);
         RollingMeanIndicator rollingMeanIndicator = new RollingMeanIndicator(new OptionalIndicator<>(logReturnIndicator), period);
@@ -20,7 +20,7 @@ public class VolatilityIndicator extends CachableIndicator<Integer, Double> impl
     }
 
     @Override
-    public Optional<Double> getValue(int index) {
+    public Optional<Double> getValue(LocalDateTime index) {
         Optional<Double> inCache = findInCache(index);
         if (inCache.isPresent()) {
             return inCache;
@@ -36,7 +36,7 @@ public class VolatilityIndicator extends CachableIndicator<Integer, Double> impl
     }
 
     @Override
-    public BarSeries getBarSeries() {
+    public TemporalBarSeries getBarSeries() {
         return varianceIndicator.getBarSeries();
     }
 }
