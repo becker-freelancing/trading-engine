@@ -7,10 +7,10 @@ import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.engine.StrategySupplier;
 import com.becker.freelance.strategies.strategy.TradingStrategy;
-import com.becker.freelance.trading.external.services.broker.AccountBalanceRequestor;
-import com.becker.freelance.trading.external.services.broker.AccountBalanceRequestorBuilder;
 import com.becker.freelance.trading.external.services.management.environment.TimeChangeListener;
 import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
+import com.becker.freelance.trading.external.services.remote.broker.RemoteAccountBalanceRequestor;
+import com.becker.freelance.trading.external.services.remote.broker.RemoteAccountBalanceRequestorBuilder;
 import com.becker.freelance.trading.external.services.remote.candles.RemoteCandleDataSource;
 import com.becker.freelance.trading.external.services.remote.candles.RemoteCandleDataSourceBuilder;
 import com.becker.freelance.trading.external.services.remote.candles.RemoteCandleSourceBuilderParams;
@@ -51,7 +51,7 @@ public class RemoteExecutionExecutor implements Runnable {
                     dataSourceBuilder.createEuroUsdRequestor()
             ));
 
-            AccountBalanceRequestor accountBalanceRequestor = externalServiceRegistry.requireServiceBuilder(AccountBalanceRequestorBuilder.class).build();
+            RemoteAccountBalanceRequestor accountBalanceRequestor = externalServiceRegistry.requireServiceBuilder(RemoteAccountBalanceRequestorBuilder.class).build();
 
             RemoteCandleDataSource candleDataSource = dataSourceBuilder.build(new RemoteCandleSourceBuilderParams(pair));
 
