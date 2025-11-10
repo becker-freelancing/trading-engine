@@ -1,14 +1,18 @@
 package com.becker.freelance.backtest;
 
 import com.becker.freelance.backtest.configuration.BacktestExecutionConfiguration;
+import com.becker.freelance.backtest.wallet.BacktestWallet;
 import com.becker.freelance.commons.app.AppConfiguration;
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.trade.Trade;
+import com.becker.freelance.commons.wallet.Wallet;
 import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.engine.StrategySupplier;
 import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.strategy.TradingStrategy;
+import com.becker.freelance.trading.external.services.backtest.broker.BacktestAccountBalanceRequestor;
+import com.becker.freelance.trading.external.services.backtest.broker.BacktestAccountBalanceRequestorBuilder;
 import com.becker.freelance.trading.external.services.backtest.callbacks.BacktestFinishedCallback;
 import com.becker.freelance.trading.external.services.backtest.candles.BacktestCandleDataSource;
 import com.becker.freelance.trading.external.services.backtest.candles.BacktestCandleDataSourceBuilder;
@@ -18,8 +22,6 @@ import com.becker.freelance.trading.external.services.backtest.earlystop.NoStopE
 import com.becker.freelance.trading.external.services.backtest.tradeexecution.BacktestTradeExecutor;
 import com.becker.freelance.trading.external.services.backtest.tradeexecution.BacktestTradeExecutorBuildParams;
 import com.becker.freelance.trading.external.services.backtest.tradeexecution.BacktestTradeExecutorBuilder;
-import com.becker.freelance.trading.external.services.broker.AccountBalanceRequestor;
-import com.becker.freelance.trading.external.services.broker.AccountBalanceRequestorBuilder;
 import com.becker.freelance.trading.external.services.management.environment.TimeChangeListener;
 import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
 import com.becker.freelance.trading.external.services.registry.ScopedExternalServiceRegistry;
@@ -34,6 +36,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class BacktestExecutor implements Runnable {
 
@@ -71,7 +74,6 @@ public class BacktestExecutor implements Runnable {
 
             BacktestTradeExecutorBuilder tradeExecutorBuilder = externalServiceRegistry.requireSupportsServiceBuilder(BacktestTradeExecutorBuilder.class, appConfiguration.appMode());
             BacktestCandleDataSourceBuilder dataProviderFactory = externalServiceRegistry.requireSupportsServiceBuilder(BacktestCandleDataSourceBuilder.class, appConfiguration.appMode());
-            AccountBalanceRequestor accountBalanceRequestor = externalServiceRegistry.requireServiceBuilder(AccountBalanceRequestorBuilder.class).build();
 
             LocalDateTime minTime = backtestExecutionConfiguration.startTime();
             LocalDateTime maxTime = backtestExecutionConfiguration.endTime();
@@ -87,11 +89,15 @@ public class BacktestExecutor implements Runnable {
             List<BacktestTradeExecutor> tradeExecutors = new ArrayList<>();
 
             EarlyStopCallbackImpl earlyStopCallback = new EarlyStopCallbackImpl(backtestExecutionConfiguration.initialWalletAmount());
-
+            BacktestWallet wallet = new BacktestWallet(backtestExecutionConfiguration.initialWalletAmount());
+            Supplier<Wallet> walletSupplier = () -> wallet;
             for (Pair pair : backtestExecutionConfiguration.pairs()) {
                 BacktestTradeExecutor tradeExecutor = tradeExecutorBuilder.build(new BacktestTradeExecutorBuildParams(backtestExecutionConfiguration, pair, euroUsdRequestor));
                 tradeExecutor.addClosedTradeSubscriber(earlyStopCallback);
+                tradeExecutor.setWallet(walletSupplier);
                 tradeExecutors.add(tradeExecutor);
+                BacktestAccountBalanceRequestor accountBalanceRequestor = externalServiceRegistry.requireServiceBuilder(BacktestAccountBalanceRequestorBuilder.class).build();
+                accountBalanceRequestor.setWallet(wallet);
 
                 BacktestCandleDataSource dataProviderForPair = dataProviderFactory.build(new BacktestCandleSourceBuilderParams(pair, backtestSynchronizer));
                 Consumer<TimeChangeListener> timeChangeListenerConsumer = listener -> backtestSynchronizer.addPrioritySubscriber(new TimeChangeListenerSynchronizeable(listener));

@@ -8,7 +8,7 @@ public class NoStopEarlyStopCallbackResult implements EarlyStopCallbackResult {
 
     @Override
     public boolean shouldStop() {
-        return true;
+        return false;
     }
 
     @Override

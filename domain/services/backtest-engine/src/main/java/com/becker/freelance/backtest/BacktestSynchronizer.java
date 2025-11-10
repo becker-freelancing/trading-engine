@@ -40,10 +40,10 @@ public class BacktestSynchronizer implements Synchronizer {
     }
 
     public void setTime(LocalDateTime time) {
+        currentTime = time;
         if (!validTimes.test(time)) {
             return;
         }
-        currentTime = time;
         prioritySubscribers.forEach(synchronizeable -> synchronizeable.synchronize(time));
         subscribers.forEach(synchronizeable -> synchronizeable.synchronize(time));
     }
