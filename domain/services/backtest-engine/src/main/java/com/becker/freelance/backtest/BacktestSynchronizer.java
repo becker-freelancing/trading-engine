@@ -7,14 +7,11 @@ import com.becker.freelance.trading.external.services.candles.Synchronizeable;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
 public class BacktestSynchronizer implements Synchronizer {
 
-    private final LocalDateTime minTime;
-    private final LocalDateTime maxTime;
     private final Set<Synchronizeable> prioritySubscribers;
     private final Set<Synchronizeable> subscribers;
     private final Duration timeShift;
@@ -27,8 +24,6 @@ public class BacktestSynchronizer implements Synchronizer {
         this.validTimes = validTimes;
         this.subscribers = new LinkedHashSet<>();
         this.prioritySubscribers = new LinkedHashSet<>();
-        this.minTime = minTime;
-        this.maxTime = maxTime;
         this.currentTime = TimeUtil.nextAligned(minTime, timeShift);
     }
 
@@ -63,13 +58,4 @@ public class BacktestSynchronizer implements Synchronizer {
         subscribers.add(synchronizeable);
     }
 
-    @Override
-    public Optional<LocalDateTime> minTime() {
-        return Optional.of(minTime);
-    }
-
-    @Override
-    public Optional<LocalDateTime> maxTime() {
-        return Optional.of(maxTime);
-    }
 }

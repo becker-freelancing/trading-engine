@@ -26,6 +26,7 @@ import com.becker.freelance.trading.external.services.management.validation.Comp
 import com.becker.freelance.trading.external.services.management.validation.EntrySignalValidator;
 import com.becker.freelance.trading.external.services.management.validation.EntrySignalValidatorBuilder;
 import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
+import com.becker.freelance.trading.external.services.registry.ScopedExternalServiceRegistry;
 import com.becker.freelance.trading.external.services.tradeexecution.TradeExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,10 +53,11 @@ public class StrategyEngine {
                           PriceRequestor priceRequestor,
                           Consumer<TimeChangeListener> timeChangeListenerConsumer,
                           BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator,
-                          AccountBalanceRequestor accountBalanceRequestor) {
+                          AccountBalanceRequestor accountBalanceRequestor,
+                          ScopedExternalServiceRegistry scopedExternalServiceRegistry) {
         this.tradeExecutor = tradeExecutor;
 
-        ExternalServiceRegistry externalServiceRegistry = ExternalServiceRegistry.newInstance();
+        ExternalServiceRegistry externalServiceRegistry = ExternalServiceRegistry.globalServiceRegistry();
         this.entrySignalAdaptor = externalServiceRegistry.requireServiceBuilder(EntrySignalAdaptorBuilder.class).build();
         this.entrySignalValidator = externalServiceRegistry.requireServiceBuilder(EntrySignalValidatorBuilder.class).build(CompositeStrategy.ALL_MATCH);
         BrokerSpecificsRequestor brokerSpecificsRequestor = externalServiceRegistry.requireServiceBuilder(BrokerSpecificsRequestorBuilder.class).build();
@@ -70,7 +72,7 @@ public class StrategyEngine {
                         TradingFeeCalculator.fromConfigFile()
                 ));
         timeChangeListenerConsumer.accept(this.environmentProvider);
-        this.strategy = strategySupplier.get(pair, brokerSpecificsRequestor.getTradingCalculator(eurUsdRequestor));
+        this.strategy = strategySupplier.get(pair, brokerSpecificsRequestor.getTradingCalculator(eurUsdRequestor), scopedExternalServiceRegistry);
         this.strategy.setOpenPositionRequestor(tradeExecutor);
         this.strategy.beforeFirstBar(strategyInitiator);
     }

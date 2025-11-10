@@ -7,6 +7,7 @@ import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
 import com.becker.freelance.trading.external.services.broker.OpenPositionRequestor;
+import com.becker.freelance.trading.external.services.registry.ScopedExternalServiceRegistry;
 import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +91,11 @@ public class RegimeStrategy extends SingleTimeFrameBaseStrategy {
         @Override
         public Set<? extends TradeableMarketRegime> activeOnRegimes() {
             return Set.of();
+        }
+
+        @Override
+        public ScopedExternalServiceRegistry scopedExternalServiceRegistry() {
+            throw new UnsupportedOperationException("Not implemented yet");
         }
 
         @Override

@@ -22,6 +22,7 @@ import com.becker.freelance.trading.external.services.broker.AccountBalanceReque
 import com.becker.freelance.trading.external.services.broker.AccountBalanceRequestorBuilder;
 import com.becker.freelance.trading.external.services.management.environment.TimeChangeListener;
 import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
+import com.becker.freelance.trading.external.services.registry.ScopedExternalServiceRegistry;
 import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +66,8 @@ public class BacktestExecutor implements Runnable {
     @Override
     public void run() {
         try {
-            ExternalServiceRegistry externalServiceRegistry = ExternalServiceRegistry.newInstance();
+            ExternalServiceRegistry externalServiceRegistry = ExternalServiceRegistry.globalServiceRegistry();
+            ScopedExternalServiceRegistry scopedExternalServiceRegistry = externalServiceRegistry.newScopedExternalServiceRegistry();
 
             BacktestTradeExecutorBuilder tradeExecutorBuilder = externalServiceRegistry.requireSupportsServiceBuilder(BacktestTradeExecutorBuilder.class, appConfiguration.appMode());
             BacktestCandleDataSourceBuilder dataProviderFactory = externalServiceRegistry.requireSupportsServiceBuilder(BacktestCandleDataSourceBuilder.class, appConfiguration.appMode());
@@ -76,6 +78,8 @@ public class BacktestExecutor implements Runnable {
             BacktestSynchronizer backtestSynchronizer = new BacktestSynchronizer(minTime, maxTime,
                     findMaximumTimeShift(backtestExecutionConfiguration.pairs()),
                     new BacktestModeTimeValidator(backtestExecutionConfiguration.backtestMode(), backtestExecutionConfiguration.pairs()));
+
+            scopedExternalServiceRegistry.registerScopedExternalService(backtestSynchronizer);
 
             EurUsdRequestor euroUsdRequestor = externalServiceRegistry.requireServiceBuilder(BacktestCandleDataSourceBuilder.class)
                     .createEuroUsdRequestor(backtestSynchronizer);
@@ -99,7 +103,8 @@ public class BacktestExecutor implements Runnable {
                         dataProviderForPair,
                         timeChangeListenerConsumer,
                         strategyInitiator,
-                        accountBalanceRequestor);
+                        accountBalanceRequestor,
+                        scopedExternalServiceRegistry);
                 StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine);
                 dataProviderForPair.addSubscriber(strategyDataSubscriber);
             }

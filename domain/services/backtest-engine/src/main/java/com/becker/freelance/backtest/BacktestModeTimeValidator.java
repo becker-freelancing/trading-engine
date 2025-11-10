@@ -40,7 +40,7 @@ class BacktestModeTimeValidator implements Predicate<LocalDateTime> {
         this.executionDuration = getExecutionDuration(backtestMode, trainDuration, valDuration, testDuration);
         this.skipDuration = getSkipDuration(backtestMode, trainDuration, valDuration, testDuration);
 
-        BacktestDataTotalTimeProvider backtestDataTotalTimeProvider = ExternalServiceRegistry.newInstance().requireServiceBuilder(BacktestDataTotalTimeProviderBuilder.class).build();
+        BacktestDataTotalTimeProvider backtestDataTotalTimeProvider = ExternalServiceRegistry.globalServiceRegistry().requireServiceBuilder(BacktestDataTotalTimeProviderBuilder.class).build();
 
         LocalDateTime startTime = pairs.stream()
                 .map(backtestDataTotalTimeProvider::getAbsoluteMinTime)

@@ -14,7 +14,7 @@ import com.becker.freelance.math.Decimal;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
 import com.becker.freelance.trading.external.services.broker.OpenPositionRequestor;
-import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
+import com.becker.freelance.trading.external.services.registry.ScopedExternalServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ta4j.core.Bar;
@@ -22,6 +22,8 @@ import org.ta4j.core.BarSeries;
 import org.ta4j.core.BaseBarSeries;
 import org.ta4j.core.Indicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
+import org.ta4j.core.indicators.helpers.HighPriceIndicator;
+import org.ta4j.core.indicators.helpers.LowPriceIndicator;
 import org.ta4j.core.num.Num;
 
 import java.time.Duration;
@@ -37,24 +39,28 @@ public abstract class SingleTimeFrameBaseStrategy implements TradingStrategy {
     private static final Logger logger = LoggerFactory.getLogger(SingleTimeFrameBaseStrategy.class);
     protected final BarSeries barSeries;
     protected final Indicator<Num> closePrice;
+    protected final Indicator<Num> lowPrice;
+    protected final Indicator<Num> highPrice;
     private final Pair pair;
     private final Indicator<TradeableMarketRegime> regimeIndicator;
     private final Set<BiConsumer<TradingStrategy, LocalDateTime>> beforeFirstBar;
-    private final ExternalServiceRegistry externalServiceRegistry;
     private OpenPositionRequestor openPositionRequestor;
     private ZonedDateTime lastAddedBarTime;
     private boolean initiated = false;
+    private ScopedExternalServiceRegistry scopedExternalServiceRegistry;
 
     protected SingleTimeFrameBaseStrategy(StrategyParameter strategyParameter) {
         this.barSeries = new BaseBarSeries();
         this.closePrice = new ClosePriceIndicator(barSeries);
-        this.externalServiceRegistry = new ExternalServiceRegistry();
+        this.lowPrice = new LowPriceIndicator(barSeries);
+        this.highPrice = new HighPriceIndicator(barSeries);
 
         Pair pair = strategyParameter.pair();
         RegimeIndicatorFactory regimeIndicatorFactory = new RegimeIndicatorFactory();
         this.regimeIndicator = regimeIndicatorFactory.marketRegimeIndicatorForStrategy(pair, closePrice);
         this.beforeFirstBar = new HashSet<>();
         this.pair = strategyParameter.pair();
+        this.scopedExternalServiceRegistry = strategyParameter.scopedExternalServiceRegistry();
     }
 
     public Optional<EntrySignalBuilder> shouldEnter(EntryExecutionParameter entryParameter) {
@@ -158,5 +164,9 @@ public abstract class SingleTimeFrameBaseStrategy implements TradingStrategy {
             case BUY -> currentPrice.getClosePriceForDirection(direction).subtract(distance);
             case SELL -> currentPrice.getClosePriceForDirection(direction).add(distance);
         };
+    }
+
+    protected ScopedExternalServiceRegistry getScopedExternalServiceRegistry() {
+        return scopedExternalServiceRegistry;
     }
 }

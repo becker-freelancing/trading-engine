@@ -132,12 +132,12 @@ abstract class AbstractLocalBacktestApp {
     }
 
     private StrategySupplier toRegimeStrategySupplier(List<RegimeStrategyCreator> strategyCreators) {
-        return (pair, tradingCalculator) -> {
+        return (pair, tradingCalculator, scopedExternalServiceRegistry) -> {
             Map<TradeableMarketRegime, List<SingleTimeFrameBaseStrategy>> strategiesByRegime = TradeableMarketRegimeWrapper.all().stream().collect(Collectors.toMap(
                     regime -> regime,
                     regime -> strategyCreators.stream().filter(strategyCreator -> strategyCreator.regimes().contains(regime))
                             .sorted(Comparator.comparing(RegimeStrategyCreator::priority))
-                            .map(strategyCreator -> (SingleTimeFrameBaseStrategy) strategyCreator.build(strategyCreator.strategyParameterForRegime(regime)))
+                            .map(strategyCreator -> (SingleTimeFrameBaseStrategy) strategyCreator.build(strategyCreator.strategyParameterForRegime(regime, scopedExternalServiceRegistry)))
                             .toList()
             ));
 

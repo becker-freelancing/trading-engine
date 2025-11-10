@@ -75,7 +75,7 @@ public class BacktestEngine {
         this.strategyCreator = strategyCreator;
         this.executor = Executors.newFixedThreadPool(backtestExecutionConfiguration.numberOfThreads());
         this.parameterFilter = parameterFilter;
-        this.onBacktestFinishedCallback = ExternalServiceRegistry.newInstance().requireServiceBuilder(BacktestFinishedCallbackBuilder.class).build(new BacktestFinishedCallbackBuilderParams(backtestExecutionConfiguration.pairs(), strategyName, appConfiguration.applicationStartTime()));
+        this.onBacktestFinishedCallback = ExternalServiceRegistry.globalServiceRegistry().requireServiceBuilder(BacktestFinishedCallbackBuilder.class).build(new BacktestFinishedCallbackBuilderParams(backtestExecutionConfiguration.pairs(), strategyName, appConfiguration.applicationStartTime()));
         this.onExceptionCallback = this::shutdownNowOnException;
         this.onFinished = onFinished;
         this.strategySuppliers = supplierWithParameters;
@@ -131,7 +131,7 @@ public class BacktestEngine {
 
         List<StrategyCreationParameter> parameters;
         try (parameterFilter) {
-            StrategyParamsSampler paramsSampler = ExternalServiceRegistry.newInstance()
+            StrategyParamsSampler paramsSampler = ExternalServiceRegistry.globalServiceRegistry()
                     .requireSupportsServiceBuilder(StrategyParamsSamplerBuilder.class, backtestStage)
                     .build(new StrategyParamsSamplerBuilderParams(
                             backtestExecutionConfiguration.parameterLimit()
@@ -148,8 +148,11 @@ public class BacktestEngine {
     }
 
     private StrategySupplierWithParameters toStrategySupplier(StrategyCreationParameter parameter) {
-        return new StrategySupplierWithParameters((pair, tradingCalculator) -> {
-            DefaultStrategyParameter defaultStrategyParameter = new DefaultStrategyParameter(parameter, pair, TradeableMarketRegimeWrapper.all());
+        return new StrategySupplierWithParameters((pair, tradingCalculator, scopedExternalServiceRegistry) -> {
+            DefaultStrategyParameter defaultStrategyParameter = new DefaultStrategyParameter(parameter,
+                    pair,
+                    TradeableMarketRegimeWrapper.all(),
+                    scopedExternalServiceRegistry);
             return strategyCreator.build(defaultStrategyParameter);
         }, parameter);
     }

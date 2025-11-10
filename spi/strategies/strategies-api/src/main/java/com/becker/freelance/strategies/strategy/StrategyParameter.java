@@ -3,6 +3,7 @@ package com.becker.freelance.strategies.strategy;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.math.Decimal;
+import com.becker.freelance.trading.external.services.registry.ScopedExternalServiceRegistry;
 import com.becker.freelance.trading.external.services.strategies.ParameterName;
 import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 
@@ -16,6 +17,8 @@ public interface StrategyParameter extends StrategyCreationParameter {
     public Pair pair();
 
     public Set<? extends TradeableMarketRegime> activeOnRegimes();
+
+    public ScopedExternalServiceRegistry scopedExternalServiceRegistry();
 
     @Override
     default void addParameter(ParameterName name, Decimal value) {

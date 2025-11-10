@@ -16,7 +16,7 @@ class EarlyStopCallbackImpl implements Consumer<Trade> {
     private int lastExecutedTradesSize;
 
     public EarlyStopCallbackImpl(Decimal initialWalletAmount) {
-        this.delegate = ExternalServiceRegistry.newInstance().requireServiceBuilder(EarlyStopCallbackBuilder.class).build(
+        this.delegate = ExternalServiceRegistry.globalServiceRegistry().requireServiceBuilder(EarlyStopCallbackBuilder.class).build(
                 new EarlyStopBuilderParams(
                         initialWalletAmount
                 )

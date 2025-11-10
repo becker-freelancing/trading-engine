@@ -6,6 +6,7 @@ import com.becker.freelance.strategies.strategy.DefaultStrategyParameter;
 import com.becker.freelance.strategies.strategy.StrategyParameter;
 import com.becker.freelance.strategies.strategy.TradingStrategy;
 import com.becker.freelance.strategies.validinitparameter.ValidStrategyInitParameters;
+import com.becker.freelance.trading.external.services.registry.ScopedExternalServiceRegistry;
 
 import java.util.Set;
 
@@ -26,14 +27,15 @@ public record RegimeStrategyCreator(StrategyCreator baseCreator,
         return baseCreator.strategyParameters();
     }
 
-    public StrategyParameter strategyParameterForRegime(TradeableMarketRegime regime) {
+    public StrategyParameter strategyParameterForRegime(TradeableMarketRegime regime, ScopedExternalServiceRegistry scopedExternalServiceRegistry) {
         if (!regimes().contains(regime)) {
             throw new IllegalArgumentException("Regime " + regime + " not supported for strategy " + strategyName());
         }
         return new DefaultStrategyParameter(
                 strategyCreationParameter(),
                 pair,
-                regimes());
+                regimes(),
+                scopedExternalServiceRegistry);
     }
 
     @Override

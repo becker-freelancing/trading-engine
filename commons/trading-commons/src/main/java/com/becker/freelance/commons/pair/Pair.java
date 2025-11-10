@@ -101,4 +101,13 @@ public interface Pair {
         return this.baseCurrency().equals(pair.baseCurrency()) &&
                 this.counterCurrency().equals(pair.counterCurrency());
     }
+
+    default Pair inResolution(Duration resolution) {
+
+        String shortName = shortName().split("_")[0] + "_" + resolution.toMinutes();
+        return PairProvider.allPairs().stream()
+                .filter(p -> shortName.equals(p.shortName()))
+                .findAny()
+                .orElseThrow(() -> new IllegalStateException("Could not find pair " + shortName + " in pairs " + PairProvider.allPairs()));
+    }
 }

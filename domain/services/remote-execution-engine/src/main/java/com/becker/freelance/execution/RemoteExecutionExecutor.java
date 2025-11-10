@@ -42,7 +42,7 @@ public class RemoteExecutionExecutor implements Runnable {
     public void run() {
         try {
 
-            ExternalServiceRegistry externalServiceRegistry = ExternalServiceRegistry.newInstance();
+            ExternalServiceRegistry externalServiceRegistry = ExternalServiceRegistry.globalServiceRegistry();
             RemoteCandleDataSourceBuilder dataSourceBuilder = externalServiceRegistry.requireServiceBuilder(RemoteCandleDataSourceBuilder.class);
 
             RemoteTradeExecutorBuilder tradeExecutorBuilder = externalServiceRegistry.requireServiceBuilder(RemoteTradeExecutorBuilder.class);
@@ -68,7 +68,8 @@ public class RemoteExecutionExecutor implements Runnable {
                     candleDataSource,
                     timeChangeListeners::add,
                     strategyInitiator,
-                    accountBalanceRequestor);
+                    accountBalanceRequestor,
+                    externalServiceRegistry.newScopedExternalServiceRegistry());
 
             StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine, timeChangeListeners);
             candleDataSource.addSubscriber(strategyDataSubscriber);
