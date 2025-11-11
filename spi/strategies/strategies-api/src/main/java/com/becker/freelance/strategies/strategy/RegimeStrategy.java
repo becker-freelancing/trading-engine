@@ -82,6 +82,11 @@ public class RegimeStrategy extends SingleTimeFrameBaseStrategy {
         allStrategies.forEach(strategy -> strategy.addBarIfNeeded(currentPrice));
     }
 
+    @Override
+    protected void resetIndicators() {
+        allStrategies.forEach(SingleTimeFrameBaseStrategy::resetIndicators);
+    }
+
     private static final record PairStrategyParameter(Pair pair) implements StrategyParameter {
         @Override
         public StrategyCreationParameter strategyParameter() {

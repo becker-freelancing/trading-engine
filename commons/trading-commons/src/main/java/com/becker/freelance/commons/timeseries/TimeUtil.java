@@ -36,4 +36,14 @@ public class TimeUtil {
 
         return localDateTime;
     }
+
+    public static LocalDateTime lastAligned(LocalDateTime dateTime, Duration timeShift) {
+        LocalDateTime localDateTime = LocalDateTime.of(dateTime.getYear(), dateTime.getMonth(), dateTime.getDayOfMonth(), dateTime.getHour(), dateTime.getMinute());
+
+        while (!isAligned(localDateTime, timeShift)) {
+            localDateTime = localDateTime.minusMinutes(1);
+        }
+
+        return localDateTime;
+    }
 }

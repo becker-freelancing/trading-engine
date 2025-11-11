@@ -52,6 +52,10 @@ public class BacktestSynchronizer implements Synchronizer {
 
     @Override
     public void addPrioritySubscriber(Synchronizeable synchronizeable) {
+        if (prioritySubscribers.contains(synchronizeable)) {
+            return;
+        }
+        subscribers.remove(synchronizeable);
         prioritySubscribers.add(synchronizeable);
     }
 
@@ -62,6 +66,9 @@ public class BacktestSynchronizer implements Synchronizer {
 
     @Override
     public void addSubscriber(Synchronizeable synchronizeable) {
+        if (prioritySubscribers.contains(synchronizeable) || subscribers.contains(synchronizeable)) {
+            return;
+        }
         subscribers.add(synchronizeable);
     }
 

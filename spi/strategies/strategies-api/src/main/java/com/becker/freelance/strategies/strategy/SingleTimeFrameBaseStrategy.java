@@ -42,6 +42,7 @@ public abstract class SingleTimeFrameBaseStrategy implements TradingStrategy {
     private boolean initiated = false;
     private final ScopedExternalServiceRegistry scopedExternalServiceRegistry;
     private LocalDateTime currentTime;
+    private int unstableBars = -1;
 
     protected SingleTimeFrameBaseStrategy(StrategyParameter strategyParameter) {
         this.barSeries = new TemporalBarSeriesImpl(strategyParameter.pair());
@@ -76,7 +77,10 @@ public abstract class SingleTimeFrameBaseStrategy implements TradingStrategy {
     }
 
     private boolean canNotExecute() {
-        return barSeries.getSize() < unstableBars();
+        if (unstableBars == -1) {
+            unstableBars = unstableBars();
+        }
+        return barSeries.getSize() < unstableBars;
     }
 
     protected void addBarIfNeeded(Bar currentPrice) {
@@ -84,9 +88,10 @@ public abstract class SingleTimeFrameBaseStrategy implements TradingStrategy {
             return;
         }
         if (!initiated && barSeries.isEmpty()) {
-            logger.info("Initiating trading strategy");
+            logger.info("Initiating trading strategy at time {}...", currentPrice.getEndTime());
             initiated = true;
             beforeFirstBar.forEach(initiator -> initiator.accept(this, currentPrice.getEndTime().toLocalDateTime()));
+            logger.info("Finished initiating trading strategy at time {}", currentPrice.getEndTime());
         }
         barSeries.addBar(currentPrice);
         lastAddedBarTime = currentPrice.getEndTime();
@@ -189,5 +194,13 @@ public abstract class SingleTimeFrameBaseStrategy implements TradingStrategy {
 
     protected Duration pairDuration() {
         return pair.toDuration();
+    }
+
+    protected abstract void resetIndicators();
+
+    @Override
+    public final void reset() {
+        resetIndicators();
+        initiated = false;
     }
 }

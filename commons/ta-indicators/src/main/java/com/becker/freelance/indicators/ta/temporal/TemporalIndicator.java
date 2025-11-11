@@ -10,4 +10,8 @@ public interface TemporalIndicator<V> {
     int getUnstableBars();
 
     public TemporalBarSeries getBarSeries();
+
+    default void reset() {
+        getBarSeries().reset();
+    }
 }

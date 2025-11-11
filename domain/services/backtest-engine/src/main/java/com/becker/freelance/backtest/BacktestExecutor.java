@@ -101,7 +101,7 @@ public class BacktestExecutor implements Runnable {
 
                 BacktestCandleDataSource dataProviderForPair = dataProviderFactory.build(new BacktestCandleSourceBuilderParams(pair, backtestSynchronizer));
                 Consumer<TimeChangeListener> timeChangeListenerConsumer = listener -> backtestSynchronizer.addPrioritySubscriber(new TimeChangeListenerSynchronizeable(listener));
-                BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = getStrategyInitiator(pair, dataProviderForPair);
+                BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = getStrategyInitiator(dataProviderForPair);
                 StrategyEngine strategyEngine = new StrategyEngine(pair,
                         strategySupplier,
                         tradeExecutor,
@@ -161,23 +161,8 @@ public class BacktestExecutor implements Runnable {
         return parameters;
     }
 
-    private BiConsumer<TradingStrategy, LocalDateTime> getStrategyInitiator(Pair pair, BacktestCandleDataSource subscribableDataProvider) {
-        return (x, y) -> {
-        };
-//        BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = (tradingStrategy, currentTime) -> {
-//            int requiredBarCount = tradingStrategy.unstableBars();
-//            Pair strategyPair = tradingStrategy.getPair();
-//            long barLengthInMinutes = strategyPair.toDuration().toMinutes();
-//            List<TimeSeriesEntry> initiationData = new ArrayList<>();
-//            for (int i = 1; i < requiredBarCount; i++) {
-//                LocalDateTime requestTime = currentTime.minusMinutes(barLengthInMinutes * i);
-//                TimeSeriesEntry priceForTime = subscribableDataProvider.getPriceForTime(strategyPair, requestTime);
-//                initiationData.add(priceForTime);
-//            }
-//            TimeSeries timeSeries = new CompleteTimeSeries(pair, initiationData);
-//            tradingStrategy.processInitData(timeSeries);
-//        };
-//        return strategyInitiator;
+    private BiConsumer<TradingStrategy, LocalDateTime> getStrategyInitiator(BacktestCandleDataSource subscribableDataProvider) {
+        return new BacktestStrategyInitiator(subscribableDataProvider);
     }
 
 }

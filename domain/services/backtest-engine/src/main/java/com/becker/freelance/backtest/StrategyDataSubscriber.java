@@ -19,4 +19,9 @@ public class StrategyDataSubscriber implements DataSubscriber {
     public void consume(TimeSeries timeSeries, LocalDateTime time) {
         strategyEngine.update(timeSeries, time);
     }
+
+    @Override
+    public void onMissingData(LocalDateTime time) {
+        strategyEngine.onMissingData(time);
+    }
 }

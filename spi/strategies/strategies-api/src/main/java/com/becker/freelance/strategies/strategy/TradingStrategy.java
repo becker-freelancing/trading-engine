@@ -30,4 +30,6 @@ public interface TradingStrategy {
     public void beforeFirstBar(BiConsumer<TradingStrategy, LocalDateTime> beforeFirstBar);
 
     public Pair getPair();
+
+    void reset();
 }

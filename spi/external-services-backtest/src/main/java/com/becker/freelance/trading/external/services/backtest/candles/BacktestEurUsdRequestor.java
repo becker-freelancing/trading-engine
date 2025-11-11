@@ -32,4 +32,9 @@ public class BacktestEurUsdRequestor implements EurUsdRequestor, DataSubscriber 
     public void consume(TimeSeries timeSeries, LocalDateTime time) {
         this.eurUsd = timeSeries;
     }
+
+    @Override
+    public void onMissingData(LocalDateTime time) {
+
+    }
 }

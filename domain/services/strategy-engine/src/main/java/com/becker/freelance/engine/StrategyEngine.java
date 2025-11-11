@@ -27,6 +27,9 @@ import com.becker.freelance.trading.external.services.management.validation.Entr
 import com.becker.freelance.trading.external.services.management.validation.EntrySignalValidatorBuilder;
 import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
 import com.becker.freelance.trading.external.services.registry.ScopedExternalServiceRegistry;
+import com.becker.freelance.trading.external.services.strategies.MissingDataHandler;
+import com.becker.freelance.trading.external.services.strategies.MissingDataHandlerBuilder;
+import com.becker.freelance.trading.external.services.strategies.MissingDataHandlerBuilderParams;
 import com.becker.freelance.trading.external.services.tradeexecution.TradeExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +48,7 @@ public class StrategyEngine {
     private final EntrySignalAdaptor entrySignalAdaptor;
     private final EntrySignalValidator entrySignalValidator;
     private final ManagementEnvironmentProvider environmentProvider;
+    private final MissingDataHandler missingDataHandler;
 
     public StrategyEngine(Pair pair,
                           StrategySupplier strategySupplier,
@@ -75,9 +79,11 @@ public class StrategyEngine {
         this.strategy = strategySupplier.get(pair, brokerSpecificsRequestor.getTradingCalculator(eurUsdRequestor), scopedExternalServiceRegistry);
         this.strategy.setOpenPositionRequestor(tradeExecutor);
         this.strategy.beforeFirstBar(strategyInitiator);
+
+        this.missingDataHandler = externalServiceRegistry.requireServiceBuilder(MissingDataHandlerBuilder.class).build(new MissingDataHandlerBuilderParams(pair));
     }
 
-    public void executeForTime(TimeSeries timeSeries, LocalDateTime time, TradingStrategy strategy) {
+    private void executeForTime(TimeSeries timeSeries, LocalDateTime time, TradingStrategy strategy) {
         try {
             if (environmentProvider.getCurrentAccountBalance().isLessThanZero()) {
                 return;
@@ -87,10 +93,16 @@ public class StrategyEngine {
             adaptPositions(currentPrice);
             closePositionsIfSlOrTpReached(currentPrice);
 
+            if (missingDataHandler.shouldResetStrategy()) {
+                strategy.reset();
+                return;
+            }
+
             shouldExit(new DefaultExitExecutionParameter(timeSeries, time, currentPrice), strategy);
             shouldEnter(new DefaultEntryExecutionParameter(timeSeries, time, currentPrice), strategy);
         } catch (Exception e) {
-            logger.error("Error while executing Strategy " + strategy.getClass().getName(), e);
+            logger.error("Error while executing Strategy {}", strategy.getClass().getName(), e);
+            logger.warn("Proceeding strategy execution after error {}", e.getMessage());
         }
     }
 
@@ -118,5 +130,10 @@ public class StrategyEngine {
 
     public void update(TimeSeries timeSeries, LocalDateTime time) {
         executeForTime(timeSeries, time, strategy);
+        missingDataHandler.onDataReceived(time);
+    }
+
+    public void onMissingData(LocalDateTime time) {
+        missingDataHandler.onMissingData(time);
     }
 }

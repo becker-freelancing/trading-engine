@@ -8,8 +8,5 @@ public interface DataSubscriber {
 
     void consume(TimeSeries timeSeries, LocalDateTime time);
 
-    default void onMissingData(LocalDateTime time) {
-    }
-
-    ;
+    void onMissingData(LocalDateTime time);
 }

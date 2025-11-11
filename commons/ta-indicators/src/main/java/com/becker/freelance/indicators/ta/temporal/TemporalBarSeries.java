@@ -10,6 +10,8 @@ public interface TemporalBarSeries {
 
     public int mapTimeToIndex(LocalDateTime time);
 
+    public int mapTimeToLastAvailableIndex(LocalDateTime time);
+
     BarSeries getBarSeries();
 
     boolean isEmpty();
@@ -25,4 +27,6 @@ public interface TemporalBarSeries {
     int getSize();
 
     Bar getBar(LocalDateTime index);
+
+    public void reset();
 }
