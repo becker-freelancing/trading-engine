@@ -1,6 +1,7 @@
 package com.becker.freelance.indicators.ta.temporal;
 
 import org.ta4j.core.indicators.EMAIndicator;
+import org.ta4j.core.num.DecimalNum;
 import org.ta4j.core.num.Num;
 
 import java.time.LocalDateTime;
@@ -33,6 +34,9 @@ public class TemporalEMAIndicator implements TemporalIndicator<Num> {
 
     @Override
     public Num getValue(LocalDateTime time) {
+        if (barSeries.getSize() < emaIndicator.getUnstableBars()) {
+            return DecimalNum.ZERO;
+        }
         int i = allowUsingLastAvailablePrice ? barSeries.mapTimeToLastAvailableIndex(time) : barSeries.mapTimeToIndex(time);
         return emaIndicator.getValue(i);
     }

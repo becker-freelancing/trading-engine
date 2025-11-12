@@ -13,7 +13,7 @@ import java.util.Map;
 public class TemporalBarSeriesImpl implements TemporalBarSeries {
 
     private final Pair pair;
-    private final BarSeries barSeries;
+    private final TemporalTa4JBarSeries barSeries;
     private final Map<LocalDateTime, Integer> indices;
     private final Map<Integer, LocalDateTime> times;
     private LocalDateTime minTime;
@@ -90,8 +90,7 @@ public class TemporalBarSeriesImpl implements TemporalBarSeries {
 
     @Override
     public void reset() {
-        barSeries.setMaximumBarCount(0);
-        barSeries.setMaximumBarCount(Integer.MAX_VALUE);
+        barSeries.clear();
         times.clear();
         indices.clear();
     }

@@ -438,4 +438,9 @@ class TemporalTa4JBarSeries implements BarSeries {
     }
 
 
+    public void clear() {
+        bars.clear();
+        seriesBeginIndex = -1;
+        seriesEndIndex = -1;
+    }
 }
