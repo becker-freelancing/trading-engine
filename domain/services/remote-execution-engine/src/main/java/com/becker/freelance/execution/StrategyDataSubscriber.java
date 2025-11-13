@@ -24,4 +24,9 @@ public class StrategyDataSubscriber implements DataSubscriber {
         timeChangeListeners.forEach(timeChangeListener -> timeChangeListener.onTimeChange(time));
         strategyEngine.update(timeSeries, time);
     }
+
+    @Override
+    public void onMissingData(LocalDateTime time) {
+        strategyEngine.onMissingData(time);
+    }
 }
