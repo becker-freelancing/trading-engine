@@ -1,8 +1,6 @@
 package com.becker.freelance.engine;
 
 import com.becker.freelance.commons.calculation.EurUsdRequestor;
-import com.becker.freelance.commons.calculation.PriceRequestor;
-import com.becker.freelance.commons.calculation.TradingFeeCalculator;
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.signal.ExitSignal;
@@ -16,6 +14,10 @@ import com.becker.freelance.strategies.strategy.TradingStrategy;
 import com.becker.freelance.trading.external.services.broker.AccountBalanceRequestor;
 import com.becker.freelance.trading.external.services.broker.BrokerSpecificsRequestor;
 import com.becker.freelance.trading.external.services.broker.BrokerSpecificsRequestorBuilder;
+import com.becker.freelance.trading.external.services.candles.PriceRequestorBroker;
+import com.becker.freelance.trading.external.services.fees.TradingFeeCalculator;
+import com.becker.freelance.trading.external.services.fees.TradingFeeCalculatorBuilder;
+import com.becker.freelance.trading.external.services.fees.TradingFeeCalculatorBuilderParams;
 import com.becker.freelance.trading.external.services.management.adaption.EntrySignalAdaptor;
 import com.becker.freelance.trading.external.services.management.adaption.EntrySignalAdaptorBuilder;
 import com.becker.freelance.trading.external.services.management.environment.ManagementEnvironmentProvider;
@@ -54,7 +56,7 @@ public class StrategyEngine {
                           StrategySupplier strategySupplier,
                           TradeExecutor tradeExecutor,
                           EurUsdRequestor eurUsdRequestor,
-                          PriceRequestor priceRequestor,
+                          PriceRequestorBroker priceRequestorBroker,
                           Consumer<TimeChangeListener> timeChangeListenerConsumer,
                           BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator,
                           AccountBalanceRequestor accountBalanceRequestor,
@@ -65,6 +67,10 @@ public class StrategyEngine {
         this.entrySignalAdaptor = externalServiceRegistry.requireServiceBuilder(EntrySignalAdaptorBuilder.class).build();
         this.entrySignalValidator = externalServiceRegistry.requireServiceBuilder(EntrySignalValidatorBuilder.class).build(CompositeStrategy.ALL_MATCH);
         BrokerSpecificsRequestor brokerSpecificsRequestor = externalServiceRegistry.requireServiceBuilder(BrokerSpecificsRequestorBuilder.class).build();
+        TradingFeeCalculator tradingFeeCalculator = externalServiceRegistry.requireServiceBuilder(TradingFeeCalculatorBuilder.class).build(new TradingFeeCalculatorBuilderParams(
+                priceRequestorBroker,
+                eurUsdRequestor
+        ));
         this.environmentProvider = externalServiceRegistry.requireServiceBuilder(ManagementEnvironmentProviderBuilder.class)
                 .build(new ManagementEnvironmentProviderBuilderParams(
                         accountBalanceRequestor,
@@ -72,8 +78,8 @@ public class StrategyEngine {
                         tradeExecutor,
                         tradeExecutor,
                         eurUsdRequestor,
-                        priceRequestor,
-                        TradingFeeCalculator.fromConfigFile()
+                        priceRequestorBroker,
+                        tradingFeeCalculator
                 ));
         timeChangeListenerConsumer.accept(this.environmentProvider);
         this.strategy = strategySupplier.get(pair, brokerSpecificsRequestor.getTradingCalculator(eurUsdRequestor), scopedExternalServiceRegistry);

@@ -35,6 +35,12 @@ public interface Pair {
                 .findAny().orElseThrow(() -> new IllegalArgumentException("Could not find Pair with technical name " + technicalName + " in " + allPairs()));
     }
 
+    static Pair fromShortName(String shortName) {
+        return allPairs().stream()
+                .filter(p -> shortName.equals(p.shortName()))
+                .findAny().orElseThrow(() -> new IllegalArgumentException("Could not find Pair with short name " + shortName + " in " + allPairs()));
+    }
+
     static List<Pair> allPairs() {
         return PairProvider.allPairs();
     }

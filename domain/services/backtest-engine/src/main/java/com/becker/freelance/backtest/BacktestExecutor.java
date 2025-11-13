@@ -22,6 +22,8 @@ import com.becker.freelance.trading.external.services.backtest.earlystop.NoStopE
 import com.becker.freelance.trading.external.services.backtest.tradeexecution.BacktestTradeExecutor;
 import com.becker.freelance.trading.external.services.backtest.tradeexecution.BacktestTradeExecutorBuildParams;
 import com.becker.freelance.trading.external.services.backtest.tradeexecution.BacktestTradeExecutorBuilder;
+import com.becker.freelance.trading.external.services.candles.PriceRequestorBroker;
+import com.becker.freelance.trading.external.services.candles.PriceRequestorBrokerBuilder;
 import com.becker.freelance.trading.external.services.management.environment.TimeChangeListener;
 import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
 import com.becker.freelance.trading.external.services.registry.ScopedExternalServiceRegistry;
@@ -86,13 +88,19 @@ public class BacktestExecutor implements Runnable {
             EurUsdRequestor euroUsdRequestor = externalServiceRegistry.requireServiceBuilder(BacktestCandleDataSourceBuilder.class)
                     .createEuroUsdRequestor(backtestSynchronizer);
 
+            PriceRequestorBroker priceRequestorBroker = externalServiceRegistry.requireServiceBuilder(PriceRequestorBrokerBuilder.class).build();
+            scopedExternalServiceRegistry.registerScopedExternalService(priceRequestorBroker);
+
             List<BacktestTradeExecutor> tradeExecutors = new ArrayList<>();
 
             EarlyStopCallbackImpl earlyStopCallback = new EarlyStopCallbackImpl(backtestExecutionConfiguration.initialWalletAmount());
             BacktestWallet wallet = new BacktestWallet(backtestExecutionConfiguration.initialWalletAmount());
             Supplier<Wallet> walletSupplier = () -> wallet;
             for (Pair pair : backtestExecutionConfiguration.pairs()) {
-                BacktestTradeExecutor tradeExecutor = tradeExecutorBuilder.build(new BacktestTradeExecutorBuildParams(backtestExecutionConfiguration, pair, euroUsdRequestor));
+                BacktestTradeExecutor tradeExecutor = tradeExecutorBuilder.build(new BacktestTradeExecutorBuildParams(backtestExecutionConfiguration,
+                        pair,
+                        euroUsdRequestor,
+                        priceRequestorBroker));
                 tradeExecutor.addClosedTradeSubscriber(earlyStopCallback);
                 tradeExecutor.setWallet(walletSupplier);
                 tradeExecutors.add(tradeExecutor);
@@ -101,12 +109,12 @@ public class BacktestExecutor implements Runnable {
 
                 BacktestCandleDataSource dataProviderForPair = dataProviderFactory.build(new BacktestCandleSourceBuilderParams(pair, backtestSynchronizer));
                 Consumer<TimeChangeListener> timeChangeListenerConsumer = listener -> backtestSynchronizer.addPrioritySubscriber(new TimeChangeListenerSynchronizeable(listener));
-                BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = getStrategyInitiator(dataProviderForPair);
+                BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = getStrategyInitiator(priceRequestorBroker);
                 StrategyEngine strategyEngine = new StrategyEngine(pair,
                         strategySupplier,
                         tradeExecutor,
                         euroUsdRequestor,
-                        dataProviderForPair,
+                        priceRequestorBroker,
                         timeChangeListenerConsumer,
                         strategyInitiator,
                         accountBalanceRequestor,
@@ -161,8 +169,8 @@ public class BacktestExecutor implements Runnable {
         return parameters;
     }
 
-    private BiConsumer<TradingStrategy, LocalDateTime> getStrategyInitiator(BacktestCandleDataSource subscribableDataProvider) {
-        return new BacktestStrategyInitiator(subscribableDataProvider);
+    private BiConsumer<TradingStrategy, LocalDateTime> getStrategyInitiator(PriceRequestorBroker priceRequestorBroker) {
+        return new BacktestStrategyInitiator(priceRequestorBroker);
     }
 
 }

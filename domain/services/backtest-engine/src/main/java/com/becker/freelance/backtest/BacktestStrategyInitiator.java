@@ -4,7 +4,7 @@ import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.CompleteTimeSeries;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.strategies.strategy.TradingStrategy;
-import com.becker.freelance.trading.external.services.backtest.candles.BacktestCandleDataSource;
+import com.becker.freelance.trading.external.services.candles.PriceRequestorBroker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,10 +18,10 @@ class BacktestStrategyInitiator implements BiConsumer<TradingStrategy, LocalDate
 
     private static final Logger logger = LoggerFactory.getLogger(BacktestStrategyInitiator.class);
 
-    private final BacktestCandleDataSource candleDataSource;
+    private final PriceRequestorBroker priceRequestorBroker;
 
-    BacktestStrategyInitiator(BacktestCandleDataSource candleDataSource) {
-        this.candleDataSource = candleDataSource;
+    BacktestStrategyInitiator(PriceRequestorBroker priceRequestorBroker) {
+        this.priceRequestorBroker = priceRequestorBroker;
     }
 
     @Override
@@ -32,7 +32,7 @@ class BacktestStrategyInitiator implements BiConsumer<TradingStrategy, LocalDate
         LocalDateTime start = time.minus(pairDuration.multipliedBy(unstableBars));
         LocalDateTime end = time.minus(pairDuration);
         logger.info("Trying to get prices from {} to {} ({} Bars on pair {})", start, end, unstableBars, pair.technicalName());
-        List<TimeSeriesEntry> prices = candleDataSource.getPriceInRange(pair, start, end).stream()
+        List<TimeSeriesEntry> prices = priceRequestorBroker.forPair(pair).getPriceInRange(start, end).stream()
                 .filter(Objects::nonNull)
                 .toList();
         logger.info("Received {} of {} Bars on pair {})", prices.size(), unstableBars, pair.technicalName());

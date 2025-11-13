@@ -37,9 +37,9 @@ public interface ManagementEnvironmentProvider extends TimeChangeListener, Exter
 
     public EurUsdRequestor getEurUsdRequestor();
 
-    public Decimal calculateMakerTradingFeeInCounterCurrency(Decimal currentPrice, Decimal positionSize);
+    public Decimal calculateCloseFeeInEuro(Decimal positionSize, TimeSeriesEntry closePrice);
 
-    public Decimal calculateTakerTradingFeeInCounterCurrency(Decimal currentPrice, Decimal positionSize);
+    public Decimal calculateOpenFeeInEuro(Decimal positionSize, TimeSeriesEntry openPrice);
 
     public LocalDateTime currentTime();
 

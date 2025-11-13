@@ -7,6 +7,8 @@ import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.engine.StrategySupplier;
 import com.becker.freelance.strategies.strategy.TradingStrategy;
+import com.becker.freelance.trading.external.services.candles.PriceRequestorBroker;
+import com.becker.freelance.trading.external.services.candles.PriceRequestorBrokerBuilder;
 import com.becker.freelance.trading.external.services.management.environment.TimeChangeListener;
 import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
 import com.becker.freelance.trading.external.services.remote.broker.RemoteAccountBalanceRequestor;
@@ -54,6 +56,7 @@ public class RemoteExecutionExecutor implements Runnable {
             RemoteAccountBalanceRequestor accountBalanceRequestor = externalServiceRegistry.requireServiceBuilder(RemoteAccountBalanceRequestorBuilder.class).build();
 
             RemoteCandleDataSource candleDataSource = dataSourceBuilder.build(new RemoteCandleSourceBuilderParams(pair));
+            PriceRequestorBroker priceRequestorBroker = externalServiceRegistry.requireServiceBuilder(PriceRequestorBrokerBuilder.class).build();
 
             BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = getStrategyInitiator(candleDataSource);
 
@@ -65,7 +68,7 @@ public class RemoteExecutionExecutor implements Runnable {
                     strategySupplier,
                     tradeExecutor,
                     dataSourceBuilder.createEuroUsdRequestor(),
-                    candleDataSource,
+                    priceRequestorBroker,
                     timeChangeListeners::add,
                     strategyInitiator,
                     accountBalanceRequestor,
