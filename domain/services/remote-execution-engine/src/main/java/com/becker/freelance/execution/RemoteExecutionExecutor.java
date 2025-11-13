@@ -58,7 +58,7 @@ public class RemoteExecutionExecutor implements Runnable {
             RemoteCandleDataSource candleDataSource = dataSourceBuilder.build(new RemoteCandleSourceBuilderParams(pair));
             PriceRequestorBroker priceRequestorBroker = externalServiceRegistry.requireServiceBuilder(PriceRequestorBrokerBuilder.class).build();
 
-            BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = getStrategyInitiator(candleDataSource);
+            BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = getStrategyInitiator(priceRequestorBroker);
 
 
             Set<TimeChangeListener> timeChangeListeners = new HashSet<>();
@@ -81,12 +81,12 @@ public class RemoteExecutionExecutor implements Runnable {
         }
     }
 
-    private BiConsumer<TradingStrategy, LocalDateTime> getStrategyInitiator(RemoteCandleDataSource subscribableDataProvider) {
+    private BiConsumer<TradingStrategy, LocalDateTime> getStrategyInitiator(PriceRequestorBroker priceRequestorBroker) {
         BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = (tradingStrategy, currentTime) -> {
             int requiredBarCount = tradingStrategy.unstableBars();
             Pair strategyPair = tradingStrategy.getPair();
             long barLengthInMinutes = strategyPair.toDuration().toMinutes();
-            List<TimeSeriesEntry> initiationData = subscribableDataProvider.getPriceInRange(strategyPair,
+            List<TimeSeriesEntry> initiationData = priceRequestorBroker.forPair(strategyPair).getPriceInRange(
                     currentTime.minusMinutes(barLengthInMinutes * requiredBarCount + 100),
                     currentTime.minusMinutes(barLengthInMinutes));
             TimeSeries timeSeries = new CompleteTimeSeries(pair, initiationData);
