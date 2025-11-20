@@ -1,31 +1,37 @@
 package com.becker.freelance.indicators.ta.util;
 
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.Indicator;
-import org.ta4j.core.num.Num;
 
-public class ShiftedIndicator implements Indicator<Num> {
+import com.becker.freelance.indicators.ta.temporal.indicator.TemporalIndicator;
+import com.becker.freelance.indicators.ta.temporal.series.TemporalBarSeries;
+import com.becker.freelance.math.Decimal;
 
-    private final Indicator<Num> closePrice;
-    private final int shift;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
-    public ShiftedIndicator(Indicator<Num> closePrice, int shift) {
+public class ShiftedIndicator implements TemporalIndicator<Decimal> {
+
+    private final TemporalIndicator<Decimal> closePrice;
+    private final Duration shift;
+    private final int shiftCount;
+
+    public ShiftedIndicator(TemporalIndicator<Decimal> closePrice, int shift) {
         this.closePrice = closePrice;
-        this.shift = shift;
+        this.shift = getBarSeries().getPairDuration().multipliedBy(shift);
+        this.shiftCount = shift;
     }
 
     @Override
-    public Num getValue(int index) {
-        return closePrice.getValue(index - shift);
+    public Decimal getValue(LocalDateTime index) {
+        return closePrice.getValue(index.minus(shift));
     }
 
     @Override
     public int getUnstableBars() {
-        return closePrice.getUnstableBars() + shift;
+        return closePrice.getUnstableBars() + shiftCount;
     }
 
     @Override
-    public BarSeries getBarSeries() {
+    public TemporalBarSeries getBarSeries() {
         return closePrice.getBarSeries();
     }
 }

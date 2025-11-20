@@ -18,11 +18,6 @@
             <version>20241224</version>
         </dependency>
         <dependency>
-            <groupId>org.ta4j</groupId>
-            <artifactId>ta4j-core</artifactId>
-            <version>${ta4j.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.becker-freelance.trading</groupId>
             <artifactId>math-commons</artifactId>
             <version>1.0-SNAPSHOT</version>

@@ -1,22 +1,24 @@
 package com.becker.freelance.indicators.ta.util;
 
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.Indicator;
-import org.ta4j.core.num.Num;
+import com.becker.freelance.indicators.ta.temporal.indicator.TemporalIndicator;
+import com.becker.freelance.indicators.ta.temporal.series.TemporalBarSeries;
+import com.becker.freelance.math.Decimal;
 
-public class MomentumIndicator implements Indicator<Num> {
+import java.time.LocalDateTime;
 
-    private final Indicator<Num> baseIndicator;
-    private final Indicator<Num> subtractIndicator;
+public class MomentumIndicator implements TemporalIndicator<Decimal> {
 
-    public MomentumIndicator(Indicator<Num> baseIndicator, Indicator<Num> subtractIndicator) {
+    private final TemporalIndicator<Decimal> baseIndicator;
+    private final TemporalIndicator<Decimal> subtractIndicator;
+
+    public MomentumIndicator(TemporalIndicator<Decimal> baseIndicator, TemporalIndicator<Decimal> subtractIndicator) {
         this.baseIndicator = baseIndicator;
         this.subtractIndicator = subtractIndicator;
     }
 
     @Override
-    public Num getValue(int index) {
-        return baseIndicator.getValue(index).minus(subtractIndicator.getValue(index));
+    public Decimal getValue(LocalDateTime index) {
+        return baseIndicator.getValue(index).subtract(subtractIndicator.getValue(index));
     }
 
     @Override
@@ -25,7 +27,7 @@ public class MomentumIndicator implements Indicator<Num> {
     }
 
     @Override
-    public BarSeries getBarSeries() {
+    public TemporalBarSeries getBarSeries() {
         return baseIndicator.getBarSeries();
     }
 }

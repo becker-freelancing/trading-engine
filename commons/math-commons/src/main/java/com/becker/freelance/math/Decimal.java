@@ -194,4 +194,8 @@ public class Decimal extends BigDecimal {
     public Decimal divide(BigDecimal divisor, int scale, RoundingMode roundingMode) {
         return new Decimal(super.divide(divisor, scale, roundingMode));
     }
+
+    public Decimal log() {
+        return new Decimal(Math.log(this.doubleValue()));
+    }
 }

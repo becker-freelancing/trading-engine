@@ -1,8 +1,6 @@
 package com.becker.freelance.commons.timeseries;
 
 import com.becker.freelance.commons.pair.Pair;
-import org.ta4j.core.Bar;
-import org.ta4j.core.BaseBar;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -17,28 +15,15 @@ public class CompleteTimeSeries implements TimeSeries {
     private final Set<LocalDateTime> index;
     private final Pair pair;
     private final Map<LocalDateTime, TimeSeriesEntry> data;
-    private final Map<LocalDateTime, Bar> barData;
 
     public CompleteTimeSeries(Pair pair, Map<LocalDateTime, TimeSeriesEntry> data) {
         this.pair = pair;
         this.data = new HashMap<>(data);
         this.index = new HashSet<>(data.keySet());
-        this.barData = new HashMap<>(data.entrySet().stream().parallel().map(entry -> {
-            TimeSeriesEntry value = entry.getValue();
-            return mapBaseBar(pair, entry.getKey(), value);
-        }).collect(Collectors.toMap(
-                bar -> bar.getEndTime().toLocalDateTime(),
-                bar -> bar
-        )));
     }
 
     public CompleteTimeSeries(Pair pair, List<TimeSeriesEntry> initiationData) {
         this(pair, initiationData.stream().collect(Collectors.toMap(TimeSeriesEntry::time, entry -> entry)));
-    }
-
-    private static BaseBar mapBaseBar(Pair pair, LocalDateTime time, TimeSeriesEntry value) {
-        return new BaseBar(pair.toDuration(), time.atZone(UTC),
-                value.getOpenMid(), value.getHighMid(), value.getLowMid(), value.getCloseMid(), value.volume());
     }
 
 
@@ -51,7 +36,6 @@ public class CompleteTimeSeries implements TimeSeries {
         LocalDateTime time = timeSeriesEntry.time();
         index.add(time);
         data.put(time, timeSeriesEntry);
-        barData.put(time, mapBaseBar(pair1, time, timeSeriesEntry));
     }
 
     @Override
@@ -62,7 +46,6 @@ public class CompleteTimeSeries implements TimeSeries {
     @Override
     public void clear() {
         index.clear();
-        barData.clear();
         data.clear();
     }
 
@@ -76,19 +59,6 @@ public class CompleteTimeSeries implements TimeSeries {
             } while (!data.containsKey(time));
         }
         return data.get(time);
-    }
-
-
-    public Bar getEntryForTimeAsBar(LocalDateTime time) {
-        if (!barData.containsKey(time)) {
-            if (getMinTime().isAfter(time)) {
-                throw new NoTimeSeriesEntryFoundException(pair, time);
-            }
-            do {
-                time = time.minus(pair.toDuration());
-            } while (!barData.containsKey(time));
-        }
-        return barData.get(time);
     }
 
     public LocalDateTime getMinTime() {

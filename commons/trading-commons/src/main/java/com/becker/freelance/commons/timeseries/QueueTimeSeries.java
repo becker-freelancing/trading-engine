@@ -1,8 +1,6 @@
 package com.becker.freelance.commons.timeseries;
 
 import com.becker.freelance.commons.pair.Pair;
-import org.ta4j.core.Bar;
-import org.ta4j.core.BaseBar;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -16,7 +14,6 @@ public class QueueTimeSeries implements TimeSeries {
     private final Set<LocalDateTime> index;
     private final Pair pair;
     private final Map<LocalDateTime, TimeSeriesEntry> data;
-    private final Map<LocalDateTime, Bar> barData;
     private final int maximumSize;
     private final Queue<LocalDateTime> timeQueue;
     private int barCount;
@@ -25,15 +22,9 @@ public class QueueTimeSeries implements TimeSeries {
         this.pair = pair;
         this.data = new HashMap<>();
         this.index = new HashSet<>();
-        this.barData = new HashMap<>();
         this.maximumSize = maximumSize;
         this.timeQueue = new LinkedList<>();
         this.barCount = 0;
-    }
-
-    private static BaseBar mapBaseBar(Pair pair, LocalDateTime time, TimeSeriesEntry value) {
-        return new BaseBar(pair.toDuration(), time.atZone(UTC),
-                value.getOpenMid(), value.getHighMid(), value.getLowMid(), value.getCloseMid(), value.volume());
     }
 
 
@@ -48,13 +39,11 @@ public class QueueTimeSeries implements TimeSeries {
             LocalDateTime oldestTime = timeQueue.poll();
             index.remove(oldestTime);
             data.remove(oldestTime);
-            barData.remove(oldestTime);
         }
 
         LocalDateTime time = timeSeriesEntry.time();
         index.add(time);
         data.put(time, timeSeriesEntry);
-        barData.put(time, mapBaseBar(pair1, time, timeSeriesEntry));
         timeQueue.add(time);
         barCount++;
     }
@@ -76,18 +65,6 @@ public class QueueTimeSeries implements TimeSeries {
         return data.get(time);
     }
 
-
-    public Bar getEntryForTimeAsBar(LocalDateTime time) {
-        if (!barData.containsKey(time)) {
-            if (getMinTime().isAfter(time)) {
-                throw new NoTimeSeriesEntryFoundException(pair, time);
-            }
-            do {
-                time = time.minus(pair.toDuration());
-            } while (!barData.containsKey(time));
-        }
-        return barData.get(time);
-    }
 
     public LocalDateTime getMinTime() {
         return data.keySet().stream().min(Comparator.naturalOrder()).orElseThrow(() -> new IllegalStateException("No data found"));
@@ -137,7 +114,6 @@ public class QueueTimeSeries implements TimeSeries {
     public void clear() {
         index.clear();
         data.clear();
-        barData.clear();
         timeQueue.clear();
         barCount = 0;
     }

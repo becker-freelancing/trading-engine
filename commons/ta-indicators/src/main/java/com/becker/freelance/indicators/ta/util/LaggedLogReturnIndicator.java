@@ -1,22 +1,25 @@
 package com.becker.freelance.indicators.ta.util;
 
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.Indicator;
-import org.ta4j.core.num.Num;
 
-public class LaggedLogReturnIndicator implements Indicator<Num> {
+import com.becker.freelance.indicators.ta.temporal.indicator.TemporalIndicator;
+import com.becker.freelance.indicators.ta.temporal.series.TemporalBarSeries;
+import com.becker.freelance.math.Decimal;
 
-    private final Indicator<Num> closePrice;
+import java.time.LocalDateTime;
+
+public class LaggedLogReturnIndicator implements TemporalIndicator<Decimal> {
+
+    private final TemporalIndicator<Decimal> closePrice;
     private final int lag;
 
-    public LaggedLogReturnIndicator(Indicator<Num> closePrice, int lag) {
+    public LaggedLogReturnIndicator(TemporalIndicator<Decimal> closePrice, int lag) {
         this.closePrice = closePrice;
         this.lag = lag;
     }
 
     @Override
-    public Num getValue(int index) {
-        return closePrice.getValue(index).dividedBy(closePrice.getValue(index - lag)).log();
+    public Decimal getValue(LocalDateTime index) {
+        return closePrice.getValue(index).divide(closePrice.getValue(index.minus(getBarSeries().getPairDuration().multipliedBy(lag)))).log();
     }
 
     @Override
@@ -25,7 +28,7 @@ public class LaggedLogReturnIndicator implements Indicator<Num> {
     }
 
     @Override
-    public BarSeries getBarSeries() {
+    public TemporalBarSeries getBarSeries() {
         return closePrice.getBarSeries();
     }
 }
