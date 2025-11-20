@@ -4,6 +4,7 @@ import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.signal.ExitSignal;
+import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
 import com.becker.freelance.trading.external.services.broker.OpenPositionRequestor;
@@ -11,7 +12,6 @@ import com.becker.freelance.trading.external.services.registry.ScopedExternalSer
 import com.becker.freelance.trading.external.services.strategies.StrategyCreationParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.ta4j.core.Bar;
 
 import java.util.*;
 
@@ -77,7 +77,7 @@ public class RegimeStrategy extends SingleTimeFrameBaseStrategy {
     }
 
     @Override
-    protected void addBarIfNeeded(Bar currentPrice) {
+    protected void addBarIfNeeded(TimeSeriesEntry currentPrice) {
         super.addBarIfNeeded(currentPrice);
         allStrategies.forEach(strategy -> strategy.addBarIfNeeded(currentPrice));
     }

@@ -30,4 +30,15 @@ public class CachableIndicator<K, V> {
     protected void removeFromCache(K index) {
         cache.remove(index);
     }
+
+    protected V getOrCompute(K index) {
+        if (!cache.containsKey(index)) {
+            putInCache(index, computeMissing(index));
+        }
+        return cache.get(index);
+    }
+
+    protected V computeMissing(K index) {
+        throw new UnsupportedOperationException("Must be implemented in subclass");
+    }
 }

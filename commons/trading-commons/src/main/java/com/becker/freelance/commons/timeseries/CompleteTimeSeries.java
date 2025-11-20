@@ -54,6 +54,18 @@ public class CompleteTimeSeries implements TimeSeries {
         barData.put(time, mapBaseBar(pair1, time, timeSeriesEntry));
     }
 
+    @Override
+    public int getBarCount() {
+        return index.size();
+    }
+
+    @Override
+    public void clear() {
+        index.clear();
+        barData.clear();
+        data.clear();
+    }
+
     public TimeSeriesEntry getEntryForTime(LocalDateTime time) {
         if (!data.containsKey(time)) {
             if (getMinTime().isAfter(time)) {

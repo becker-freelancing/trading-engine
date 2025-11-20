@@ -2,34 +2,33 @@ package com.becker.freelance.indicators.ta.regime;
 
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.indicators.ta.cache.CachableIndicator;
-import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
-import com.becker.freelance.indicators.ta.temporal.TemporalEMAIndicator;
-import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
+import com.becker.freelance.indicators.ta.temporal.indicator.EMATemporalIndicator;
+import com.becker.freelance.indicators.ta.temporal.indicator.TemporalIndicator;
+import com.becker.freelance.indicators.ta.temporal.series.TemporalBarSeries;
 import com.becker.freelance.indicators.ta.util.VolatilityIndicator;
-import org.ta4j.core.num.DecimalNum;
-import org.ta4j.core.num.Num;
+import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 public class MarketRegimeIndicator extends CachableIndicator<LocalDateTime, MarketRegime> implements TemporalIndicator<TradeableMarketRegime> {
 
-    private final Num MINUS_1 = DecimalNum.valueOf(-1);
+    private final Decimal MINUS_1 = Decimal.MINUS_1;
 
     private final double volaSplitThreshold;
-    private final Num trendReversalSlopeThreshold;
+    private final Decimal trendReversalSlopeThreshold;
     private final int trendSlopeShift;
-    private final TemporalIndicator<Num> ema50;
-    private final TemporalIndicator<Num> ema100;
+    private final TemporalIndicator<Decimal> ema50;
+    private final TemporalIndicator<Decimal> ema100;
     private final TemporalIndicator<Optional<Double>> volaIndicator;
 
-    public MarketRegimeIndicator(TemporalIndicator<Num> closePrice, double volaSplitThreshold, double trendReversalSlopeThreshold, int trendSlopeShift) {
+    public MarketRegimeIndicator(TemporalIndicator<Decimal> closePrice, double volaSplitThreshold, double trendReversalSlopeThreshold, int trendSlopeShift) {
         super(100);
         this.volaSplitThreshold = volaSplitThreshold;
-        this.trendReversalSlopeThreshold = DecimalNum.valueOf(trendReversalSlopeThreshold);
+        this.trendReversalSlopeThreshold = Decimal.valueOf(trendReversalSlopeThreshold);
         this.trendSlopeShift = trendSlopeShift;
-        this.ema50 = new TemporalEMAIndicator(closePrice, 50);
-        this.ema100 = new TemporalEMAIndicator(closePrice, 100);
+        this.ema50 = new EMATemporalIndicator(closePrice, 50, false, false);
+        this.ema100 = new EMATemporalIndicator(closePrice, 100, false, false);
         this.volaIndicator = new VolatilityIndicator(closePrice, 30);
     }
 
@@ -39,9 +38,9 @@ public class MarketRegimeIndicator extends CachableIndicator<LocalDateTime, Mark
         if (cache.isPresent()) {
             return cache.get();
         }
-        Num ema50Value = ema50.getValue(index);
-        Num ema100Value = ema100.getValue(index);
-        Num ema50Slope = ema50Value.minus(ema50.getValue(index.minus(getBarSeries().getPairDuration().multipliedBy(trendSlopeShift)))).dividedBy(DecimalNum.valueOf(trendSlopeShift));
+        Decimal ema50Value = ema50.getValue(index);
+        Decimal ema100Value = ema100.getValue(index);
+        Decimal ema50Slope = ema50Value.subtract(ema50.getValue(index.minus(getBarSeries().getPairDuration().multipliedBy(trendSlopeShift)))).divide(Decimal.valueOf(trendSlopeShift));
         TrendDirection trendDirection = getTrendDirection(ema50Value, ema100Value, ema50Slope);
         Vola vola = getVola(index);
 
@@ -76,8 +75,8 @@ public class MarketRegimeIndicator extends CachableIndicator<LocalDateTime, Mark
         return Vola.HIGH;
     }
 
-    private TrendDirection getTrendDirection(Num ema50, Num ema100, Num ema50Slope) {
-        if (ema50.isGreaterThan(ema100) && ema50Slope.isGreaterThan(trendReversalSlopeThreshold.multipliedBy(MINUS_1))) {
+    private TrendDirection getTrendDirection(Decimal ema50, Decimal ema100, Decimal ema50Slope) {
+        if (ema50.isGreaterThan(ema100) && ema50Slope.isGreaterThan(trendReversalSlopeThreshold.multiply(MINUS_1))) {
             return TrendDirection.UP;
         }
         if (ema50.isLessThan(ema100) && ema50Slope.isLessThan(trendReversalSlopeThreshold)) {

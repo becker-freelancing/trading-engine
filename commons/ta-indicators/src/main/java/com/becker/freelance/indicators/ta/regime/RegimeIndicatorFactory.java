@@ -2,11 +2,11 @@ package com.becker.freelance.indicators.ta.regime;
 
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
-import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
-import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
+import com.becker.freelance.indicators.ta.temporal.indicator.TemporalIndicator;
+import com.becker.freelance.indicators.ta.temporal.series.TemporalBarSeries;
+import com.becker.freelance.math.Decimal;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.ta4j.core.num.Num;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 
 public class RegimeIndicatorFactory {
 
-    public TemporalIndicator<TradeableMarketRegime> marketRegimeIndicatorForStrategy(Pair pair, TemporalIndicator<Num> closePrice) {
+    public TemporalIndicator<TradeableMarketRegime> marketRegimeIndicatorForStrategy(Pair pair, TemporalIndicator<Decimal> closePrice) {
         if (isRegimeDetectionDisabled()){
             return getDisabledIndicator(closePrice.getBarSeries());
         }
@@ -29,7 +29,7 @@ public class RegimeIndicatorFactory {
         return marketRegimeIndicatorFromConfigFile(pair, closePrice);
     }
 
-    public TemporalIndicator<TradeableMarketRegime> marketRegimeIndicatorFromConfigFile(Pair pair, TemporalIndicator<Num> closePrice) {
+    public TemporalIndicator<TradeableMarketRegime> marketRegimeIndicatorFromConfigFile(Pair pair, TemporalIndicator<Decimal> closePrice) {
         if (isRegimeDetectionDisabled()){
             throw new IllegalStateException("Market Regime Detection is disabled");
         }
@@ -47,7 +47,7 @@ public class RegimeIndicatorFactory {
         return new DurationMarketRegimeIndicator(marketRegimeIndicator);
     }
 
-    public TemporalIndicator<TradeableMarketRegime> quantileMarketRegimeIndicator(Pair pair, TemporalIndicator<Num> closePrice) {
+    public TemporalIndicator<TradeableMarketRegime> quantileMarketRegimeIndicator(Pair pair, TemporalIndicator<Decimal> closePrice) {
         TemporalIndicator<TradeableMarketRegime> regimeIndicator = marketRegimeIndicatorFromConfigFile(pair, closePrice);
         TemporalIndicator<DurationMarketRegime> durationMarketRegimeIndicator = durationMarketRegimeIndicator(regimeIndicator);
         JSONObject configForPair = loadConfigForPair(pair).getJSONObject("quantileRegimeDetector");

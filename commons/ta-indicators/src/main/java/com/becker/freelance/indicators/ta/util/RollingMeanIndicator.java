@@ -1,30 +1,29 @@
 package com.becker.freelance.indicators.ta.util;
 
-import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
-import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
-import org.ta4j.core.num.DecimalNum;
-import org.ta4j.core.num.Num;
+import com.becker.freelance.indicators.ta.temporal.indicator.TemporalIndicator;
+import com.becker.freelance.indicators.ta.temporal.series.TemporalBarSeries;
+import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class RollingMeanIndicator implements TemporalIndicator<Optional<Num>> {
+public class RollingMeanIndicator implements TemporalIndicator<Optional<Decimal>> {
 
-    private final TemporalIndicator<Optional<Num>> baseIndicator;
+    private final TemporalIndicator<Optional<Decimal>> baseIndicator;
     private final int meanPeriod;
-    private final Num meanPeriodNum;
-    private final Map<LocalDateTime, Num> cache = new HashMap<>();
+    private final Decimal meanPeriodNum;
+    private final Map<LocalDateTime, Decimal> cache = new HashMap<>();
 
-    public RollingMeanIndicator(TemporalIndicator<Optional<Num>> baseIndicator, int meanPeriod) {
+    public RollingMeanIndicator(TemporalIndicator<Optional<Decimal>> baseIndicator, int meanPeriod) {
         this.baseIndicator = baseIndicator;
         this.meanPeriod = meanPeriod;
-        this.meanPeriodNum = DecimalNum.valueOf(meanPeriod);
+        this.meanPeriodNum = new Decimal(meanPeriod);
     }
 
     @Override
-    public Optional<Num> getValue(LocalDateTime index) {
+    public Optional<Decimal> getValue(LocalDateTime index) {
         cache.computeIfAbsent(index, idx -> {
 
             LocalDateTime start = index.minus(getBarSeries().getPairDuration().multipliedBy(meanPeriod - 1));
@@ -33,7 +32,7 @@ public class RollingMeanIndicator implements TemporalIndicator<Optional<Num>> {
             }
             double sum = 0.;
             while (start.isBefore(index) || start.isEqual(index)) {
-                Optional<Num> value = baseIndicator.getValue(start);
+                Optional<Decimal> value = baseIndicator.getValue(start);
                 if (value.isEmpty()) {
                     return null;
                 }
@@ -41,7 +40,7 @@ public class RollingMeanIndicator implements TemporalIndicator<Optional<Num>> {
                 start = start.plus(getBarSeries().getPairDuration());
             }
 
-            Num value = DecimalNum.valueOf(sum).dividedBy(meanPeriodNum);
+            Decimal value = Decimal.valueOf(sum).divide(meanPeriodNum);
             return value;
         });
         return Optional.ofNullable(cache.get(index));

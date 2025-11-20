@@ -7,6 +7,8 @@ import com.becker.freelance.trading.external.services.backtest.candles.BacktestD
 import com.becker.freelance.trading.external.services.backtest.candles.BacktestDataTotalTimeProviderBuilderParams;
 import com.becker.freelance.trading.external.services.registry.ExternalServiceRegistry;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -16,6 +18,8 @@ import java.util.List;
 import java.util.function.Predicate;
 
 class BacktestModeTimeValidator implements Predicate<LocalDateTime> {
+
+    private static final Logger logger = LoggerFactory.getLogger(BacktestModeTimeValidator.class);
 
     private final Duration executionDuration;
     private final Duration skipDuration;
@@ -48,6 +52,10 @@ class BacktestModeTimeValidator implements Predicate<LocalDateTime> {
                 .max(Comparator.naturalOrder())
                 .orElseThrow(() -> new IllegalStateException("could not find min time for pairs " + pairs))
                 .plus(initialSkipDuration);
+
+        if (!startTime.equals(backtestStartTime)) {
+            logger.warn("Setting Start time to {} instead of {} because this is the absolute min time in the database.", startTime, backtestStartTime);
+        }
 
         this.currentExecutionStartTime = startTime.plus(initialSkipDuration);
         this.currentExecutionEndTime = currentExecutionStartTime.plus(executionDuration);

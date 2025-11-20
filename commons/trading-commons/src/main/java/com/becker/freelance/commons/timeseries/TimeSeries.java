@@ -33,4 +33,12 @@ public interface TimeSeries {
     }
 
     void addEntry(TimeSeriesEntry timeSeriesEntry);
+
+    int getBarCount();
+
+    default boolean isEmpty() {
+        return getBarCount() == 0;
+    }
+
+    void clear();
 }

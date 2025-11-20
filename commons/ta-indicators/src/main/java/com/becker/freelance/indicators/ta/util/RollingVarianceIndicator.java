@@ -1,8 +1,8 @@
 package com.becker.freelance.indicators.ta.util;
 
-import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
-import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
-import org.ta4j.core.num.Num;
+import com.becker.freelance.indicators.ta.temporal.indicator.TemporalIndicator;
+import com.becker.freelance.indicators.ta.temporal.series.TemporalBarSeries;
+import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -11,11 +11,11 @@ import java.util.Optional;
 
 public class RollingVarianceIndicator implements TemporalIndicator<Optional<Double>> {
 
-    private final TemporalIndicator<Optional<Num>> baseIndicator;
+    private final TemporalIndicator<Optional<Decimal>> baseIndicator;
     private final int variancePeriod;
     private Map<LocalDateTime, Double> cache = new HashMap<>();
 
-    public RollingVarianceIndicator(TemporalIndicator<Optional<Num>> baseIndicator, int variancePeriod) {
+    public RollingVarianceIndicator(TemporalIndicator<Optional<Decimal>> baseIndicator, int variancePeriod) {
         this.baseIndicator = baseIndicator;
         this.variancePeriod = variancePeriod;
     }
@@ -31,7 +31,7 @@ public class RollingVarianceIndicator implements TemporalIndicator<Optional<Doub
             double sumsq = 0.;
 
             while (start.isBefore(index) || start.equals(index)) {
-                Optional<Num> value = baseIndicator.getValue(index);
+                Optional<Decimal> value = baseIndicator.getValue(index);
                 if (value.isEmpty()) {
                     return null;
                 }

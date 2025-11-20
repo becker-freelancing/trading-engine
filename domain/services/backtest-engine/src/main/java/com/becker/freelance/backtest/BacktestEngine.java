@@ -38,7 +38,7 @@ public class BacktestEngine {
     private final ExecutorService executor;
     private final ParameterFilter parameterFilter;
     private final BacktestFinishedCallback onBacktestFinishedCallback;
-    private final Consumer<Exception> onExceptionCallback;
+    private final Consumer<Throwable> onExceptionCallback;
     private final Runnable onFinished;
     private final List<StrategySupplierWithParameters> strategySuppliers;
     private final String strategyName;
@@ -174,7 +174,7 @@ public class BacktestEngine {
         backtestExecutor.run();
     }
 
-    private void shutdownNowOnException(Exception e) {
+    private void shutdownNowOnException(Throwable e) {
         logger.error("Error while executing backtest", e);
         executor.shutdownNow();
     }

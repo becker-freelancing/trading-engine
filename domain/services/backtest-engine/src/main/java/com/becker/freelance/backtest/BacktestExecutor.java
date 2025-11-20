@@ -48,7 +48,7 @@ public class BacktestExecutor implements Runnable {
     private final AppConfiguration appConfiguration;
     private final BacktestExecutionConfiguration backtestExecutionConfiguration;
     private final BacktestFinishedCallback onBacktestFinished;
-    private final Consumer<Exception> onError;
+    private final Consumer<Throwable> onError;
     private final StrategyCreationParameter parameters;
     private final StrategySupplier strategySupplier;
 
@@ -56,7 +56,7 @@ public class BacktestExecutor implements Runnable {
     public BacktestExecutor(Decimal executionId, AppConfiguration appConfiguration,
                             BacktestExecutionConfiguration backtestExecutionConfiguration,
                             BacktestFinishedCallback onBacktestFinished,
-                            Consumer<Exception> onError,
+                            Consumer<Throwable> onError,
                             StrategyCreationParameter parameters,
                             StrategySupplier strategySupplier) {
         this.executionId = executionId;
@@ -136,7 +136,7 @@ public class BacktestExecutor implements Runnable {
                     .sorted(Comparator.comparing(Trade::getCloseTime))
                     .toList();
             onBacktestFinished.accept(executionId, allClosedTrades, parameters, earlyStopCallbackResult);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             onError.accept(e);
         }
     }

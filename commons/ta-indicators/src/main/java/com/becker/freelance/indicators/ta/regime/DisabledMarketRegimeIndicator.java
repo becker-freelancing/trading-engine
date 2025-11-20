@@ -1,8 +1,8 @@
 package com.becker.freelance.indicators.ta.regime;
 
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
-import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
-import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
+import com.becker.freelance.indicators.ta.temporal.indicator.TemporalIndicator;
+import com.becker.freelance.indicators.ta.temporal.series.TemporalBarSeries;
 
 import java.time.LocalDateTime;
 

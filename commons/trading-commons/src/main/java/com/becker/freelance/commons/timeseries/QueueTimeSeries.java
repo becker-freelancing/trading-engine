@@ -19,6 +19,7 @@ public class QueueTimeSeries implements TimeSeries {
     private final Map<LocalDateTime, Bar> barData;
     private final int maximumSize;
     private final Queue<LocalDateTime> timeQueue;
+    private int barCount;
 
     public QueueTimeSeries(Pair pair, int maximumSize) {
         this.pair = pair;
@@ -27,6 +28,7 @@ public class QueueTimeSeries implements TimeSeries {
         this.barData = new HashMap<>();
         this.maximumSize = maximumSize;
         this.timeQueue = new LinkedList<>();
+        this.barCount = 0;
     }
 
     private static BaseBar mapBaseBar(Pair pair, LocalDateTime time, TimeSeriesEntry value) {
@@ -54,6 +56,12 @@ public class QueueTimeSeries implements TimeSeries {
         data.put(time, timeSeriesEntry);
         barData.put(time, mapBaseBar(pair1, time, timeSeriesEntry));
         timeQueue.add(time);
+        barCount++;
+    }
+
+    @Override
+    public int getBarCount() {
+        return barCount;
     }
 
     public TimeSeriesEntry getEntryForTime(LocalDateTime time) {
@@ -125,4 +133,12 @@ public class QueueTimeSeries implements TimeSeries {
         return index.contains(time);
     }
 
+    @Override
+    public void clear() {
+        index.clear();
+        data.clear();
+        barData.clear();
+        timeQueue.clear();
+        barCount = 0;
+    }
 }
