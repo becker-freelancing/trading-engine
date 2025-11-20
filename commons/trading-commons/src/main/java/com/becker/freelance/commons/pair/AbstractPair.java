@@ -98,6 +98,7 @@ public abstract class AbstractPair implements Pair {
     @Override
     public String toString() {
         return "AbstractPair[" +
+                "technicalName=" + technicalName() + ", " +
                 "baseCurrency=" + baseCurrency + ", " +
                 "counterCurrency=" + counterCurrency + ", " +
                 "timeInMinutes=" + timeInMinutes + ", " +

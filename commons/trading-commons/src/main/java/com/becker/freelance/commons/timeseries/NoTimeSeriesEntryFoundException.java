@@ -10,7 +10,7 @@ public class NoTimeSeriesEntryFoundException extends RuntimeException{
     private final LocalDateTime time;
 
     public NoTimeSeriesEntryFoundException(Pair pair, LocalDateTime time) {
-        super("No time found in Time Series " + pair + " before " + time);
+        super("No time found in Time Series " + pair.technicalName() + " before " + time);
         this.pair = pair;
         this.time = time;
     }
