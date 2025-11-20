@@ -34,10 +34,11 @@ public class MarketRegimeIndicator extends CachableIndicator<LocalDateTime, Mark
 
     @Override
     public MarketRegime getValue(LocalDateTime index) {
-        Optional<MarketRegime> cache = findInCache(index);
-        if (cache.isPresent()) {
-            return cache.get();
-        }
+        return getOrCompute(index);
+    }
+
+    @Override
+    protected MarketRegime computeMissing(LocalDateTime index) {
         Decimal ema50Value = ema50.getValue(index);
         Decimal ema100Value = ema100.getValue(index);
         Decimal ema50Slope = ema50Value.subtract(ema50.getValue(index.minus(getBarSeries().getPairDuration().multipliedBy(trendSlopeShift)))).divide(Decimal.valueOf(trendSlopeShift));
@@ -45,7 +46,6 @@ public class MarketRegimeIndicator extends CachableIndicator<LocalDateTime, Mark
         Vola vola = getVola(index);
 
         MarketRegime marketRegime = map(trendDirection, vola);
-        putInCache(index, marketRegime);
         return marketRegime;
     }
 

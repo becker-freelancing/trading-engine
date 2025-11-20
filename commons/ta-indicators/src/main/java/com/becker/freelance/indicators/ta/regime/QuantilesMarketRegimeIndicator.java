@@ -8,7 +8,6 @@ import com.becker.freelance.indicators.ta.temporal.series.TemporalBarSeries;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class QuantilesMarketRegimeIndicator extends CachableIndicator<LocalDateTime, QuantileMarketRegime> implements TemporalIndicator<TradeableMarketRegime> {
 
@@ -23,25 +22,7 @@ public class QuantilesMarketRegimeIndicator extends CachableIndicator<LocalDateT
 
     @Override
     public QuantileMarketRegime getValue(LocalDateTime index) {
-        Optional<QuantileMarketRegime> inCache = findInCache(index);
-        if (inCache.isPresent()) {
-            return inCache.get();
-        }
-
-        DurationMarketRegime durationMarketRegime = regimeIndicator.getValue(index);
-        MarketRegime marketRegime = (MarketRegime) durationMarketRegime.marketRegime();
-        List<Double> quantiles = this.quantiles.get(marketRegime);
-        int duration = durationMarketRegime.duration();
-        QuantileMarketRegime quantileMarketRegime = QuantileMarketRegime.maxQuantile(marketRegime);
-        for (int i = 0; i < quantiles.size(); i++) {
-            Double quantileValue = quantiles.get(i);
-            if (quantileValue > duration) {
-                quantileMarketRegime = map(marketRegime, i);
-                break;
-            }
-        }
-        putInCache(index, quantileMarketRegime);
-        return quantileMarketRegime;
+        return getOrCompute(index);
     }
 
     private QuantileMarketRegime map(MarketRegime marketRegime, int i) {
@@ -71,5 +52,22 @@ public class QuantilesMarketRegimeIndicator extends CachableIndicator<LocalDateT
     @Override
     public TemporalBarSeries getBarSeries() {
         return regimeIndicator.getBarSeries();
+    }
+
+    @Override
+    protected QuantileMarketRegime computeMissing(LocalDateTime index) {
+        DurationMarketRegime durationMarketRegime = regimeIndicator.getValue(index);
+        MarketRegime marketRegime = (MarketRegime) durationMarketRegime.marketRegime();
+        List<Double> quantiles = this.quantiles.get(marketRegime);
+        int duration = durationMarketRegime.duration();
+        QuantileMarketRegime quantileMarketRegime = QuantileMarketRegime.maxQuantile(marketRegime);
+        for (int i = 0; i < quantiles.size(); i++) {
+            Double quantileValue = quantiles.get(i);
+            if (quantileValue > duration) {
+                quantileMarketRegime = map(marketRegime, i);
+                break;
+            }
+        }
+        return quantileMarketRegime;
     }
 }

@@ -1,9 +1,6 @@
 package com.becker.freelance.indicators.ta.cache;
 
-import java.util.Optional;
-import java.util.stream.Stream;
-
-public class CachableIndicator<K, V> {
+public abstract class CachableIndicator<K, V> {
 
     private final FixedSizeMap<K, V> cache;
 
@@ -11,24 +8,8 @@ public class CachableIndicator<K, V> {
         cache = new FixedSizeMap<>(cacheSize);
     }
 
-    protected Optional<V> findInCache(K key) {
-        if (cache.containsKey(key)) {
-            V cacheItem = cache.get(key);
-            return Optional.of(cacheItem);
-        }
-        return Optional.empty();
-    }
-
     protected void putInCache(K key, V value) {
         cache.put(key, value);
-    }
-
-    protected Stream<V> values() {
-        return cache.values().stream();
-    }
-
-    protected void removeFromCache(K index) {
-        cache.remove(index);
     }
 
     protected V getOrCompute(K index) {
@@ -38,7 +19,5 @@ public class CachableIndicator<K, V> {
         return cache.get(index);
     }
 
-    protected V computeMissing(K index) {
-        throw new UnsupportedOperationException("Must be implemented in subclass");
-    }
+    protected abstract V computeMissing(K index);
 }

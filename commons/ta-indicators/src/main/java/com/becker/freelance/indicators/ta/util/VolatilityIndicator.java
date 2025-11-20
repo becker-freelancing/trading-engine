@@ -8,7 +8,7 @@ import com.becker.freelance.math.Decimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-public class VolatilityIndicator extends CachableIndicator<LocalDateTime, Double> implements TemporalIndicator<Optional<Double>> {
+public class VolatilityIndicator extends CachableIndicator<LocalDateTime, Optional<Double>> implements TemporalIndicator<Optional<Double>> {
 
     private final TemporalIndicator<Optional<Double>> varianceIndicator;
 
@@ -21,13 +21,12 @@ public class VolatilityIndicator extends CachableIndicator<LocalDateTime, Double
 
     @Override
     public Optional<Double> getValue(LocalDateTime index) {
-        Optional<Double> inCache = findInCache(index);
-        if (inCache.isPresent()) {
-            return inCache;
-        }
-        Optional<Double> variance = varianceIndicator.getValue(index).map(Math::sqrt);
-        variance.ifPresent(value -> putInCache(index, value));
-        return variance;
+        return getOrCompute(index);
+    }
+
+    @Override
+    protected Optional<Double> computeMissing(LocalDateTime index) {
+        return varianceIndicator.getValue(index).map(Math::sqrt);
     }
 
     @Override

@@ -6,7 +6,6 @@ import com.becker.freelance.indicators.ta.temporal.indicator.TemporalIndicator;
 import com.becker.freelance.indicators.ta.temporal.series.TemporalBarSeries;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 public class DurationMarketRegimeIndicator extends CachableIndicator<LocalDateTime, DurationMarketRegimeImpl> implements TemporalIndicator<DurationMarketRegime> {
 
@@ -19,11 +18,21 @@ public class DurationMarketRegimeIndicator extends CachableIndicator<LocalDateTi
 
     @Override
     public DurationMarketRegime getValue(LocalDateTime index) {
-        Optional<DurationMarketRegimeImpl> inCache = findInCache(index);
-        if (inCache.isPresent()) {
-            return inCache.get();
-        }
+        return getOrCompute(index);
+    }
 
+    @Override
+    public int getUnstableBars() {
+        return marketRegimeIndicator.getUnstableBars();
+    }
+
+    @Override
+    public TemporalBarSeries getBarSeries() {
+        return marketRegimeIndicator.getBarSeries();
+    }
+
+    @Override
+    protected DurationMarketRegimeImpl computeMissing(LocalDateTime index) {
         TradeableMarketRegime currentRegime = marketRegimeIndicator.getValue(index);
         int duration = 1;
         LocalDateTime time = index;
@@ -35,18 +44,6 @@ public class DurationMarketRegimeIndicator extends CachableIndicator<LocalDateTi
             time = time.minus(getBarSeries().getPairDuration());
         }
 
-        DurationMarketRegimeImpl durationMarketRegime = new DurationMarketRegimeImpl(currentRegime, duration);
-        putInCache(index, durationMarketRegime);
-        return durationMarketRegime;
-    }
-
-    @Override
-    public int getUnstableBars() {
-        return marketRegimeIndicator.getUnstableBars();
-    }
-
-    @Override
-    public TemporalBarSeries getBarSeries() {
-        return marketRegimeIndicator.getBarSeries();
+        return new DurationMarketRegimeImpl(currentRegime, duration);
     }
 }
