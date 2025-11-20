@@ -1,8 +1,9 @@
-package com.becker.freelance.indicators.ta.temporal.indicator;
+package com.becker.freelance.indicators.ta.other;
 
 import com.becker.freelance.commons.timeseries.TimeUtil;
 import com.becker.freelance.indicators.ta.cache.CachableIndicator;
-import com.becker.freelance.indicators.ta.temporal.series.TemporalBarSeries;
+import com.becker.freelance.indicators.ta.temporal.TemporalBarSeries;
+import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;

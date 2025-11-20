@@ -1,4 +1,4 @@
-package com.becker.freelance.indicators.ta.temporal.series;
+package com.becker.freelance.indicators.ta.temporal;
 
 import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;

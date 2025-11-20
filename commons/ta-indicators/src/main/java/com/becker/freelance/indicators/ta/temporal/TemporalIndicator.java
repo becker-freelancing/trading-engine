@@ -1,6 +1,4 @@
-package com.becker.freelance.indicators.ta.temporal.indicator;
-
-import com.becker.freelance.indicators.ta.temporal.series.TemporalBarSeries;
+package com.becker.freelance.indicators.ta.temporal;
 
 import java.time.LocalDateTime;
 
