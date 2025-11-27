@@ -22,6 +22,13 @@ public class MACDSignalTemporalIndicator extends CachableIndicator<LocalDateTime
     }
 
     @Override
+    public void reset() {
+        TemporalIndicator.super.reset();
+        signalEma.reset();
+        macd.reset();
+    }
+
+    @Override
     public Decimal getValue(LocalDateTime time) {
 
         if (allowUsingLastAvailablePrice && !getBarSeries().isTimeAligned(time)) {

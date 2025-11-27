@@ -22,6 +22,13 @@ public class MACDHistogramTemporalIndicator extends CachableIndicator<LocalDateT
     }
 
     @Override
+    public void reset() {
+        TemporalIndicator.super.reset();
+        macd.reset();
+        signal.reset();
+    }
+
+    @Override
     public Decimal getValue(LocalDateTime time) {
         if (allowUsingLastAvailablePrice && !getBarSeries().isTimeAligned(time)) {
             LocalDateTime lastAligned = TimeUtil.lastAligned(time, getBarSeries().getPairDuration());

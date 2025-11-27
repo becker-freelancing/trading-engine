@@ -1,5 +1,7 @@
 package com.becker.freelance.indicators.ta.temporal;
 
+import com.becker.freelance.indicators.ta.cache.CachableIndicator;
+
 import java.time.LocalDateTime;
 
 public interface TemporalIndicator<V> {
@@ -13,5 +15,8 @@ public interface TemporalIndicator<V> {
 
     default void reset() {
         getBarSeries().reset();
+        if (this instanceof CachableIndicator<?, ?> cache) {
+            cache.clearCache();
+        }
     }
 }

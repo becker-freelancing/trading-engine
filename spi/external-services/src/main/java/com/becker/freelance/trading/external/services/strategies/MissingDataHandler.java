@@ -11,4 +11,6 @@ public interface MissingDataHandler extends ExternalService {
     public void onMissingData(LocalDateTime time);
 
     public void onDataReceived(LocalDateTime time);
+
+    String getReason();
 }

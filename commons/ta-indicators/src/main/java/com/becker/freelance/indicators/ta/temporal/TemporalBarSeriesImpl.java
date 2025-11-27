@@ -51,6 +51,7 @@ public class TemporalBarSeriesImpl implements TemporalBarSeries {
     @Override
     public void reset() {
         barSeries.clear();
+        minTime = null;
     }
 
     @Override

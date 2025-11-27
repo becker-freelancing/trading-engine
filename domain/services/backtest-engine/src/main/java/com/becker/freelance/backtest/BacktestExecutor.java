@@ -10,7 +10,7 @@ import com.becker.freelance.commons.wallet.Wallet;
 import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.engine.StrategySupplier;
 import com.becker.freelance.math.Decimal;
-import com.becker.freelance.strategies.strategy.TradingStrategy;
+import com.becker.freelance.strategies.strategy.TradingStrategyInitiator;
 import com.becker.freelance.trading.external.services.backtest.broker.BacktestAccountBalanceRequestor;
 import com.becker.freelance.trading.external.services.backtest.broker.BacktestAccountBalanceRequestorBuilder;
 import com.becker.freelance.trading.external.services.backtest.callbacks.BacktestFinishedCallback;
@@ -36,7 +36,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -109,7 +108,7 @@ public class BacktestExecutor implements Runnable {
 
                 BacktestCandleDataSource dataProviderForPair = dataProviderFactory.build(new BacktestCandleSourceBuilderParams(pair, backtestSynchronizer));
                 Consumer<TimeChangeListener> timeChangeListenerConsumer = listener -> backtestSynchronizer.addPrioritySubscriber(new TimeChangeListenerSynchronizeable(listener));
-                BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = getStrategyInitiator(priceRequestorBroker);
+                TradingStrategyInitiator strategyInitiator = new BacktestStrategyInitiator(priceRequestorBroker);
                 StrategyEngine strategyEngine = new StrategyEngine(pair,
                         strategySupplier,
                         tradeExecutor,
@@ -118,7 +117,8 @@ public class BacktestExecutor implements Runnable {
                         timeChangeListenerConsumer,
                         strategyInitiator,
                         accountBalanceRequestor,
-                        scopedExternalServiceRegistry);
+                        scopedExternalServiceRegistry,
+                        dataProviderForPair::reset);
                 StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine);
                 dataProviderForPair.addSubscriber(strategyDataSubscriber);
             }
@@ -167,10 +167,6 @@ public class BacktestExecutor implements Runnable {
 
     public StrategyCreationParameter getParameter() {
         return parameters;
-    }
-
-    private BiConsumer<TradingStrategy, LocalDateTime> getStrategyInitiator(PriceRequestorBroker priceRequestorBroker) {
-        return new BacktestStrategyInitiator(priceRequestorBroker);
     }
 
 }

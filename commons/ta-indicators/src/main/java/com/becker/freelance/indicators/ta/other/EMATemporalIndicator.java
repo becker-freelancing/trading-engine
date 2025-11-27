@@ -46,7 +46,6 @@ public class EMATemporalIndicator extends CachableIndicator<LocalDateTime, Decim
         Decimal lastEma = getValue(getBarSeries().getLastTime(index));
 
         return alpha.multiply(current).add(invertedAlpha.multiply(lastEma));
-
     }
 
     @Override

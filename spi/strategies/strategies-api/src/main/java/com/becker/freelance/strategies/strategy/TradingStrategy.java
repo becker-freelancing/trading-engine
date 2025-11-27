@@ -4,16 +4,13 @@ import com.becker.freelance.commons.pair.Pair;
 import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.signal.ExitSignal;
-import com.becker.freelance.commons.timeseries.TimeSeries;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
 import com.becker.freelance.trading.external.services.broker.OpenPositionRequestor;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 
-public interface TradingStrategy {
+public interface TradingStrategy extends Initializable {
 
     public void setOpenPositionRequestor(OpenPositionRequestor openPositionRequestor);
 
@@ -25,11 +22,14 @@ public interface TradingStrategy {
 
     public int unstableBars();
 
-    public void processInitData(TimeSeries initiationData);
-
-    public void beforeFirstBar(BiConsumer<TradingStrategy, LocalDateTime> beforeFirstBar);
+    public void beforeFirstBar(TradingStrategyInitiator beforeFirstBar);
 
     public Pair getPair();
 
     void reset();
+
+    @Override
+    default int initializationBarCount() {
+        return unstableBars();
+    }
 }

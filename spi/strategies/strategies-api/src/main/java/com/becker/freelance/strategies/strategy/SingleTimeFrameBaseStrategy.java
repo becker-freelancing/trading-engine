@@ -27,18 +27,19 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 public abstract class SingleTimeFrameBaseStrategy implements TradingStrategy {
 
     private static final Logger logger = LoggerFactory.getLogger(SingleTimeFrameBaseStrategy.class);
+
     protected final TemporalBarSeries barSeries;
     protected final TemporalIndicator<Decimal> closePrice;
     protected final TemporalIndicator<Decimal> lowPrice;
     protected final TemporalIndicator<Decimal> highPrice;
     private final Pair pair;
     private final TemporalIndicator<TradeableMarketRegime> regimeIndicator;
-    private final Set<BiConsumer<TradingStrategy, LocalDateTime>> beforeFirstBar;
+    private final Set<TradingStrategyInitiator> beforeFirstBar;
     private OpenPositionRequestor openPositionRequestor;
     private LocalDateTime lastAddedBarTime;
     private boolean initiated = false;
@@ -81,8 +82,19 @@ public abstract class SingleTimeFrameBaseStrategy implements TradingStrategy {
     private boolean canNotExecute() {
         if (unstableBars == -1) {
             unstableBars = unstableBars();
+            logger.info("Unstable bars for strategy {}: {}", getClass().getSimpleName(), unstableBars);
         }
-        return barSeries.getSize() < unstableBars;
+        return barSeries.getSize() < unstableBars || getIndicators().stream()
+                .anyMatch(indicator -> indicator.getBarSeries().getSize() < indicator.getUnstableBars());
+    }
+
+    protected abstract List<TemporalIndicator<?>> getIndicators();
+
+    private int unstableBarsNormalized(TemporalIndicator<?> temporalIndicator) {
+        int unstableBars = temporalIndicator.getUnstableBars();
+        long indicatorPairMinutes = temporalIndicator.getBarSeries().getPairDuration().toMinutes();
+        long strategyPairMinutes = getPair().timeInMinutes();
+        return (int) Math.ceil(indicatorPairMinutes / (double) strategyPairMinutes) * unstableBars;
     }
 
     protected void addBarIfNeeded(TimeSeriesEntry currentPrice) {
@@ -92,7 +104,7 @@ public abstract class SingleTimeFrameBaseStrategy implements TradingStrategy {
         if (!initiated && barSeries.isEmpty()) {
             logger.info("Initiating trading strategy at time {}...", currentPrice.time());
             initiated = true;
-            beforeFirstBar.forEach(initiator -> initiator.accept(this, currentPrice.time()));
+            beforeFirstBar.forEach(initiator -> initiator.initiate(this, currentPrice.time()));
             logger.info("Finished initiating trading strategy at time {}", currentPrice.time());
         }
         barSeries.addBar(currentPrice);
@@ -119,11 +131,15 @@ public abstract class SingleTimeFrameBaseStrategy implements TradingStrategy {
 
     @Override
     public int unstableBars() {
-        return regimeIndicator.getUnstableBars();
+        return Stream.concat(Stream.of(regimeIndicator),
+                        getIndicators().stream()
+                ).map(this::unstableBarsNormalized)
+                .max(Comparator.naturalOrder())
+                .orElse(0);
     }
 
     @Override
-    public void beforeFirstBar(BiConsumer<TradingStrategy, LocalDateTime> beforeFirstBar) {
+    public void beforeFirstBar(TradingStrategyInitiator beforeFirstBar) {
         this.beforeFirstBar.add(beforeFirstBar);
     }
 
@@ -198,7 +214,12 @@ public abstract class SingleTimeFrameBaseStrategy implements TradingStrategy {
         return pair.toDuration();
     }
 
-    protected abstract void resetIndicators();
+    protected void resetIndicators() {
+        Stream.concat(
+                        Stream.of(regimeIndicator),
+                        getIndicators().stream())
+                .forEach(TemporalIndicator::reset);
+    }
 
     @Override
     public final void reset() {

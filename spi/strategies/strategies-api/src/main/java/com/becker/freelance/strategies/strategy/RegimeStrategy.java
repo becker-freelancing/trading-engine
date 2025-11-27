@@ -5,6 +5,7 @@ import com.becker.freelance.commons.regime.TradeableMarketRegime;
 import com.becker.freelance.commons.signal.EntrySignalBuilder;
 import com.becker.freelance.commons.signal.ExitSignal;
 import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
+import com.becker.freelance.indicators.ta.temporal.TemporalIndicator;
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
 import com.becker.freelance.trading.external.services.broker.OpenPositionRequestor;
@@ -77,6 +78,14 @@ public class RegimeStrategy extends SingleTimeFrameBaseStrategy {
     }
 
     @Override
+    protected List<TemporalIndicator<?>> getIndicators() {
+        return allStrategies.stream()
+                .map(SingleTimeFrameBaseStrategy::getIndicators)
+                .flatMap(List::stream)
+                .toList();
+    }
+
+    @Override
     protected void addBarIfNeeded(TimeSeriesEntry currentPrice) {
         super.addBarIfNeeded(currentPrice);
         allStrategies.forEach(strategy -> strategy.addBarIfNeeded(currentPrice));
@@ -85,6 +94,14 @@ public class RegimeStrategy extends SingleTimeFrameBaseStrategy {
     @Override
     protected void resetIndicators() {
         allStrategies.forEach(SingleTimeFrameBaseStrategy::resetIndicators);
+    }
+
+    @Override
+    public List<Initializable> getTransitiveInitializables() {
+        return allStrategies.stream()
+                .map(TradingStrategy::getTransitiveInitializables)
+                .flatMap(List::stream)
+                .toList();
     }
 
     private static final record PairStrategyParameter(Pair pair) implements StrategyParameter {

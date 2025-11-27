@@ -11,6 +11,7 @@ import com.becker.freelance.strategies.executionparameter.DefaultExitExecutionPa
 import com.becker.freelance.strategies.executionparameter.EntryExecutionParameter;
 import com.becker.freelance.strategies.executionparameter.ExitExecutionParameter;
 import com.becker.freelance.strategies.strategy.TradingStrategy;
+import com.becker.freelance.strategies.strategy.TradingStrategyInitiator;
 import com.becker.freelance.trading.external.services.broker.AccountBalanceRequestor;
 import com.becker.freelance.trading.external.services.broker.BrokerSpecificsRequestor;
 import com.becker.freelance.trading.external.services.broker.BrokerSpecificsRequestorBuilder;
@@ -38,7 +39,6 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class StrategyEngine {
@@ -51,6 +51,7 @@ public class StrategyEngine {
     private final EntrySignalValidator entrySignalValidator;
     private final ManagementEnvironmentProvider environmentProvider;
     private final MissingDataHandler missingDataHandler;
+    private final ResetListener resetListener;
 
     public StrategyEngine(Pair pair,
                           StrategySupplier strategySupplier,
@@ -58,10 +59,11 @@ public class StrategyEngine {
                           EurUsdRequestor eurUsdRequestor,
                           PriceRequestorBroker priceRequestorBroker,
                           Consumer<TimeChangeListener> timeChangeListenerConsumer,
-                          BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator,
+                          TradingStrategyInitiator strategyInitiator,
                           AccountBalanceRequestor accountBalanceRequestor,
-                          ScopedExternalServiceRegistry scopedExternalServiceRegistry) {
+                          ScopedExternalServiceRegistry scopedExternalServiceRegistry, ResetListener resetListener) {
         this.tradeExecutor = tradeExecutor;
+        this.resetListener = resetListener;
 
         ExternalServiceRegistry externalServiceRegistry = ExternalServiceRegistry.globalServiceRegistry();
         this.entrySignalAdaptor = externalServiceRegistry.requireServiceBuilder(EntrySignalAdaptorBuilder.class).build();
@@ -100,7 +102,9 @@ public class StrategyEngine {
             closePositionsIfSlOrTpReached(currentPrice);
 
             if (missingDataHandler.shouldResetStrategy()) {
+                logger.info("Resetting Strategy because of {}", missingDataHandler.getReason());
                 strategy.reset();
+                resetListener.onReset();
                 return;
             }
 
@@ -108,7 +112,7 @@ public class StrategyEngine {
             shouldEnter(new DefaultEntryExecutionParameter(timeSeries, time, currentPrice), strategy);
         } catch (Exception e) {
             logger.error("Error while executing Strategy {}", strategy.getClass().getName(), e);
-            logger.warn("Proceeding strategy execution after error {}", e.getMessage());
+            logger.warn("Proceeding strategy execution on time {} after error {} with timeseries {}", time, e.getMessage(), timeSeries);
         }
     }
 
@@ -135,8 +139,8 @@ public class StrategyEngine {
     }
 
     public void update(TimeSeries timeSeries, LocalDateTime time) {
-        executeForTime(timeSeries, time, strategy);
         missingDataHandler.onDataReceived(time);
+        executeForTime(timeSeries, time, strategy);
     }
 
     public void onMissingData(LocalDateTime time) {

@@ -20,4 +20,8 @@ public abstract class CachableIndicator<K, V> {
     }
 
     protected abstract V computeMissing(K index);
+
+    public void clearCache() {
+        cache.clear();
+    }
 }

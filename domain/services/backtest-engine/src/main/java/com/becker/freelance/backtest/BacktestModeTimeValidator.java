@@ -59,6 +59,12 @@ class BacktestModeTimeValidator implements Predicate<LocalDateTime> {
 
         this.currentExecutionStartTime = startTime.plus(initialSkipDuration);
         this.currentExecutionEndTime = currentExecutionStartTime.plus(executionDuration);
+
+        logger.info("Current Start Time set to {} and End Time set to {}", currentExecutionStartTime, currentExecutionEndTime);
+        logger.info("Initial Skip duration: {} ({})", initialSkipDuration, initialSkipDuration.toDays());
+        logger.info("Execution duration: {} ({})", executionDuration, executionDuration.toDays());
+        logger.info("Skip duration: {} ({})", skipDuration, skipDuration.toDays());
+        logger.info("Setting first time window from {} to {}", currentExecutionStartTime, currentExecutionEndTime);
     }
 
     private Duration getInitialSkipDuration(BacktestMode backtestMode, Duration trainDuration, Duration valDuration) {
@@ -89,8 +95,11 @@ class BacktestModeTimeValidator implements Predicate<LocalDateTime> {
     public boolean test(LocalDateTime time) {
         if (!shiftedWindow && time.isAfter(currentExecutionEndTime)) {
 
+
             currentExecutionStartTime = currentExecutionEndTime.plus(skipDuration);
             currentExecutionEndTime = currentExecutionStartTime.plus(executionDuration);
+
+            logger.info("Shifting Time Window to {} - {}", currentExecutionStartTime, currentExecutionEndTime);
 
             shiftedWindow = true;
         }

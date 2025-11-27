@@ -94,6 +94,10 @@ public class QueueTimeSeries implements TimeSeries {
 
     @Override
     public String toString() {
+        if (data.isEmpty()) {
+            return String.format("QueueTimeSeries(For: %s, Empty)",
+                    pair.technicalName());
+        }
         return String.format("QueueTimeSeries(For: %s, From: %s, To: %s, Entries: %d)",
                 pair.technicalName(), getMinTime(), getMaxTime(), index.size());
     }
@@ -116,5 +120,14 @@ public class QueueTimeSeries implements TimeSeries {
         data.clear();
         timeQueue.clear();
         barCount = 0;
+    }
+
+    @Override
+    public Iterator<TimeSeriesEntry> iterator() {
+        return data.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(Map.Entry::getValue)
+                .toList()
+                .iterator();
     }
 }

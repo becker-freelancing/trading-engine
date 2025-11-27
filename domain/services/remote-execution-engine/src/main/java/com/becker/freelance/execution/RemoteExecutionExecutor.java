@@ -1,12 +1,9 @@
 package com.becker.freelance.execution;
 
 import com.becker.freelance.commons.pair.Pair;
-import com.becker.freelance.commons.timeseries.CompleteTimeSeries;
-import com.becker.freelance.commons.timeseries.TimeSeries;
-import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.engine.StrategyEngine;
 import com.becker.freelance.engine.StrategySupplier;
-import com.becker.freelance.strategies.strategy.TradingStrategy;
+import com.becker.freelance.strategies.strategy.TradingStrategyInitiator;
 import com.becker.freelance.trading.external.services.candles.PriceRequestorBroker;
 import com.becker.freelance.trading.external.services.candles.PriceRequestorBrokerBuilder;
 import com.becker.freelance.trading.external.services.management.environment.TimeChangeListener;
@@ -22,11 +19,8 @@ import com.becker.freelance.trading.external.services.tradeexecution.TradeExecut
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
 public class RemoteExecutionExecutor implements Runnable {
 
@@ -58,7 +52,7 @@ public class RemoteExecutionExecutor implements Runnable {
             RemoteCandleDataSource candleDataSource = dataSourceBuilder.build(new RemoteCandleSourceBuilderParams(pair));
             PriceRequestorBroker priceRequestorBroker = externalServiceRegistry.requireServiceBuilder(PriceRequestorBrokerBuilder.class).build();
 
-            BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = getStrategyInitiator(priceRequestorBroker);
+            TradingStrategyInitiator strategyInitiator = getStrategyInitiator(priceRequestorBroker);
 
 
             Set<TimeChangeListener> timeChangeListeners = new HashSet<>();
@@ -72,7 +66,10 @@ public class RemoteExecutionExecutor implements Runnable {
                     timeChangeListeners::add,
                     strategyInitiator,
                     accountBalanceRequestor,
-                    externalServiceRegistry.newScopedExternalServiceRegistry());
+                    externalServiceRegistry.newScopedExternalServiceRegistry(),
+                    () -> {
+                        throw new UnsupportedOperationException("Not implemented yet");
+                    });
 
             StrategyDataSubscriber strategyDataSubscriber = new StrategyDataSubscriber(strategyEngine, timeChangeListeners);
             candleDataSource.addSubscriber(strategyDataSubscriber);
@@ -81,17 +78,17 @@ public class RemoteExecutionExecutor implements Runnable {
         }
     }
 
-    private BiConsumer<TradingStrategy, LocalDateTime> getStrategyInitiator(PriceRequestorBroker priceRequestorBroker) {
-        BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = (tradingStrategy, currentTime) -> {
-            int requiredBarCount = tradingStrategy.unstableBars();
-            Pair strategyPair = tradingStrategy.getPair();
-            long barLengthInMinutes = strategyPair.toDuration().toMinutes();
-            List<TimeSeriesEntry> initiationData = priceRequestorBroker.forPair(strategyPair).getPriceInRange(
-                    currentTime.minusMinutes(barLengthInMinutes * requiredBarCount + 100),
-                    currentTime.minusMinutes(barLengthInMinutes));
-            TimeSeries timeSeries = new CompleteTimeSeries(pair, initiationData);
-            tradingStrategy.processInitData(timeSeries);
-        };
-        return strategyInitiator;
+    private TradingStrategyInitiator getStrategyInitiator(PriceRequestorBroker priceRequestorBroker) {
+//        BiConsumer<TradingStrategy, LocalDateTime> strategyInitiator = (tradingStrategy, currentTime) -> {
+//            int requiredBarCount = tradingStrategy.unstableBars();
+//            Pair strategyPair = tradingStrategy.getPair();
+//            long barLengthInMinutes = strategyPair.toDuration().toMinutes();
+//            List<TimeSeriesEntry> initiationData = priceRequestorBroker.forPair(strategyPair).getPriceInRange(
+//                    currentTime.minusMinutes(barLengthInMinutes * requiredBarCount + 100),
+//                    currentTime.minusMinutes(barLengthInMinutes));
+//            TimeSeries timeSeries = new CompleteTimeSeries(pair, initiationData);
+//            tradingStrategy.processInitData(timeSeries);
+//        };
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

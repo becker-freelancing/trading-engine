@@ -105,4 +105,13 @@ public class CompleteTimeSeries implements TimeSeries {
         return index.contains(time);
     }
 
+
+    @Override
+    public Iterator<TimeSeriesEntry> iterator() {
+        return data.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(Map.Entry::getValue)
+                .toList()
+                .iterator();
+    }
 }

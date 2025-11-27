@@ -23,6 +23,13 @@ public class MACDTemporalIndicator extends CachableIndicator<LocalDateTime, Deci
         this.emaSlow = new EMATemporalIndicator(base, macdLongPeriod, allowUsingLastAvailablePrice, allowExternalStartValue);
     }
 
+    @Override
+    public void reset() {
+        TemporalIndicator.super.reset();
+        emaFast.reset();
+        emaSlow.reset();
+    }
+
     public TemporalIndicator<Decimal> getHistogram(int macdSignalLinePeriod) {
         return new MACDHistogramTemporalIndicator(
                 this,
