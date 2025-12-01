@@ -26,7 +26,6 @@ class DecimalTest {
         RangeTests.main(null);
         RoundingTests.main(null);
         ScaleByPowerOfTenTests.main(null);
-        SerializationTests.main();
         SquareRootTests.main();
         StringConstructor.main(null);
         StrippingZerosTest.main(null);

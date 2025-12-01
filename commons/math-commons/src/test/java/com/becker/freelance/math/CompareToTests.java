@@ -24,21 +24,20 @@ package com.becker.freelance.math;/*
 /*
  * @test
  * @bug 6473768
- * @summary Tests of BigDecimal.compareTo
+ * @summary Tests of Decimal.compareTo
  */
 
-import java.math.BigDecimal;
 
-import static java.math.BigDecimal.*;
+import static com.becker.freelance.math.Decimal.*;
 
 public class CompareToTests {
     private static int compareToTests() {
         int failures = 0;
 
-        final BigDecimal MINUS_ONE = BigDecimal.ONE.negate();
+        final Decimal MINUS_ONE = Decimal.ONE.negate();
 
         // First operand, second operand, expected compareTo result
-        BigDecimal[][] testCases = {
+        Decimal[][] testCases = {
                 // Basics
                 {valueOf(0), valueOf(0), ZERO},
                 {valueOf(0), valueOf(1), MINUS_ONE},
@@ -79,11 +78,11 @@ public class CompareToTests {
                 {valueOf(Long.MIN_VALUE + 1).negate(), valueOf(Long.MIN_VALUE), ONE},
         };
 
-        for (BigDecimal[] testCase : testCases) {
-            BigDecimal a = testCase[0];
-            BigDecimal a_negate = a.negate();
-            BigDecimal b = testCase[1];
-            BigDecimal b_negate = b.negate();
+        for (Decimal[] testCase : testCases) {
+            Decimal a = testCase[0];
+            Decimal a_negate = a.negate();
+            Decimal b = testCase[1];
+            Decimal b_negate = b.negate();
             int expected = testCase[2].intValue();
 
             failures += compareToTest(a, b, expected);
@@ -94,7 +93,7 @@ public class CompareToTests {
         return failures;
     }
 
-    private static int compareToTest(BigDecimal a, BigDecimal b, int expected) {
+    private static int compareToTest(Decimal a, Decimal b, int expected) {
         int result = a.compareTo(b);
         int failed = (result == expected) ? 0 : 1;
         if (failed == 1) {

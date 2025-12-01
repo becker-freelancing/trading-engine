@@ -29,7 +29,7 @@ package com.becker.freelance.math;/*
  * @run main/othervm -XX:+IgnoreUnrecognizedVMOptions -XX:+EliminateAutoBox -XX:AutoBoxCacheMax=20000 com.becker.freelance.math.ToPlainStringTests
  */
 
-import java.math.BigDecimal;
+
 
 public class ToPlainStringTests {
     public static void main(String argv[]) {
@@ -75,20 +75,20 @@ public class ToPlainStringTests {
 
         int errors = 0;
         for (String[] testCase : testCases) {
-            BigDecimal bd = new BigDecimal(testCase[0]);
+            Decimal bd = new Decimal(testCase[0]);
             String s;
 
             if (!(s = bd.toPlainString()).equals(testCase[1])) {
                 errors++;
                 System.err.println("Unexpected plain result ``" +
-                        s + "'' from BigDecimal " +
+                        s + "'' from Decimal " +
                         bd);
             }
-            bd = new BigDecimal("-" + testCase[0]);
+            bd = new Decimal("-" + testCase[0]);
             if (bd.signum() != 0 && !(s = (bd.toPlainString())).equals("-" + testCase[1])) {
                 errors++;
                 System.err.println("Unexpected plain result ``" +
-                        s + "'' from BigDecimal " +
+                        s + "'' from Decimal " +
                         bd);
             }
         }
@@ -117,7 +117,7 @@ public class ToPlainStringTests {
         /* We expect pre-emptive OutOfMemoryErrors, nothing else */
         for (String failingCase : failingCases) {
             try {
-                new BigDecimal(failingCase).toPlainString();
+                new Decimal(failingCase).toPlainString();
             } catch (OutOfMemoryError expected) {
                 continue;
             } catch (Throwable ignored) {

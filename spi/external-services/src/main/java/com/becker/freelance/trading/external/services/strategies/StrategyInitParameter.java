@@ -10,7 +10,7 @@ public record StrategyInitParameter(ParameterName name, Decimal defaultValue, De
         this(name, new Decimal(defaultValue), new Decimal(minValue), new Decimal(maxValue), new Decimal(stepSize));
     }
 
-    public StrategyInitParameter(ParameterName name, Double defaultValue, Double minValue, Double maxValue, Double stepSize) {
+    public StrategyInitParameter(ParameterName name, String defaultValue, String minValue, String maxValue, String stepSize) {
         this(name, new Decimal(defaultValue), new Decimal(minValue), new Decimal(maxValue), new Decimal(stepSize));
     }
 

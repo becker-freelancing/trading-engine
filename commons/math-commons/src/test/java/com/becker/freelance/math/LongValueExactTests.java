@@ -24,11 +24,10 @@ package com.becker.freelance.math;/*
 /**
  * @test
  * @bug 6806261 8211936 8305343
- * @summary Tests of BigDecimal.longValueExact
+ * @summary Tests of Decimal.longValueExact
  */
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+
 import java.util.List;
 import java.util.Map;
 
@@ -48,35 +47,35 @@ public class LongValueExactTests {
         }
     }
 
-    private static long simpleLongValueExact(BigDecimal bd) {
+    private static long simpleLongValueExact(Decimal bd) {
         return bd.toBigIntegerExact().longValue();
     }
 
     private static int longValueExactSuccessful() {
         int failures = 0;
 
-        // Strings used to create BigDecimal instances on which invoking
+        // Strings used to create Decimal instances on which invoking
         // longValueExact() will succeed.
-        Map<BigDecimal, Long> successCases =
-                Map.ofEntries(entry(new BigDecimal("9223372036854775807"), Long.MAX_VALUE), // 2^63 -1
-                        entry(new BigDecimal("9223372036854775807.0"), Long.MAX_VALUE),
-                        entry(new BigDecimal("9223372036854775807.00"), Long.MAX_VALUE),
+        Map<Decimal, Long> successCases =
+                Map.ofEntries(entry(new Decimal("9223372036854775807"), Long.MAX_VALUE), // 2^63 -1
+                        entry(new Decimal("9223372036854775807.0"), Long.MAX_VALUE),
+                        entry(new Decimal("9223372036854775807.00"), Long.MAX_VALUE),
 
-                        entry(new BigDecimal("-9223372036854775808"), Long.MIN_VALUE), // -2^63
-                        entry(new BigDecimal("-9223372036854775808.0"), Long.MIN_VALUE),
-                        entry(new BigDecimal("-9223372036854775808.00"), Long.MIN_VALUE),
+                        entry(new Decimal("-9223372036854775808"), Long.MIN_VALUE), // -2^63
+                        entry(new Decimal("-9223372036854775808.0"), Long.MIN_VALUE),
+                        entry(new Decimal("-9223372036854775808.00"), Long.MIN_VALUE),
 
-                        entry(new BigDecimal("1e0"), 1L),
-                        entry(new BigDecimal(BigInteger.ONE, -18), 1_000_000_000_000_000_000L),
+                        entry(new Decimal("1e0"), 1L),
+                        entry(new Decimal(BigInteger.ONE, -18), 1_000_000_000_000_000_000L),
 
-                        entry(new BigDecimal("0e13"), 0L), // Fast path zero
-                        entry(new BigDecimal("0e64"), 0L),
-                        entry(new BigDecimal("0e1024"), 0L),
+                        entry(new Decimal("0e13"), 0L), // Fast path zero
+                        entry(new Decimal("0e64"), 0L),
+                        entry(new Decimal("0e1024"), 0L),
 
-                        entry(new BigDecimal("10.000000000000000000000000000000000"), 10L));
+                        entry(new Decimal("10.000000000000000000000000000000000"), 10L));
 
         for (var testCase : successCases.entrySet()) {
-            BigDecimal bd = testCase.getKey();
+            Decimal bd = testCase.getKey();
             long expected = testCase.getValue();
             try {
                 long longValueExact = bd.longValueExact();
@@ -96,21 +95,21 @@ public class LongValueExactTests {
 
     private static int longValueExactExceptional() {
         int failures = 0;
-        List<BigDecimal> exceptionalCases =
-                List.of(new BigDecimal("9223372036854775808"), // Long.MAX_VALUE + 1
-                        new BigDecimal("9223372036854775808.0"),
-                        new BigDecimal("9223372036854775808.00"),
-                        new BigDecimal("-9223372036854775809"), // Long.MIN_VALUE - 1
-                        new BigDecimal("-9223372036854775808.1"),
-                        new BigDecimal("-9223372036854775808.01"),
+        List<Decimal> exceptionalCases =
+                List.of(new Decimal("9223372036854775808"), // Long.MAX_VALUE + 1
+                        new Decimal("9223372036854775808.0"),
+                        new Decimal("9223372036854775808.00"),
+                        new Decimal("-9223372036854775809"), // Long.MIN_VALUE - 1
+                        new Decimal("-9223372036854775808.1"),
+                        new Decimal("-9223372036854775808.01"),
 
-                        new BigDecimal("9999999999999999999"),
-                        new BigDecimal("10000000000000000000"),
+                        new Decimal("9999999999999999999"),
+                        new Decimal("10000000000000000000"),
 
-                        new BigDecimal("0.99"),
-                        new BigDecimal("0.999999999999999999999"));
+                        new Decimal("0.99"),
+                        new Decimal("0.999999999999999999999"));
 
-        for (BigDecimal bd : exceptionalCases) {
+        for (Decimal bd : exceptionalCases) {
             try {
                 long longValueExact = bd.longValueExact();
                 failures++;
@@ -124,12 +123,12 @@ public class LongValueExactTests {
 
     private static int longValueExactExceptional8305343() {
         int failures = 0;
-        List<BigDecimal> exceptionalCases =
-                List.of(new BigDecimal("1e" + (Integer.MAX_VALUE - 1)),
-                        new BigDecimal("1e" + (Integer.MAX_VALUE))
+        List<Decimal> exceptionalCases =
+                List.of(new Decimal("1e" + (Integer.MAX_VALUE - 1)),
+                        new Decimal("1e" + (Integer.MAX_VALUE))
                 );
 
-        for (BigDecimal bd : exceptionalCases) {
+        for (Decimal bd : exceptionalCases) {
             try {
                 bd.longValueExact();
                 failures++;

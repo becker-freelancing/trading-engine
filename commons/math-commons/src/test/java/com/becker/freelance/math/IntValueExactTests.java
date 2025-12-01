@@ -24,11 +24,10 @@ package com.becker.freelance.math;/*
 /**
  * @test
  * @bug 8211936
- * @summary Tests of BigDecimal.intValueExact
+ * @summary Tests of Decimal.intValueExact
  */
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+
 import java.util.List;
 import java.util.Map;
 
@@ -47,35 +46,35 @@ public class IntValueExactTests {
         }
     }
 
-    private static int simpleIntValueExact(BigDecimal bd) {
+    private static int simpleIntValueExact(Decimal bd) {
         return bd.toBigIntegerExact().intValue();
     }
 
     private static int intValueExactSuccessful() {
         int failures = 0;
 
-        // Strings used to create BigDecimal instances on which invoking
+        // Strings used to create Decimal instances on which invoking
         // intValueExact() will succeed.
-        Map<BigDecimal, Integer> successCases =
-                Map.ofEntries(entry(new BigDecimal("2147483647"), Integer.MAX_VALUE), // 2^31 -1
-                        entry(new BigDecimal("2147483647.0"), Integer.MAX_VALUE),
-                        entry(new BigDecimal("2147483647.00"), Integer.MAX_VALUE),
+        Map<Decimal, Integer> successCases =
+                Map.ofEntries(entry(new Decimal("2147483647"), Integer.MAX_VALUE), // 2^31 -1
+                        entry(new Decimal("2147483647.0"), Integer.MAX_VALUE),
+                        entry(new Decimal("2147483647.00"), Integer.MAX_VALUE),
 
-                        entry(new BigDecimal("-2147483648"), Integer.MIN_VALUE), // -2^31
-                        entry(new BigDecimal("-2147483648.0"), Integer.MIN_VALUE),
-                        entry(new BigDecimal("-2147483648.00"), Integer.MIN_VALUE),
+                        entry(new Decimal("-2147483648"), Integer.MIN_VALUE), // -2^31
+                        entry(new Decimal("-2147483648.0"), Integer.MIN_VALUE),
+                        entry(new Decimal("-2147483648.00"), Integer.MIN_VALUE),
 
-                        entry(new BigDecimal("1e0"), 1),
-                        entry(new BigDecimal(BigInteger.ONE, -9), 1_000_000_000),
+                        entry(new Decimal("1e0"), 1),
+                        entry(new Decimal(BigInteger.ONE, -9), 1_000_000_000),
 
-                        entry(new BigDecimal("0e13"), 0), // Fast path zero
-                        entry(new BigDecimal("0e32"), 0),
-                        entry(new BigDecimal("0e512"), 0),
+                        entry(new Decimal("0e13"), 0), // Fast path zero
+                        entry(new Decimal("0e32"), 0),
+                        entry(new Decimal("0e512"), 0),
 
-                        entry(new BigDecimal("10.000000000000000000000000000000000"), 10));
+                        entry(new Decimal("10.000000000000000000000000000000000"), 10));
 
         for (var testCase : successCases.entrySet()) {
-            BigDecimal bd = testCase.getKey();
+            Decimal bd = testCase.getKey();
             int expected = testCase.getValue();
             try {
                 int intValueExact = bd.intValueExact();
@@ -95,21 +94,21 @@ public class IntValueExactTests {
 
     private static int intValueExactExceptional() {
         int failures = 0;
-        List<BigDecimal> exceptionalCases =
-                List.of(new BigDecimal("2147483648"), // Integer.MAX_VALUE + 1
-                        new BigDecimal("2147483648.0"),
-                        new BigDecimal("2147483648.00"),
-                        new BigDecimal("-2147483649"), // Integer.MIN_VALUE - 1
-                        new BigDecimal("-2147483649.1"),
-                        new BigDecimal("-2147483649.01"),
+        List<Decimal> exceptionalCases =
+                List.of(new Decimal("2147483648"), // Integer.MAX_VALUE + 1
+                        new Decimal("2147483648.0"),
+                        new Decimal("2147483648.00"),
+                        new Decimal("-2147483649"), // Integer.MIN_VALUE - 1
+                        new Decimal("-2147483649.1"),
+                        new Decimal("-2147483649.01"),
 
-                        new BigDecimal("9999999999999999999999999999999"),
-                        new BigDecimal("10000000000000000000000000000000"),
+                        new Decimal("9999999999999999999999999999999"),
+                        new Decimal("10000000000000000000000000000000"),
 
-                        new BigDecimal("0.99"),
-                        new BigDecimal("0.999999999999999999999"));
+                        new Decimal("0.99"),
+                        new Decimal("0.999999999999999999999"));
 
-        for (BigDecimal bd : exceptionalCases) {
+        for (Decimal bd : exceptionalCases) {
             try {
                 int intValueExact = bd.intValueExact();
                 failures++;

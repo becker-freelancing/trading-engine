@@ -27,26 +27,25 @@ package com.becker.freelance.math;/*
  * @summary Test that precision() is computed properly.
  */
 
-import java.math.BigDecimal;
 
-import static java.math.BigDecimal.TEN;
-import static java.math.BigDecimal.valueOf;
+import static com.becker.freelance.math.Decimal.TEN;
+import static com.becker.freelance.math.Decimal.valueOf;
 
 public class PrecisionTests {
-    private static BigDecimal NINE = valueOf(9);
+    private static Decimal NINE = valueOf(9);
 
     public static void main(String argv[]) {
         int failures = 0;
 
         // Smallest and largest values of a given length
-        BigDecimal[] testValues = {
+        Decimal[] testValues = {
                 valueOf(1), valueOf(9),
         };
 
-        failures += testPrecision(new BigDecimal(0), 1);
+        failures += testPrecision(new Decimal(0), 1);
 
         for (int i = 1; i < 100; i++) {
-            for (BigDecimal bd : testValues) {
+            for (Decimal bd : testValues) {
                 failures += testPrecision(bd, i);
                 failures += testPrecision(bd.negate(), i);
             }
@@ -56,7 +55,7 @@ public class PrecisionTests {
         }
 
         // The following test tries to cover testings for precision of long values
-        BigDecimal[] randomTestValues = {
+        Decimal[] randomTestValues = {
                 valueOf(2147483648L),          // 2^31:       10 digits
                 valueOf(-2147483648L),         // -2^31:      10 digits
                 valueOf(98893745455L),         // random:     11 digits
@@ -80,7 +79,7 @@ public class PrecisionTests {
         }
     }
 
-    private static int testPrecision(BigDecimal bd, int expected) {
+    private static int testPrecision(Decimal bd, int expected) {
         int precision = bd.precision();
 
         // System.out.printf("Testing %s, expected %d%n", bd, expected);

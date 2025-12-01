@@ -27,14 +27,14 @@ package com.becker.freelance.math;/*
  * @summary Tests of dropping digits near the scale threshold
  */
 
-import java.math.BigDecimal;
+
 import java.math.MathContext;
 
 public class RoundingTests {
     private static int roundingTests() {
         int failures = 0;
-        BigDecimal bd1 = BigDecimal.valueOf(11, Integer.MIN_VALUE);
-        BigDecimal bd2 = null;
+        Decimal bd1 = Decimal.valueOf(11, Integer.MIN_VALUE);
+        Decimal bd2 = null;
         MathContext mc = new MathContext(1);
         try {
             bd2 = bd1.round(mc); // should overflow here

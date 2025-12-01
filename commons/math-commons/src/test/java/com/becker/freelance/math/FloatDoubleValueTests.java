@@ -29,7 +29,7 @@ package com.becker.freelance.math;/*
  * @run main/othervm -XX:+IgnoreUnrecognizedVMOptions -XX:+EliminateAutoBox -XX:AutoBoxCacheMax=20000 com.becker.freelance.math.FloatDoubleValueTests
  */
 
-import java.math.BigDecimal;
+
 
 public class FloatDoubleValueTests {
     private static final long two2the24 = 1L << 23;
@@ -41,21 +41,21 @@ public class FloatDoubleValueTests {
     // Largest long that fits exactly in a double
     private static final long maxDblLong = Long.MAX_VALUE & ~(0x7ffL);
 
-    static void testDoubleValue0(long i, BigDecimal bd) {
+    static void testDoubleValue0(long i, Decimal bd) {
         if (bd.doubleValue() != i ||
                 bd.longValue() != i)
             throw new RuntimeException("Unexpected equality failure for " +
                     i + "\t" + bd);
     }
 
-    static void testFloatValue0(long i, BigDecimal bd) {
+    static void testFloatValue0(long i, Decimal bd) {
         if (bd.floatValue() != i ||
                 bd.longValue() != i)
             throw new RuntimeException("Unexpected equality failure for " +
                     i + "\t" + bd);
     }
 
-    static void checkFloat(BigDecimal bd, float f) {
+    static void checkFloat(Decimal bd, float f) {
         float fbd = bd.floatValue();
         if (f != fbd) {
             String message = String.format("Bad conversion:" +
@@ -65,7 +65,7 @@ public class FloatDoubleValueTests {
         }
     }
 
-    static void checkDouble(BigDecimal bd, double d) {
+    static void checkDouble(Decimal bd, double d) {
         double dbd = bd.doubleValue();
 
         if (d != dbd) {
@@ -95,8 +95,8 @@ public class FloatDoubleValueTests {
         };
 
         for (long i : longValues) {
-            BigDecimal bd1 = new BigDecimal(i);
-            BigDecimal bd2 = new BigDecimal(-i);
+            Decimal bd1 = new Decimal(i);
+            Decimal bd2 = new Decimal(-i);
 
             testDoubleValue0(i, bd1);
             testDoubleValue0(-i, bd2);
@@ -123,8 +123,8 @@ public class FloatDoubleValueTests {
         // Test integral values that will convert exactly to double
         // but not float.
         for (long i : longValues) {
-            BigDecimal bd1 = new BigDecimal(i);
-            BigDecimal bd2 = new BigDecimal(-i);
+            Decimal bd1 = new Decimal(i);
+            Decimal bd2 = new Decimal(-i);
 
             testDoubleValue0(i, bd1);
             testDoubleValue0(-i, bd2);
@@ -135,8 +135,8 @@ public class FloatDoubleValueTests {
 
         // Now check values that should not convert the same in double
         for (long i = maxDblLong; i < Long.MAX_VALUE; i++) {
-            BigDecimal bd1 = new BigDecimal(i);
-            BigDecimal bd2 = new BigDecimal(-i);
+            Decimal bd1 = new Decimal(i);
+            Decimal bd2 = new Decimal(-i);
             checkDouble(bd1, (double) i);
             checkDouble(bd2, -(double) i);
 
@@ -144,15 +144,15 @@ public class FloatDoubleValueTests {
             checkFloat(bd2, -(float) i);
         }
 
-        checkDouble(new BigDecimal(Long.MIN_VALUE), (double) Long.MIN_VALUE);
-        checkDouble(new BigDecimal(Long.MAX_VALUE), (double) Long.MAX_VALUE);
+        checkDouble(new Decimal(Long.MIN_VALUE), (double) Long.MIN_VALUE);
+        checkDouble(new Decimal(Long.MAX_VALUE), (double) Long.MAX_VALUE);
     }
 
     static void testFloatValue() {
         // Now check values that should not convert the same in float
         for (long i = maxFltLong; i <= Integer.MAX_VALUE; i++) {
-            BigDecimal bd1 = new BigDecimal(i);
-            BigDecimal bd2 = new BigDecimal(-i);
+            Decimal bd1 = new Decimal(i);
+            Decimal bd2 = new Decimal(-i);
             checkFloat(bd1, (float) i);
             checkFloat(bd2, -(float) i);
 
@@ -162,20 +162,20 @@ public class FloatDoubleValueTests {
     }
 
     static void testFloatValue1() {
-        checkFloat(new BigDecimal("85070591730234615847396907784232501249"), 8.507059e+37f);
-        checkFloat(new BigDecimal("7784232501249e12"), 7.7842326e24f);
-        checkFloat(new BigDecimal("907784232501249e-12"), 907.78424f);
-        checkFloat(new BigDecimal("7784e8"), 7.7839997e11f);
-        checkFloat(new BigDecimal("9077e-8"), 9.077e-5f);
+        checkFloat(new Decimal("85070591730234615847396907784232501249"), 8.507059e+37f);
+        checkFloat(new Decimal("7784232501249e12"), 7.7842326e24f);
+        checkFloat(new Decimal("907784232501249e-12"), 907.78424f);
+        checkFloat(new Decimal("7784e8"), 7.7839997e11f);
+        checkFloat(new Decimal("9077e-8"), 9.077e-5f);
 
     }
 
     static void testDoubleValue1() {
-        checkDouble(new BigDecimal("85070591730234615847396907784232501249"), 8.507059173023462e37);
-        checkDouble(new BigDecimal("7784232501249e12"), 7.784232501249e24);
-        checkDouble(new BigDecimal("907784232501249e-12"), 907.784232501249);
-        checkDouble(new BigDecimal("7784e8"), 7.784e11);
-        checkDouble(new BigDecimal("9077e-8"), 9.077e-5);
+        checkDouble(new Decimal("85070591730234615847396907784232501249"), 8.507059173023462e37);
+        checkDouble(new Decimal("7784232501249e12"), 7.784232501249e24);
+        checkDouble(new Decimal("907784232501249e-12"), 907.784232501249);
+        checkDouble(new Decimal("7784e8"), 7.784e11);
+        checkDouble(new Decimal("9077e-8"), 9.077e-5);
 
     }
 

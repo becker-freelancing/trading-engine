@@ -27,12 +27,11 @@ package com.becker.freelance.math;/*
  * @build jdk.test.lib.RandomFactory
  * @run main com.becker.freelance.math.StringConstructor
  * @bug 4103117 4331084 4488017 4490929 6255285 6268365 8074460 8078672 8233760
- * @summary Tests the BigDecimal string constructor (use -Dseed=X to set PRNG seed).
+ * @summary Tests the Decimal string constructor (use -Dseed=X to set PRNG seed).
  * @key randomness
  */
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+
 import java.util.Random;
 
 public class StringConstructor {
@@ -70,10 +69,10 @@ public class StringConstructor {
         leadingExponentZeroTest();
         nonAsciiZeroTest();
 
-        /* These BigDecimals produce a string with an exponent > Integer.MAX_VALUE */
-        roundtripWithAbnormalExponent(BigDecimal.valueOf(10, Integer.MIN_VALUE));
-        roundtripWithAbnormalExponent(BigDecimal.valueOf(Long.MIN_VALUE, Integer.MIN_VALUE));
-        roundtripWithAbnormalExponent(new BigDecimal(new BigInteger("1" + "0".repeat(100)), Integer.MIN_VALUE));
+        /* These Decimals produce a string with an exponent > Integer.MAX_VALUE */
+        roundtripWithAbnormalExponent(Decimal.valueOf(10, Integer.MIN_VALUE));
+        roundtripWithAbnormalExponent(Decimal.valueOf(Long.MIN_VALUE, Integer.MIN_VALUE));
+        roundtripWithAbnormalExponent(new Decimal(new BigInteger("1" + "0".repeat(100)), Integer.MIN_VALUE));
 
         /* These Strings have an exponent > Integer.MAX_VALUE */
         roundtripWithAbnormalExponent("1.0E+2147483649");
@@ -89,11 +88,11 @@ public class StringConstructor {
                 bi = bi.negate();
             int decimalLength = bi.toString().length();
             int scale = random.nextInt(decimalLength);
-            BigDecimal bd = new BigDecimal(bi, scale);
+            Decimal bd = new Decimal(bi, scale);
             String bdString = bd.toString();
             // System.err.println("bi" + bi.toString() + "\tscale " + scale);
             // System.err.println("bd string: " + bdString);
-            BigDecimal bdDoppel = new BigDecimal(bdString);
+            Decimal bdDoppel = new Decimal(bdString);
             if (!bd.equals(bdDoppel)) {
                 System.err.println("bd string: scale: " + bd.scale() +
                         "\t" + bdString);
@@ -104,14 +103,14 @@ public class StringConstructor {
         }
     }
 
-    private static void roundtripWithAbnormalExponent(BigDecimal bd) {
-        if (!bd.equals(new BigDecimal(bd.toString()))) {
+    private static void roundtripWithAbnormalExponent(Decimal bd) {
+        if (!bd.equals(new Decimal(bd.toString()))) {
             throw new RuntimeException("Abnormal exponent roundtrip failure");
         }
     }
 
     private static void roundtripWithAbnormalExponent(String s) {
-        if (!s.equals(new BigDecimal(s).toString())) {
+        if (!s.equals(new Decimal(s).toString())) {
             throw new RuntimeException("Abnormal exponent roundtrip failure");
         }
     }
@@ -126,10 +125,10 @@ public class StringConstructor {
                 "\u0660\u0660\u0660\u06604e5",
         };
 
-        BigDecimal expected = new BigDecimal("4e5");
+        Decimal expected = new Decimal("4e5");
 
         for (String s : values) {
-            BigDecimal tmp = new BigDecimal(s);
+            Decimal tmp = new Decimal(s);
             // System.err.println("Testing " + s);
             if (!expected.equals(tmp) || tmp.precision() != 1) {
                 System.err.println("Bad conversion of " + s + "got " +
@@ -141,8 +140,8 @@ public class StringConstructor {
     }
 
     private static void leadingExponentZeroTest() {
-        BigDecimal twelve = new BigDecimal("12");
-        BigDecimal onePointTwo = new BigDecimal("1.2");
+        Decimal twelve = new Decimal("12");
+        Decimal onePointTwo = new Decimal("1.2");
 
         String start = "1.2e0";
         String end = "1";
@@ -161,13 +160,13 @@ public class StringConstructor {
         }
     }
 
-    private static void testString(String s, BigDecimal expected) {
+    private static void testString(String s, Decimal expected) {
         testString0(s, expected);
         testString0(switchZero(s), expected);
     }
 
-    private static void testString0(String s, BigDecimal expected) {
-        if (!expected.equals(new BigDecimal(s)))
+    private static void testString0(String s, Decimal expected) {
+        if (!expected.equals(new Decimal(s)))
             throw new RuntimeException(s + " is not equal to " + expected);
     }
 
@@ -177,7 +176,7 @@ public class StringConstructor {
 
     private static void constructWithError(String badString) {
         try {
-            BigDecimal d = new BigDecimal(badString);
+            Decimal d = new Decimal(badString);
             throw new RuntimeException(badString + " accepted");
         } catch (NumberFormatException e) {
         }

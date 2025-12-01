@@ -27,25 +27,24 @@ package com.becker.freelance.math;/*
  * @summary Basic tests of scaleByPowerOfTen
  */
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+
 
 public class ScaleByPowerOfTenTests {
 
     public static void main(String argv[]) {
         for (int i = -10; i < 10; i++) {
-            BigDecimal bd = BigDecimal.ONE.scaleByPowerOfTen(i);
-            BigDecimal expected;
+            Decimal bd = Decimal.ONE.scaleByPowerOfTen(i);
+            Decimal expected;
 
-            if (!bd.equals(expected = new BigDecimal(BigInteger.ONE, -i))) {
+            if (!bd.equals(expected = new Decimal(BigInteger.ONE, -i))) {
                 throw new RuntimeException("Unexpected result " +
                         bd.toString() +
                         "; expected " +
                         expected.toString());
             }
 
-            bd = BigDecimal.ONE.negate().scaleByPowerOfTen(i);
-            if (!bd.equals(expected = new BigDecimal(BigInteger.ONE.negate(), -i))) {
+            bd = Decimal.ONE.negate().scaleByPowerOfTen(i);
+            if (!bd.equals(expected = new Decimal(BigInteger.ONE.negate(), -i))) {
                 throw new RuntimeException("Unexpected result " +
                         bd.toString() +
                         "; expected " +

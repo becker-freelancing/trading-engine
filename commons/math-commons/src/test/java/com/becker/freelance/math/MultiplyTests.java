@@ -24,43 +24,43 @@ package com.becker.freelance.math;/*
 /*
  * @test
  * @bug 6850606
- * @summary Test BigDecimal.multiply(BigDecimal)
+ * @summary Test Decimal.multiply(Decimal)
  * @author xlu
  */
 
-import java.math.BigDecimal;
+
 
 public class MultiplyTests {
 
     private static int multiplyTests() {
         int failures = 0;
 
-        BigDecimal[] bd1 = {
-                new BigDecimal("123456789"),
-                new BigDecimal("1234567898"),
-                new BigDecimal("12345678987")
+        Decimal[] bd1 = {
+                new Decimal("123456789"),
+                new Decimal("1234567898"),
+                new Decimal("12345678987")
         };
 
-        BigDecimal[] bd2 = {
-                new BigDecimal("987654321"),
-                new BigDecimal("8987654321"),
-                new BigDecimal("78987654321")
+        Decimal[] bd2 = {
+                new Decimal("987654321"),
+                new Decimal("8987654321"),
+                new Decimal("78987654321")
         };
 
         // Two dimensonal array recording bd1[i] * bd2[j] &
         // 0 <= i <= 2 && 0 <= j <= 2;
-        BigDecimal[][] expectedResults = {
-                {new BigDecimal("121932631112635269"),
-                        new BigDecimal("1109586943112635269"),
-                        new BigDecimal("9751562173112635269")
+        Decimal[][] expectedResults = {
+                {new Decimal("121932631112635269"),
+                        new Decimal("1109586943112635269"),
+                        new Decimal("9751562173112635269")
                 },
-                {new BigDecimal("1219326319027587258"),
-                        new BigDecimal("11095869503027587258"),
-                        new BigDecimal("97515622363027587258")
+                {new Decimal("1219326319027587258"),
+                        new Decimal("11095869503027587258"),
+                        new Decimal("97515622363027587258")
                 },
-                {new BigDecimal("12193263197189452827"),
-                        new BigDecimal("110958695093189452827"),
-                        new BigDecimal("975156224183189452827")
+                {new Decimal("12193263197189452827"),
+                        new Decimal("110958695093189452827"),
+                        new Decimal("975156224183189452827")
                 }
         };
 
@@ -72,8 +72,8 @@ public class MultiplyTests {
             }
         }
 
-        BigDecimal x = BigDecimal.valueOf(8L, 1);
-        BigDecimal xPower = BigDecimal.valueOf(-1L);
+        Decimal x = Decimal.valueOf(8L, 1);
+        Decimal xPower = Decimal.valueOf(-1L);
         try {
             for (int i = 0; i < 100; i++) {
                 xPower = xPower.multiply(x);

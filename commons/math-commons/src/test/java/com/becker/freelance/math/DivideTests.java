@@ -27,12 +27,12 @@ package com.becker.freelance.math;/*
  * @summary Some tests for the divide methods.
  */
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+
 import java.math.MathContext;
 import java.math.RoundingMode;
 
-import static java.math.BigDecimal.*;
+import static com.becker.freelance.math.Decimal.*;
+
 
 public class DivideTests {
 
@@ -46,32 +46,32 @@ public class DivideTests {
                 int powerOf5 = (int) StrictMath.pow(5.0, j);
                 int product;
 
-                BigDecimal bd;
+                Decimal bd;
 
                 try {
-                    bd = BigDecimal.ONE.divide(new BigDecimal(product = powerOf2 * powerOf5));
+                    bd = Decimal.ONE.divide(new Decimal(product = powerOf2 * powerOf5));
                 } catch (ArithmeticException e) {
                     failures++;
-                    System.err.println((new BigDecimal(powerOf2)).toString() + " / " +
-                            (new BigDecimal(powerOf5)).toString() + " threw an exception.");
+                    System.err.println((new Decimal(powerOf2)).toString() + " / " +
+                            (new Decimal(powerOf5)).toString() + " threw an exception.");
                     e.printStackTrace();
                 }
 
                 try {
-                    bd = new BigDecimal(powerOf2).divide(new BigDecimal(powerOf5));
+                    bd = new Decimal(powerOf2).divide(new Decimal(powerOf5));
                 } catch (ArithmeticException e) {
                     failures++;
-                    System.err.println((new BigDecimal(powerOf2)).toString() + " / " +
-                            (new BigDecimal(powerOf5)).toString() + " threw an exception.");
+                    System.err.println((new Decimal(powerOf2)).toString() + " / " +
+                            (new Decimal(powerOf5)).toString() + " threw an exception.");
                     e.printStackTrace();
                 }
 
                 try {
-                    bd = new BigDecimal(powerOf5).divide(new BigDecimal(powerOf2));
+                    bd = new Decimal(powerOf5).divide(new Decimal(powerOf2));
                 } catch (ArithmeticException e) {
                     failures++;
-                    System.err.println((new BigDecimal(powerOf5)).toString() + " / " +
-                            (new BigDecimal(powerOf2)).toString() + " threw an exception.");
+                    System.err.println((new Decimal(powerOf5)).toString() + " / " +
+                            (new Decimal(powerOf2)).toString() + " threw an exception.");
 
                     e.printStackTrace();
                 }
@@ -98,8 +98,8 @@ public class DivideTests {
 
                         if (((dividend / divisor) * divisor) != dividend) {
                             try {
-                                BigDecimal quotient = (new BigDecimal(dividend).
-                                        divide(new BigDecimal(divisor)));
+                                Decimal quotient = (new Decimal(dividend).
+                                        divide(new Decimal(divisor)));
                                 failures++;
                                 System.err.println("Exact quotient " + quotient.toString() +
                                         " returned for non-terminating fraction " +
@@ -120,20 +120,20 @@ public class DivideTests {
     public static int properScaleTests() {
         int failures = 0;
 
-        BigDecimal[][] testCases = {
-                {new BigDecimal("1"), new BigDecimal("5"), new BigDecimal("2e-1")},
-                {new BigDecimal("1"), new BigDecimal("50e-1"), new BigDecimal("2e-1")},
-                {new BigDecimal("10e-1"), new BigDecimal("5"), new BigDecimal("2e-1")},
-                {new BigDecimal("1"), new BigDecimal("500e-2"), new BigDecimal("2e-1")},
-                {new BigDecimal("100e-2"), new BigDecimal("5"), new BigDecimal("20e-2")},
-                {new BigDecimal("1"), new BigDecimal("32"), new BigDecimal("3125e-5")},
-                {new BigDecimal("1"), new BigDecimal("64"), new BigDecimal("15625e-6")},
-                {new BigDecimal("1.0000000"), new BigDecimal("64"), new BigDecimal("156250e-7")},
+        Decimal[][] testCases = {
+                {new Decimal("1"), new Decimal("5"), new Decimal("2e-1")},
+                {new Decimal("1"), new Decimal("50e-1"), new Decimal("2e-1")},
+                {new Decimal("10e-1"), new Decimal("5"), new Decimal("2e-1")},
+                {new Decimal("1"), new Decimal("500e-2"), new Decimal("2e-1")},
+                {new Decimal("100e-2"), new Decimal("5"), new Decimal("20e-2")},
+                {new Decimal("1"), new Decimal("32"), new Decimal("3125e-5")},
+                {new Decimal("1"), new Decimal("64"), new Decimal("15625e-6")},
+                {new Decimal("1.0000000"), new Decimal("64"), new Decimal("156250e-7")},
         };
 
 
-        for (BigDecimal[] tc : testCases) {
-            BigDecimal quotient;
+        for (Decimal[] tc : testCases) {
+            Decimal quotient;
             if (!(quotient = tc[0].divide(tc[1])).equals(tc[2])) {
                 failures++;
                 System.err.println("Unexpected quotient from " + tc[0] + " / " + tc[1] +
@@ -148,13 +148,13 @@ public class DivideTests {
         int failures = 0;
 
         MathContext mc = new MathContext(3, RoundingMode.FLOOR);
-        BigDecimal[][] testCases = {
-                {new BigDecimal("19"), new BigDecimal("100"), new BigDecimal("0.19")},
-                {new BigDecimal("21"), new BigDecimal("110"), new BigDecimal("0.190")},
+        Decimal[][] testCases = {
+                {new Decimal("19"), new Decimal("100"), new Decimal("0.19")},
+                {new Decimal("21"), new Decimal("110"), new Decimal("0.190")},
         };
 
-        for (BigDecimal[] tc : testCases) {
-            BigDecimal quotient;
+        for (Decimal[] tc : testCases) {
+            Decimal quotient;
             if (!(quotient = tc[0].divide(tc[1], mc)).equals(tc[2])) {
                 failures++;
                 System.err.println("Unexpected quotient from " + tc[0] + " / " + tc[1] +
@@ -171,56 +171,56 @@ public class DivideTests {
         // rounding modes.
 
         // Encode rounding mode and scale for the divide in a
-        // BigDecimal with the significand equal to the rounding mode
+        // Decimal with the significand equal to the rounding mode
         // and the scale equal to the number's scale.
 
         // {dividend, dividisor, rounding, quotient}
-        BigDecimal a = new BigDecimal("31415");
-        BigDecimal a_minus = a.negate();
-        BigDecimal b = new BigDecimal("10000");
+        Decimal a = new Decimal("31415");
+        Decimal a_minus = a.negate();
+        Decimal b = new Decimal("10000");
 
-        BigDecimal c = new BigDecimal("31425");
-        BigDecimal c_minus = c.negate();
+        Decimal c = new Decimal("31425");
+        Decimal c_minus = c.negate();
 
         // Ad hoc tests
-        BigDecimal d = new BigDecimal(new BigInteger("-37361671119238118911893939591735"), 10);
-        BigDecimal e = new BigDecimal(new BigInteger("74723342238476237823787879183470"), 15);
+        Decimal d = new Decimal(new BigInteger("-37361671119238118911893939591735"), 10);
+        Decimal e = new Decimal(new BigInteger("74723342238476237823787879183470"), 15);
 
-        BigDecimal[][] testCases = {
-                {a, b, BigDecimal.valueOf(ROUND_UP, 3), new BigDecimal("3.142")},
-                {a_minus, b, BigDecimal.valueOf(ROUND_UP, 3), new BigDecimal("-3.142")},
+        Decimal[][] testCases = {
+                {a, b, Decimal.valueOf(ROUND_UP, 3), new Decimal("3.142")},
+                {a_minus, b, Decimal.valueOf(ROUND_UP, 3), new Decimal("-3.142")},
 
-                {a, b, BigDecimal.valueOf(ROUND_DOWN, 3), new BigDecimal("3.141")},
-                {a_minus, b, BigDecimal.valueOf(ROUND_DOWN, 3), new BigDecimal("-3.141")},
+                {a, b, Decimal.valueOf(ROUND_DOWN, 3), new Decimal("3.141")},
+                {a_minus, b, Decimal.valueOf(ROUND_DOWN, 3), new Decimal("-3.141")},
 
-                {a, b, BigDecimal.valueOf(ROUND_CEILING, 3), new BigDecimal("3.142")},
-                {a_minus, b, BigDecimal.valueOf(ROUND_CEILING, 3), new BigDecimal("-3.141")},
+                {a, b, Decimal.valueOf(ROUND_CEILING, 3), new Decimal("3.142")},
+                {a_minus, b, Decimal.valueOf(ROUND_CEILING, 3), new Decimal("-3.141")},
 
-                {a, b, BigDecimal.valueOf(ROUND_FLOOR, 3), new BigDecimal("3.141")},
-                {a_minus, b, BigDecimal.valueOf(ROUND_FLOOR, 3), new BigDecimal("-3.142")},
+                {a, b, Decimal.valueOf(ROUND_FLOOR, 3), new Decimal("3.141")},
+                {a_minus, b, Decimal.valueOf(ROUND_FLOOR, 3), new Decimal("-3.142")},
 
-                {a, b, BigDecimal.valueOf(ROUND_HALF_UP, 3), new BigDecimal("3.142")},
-                {a_minus, b, BigDecimal.valueOf(ROUND_HALF_UP, 3), new BigDecimal("-3.142")},
+                {a, b, Decimal.valueOf(ROUND_HALF_UP, 3), new Decimal("3.142")},
+                {a_minus, b, Decimal.valueOf(ROUND_HALF_UP, 3), new Decimal("-3.142")},
 
-                {a, b, BigDecimal.valueOf(ROUND_DOWN, 3), new BigDecimal("3.141")},
-                {a_minus, b, BigDecimal.valueOf(ROUND_DOWN, 3), new BigDecimal("-3.141")},
+                {a, b, Decimal.valueOf(ROUND_DOWN, 3), new Decimal("3.141")},
+                {a_minus, b, Decimal.valueOf(ROUND_DOWN, 3), new Decimal("-3.141")},
 
-                {a, b, BigDecimal.valueOf(ROUND_HALF_EVEN, 3), new BigDecimal("3.142")},
-                {a_minus, b, BigDecimal.valueOf(ROUND_HALF_EVEN, 3), new BigDecimal("-3.142")},
+                {a, b, Decimal.valueOf(ROUND_HALF_EVEN, 3), new Decimal("3.142")},
+                {a_minus, b, Decimal.valueOf(ROUND_HALF_EVEN, 3), new Decimal("-3.142")},
 
-                {c, b, BigDecimal.valueOf(ROUND_HALF_EVEN, 3), new BigDecimal("3.142")},
-                {c_minus, b, BigDecimal.valueOf(ROUND_HALF_EVEN, 3), new BigDecimal("-3.142")},
+                {c, b, Decimal.valueOf(ROUND_HALF_EVEN, 3), new Decimal("3.142")},
+                {c_minus, b, Decimal.valueOf(ROUND_HALF_EVEN, 3), new Decimal("-3.142")},
 
-                {d, e, BigDecimal.valueOf(ROUND_HALF_UP, -5), BigDecimal.valueOf(-1, -5)},
-                {d, e, BigDecimal.valueOf(ROUND_HALF_DOWN, -5), BigDecimal.valueOf(0, -5)},
-                {d, e, BigDecimal.valueOf(ROUND_HALF_EVEN, -5), BigDecimal.valueOf(0, -5)},
+                {d, e, Decimal.valueOf(ROUND_HALF_UP, -5), Decimal.valueOf(-1, -5)},
+                {d, e, Decimal.valueOf(ROUND_HALF_DOWN, -5), Decimal.valueOf(0, -5)},
+                {d, e, Decimal.valueOf(ROUND_HALF_EVEN, -5), Decimal.valueOf(0, -5)},
         };
 
-        for (BigDecimal tc[] : testCases) {
+        for (Decimal tc[] : testCases) {
             int scale = tc[2].scale();
             int rm = tc[2].unscaledValue().intValue();
 
-            BigDecimal quotient = tc[0].divide(tc[1], scale, rm);
+            Decimal quotient = tc[0].divide(tc[1], scale, rm);
             if (!quotient.equals(tc[3])) {
                 failures++;
                 System.err.println("Unexpected quotient from " + tc[0] + " / " + tc[1] +
@@ -230,27 +230,27 @@ public class DivideTests {
         }
 
         // 6876282
-        BigDecimal[][] testCases2 = {
+        Decimal[][] testCases2 = {
                 // { dividend, divisor, expected quotient }
-                {new BigDecimal(3090), new BigDecimal(7), new BigDecimal(441)},
-                {new BigDecimal("309000000000000000000000"), new BigDecimal("700000000000000000000"),
-                        new BigDecimal(441)},
-                {new BigDecimal("962.430000000000"), new BigDecimal("8346463.460000000000"),
-                        new BigDecimal("0.000115309916")},
-                {new BigDecimal("18446744073709551631"), new BigDecimal("4611686018427387909"),
-                        new BigDecimal(4)},
-                {new BigDecimal("18446744073709551630"), new BigDecimal("4611686018427387909"),
-                        new BigDecimal(4)},
-                {new BigDecimal("23058430092136939523"), new BigDecimal("4611686018427387905"),
-                        new BigDecimal(5)},
-                {new BigDecimal("-18446744073709551661"), new BigDecimal("-4611686018427387919"),
-                        new BigDecimal(4)},
-                {new BigDecimal("-18446744073709551660"), new BigDecimal("-4611686018427387919"),
-                        new BigDecimal(4)},
+                {new Decimal(3090), new Decimal(7), new Decimal(441)},
+                {new Decimal("309000000000000000000000"), new Decimal("700000000000000000000"),
+                        new Decimal(441)},
+                {new Decimal("962.430000000000"), new Decimal("8346463.460000000000"),
+                        new Decimal("0.000115309916")},
+                {new Decimal("18446744073709551631"), new Decimal("4611686018427387909"),
+                        new Decimal(4)},
+                {new Decimal("18446744073709551630"), new Decimal("4611686018427387909"),
+                        new Decimal(4)},
+                {new Decimal("23058430092136939523"), new Decimal("4611686018427387905"),
+                        new Decimal(5)},
+                {new Decimal("-18446744073709551661"), new Decimal("-4611686018427387919"),
+                        new Decimal(4)},
+                {new Decimal("-18446744073709551660"), new Decimal("-4611686018427387919"),
+                        new Decimal(4)},
         };
 
-        for (BigDecimal test[] : testCases2) {
-            BigDecimal quo = test[0].divide(test[1], RoundingMode.HALF_UP);
+        for (Decimal test[] : testCases2) {
+            Decimal quo = test[0].divide(test[1], RoundingMode.HALF_UP);
             if (!quo.equals(test[2])) {
                 failures++;
                 System.err.println("Unexpected quotient from " + test[0] + " / " + test[1] +
@@ -265,7 +265,7 @@ public class DivideTests {
         int failures = 0;
 
         //problematic divisor: one with scale 17
-        BigDecimal one = BigDecimal.ONE.setScale(17);
+        Decimal one = Decimal.ONE.setScale(17);
         RoundingMode rounding = RoundingMode.UNNECESSARY;
 
         long[][] unscaledAndScale = new long[][]{
@@ -281,9 +281,9 @@ public class DivideTests {
             long unscaled = uas[0];
             int scale = (int) uas[1];
 
-            BigDecimal noRound = null;
+            Decimal noRound = null;
             try {
-                noRound = BigDecimal.valueOf(unscaled, scale).
+                noRound = Decimal.valueOf(unscaled, scale).
                         divide(one, RoundingMode.UNNECESSARY);
             } catch (ArithmeticException e) {
                 failures++;
@@ -291,9 +291,9 @@ public class DivideTests {
                         + " and scale " + scale + " without rounding");
             }
 
-            BigDecimal roundDown = null;
+            Decimal roundDown = null;
             try {
-                roundDown = BigDecimal.valueOf(unscaled, scale).
+                roundDown = Decimal.valueOf(unscaled, scale).
                         divide(one, RoundingMode.DOWN);
             } catch (ArithmeticException e) {
                 failures++;
@@ -330,7 +330,7 @@ public class DivideTests {
 
     // Preliminary exact divide method; could be used for comparison
     // purposes.
-    BigDecimal anotherDivide(BigDecimal dividend, BigDecimal divisor) {
+    Decimal anotherDivide(Decimal dividend, Decimal divisor) {
         /*
          * Handle zero cases first.
          */
@@ -340,7 +340,7 @@ public class DivideTests {
             throw new ArithmeticException("Division by zero");
         }
         if (dividend.signum() == 0)        // 0/y
-            return BigDecimal.ZERO;
+            return Decimal.ZERO;
         else {
             /*
              * Determine if there is a result with a terminating

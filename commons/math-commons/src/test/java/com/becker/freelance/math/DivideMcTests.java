@@ -30,7 +30,7 @@ package com.becker.freelance.math;/*
  * @author Sergey V. Kuksenko
  */
 
-import java.math.BigDecimal;
+
 import java.math.MathContext;
 import java.math.RoundingMode;
 
@@ -5756,9 +5756,9 @@ public class DivideMcTests {
         int failures = 0;
         for (int i = 0; i < value.length; i++) {
             for (int j = 0; j < value.length; j++) {
-                BigDecimal v1 = new BigDecimal(value[i]);
-                BigDecimal v2 = new BigDecimal(value[j]);
-                BigDecimal res1 = v1.divide(v2, MathContext.DECIMAL64);
+                Decimal v1 = new Decimal(value[i]);
+                Decimal v2 = new Decimal(value[j]);
+                Decimal res1 = v1.divide(v2, MathContext.DECIMAL64);
                 if (!res1.toString().equals(results[i][j])) {
                     failures++;
                     System.err.println("Unexpected result from " + v1 + " / " + v2 +
@@ -5770,10 +5770,10 @@ public class DivideMcTests {
         for (int mpc = 1; mpc < 23; mpc++) {
             for (int i = 0; i < value.length; i++) {
                 for (int j = 0; j < value.length; j++) {
-                    BigDecimal v1 = new BigDecimal(value[i]);
-                    BigDecimal v2 = new BigDecimal(value[j]);
-                    BigDecimal res1 = v1.divide(v2, new MathContext(mpc, RoundingMode.HALF_EVEN));
-                    BigDecimal res2 = v1.divide(v2, new MathContext(128, RoundingMode.HALF_EVEN)).round(new MathContext(mpc, RoundingMode.HALF_EVEN));
+                    Decimal v1 = new Decimal(value[i]);
+                    Decimal v2 = new Decimal(value[j]);
+                    Decimal res1 = v1.divide(v2, new MathContext(mpc, RoundingMode.HALF_EVEN));
+                    Decimal res2 = v1.divide(v2, new MathContext(128, RoundingMode.HALF_EVEN)).round(new MathContext(mpc, RoundingMode.HALF_EVEN));
                     if (!res1.equals(res2)) {
                         failures++;
                         System.err.println("Unexpected result from " + v1 + " / " + v2 +

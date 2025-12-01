@@ -24,17 +24,17 @@ package com.becker.freelance.math;/*
 /*
  * @test
  * @bug 6362557 8200698
- * @summary Some tests of add(BigDecimal, mc)
+ * @summary Some tests of add(Decimal, mc)
  */
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.EnumSet;
 import java.util.Set;
 
-import static java.math.BigDecimal.valueOf;
+import static com.becker.freelance.math.Decimal.valueOf;
+
 
 public class AddTests {
 
@@ -48,16 +48,16 @@ public class AddTests {
     private static int simpleTests() {
         int failures = 0;
 
-        BigDecimal[] bd1 = {
-                new BigDecimal(new BigInteger("7812404666936930160"), 11),
-                new BigDecimal(new BigInteger("7812404666936930160"), 12),
-                new BigDecimal(new BigInteger("7812404666936930160"), 13),
+        Decimal[] bd1 = {
+                new Decimal(new BigInteger("7812404666936930160"), 11),
+                new Decimal(new BigInteger("7812404666936930160"), 12),
+                new Decimal(new BigInteger("7812404666936930160"), 13),
         };
-        BigDecimal bd2 = new BigDecimal(new BigInteger("2790000"), 1);
-        BigDecimal[] expectedResult = {
-                new BigDecimal("78403046.66936930160"),
-                new BigDecimal("8091404.666936930160"),
-                new BigDecimal("1060240.4666936930160"),
+        Decimal bd2 = new Decimal(new BigInteger("2790000"), 1);
+        Decimal[] expectedResult = {
+                new Decimal("78403046.66936930160"),
+                new Decimal("8091404.666936930160"),
+                new Decimal("1060240.4666936930160"),
         };
         for (int i = 0; i < bd1.length; i++) {
             if (!bd1[i].add(bd2).equals(expectedResult[i]))
@@ -85,12 +85,12 @@ public class AddTests {
      * Print sum of b1 and b2; correct result will not throw an
      * exception.
      */
-    private static int addWithoutException(BigDecimal b1, BigDecimal b2, MathContext mc) {
+    private static int addWithoutException(Decimal b1, Decimal b2, MathContext mc) {
         if (mc == null)
             mc = new MathContext(2, RoundingMode.DOWN);
 
         try {
-            BigDecimal sum = b1.add(b2, mc);
+            Decimal sum = b1.add(b2, mc);
             printAddition(b1, b2, sum.toString());
             return 0;
         } catch (ArithmeticException ae) {
@@ -106,108 +106,108 @@ public class AddTests {
     private static int roundingGradationTests() {
         int failures = 0;
 
-        failures += roundAway(new BigDecimal("1234e100"),
-                new BigDecimal("1234e97"));
+        failures += roundAway(new Decimal("1234e100"),
+                new Decimal("1234e97"));
 
-        failures += roundAway(new BigDecimal("1234e100"),
-                new BigDecimal("1234e96"));
+        failures += roundAway(new Decimal("1234e100"),
+                new Decimal("1234e96"));
 
-        failures += roundAway(new BigDecimal("1234e100"),
-                new BigDecimal("1234e95"));
+        failures += roundAway(new Decimal("1234e100"),
+                new Decimal("1234e95"));
 
-        failures += roundAway(new BigDecimal("1234e100"),
-                new BigDecimal("1234e94"));
+        failures += roundAway(new Decimal("1234e100"),
+                new Decimal("1234e94"));
 
-        failures += roundAway(new BigDecimal("1234e100"),
-                new BigDecimal("1234e93"));
+        failures += roundAway(new Decimal("1234e100"),
+                new Decimal("1234e93"));
 
-        failures += roundAway(new BigDecimal("1234e100"),
-                new BigDecimal("1234e92"));
+        failures += roundAway(new Decimal("1234e100"),
+                new Decimal("1234e92"));
 
-        failures += roundAway(new BigDecimal("1234e100"),
-                new BigDecimal("1234e50"));
-
-
-        failures += roundAway(new BigDecimal("1000e100"),
-                new BigDecimal("1234e97"));
-
-        failures += roundAway(new BigDecimal("1000e100"),
-                new BigDecimal("1234e96"));
-
-        failures += roundAway(new BigDecimal("1000e100"),
-                new BigDecimal("1234e95"));
-
-        failures += roundAway(new BigDecimal("1000e100"),
-                new BigDecimal("1234e94"));
-
-        failures += roundAway(new BigDecimal("1000e100"),
-                new BigDecimal("1234e93"));
-
-        failures += roundAway(new BigDecimal("1000e100"),
-                new BigDecimal("1234e92"));
-
-        failures += roundAway(new BigDecimal("1000e100"),
-                new BigDecimal("1234e50"));
+        failures += roundAway(new Decimal("1234e100"),
+                new Decimal("1234e50"));
 
 
-        failures += roundAway(new BigDecimal("1999e100"),
-                new BigDecimal("1234e97"));
+        failures += roundAway(new Decimal("1000e100"),
+                new Decimal("1234e97"));
 
-        failures += roundAway(new BigDecimal("1999e100"),
-                new BigDecimal("1234e96"));
+        failures += roundAway(new Decimal("1000e100"),
+                new Decimal("1234e96"));
 
-        failures += roundAway(new BigDecimal("1999e100"),
-                new BigDecimal("1234e95"));
+        failures += roundAway(new Decimal("1000e100"),
+                new Decimal("1234e95"));
 
-        failures += roundAway(new BigDecimal("1999e100"),
-                new BigDecimal("1234e94"));
+        failures += roundAway(new Decimal("1000e100"),
+                new Decimal("1234e94"));
 
-        failures += roundAway(new BigDecimal("1999e100"),
-                new BigDecimal("1234e93"));
+        failures += roundAway(new Decimal("1000e100"),
+                new Decimal("1234e93"));
 
-        failures += roundAway(new BigDecimal("1999e100"),
-                new BigDecimal("1234e92"));
+        failures += roundAway(new Decimal("1000e100"),
+                new Decimal("1234e92"));
 
-        failures += roundAway(new BigDecimal("1999e100"),
-                new BigDecimal("1234e50"));
+        failures += roundAway(new Decimal("1000e100"),
+                new Decimal("1234e50"));
 
 
-        failures += roundAway(new BigDecimal("9999e100"),
-                new BigDecimal("1234e97"));
+        failures += roundAway(new Decimal("1999e100"),
+                new Decimal("1234e97"));
 
-        failures += roundAway(new BigDecimal("9999e100"),
-                new BigDecimal("1234e96"));
+        failures += roundAway(new Decimal("1999e100"),
+                new Decimal("1234e96"));
 
-        failures += roundAway(new BigDecimal("9999e100"),
-                new BigDecimal("1234e95"));
+        failures += roundAway(new Decimal("1999e100"),
+                new Decimal("1234e95"));
 
-        failures += roundAway(new BigDecimal("9999e100"),
-                new BigDecimal("1234e94"));
+        failures += roundAway(new Decimal("1999e100"),
+                new Decimal("1234e94"));
 
-        failures += roundAway(new BigDecimal("9999e100"),
-                new BigDecimal("1234e93"));
+        failures += roundAway(new Decimal("1999e100"),
+                new Decimal("1234e93"));
 
-        failures += roundAway(new BigDecimal("9999e100"),
-                new BigDecimal("1234e92"));
+        failures += roundAway(new Decimal("1999e100"),
+                new Decimal("1234e92"));
 
-        failures += roundAway(new BigDecimal("9999e100"),
-                new BigDecimal("1234e50"));
+        failures += roundAway(new Decimal("1999e100"),
+                new Decimal("1234e50"));
+
+
+        failures += roundAway(new Decimal("9999e100"),
+                new Decimal("1234e97"));
+
+        failures += roundAway(new Decimal("9999e100"),
+                new Decimal("1234e96"));
+
+        failures += roundAway(new Decimal("9999e100"),
+                new Decimal("1234e95"));
+
+        failures += roundAway(new Decimal("9999e100"),
+                new Decimal("1234e94"));
+
+        failures += roundAway(new Decimal("9999e100"),
+                new Decimal("1234e93"));
+
+        failures += roundAway(new Decimal("9999e100"),
+                new Decimal("1234e92"));
+
+        failures += roundAway(new Decimal("9999e100"),
+                new Decimal("1234e50"));
 
         return failures;
     }
 
-    private static void printAddition(BigDecimal b1, BigDecimal b2, String s) {
+    private static void printAddition(Decimal b1, Decimal b2, String s) {
         System.out.println("" + b1 + "\t+\t" + b2 + "\t=\t" + s);
     }
 
-    private static int roundAway(BigDecimal b1, BigDecimal b2) {
+    private static int roundAway(Decimal b1, Decimal b2) {
         int failures = 0;
 
         b1.precision();
         b2.precision();
 
-        BigDecimal b1_negate = b1.negate();
-        BigDecimal b2_negate = b2.negate();
+        Decimal b1_negate = b1.negate();
+        Decimal b2_negate = b2.negate();
 
         b1_negate.precision();
         b2_negate.precision();
@@ -220,7 +220,7 @@ public class AddTests {
         return failures;
     }
 
-    private static int roundAway1(BigDecimal b1, BigDecimal b2) {
+    private static int roundAway1(Decimal b1, Decimal b2) {
         int failures = 0;
         failures += roundAway0(b1, b2);
         failures += roundAway0(b2, b1);
@@ -231,17 +231,17 @@ public class AddTests {
      * Compare b1.add(b2, mc) with b1.add(b2).round(mc) for a variety
      * of MathContexts.
      */
-    private static int roundAway0(BigDecimal b1, BigDecimal b2) {
+    private static int roundAway0(Decimal b1, Decimal b2) {
         int failures = 0;
-        BigDecimal exactSum = b1.add(b2);
+        Decimal exactSum = b1.add(b2);
 
         for (int precision = 1; precision < exactSum.precision() + 2; precision++) {
             for (RoundingMode rm : nonExactRoundingModes) {
                 MathContext mc = new MathContext(precision, rm);
-                BigDecimal roundedExactSum = exactSum.round(mc);
+                Decimal roundedExactSum = exactSum.round(mc);
 
                 try {
-                    BigDecimal sum = b1.add(b2, mc);
+                    Decimal sum = b1.add(b2, mc);
 
                     if (!roundedExactSum.equals(sum)) {
                         failures++;
@@ -272,20 +272,20 @@ public class AddTests {
     private static int precisionConsistencyTest() {
         int failures = 0;
         MathContext mc = new MathContext(1, RoundingMode.DOWN);
-        BigDecimal a = BigDecimal.valueOf(1999, -1); //value is equivalent to 19990
+        Decimal a = valueOf(1999, -1); //value is equivalent to 19990
 
-        BigDecimal sum1 = a.add(BigDecimal.ONE, mc);
+        Decimal sum1 = a.add(Decimal.ONE, mc);
         a.precision();
-        BigDecimal sum2 = a.add(BigDecimal.ONE, mc);
+        Decimal sum2 = a.add(Decimal.ONE, mc);
 
         if (!sum1.equals(sum2)) {
             failures++;
             System.out.println("Unequal sums after calling precision!");
             System.out.print("Before:\t");
-            printAddition(a, BigDecimal.ONE, sum1.toString());
+            printAddition(a, Decimal.ONE, sum1.toString());
 
             System.out.print("After:\t");
-            printAddition(a, BigDecimal.ONE, sum2.toString());
+            printAddition(a, Decimal.ONE, sum2.toString());
         }
 
         return failures;
@@ -293,7 +293,7 @@ public class AddTests {
 
     private static int arithmeticExceptionTest() {
         int failures = 0;
-        BigDecimal x;
+        Decimal x;
         try {
             //
             // The string representation "1e2147483647", which is equivalent
@@ -306,7 +306,7 @@ public class AddTests {
             // would need to be created. Therefore the next statement is
             // expected to overflow with an ArithmeticException.
             //
-            x = new BigDecimal("1e2147483647").add(new BigDecimal(1));
+            x = new Decimal("1e2147483647").add(new Decimal(1));
             failures++;
         } catch (ArithmeticException ae) {
         }

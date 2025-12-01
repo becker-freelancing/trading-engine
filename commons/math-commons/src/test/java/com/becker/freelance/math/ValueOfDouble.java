@@ -31,8 +31,6 @@ package com.becker.freelance.math;/*
 
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -41,8 +39,8 @@ public class ValueOfDouble {
     private static final String DIGITS = "1234567000003456789"; // Enough digits to fill a long
 
     private static void checkValue(double value) {
-        BigDecimal expected = new BigDecimal(Double.toString(value));
-        assertEquals(expected, BigDecimal.valueOf(value));
+        Decimal expected = new Decimal(Double.toString(value));
+        assertEquals(expected, Decimal.valueOf(value));
     }
 
     @Test
@@ -67,8 +65,8 @@ public class ValueOfDouble {
 
     @Test
     public void testExceptions() {
-        assertThrows(NumberFormatException.class, () -> BigDecimal.valueOf(Double.NaN));
-        assertThrows(NumberFormatException.class, () -> BigDecimal.valueOf(Double.POSITIVE_INFINITY));
-        assertThrows(NumberFormatException.class, () -> BigDecimal.valueOf(Double.NEGATIVE_INFINITY));
+        assertThrows(NumberFormatException.class, () -> Decimal.valueOf(Double.NaN));
+        assertThrows(NumberFormatException.class, () -> Decimal.valueOf(Double.POSITIVE_INFINITY));
+        assertThrows(NumberFormatException.class, () -> Decimal.valueOf(Double.NEGATIVE_INFINITY));
     }
 }

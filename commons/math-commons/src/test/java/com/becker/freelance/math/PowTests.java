@@ -27,37 +27,37 @@ package com.becker.freelance.math;/*
  * @summary Some exponent over/undeflow tests for the pow method
  */
 
-import java.math.BigDecimal;
+
 
 public class PowTests {
     static int zeroAndOneTests() {
         int failures = 0;
 
-        BigDecimal[][] testCases = {
-                {BigDecimal.valueOf(0, Integer.MAX_VALUE), new BigDecimal(0), BigDecimal.valueOf(1, 0)},
-                {BigDecimal.valueOf(0, Integer.MAX_VALUE), new BigDecimal(1), BigDecimal.valueOf(0, Integer.MAX_VALUE)},
-                {BigDecimal.valueOf(0, Integer.MAX_VALUE), new BigDecimal(2), BigDecimal.valueOf(0, Integer.MAX_VALUE)},
-                {BigDecimal.valueOf(0, Integer.MAX_VALUE), new BigDecimal(999999999), BigDecimal.valueOf(0, Integer.MAX_VALUE)},
+        Decimal[][] testCases = {
+                {Decimal.valueOf(0, Integer.MAX_VALUE), new Decimal(0), Decimal.valueOf(1, 0)},
+                {Decimal.valueOf(0, Integer.MAX_VALUE), new Decimal(1), Decimal.valueOf(0, Integer.MAX_VALUE)},
+                {Decimal.valueOf(0, Integer.MAX_VALUE), new Decimal(2), Decimal.valueOf(0, Integer.MAX_VALUE)},
+                {Decimal.valueOf(0, Integer.MAX_VALUE), new Decimal(999999999), Decimal.valueOf(0, Integer.MAX_VALUE)},
 
-                {BigDecimal.valueOf(0, Integer.MIN_VALUE), new BigDecimal(0), BigDecimal.valueOf(1, 0)},
-                {BigDecimal.valueOf(0, Integer.MIN_VALUE), new BigDecimal(1), BigDecimal.valueOf(0, Integer.MIN_VALUE)},
-                {BigDecimal.valueOf(0, Integer.MIN_VALUE), new BigDecimal(2), BigDecimal.valueOf(0, Integer.MIN_VALUE)},
-                {BigDecimal.valueOf(0, Integer.MIN_VALUE), new BigDecimal(999999999), BigDecimal.valueOf(0, Integer.MIN_VALUE)},
+                {Decimal.valueOf(0, Integer.MIN_VALUE), new Decimal(0), Decimal.valueOf(1, 0)},
+                {Decimal.valueOf(0, Integer.MIN_VALUE), new Decimal(1), Decimal.valueOf(0, Integer.MIN_VALUE)},
+                {Decimal.valueOf(0, Integer.MIN_VALUE), new Decimal(2), Decimal.valueOf(0, Integer.MIN_VALUE)},
+                {Decimal.valueOf(0, Integer.MIN_VALUE), new Decimal(999999999), Decimal.valueOf(0, Integer.MIN_VALUE)},
 
-                {BigDecimal.valueOf(1, Integer.MAX_VALUE), new BigDecimal(0), BigDecimal.valueOf(1, 0)},
-                {BigDecimal.valueOf(1, Integer.MAX_VALUE), new BigDecimal(1), BigDecimal.valueOf(1, Integer.MAX_VALUE)},
-                {BigDecimal.valueOf(1, Integer.MAX_VALUE), new BigDecimal(2), null}, // overflow
-                {BigDecimal.valueOf(1, Integer.MAX_VALUE), new BigDecimal(999999999), null}, // overflow
+                {Decimal.valueOf(1, Integer.MAX_VALUE), new Decimal(0), Decimal.valueOf(1, 0)},
+                {Decimal.valueOf(1, Integer.MAX_VALUE), new Decimal(1), Decimal.valueOf(1, Integer.MAX_VALUE)},
+                {Decimal.valueOf(1, Integer.MAX_VALUE), new Decimal(2), null}, // overflow
+                {Decimal.valueOf(1, Integer.MAX_VALUE), new Decimal(999999999), null}, // overflow
 
-                {BigDecimal.valueOf(1, Integer.MIN_VALUE), new BigDecimal(0), BigDecimal.valueOf(1, 0)},
-                {BigDecimal.valueOf(1, Integer.MIN_VALUE), new BigDecimal(1), BigDecimal.valueOf(1, Integer.MIN_VALUE)},
-                {BigDecimal.valueOf(1, Integer.MIN_VALUE), new BigDecimal(2), null}, // underflow
-                {BigDecimal.valueOf(1, Integer.MIN_VALUE), new BigDecimal(999999999), null}, // underflow
+                {Decimal.valueOf(1, Integer.MIN_VALUE), new Decimal(0), Decimal.valueOf(1, 0)},
+                {Decimal.valueOf(1, Integer.MIN_VALUE), new Decimal(1), Decimal.valueOf(1, Integer.MIN_VALUE)},
+                {Decimal.valueOf(1, Integer.MIN_VALUE), new Decimal(2), null}, // underflow
+                {Decimal.valueOf(1, Integer.MIN_VALUE), new Decimal(999999999), null}, // underflow
         };
 
-        for (BigDecimal[] testCase : testCases) {
+        for (Decimal[] testCase : testCases) {
             int exponent = testCase[1].intValueExact();
-            BigDecimal result;
+            Decimal result;
 
             try {
                 result = testCase[0].pow(exponent);

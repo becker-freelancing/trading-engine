@@ -30,16 +30,15 @@ package com.becker.freelance.math;/*
  * @author Sergey V. Kuksenko
  */
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+
 import java.math.MathContext;
 
 public class RangeTests {
 
 
-    private static int addTest(BigDecimal arg1, BigDecimal arg2, BigDecimal expectedResult) {
+    private static int addTest(Decimal arg1, Decimal arg2, Decimal expectedResult) {
         int failures = 0;
-        BigDecimal result = arg1.add(arg2);
+        Decimal result = arg1.add(arg2);
         if (!result.equals(expectedResult)) {
             System.out.println("Sum:" +
                     arg1 + " + " +
@@ -63,7 +62,7 @@ public class RangeTests {
     }
 
     /*
-     *  Test BigDecimal.add(BigDecimal) when values are withing different ranges:
+     *  Test Decimal.add(Decimal) when values are withing different ranges:
      *  1. within 32 bits
      *  2. within 64 bits
      *  3. outside 64 bits.
@@ -71,99 +70,99 @@ public class RangeTests {
     private static int addBoundaryTest() {
         int failures = 0;
         failures += addTest(
-                new BigDecimal("85070591730234615847396907784232501249"),
-                BigDecimal.valueOf(0),
-                new BigDecimal("85070591730234615847396907784232501249"));
+                new Decimal("85070591730234615847396907784232501249"),
+                Decimal.valueOf(0),
+                new Decimal("85070591730234615847396907784232501249"));
         failures += addTest(
-                new BigDecimal("-85070591730234615847396907784232501249"),
-                BigDecimal.valueOf(0),
-                new BigDecimal("-85070591730234615847396907784232501249"));
+                new Decimal("-85070591730234615847396907784232501249"),
+                Decimal.valueOf(0),
+                new Decimal("-85070591730234615847396907784232501249"));
         failures += addTest(
-                new BigDecimal("85070591730234615847396907784232501249"),
-                BigDecimal.valueOf(1),
-                new BigDecimal("85070591730234615847396907784232501250"));
+                new Decimal("85070591730234615847396907784232501249"),
+                Decimal.valueOf(1),
+                new Decimal("85070591730234615847396907784232501250"));
         failures += addTest(
-                new BigDecimal("85070591730234615847396907784232501249"),
-                BigDecimal.valueOf(-1),
-                new BigDecimal("85070591730234615847396907784232501248"));
+                new Decimal("85070591730234615847396907784232501249"),
+                Decimal.valueOf(-1),
+                new Decimal("85070591730234615847396907784232501248"));
         failures += addTest(
-                new BigDecimal("-85070591730234615847396907784232501250"),
-                BigDecimal.valueOf(-1),
-                new BigDecimal("-85070591730234615847396907784232501251"));
+                new Decimal("-85070591730234615847396907784232501250"),
+                Decimal.valueOf(-1),
+                new Decimal("-85070591730234615847396907784232501251"));
         failures += addTest(
-                new BigDecimal("-85070591730234615847396907784232501249"),
-                BigDecimal.valueOf(1),
-                new BigDecimal("-85070591730234615847396907784232501248"));
+                new Decimal("-85070591730234615847396907784232501249"),
+                Decimal.valueOf(1),
+                new Decimal("-85070591730234615847396907784232501248"));
         failures += addTest(
-                new BigDecimal("147573952589676412927"),
-                BigDecimal.valueOf(Integer.MAX_VALUE),
-                new BigDecimal("147573952591823896574"));
+                new Decimal("147573952589676412927"),
+                Decimal.valueOf(Integer.MAX_VALUE),
+                new Decimal("147573952591823896574"));
         failures += addTest(
-                new BigDecimal("-147573952589676412927"),
-                BigDecimal.valueOf(Integer.MAX_VALUE),
-                new BigDecimal("-147573952587528929280"));
+                new Decimal("-147573952589676412927"),
+                Decimal.valueOf(Integer.MAX_VALUE),
+                new Decimal("-147573952587528929280"));
         failures += addTest(
-                new BigDecimal("79228162514264337593543950335"),
-                BigDecimal.valueOf(999),
-                new BigDecimal("79228162514264337593543951334"));
+                new Decimal("79228162514264337593543950335"),
+                Decimal.valueOf(999),
+                new Decimal("79228162514264337593543951334"));
         failures += addTest(
-                new BigDecimal("79228162514264337593543950335"),
-                BigDecimal.valueOf(Integer.MAX_VALUE / 2),
-                new BigDecimal("79228162514264337594617692158"));
+                new Decimal("79228162514264337593543950335"),
+                Decimal.valueOf(Integer.MAX_VALUE / 2),
+                new Decimal("79228162514264337594617692158"));
         failures += addTest(
-                new BigDecimal("79228162514264337593543950335"),
-                BigDecimal.valueOf(Integer.MIN_VALUE / 2),
-                new BigDecimal("79228162514264337592470208511"));
+                new Decimal("79228162514264337593543950335"),
+                Decimal.valueOf(Integer.MIN_VALUE / 2),
+                new Decimal("79228162514264337592470208511"));
         failures += addTest(
-                new BigDecimal("-79228162514264337593543950335"),
-                BigDecimal.valueOf(Integer.MAX_VALUE / 2),
-                new BigDecimal("-79228162514264337592470208512"));
+                new Decimal("-79228162514264337593543950335"),
+                Decimal.valueOf(Integer.MAX_VALUE / 2),
+                new Decimal("-79228162514264337592470208512"));
         failures += addTest(
-                new BigDecimal("79228162514264337593543950335"),
-                BigDecimal.valueOf(-(Integer.MIN_VALUE / 2)),
-                new BigDecimal("79228162514264337594617692159"));
+                new Decimal("79228162514264337593543950335"),
+                Decimal.valueOf(-(Integer.MIN_VALUE / 2)),
+                new Decimal("79228162514264337594617692159"));
         failures += addTest(
-                new BigDecimal("79228162514264337593543950335"),
-                BigDecimal.valueOf(Long.MAX_VALUE / 2),
-                new BigDecimal("79228162518876023611971338238"));
+                new Decimal("79228162514264337593543950335"),
+                Decimal.valueOf(Long.MAX_VALUE / 2),
+                new Decimal("79228162518876023611971338238"));
         failures += addTest(
-                new BigDecimal("79228162514264337593543950335"),
-                BigDecimal.valueOf(Long.MIN_VALUE / 2),
-                new BigDecimal("79228162509652651575116562431"));
+                new Decimal("79228162514264337593543950335"),
+                Decimal.valueOf(Long.MIN_VALUE / 2),
+                new Decimal("79228162509652651575116562431"));
         failures += addTest(
-                new BigDecimal("-79228162514264337593543950335"),
-                BigDecimal.valueOf(Long.MAX_VALUE / 2),
-                new BigDecimal("-79228162509652651575116562432"));
+                new Decimal("-79228162514264337593543950335"),
+                Decimal.valueOf(Long.MAX_VALUE / 2),
+                new Decimal("-79228162509652651575116562432"));
         failures += addTest(
-                new BigDecimal("79228162514264337593543950335"),
-                BigDecimal.valueOf(-(Long.MIN_VALUE / 2)),
-                new BigDecimal("79228162518876023611971338239"));
+                new Decimal("79228162514264337593543950335"),
+                Decimal.valueOf(-(Long.MIN_VALUE / 2)),
+                new Decimal("79228162518876023611971338239"));
         failures += addTest(
-                new BigDecimal("-9223372036854775808"),
-                BigDecimal.valueOf(1),
-                new BigDecimal("-9223372036854775807"));
+                new Decimal("-9223372036854775808"),
+                Decimal.valueOf(1),
+                new Decimal("-9223372036854775807"));
         failures += addTest(
-                new BigDecimal("-9223372036854775808"),
-                BigDecimal.valueOf(Long.MAX_VALUE / 2),
-                new BigDecimal("-4611686018427387905"));
+                new Decimal("-9223372036854775808"),
+                Decimal.valueOf(Long.MAX_VALUE / 2),
+                new Decimal("-4611686018427387905"));
         failures += addTest(
-                new BigDecimal("9223372036854775808"),
-                BigDecimal.valueOf(-1),
-                new BigDecimal("9223372036854775807"));
+                new Decimal("9223372036854775808"),
+                Decimal.valueOf(-1),
+                new Decimal("9223372036854775807"));
         failures += addTest(
-                new BigDecimal("9223372036854775808"),
-                BigDecimal.valueOf(-Long.MAX_VALUE / 2),
-                new BigDecimal("4611686018427387905"));
+                new Decimal("9223372036854775808"),
+                Decimal.valueOf(-Long.MAX_VALUE / 2),
+                new Decimal("4611686018427387905"));
 
         return failures;
     }
 
     private static int testRoundingFromBigInteger(BigInteger bi, int scale, MathContext mc) {
         int failures = 0;
-        BigDecimal bd1 = new BigDecimal(bi, scale, mc);
-        BigDecimal bd2 = (new BigDecimal(bi, scale)).round(mc);
+        Decimal bd1 = new Decimal(bi, scale, mc);
+        Decimal bd2 = (new Decimal(bi, scale)).round(mc);
         if (!bd1.equals(bd2)) {
-            System.out.println("new BigDecimal(BigInteger,int,MathContext):" +
+            System.out.println("new Decimal(BigInteger,int,MathContext):" +
                     "BigInteger == " +
                     bi + ";  scale == " + scale + "; result == " +
                     bd1 + "; expected  == " +
@@ -205,10 +204,10 @@ public class RangeTests {
 
     private static int minLongConstructorTest(MathContext mc) {
         int failures = 0;
-        BigDecimal bd1 = new BigDecimal(Long.MIN_VALUE, mc);
-        BigDecimal bd2 = new BigDecimal(Long.MIN_VALUE).round(mc);
+        Decimal bd1 = new Decimal(Long.MIN_VALUE, mc);
+        Decimal bd2 = new Decimal(Long.MIN_VALUE).round(mc);
         if (!bd1.equals(bd2)) {
-            System.out.println("new BigDecimal(long,MathContext):" +
+            System.out.println("new Decimal(long,MathContext):" +
                     "long == " +
                     Long.MIN_VALUE + "; result == " +
                     bd1 + "; expected  == " +

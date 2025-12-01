@@ -26,8 +26,6 @@
 package com.becker.freelance.math;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 
 import static com.becker.freelance.math.Float16Consts.*;
 import static java.lang.Float.float16ToFloat;
@@ -435,7 +433,7 @@ public final class Float16
         // Trial conversion from String -> double. Do quick range
         // check for a pass-through, then check for possibility of
         // double-rounding and another conversion using
-        // BigInteger/BigDecimal, if needed.
+        // BigInteger/Decimal, if needed.
         double trialResult = Double.parseDouble(s);
         // After this point, the trimmed string is known to be
         // syntactically well-formed; should be able to operate on
@@ -449,11 +447,11 @@ public final class Float16
             return valueOf(trialResult);
         } else {
             // If double rounding is not ruled out, re-parse, create a
-            // BigDecimal to hold the exact numerical value, round and
+            // Decimal to hold the exact numerical value, round and
             // return.
 
             // Remove any trailing FloatTypeSuffix (f|F|d|D), not
-            // recognized by BigDecimal (or BigInteger)
+            // recognized by Decimal (or BigInteger)
             int sLength = s.length();
             if (Character.isAlphabetic(s.charAt(sLength - 1))) {
                 s = s.substring(0, sLength - 1);
@@ -467,10 +465,10 @@ public final class Float16
             boolean hexInput = (s.length() >= 3) && isX(s.charAt(isSigned ? 2 : 1));
 
             if (!hexInput) { // Decimal input
-                // Grammar of BigDecimal string input is compatible
+                // Grammar of Decimal string input is compatible
                 // with the decimal grammar for this method after
                 // trimming and removal of any FloatTypeSuffix.
-                return valueOf(new BigDecimal(s));
+                return valueOf(new Decimal(s));
             } else {
                 // For hex inputs, convert the significand and
                 // exponent portions separately.
@@ -520,22 +518,22 @@ public final class Float16
                 //
                 // normalizedSignificand * 2^(adjustedExponent)
                 //
-                // Given the set of methods on BigDecimal, in
+                // Given the set of methods on Decimal, in
                 // particular pow being limited to non-negative
                 // exponents, this is computed either by multiplying
-                // by BigDecimal.TWO raised to the adjustedExponent or
-                // dividing by BigDecimal.TWO raised to the negated
+                // by Decimal.TWO raised to the adjustedExponent or
+                // dividing by Decimal.TWO raised to the negated
                 // adjustedExponent.
 
-                BigDecimal normalizedSignficand =
-                        new BigDecimal(new BigInteger(hexSignificand.toString(), 16));
+                Decimal normalizedSignficand =
+                        new Decimal(new BigInteger(hexSignificand.toString(), 16));
 
                 // Each hex fraction digit is four bits
                 int adjustedExponent = rawExponent - 4 * fractionDigits;
 
-                BigDecimal convertedStringValue = (adjustedExponent >= 0) ?
-                        normalizedSignficand.multiply(BigDecimal.TWO.pow(adjustedExponent)) :
-                        normalizedSignficand.divide(BigDecimal.TWO.pow(-adjustedExponent));
+                Decimal convertedStringValue = (adjustedExponent >= 0) ?
+                        normalizedSignficand.multiply(Decimal.TWO.pow(adjustedExponent)) :
+                        normalizedSignficand.divide(Decimal.TWO.pow(-adjustedExponent));
                 return valueOf(convertedStringValue);
             }
         }
@@ -563,13 +561,13 @@ public final class Float16
     }
 
     /**
-     * {@return a {@link Float16} value rounded from the {@link BigDecimal}
+     * {@return a {@link Float16} value rounded from the {@link Decimal}
      * argument using the round to nearest rounding policy}
      *
-     * @param v a {@link BigDecimal}
+     * @param v a {@link Decimal}
      */
-    public static Float16 valueOf(BigDecimal v) {
-        return BigDecimalConversion.float16Value(v);
+    public static Float16 valueOf(Decimal v) {
+        return DecimalConversion.float16Value(v);
     }
 
     /**
@@ -2181,8 +2179,8 @@ public final class Float16
 
     // TODO: Host this functionality in this class for now until
     // java.base has Float16 support and this logic can be moved to
-    // BigDecimal.
-    private class BigDecimalConversion {
+    // Decimal.
+    private class DecimalConversion {
         /*
          * Let l = log_2(10).
          * Then, L < l < L + ulp(L) / 2, that is, L = roundTiesToEven(l).
@@ -2202,7 +2200,7 @@ public final class Float16
                 Float16.valueOf(1_000), Float16.valueOf(10_000)
         };
 
-        public static Float16 float16Value(BigDecimal bd) {
+        public static Float16 float16Value(Decimal bd) {
             int scale = bd.scale();
             BigInteger unscaledValue = bd.unscaledValue();
 
@@ -2233,8 +2231,8 @@ public final class Float16
             return BigInteger.TEN.pow(scale);
         }
 
-        private static Float16 fullFloat16Value(BigDecimal bd) {
-            if (BigDecimal.ZERO.compareTo(bd) == 0) {
+        private static Float16 fullFloat16Value(Decimal bd) {
+            if (Decimal.ZERO.compareTo(bd) == 0) {
                 return ZERO;
             }
             BigInteger w = bd.unscaledValue().abs();

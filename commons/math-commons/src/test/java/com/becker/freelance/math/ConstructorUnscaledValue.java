@@ -24,22 +24,21 @@ package com.becker.freelance.math;/*
 /*
  * @test
  * @bug 8282252
- * @summary Test constructors of BigDecimal to replace BigInteger subclasses
+ * @summary Test constructors of Decimal to replace BigInteger subclasses
  */
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+
 import java.math.MathContext;
 
 public class ConstructorUnscaledValue {
     public static void main(String... args) {
         TestBigInteger tbi = new TestBigInteger(BigInteger.ONE);
-        // Create BigDecimal's using each of the three constructors
+        // Create Decimal's using each of the three constructors
         // with guards on the class of unscaledValue
-        BigDecimal[] values = {
-                new BigDecimal(tbi),
-                new BigDecimal(tbi, 2),
-                new BigDecimal(tbi, 3, MathContext.DECIMAL32),
+        Decimal[] values = {
+                new Decimal(tbi),
+                new Decimal(tbi, 2),
+                new Decimal(tbi, 3, MathContext.DECIMAL32),
         };
 
         for (var bd : values) {

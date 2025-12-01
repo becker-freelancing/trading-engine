@@ -27,31 +27,31 @@ package com.becker.freelance.math;/*
  * @summary Test for the rounding behavior of negate(MathContext)
  */
 
-import java.math.BigDecimal;
+
 import java.math.MathContext;
 import java.math.RoundingMode;
 
 public class NegateTests {
 
-    static BigDecimal negateThenRound(BigDecimal bd, MathContext mc) {
+    static Decimal negateThenRound(Decimal bd, MathContext mc) {
         return bd.negate().plus(mc);
     }
 
 
-    static BigDecimal absThenRound(BigDecimal bd, MathContext mc) {
+    static Decimal absThenRound(Decimal bd, MathContext mc) {
         return bd.abs().plus(mc);
     }
 
 
-    static int negateTest(BigDecimal[][] testCases, MathContext mc) {
+    static int negateTest(Decimal[][] testCases, MathContext mc) {
         int failures = 0;
 
-        for (BigDecimal[] testCase : testCases) {
+        for (Decimal[] testCase : testCases) {
 
-            BigDecimal bd = testCase[0];
-            BigDecimal neg1 = bd.negate(mc);
-            BigDecimal neg2 = negateThenRound(bd, mc);
-            BigDecimal expected = testCase[1];
+            Decimal bd = testCase[0];
+            Decimal neg1 = bd.negate(mc);
+            Decimal neg2 = negateThenRound(bd, mc);
+            Decimal expected = testCase[1];
 
             if (!neg1.equals(expected)) {
                 failures++;
@@ -66,8 +66,8 @@ public class NegateTests {
             }
 
             // Test abs consistency
-            BigDecimal abs = bd.abs(mc);
-            BigDecimal expectedAbs = absThenRound(bd, mc);
+            Decimal abs = bd.abs(mc);
+            Decimal expectedAbs = absThenRound(bd, mc);
             if (!abs.equals(expectedAbs)) {
                 failures++;
                 System.err.println("(" + bd + ").abs(" + mc + ")  => " +
@@ -81,17 +81,17 @@ public class NegateTests {
 
     static int negateTests() {
         int failures = 0;
-        BigDecimal[][] testCasesCeiling = {
-                {new BigDecimal("1.3"), new BigDecimal("-1")},
-                {new BigDecimal("-1.3"), new BigDecimal("2")},
+        Decimal[][] testCasesCeiling = {
+                {new Decimal("1.3"), new Decimal("-1")},
+                {new Decimal("-1.3"), new Decimal("2")},
         };
 
         failures += negateTest(testCasesCeiling,
                 new MathContext(1, RoundingMode.CEILING));
 
-        BigDecimal[][] testCasesFloor = {
-                {new BigDecimal("1.3"), new BigDecimal("-2")},
-                {new BigDecimal("-1.3"), new BigDecimal("1")},
+        Decimal[][] testCasesFloor = {
+                {new Decimal("1.3"), new Decimal("-2")},
+                {new Decimal("-1.3"), new Decimal("1")},
         };
 
         failures += negateTest(testCasesFloor,
