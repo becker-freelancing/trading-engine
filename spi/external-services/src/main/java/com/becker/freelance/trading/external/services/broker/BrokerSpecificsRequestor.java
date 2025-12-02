@@ -10,4 +10,6 @@ public interface BrokerSpecificsRequestor extends ExternalService {
     public Integer getMaxBrokerFractionPlaces();
 
     public TradingCalculator getTradingCalculator(EurUsdRequestor eurUsdRequestor);
+
+    boolean doesOrderTypeAffectExecutionCost();
 }

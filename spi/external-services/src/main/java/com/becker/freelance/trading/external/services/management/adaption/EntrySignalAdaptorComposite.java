@@ -22,6 +22,11 @@ public class EntrySignalAdaptorComposite implements EntrySignalAdaptor {
     }
 
     @Override
+    public boolean isActive(ManagementEnvironmentProvider managementEnvironmentProvider) {
+        return !adaptors.isEmpty();
+    }
+
+    @Override
     public String toString() {
         return "EntrySignalAdaptors:\n" + String.join("\n\t* ", adaptors.stream().map(Object::getClass).map(Class::getName).toList());
     }

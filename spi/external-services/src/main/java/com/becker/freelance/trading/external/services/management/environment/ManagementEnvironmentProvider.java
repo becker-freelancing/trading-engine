@@ -44,4 +44,6 @@ public interface ManagementEnvironmentProvider extends TimeChangeListener, Exter
     public LocalDateTime currentTime();
 
     TimeSeriesEntry getCurrentPrice(Pair pair);
+
+    boolean doesOrderTypeAffectExecutionCost();
 }

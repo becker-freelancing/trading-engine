@@ -116,4 +116,6 @@ public interface Pair {
                 .findAny()
                 .orElseThrow(() -> new IllegalStateException("Could not find pair " + shortName + " in pairs " + PairProvider.allPairs()));
     }
+
+    int precision();
 }

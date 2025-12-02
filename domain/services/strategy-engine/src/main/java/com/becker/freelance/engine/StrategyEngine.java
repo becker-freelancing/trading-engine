@@ -66,7 +66,6 @@ public class StrategyEngine {
         this.resetListener = resetListener;
 
         ExternalServiceRegistry externalServiceRegistry = ExternalServiceRegistry.globalServiceRegistry();
-        this.entrySignalAdaptor = externalServiceRegistry.requireServiceBuilder(EntrySignalAdaptorBuilder.class).build();
         this.entrySignalValidator = externalServiceRegistry.requireServiceBuilder(EntrySignalValidatorBuilder.class).build(CompositeStrategy.ALL_MATCH);
         BrokerSpecificsRequestor brokerSpecificsRequestor = externalServiceRegistry.requireServiceBuilder(BrokerSpecificsRequestorBuilder.class).build();
         TradingFeeCalculator tradingFeeCalculator = externalServiceRegistry.requireServiceBuilder(TradingFeeCalculatorBuilder.class).build(new TradingFeeCalculatorBuilderParams(
@@ -84,6 +83,7 @@ public class StrategyEngine {
                         tradingFeeCalculator
                 ));
         timeChangeListenerConsumer.accept(this.environmentProvider);
+        this.entrySignalAdaptor = externalServiceRegistry.requireServiceBuilder(EntrySignalAdaptorBuilder.class).build(environmentProvider);
         this.strategy = strategySupplier.get(pair, brokerSpecificsRequestor.getTradingCalculator(eurUsdRequestor), scopedExternalServiceRegistry);
         this.strategy.setOpenPositionRequestor(tradeExecutor);
         this.strategy.beforeFirstBar(strategyInitiator);

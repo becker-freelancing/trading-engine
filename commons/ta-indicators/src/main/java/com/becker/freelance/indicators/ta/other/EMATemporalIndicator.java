@@ -17,6 +17,8 @@ public class EMATemporalIndicator extends CachableIndicator<LocalDateTime, Decim
     private final boolean allowExternalStartValue;
     private final Decimal invertedAlpha;
 
+    private final int precision;
+
     public EMATemporalIndicator(TemporalIndicator<Decimal> base, int period, boolean allowUsingLastAvailablePrice, boolean allowExternalStartValue) {
         super(1000);
         this.base = base;
@@ -25,6 +27,7 @@ public class EMATemporalIndicator extends CachableIndicator<LocalDateTime, Decim
         this.allowUsingLastAvailablePrice = allowUsingLastAvailablePrice;
         this.allowExternalStartValue = allowExternalStartValue;
         this.invertedAlpha = Decimal.ONE.subtract(alpha);
+        this.precision = base.getBarSeries().getPair().precision();
     }
 
     @Override
@@ -45,7 +48,7 @@ public class EMATemporalIndicator extends CachableIndicator<LocalDateTime, Decim
         Decimal current = base.getValue(index);
         Decimal lastEma = getValue(getBarSeries().getLastTime(index));
 
-        return alpha.multiply(current).add(invertedAlpha.multiply(lastEma));
+        return alpha.multiply(current).add(invertedAlpha.multiply(lastEma)).round(precision);
     }
 
     @Override

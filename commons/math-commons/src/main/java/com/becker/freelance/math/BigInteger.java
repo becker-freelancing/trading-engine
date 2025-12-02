@@ -1154,9 +1154,9 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         // If -MAX_CONSTANT < val < MAX_CONSTANT, return stashed constant
         if (val == 0)
             return ZERO;
-        if (val > 0 && val <= MAX_CONSTANT)
+        if (val > 0 && val <= MAX_CONSTANT && posConst[(int) val] != null)
             return posConst[(int) val];
-        else if (val < 0 && val >= -MAX_CONSTANT)
+        else if (val < 0 && val >= -MAX_CONSTANT && negConst[(int) -val] != null)
             return negConst[(int) -val];
 
         return new BigInteger(val);

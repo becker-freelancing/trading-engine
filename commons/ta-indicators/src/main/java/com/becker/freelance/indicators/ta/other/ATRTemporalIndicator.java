@@ -17,6 +17,8 @@ public class ATRTemporalIndicator extends CachableIndicator<LocalDateTime, Decim
     private final boolean allowUsingLastAvailablePrice;
     private final boolean allowExternalStartValue;
 
+    private final int precision;
+
     public ATRTemporalIndicator(TemporalBarSeries base, int period, boolean allowUsingLastAvailablePrice, boolean allowExternalStartValue) {
         super(1000);
         this.base = base;
@@ -24,6 +26,7 @@ public class ATRTemporalIndicator extends CachableIndicator<LocalDateTime, Decim
         this.decimalPeriod = Decimal.valueOf(period);
         this.allowUsingLastAvailablePrice = allowUsingLastAvailablePrice;
         this.allowExternalStartValue = allowExternalStartValue;
+        this.precision = base.getPair().precision();
     }
 
     @Override
@@ -53,7 +56,7 @@ public class ATRTemporalIndicator extends CachableIndicator<LocalDateTime, Decim
 
         Decimal prevAtr = getValue(getBarSeries().getLastTime(index));
 
-        return prevAtr.multiply(period - 1).add(tr).divide(decimalPeriod);
+        return prevAtr.multiply(period - 1).add(tr).divide(decimalPeriod).round(precision);
     }
 
     private Decimal max(Decimal d1, Decimal d2) {

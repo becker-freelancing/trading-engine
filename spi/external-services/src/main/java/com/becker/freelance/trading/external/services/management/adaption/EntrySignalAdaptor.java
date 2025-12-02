@@ -7,4 +7,6 @@ import com.becker.freelance.trading.external.services.registry.ExternalService;
 public interface EntrySignalAdaptor extends ExternalService {
 
     public EntrySignalBuilder adapt(ManagementEnvironmentProvider environmentProvider, EntrySignalBuilder entrySignal);
+
+    public boolean isActive(ManagementEnvironmentProvider managementEnvironmentProvider);
 }

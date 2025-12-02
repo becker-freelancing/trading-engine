@@ -17,8 +17,10 @@ public abstract class AbstractPair implements Pair {
     private final Decimal leverageFactor;
     private final Decimal sizeMultiplication;
 
+    private final int precision;
+
     protected AbstractPair(String baseCurrency, String counterCurrency, long timeInMinutes, String technicalName, Decimal profitPerPointForOneContract,
-                        Decimal minOrderSize, Decimal minStop, Decimal minLimit, Decimal leverageFactor, Decimal sizeMultiplication) {
+                           Decimal minOrderSize, Decimal minStop, Decimal minLimit, Decimal leverageFactor, Decimal sizeMultiplication, int precision) {
         this.baseCurrency = baseCurrency;
         this.counterCurrency = counterCurrency;
         this.timeInMinutes = timeInMinutes;
@@ -29,6 +31,7 @@ public abstract class AbstractPair implements Pair {
         this.minLimit = minLimit;
         this.leverageFactor = leverageFactor;
         this.sizeMultiplication = sizeMultiplication;
+        this.precision = precision;
     }
 
 
@@ -93,6 +96,11 @@ public abstract class AbstractPair implements Pair {
     @Override
     public Decimal sizeMultiplication() {
         return sizeMultiplication;
+    }
+
+    @Override
+    public int precision() {
+        return precision;
     }
 
     @Override

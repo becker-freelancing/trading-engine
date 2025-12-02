@@ -60,7 +60,7 @@ public record TimeSeriesEntry(LocalDateTime time, Decimal openBid, Decimal openA
 
     @Override
     public String toString() {
-        return String.format("TimeSeriesEntry(Time: %s, Pair: %s, Open: %f, High: %f, Low: %f, Close: %f, Volume: %f, Trades: %f)",
+        return String.format("TimeSeriesEntry(Time: %s, Pair: %s, Open: %s, High: %s, Low: %s, Close: %s, Volume: %s, Trades: %s)",
                 time, pair.technicalName(), openAsk, highAsk, lowAsk, closeAsk, volume, trades);
     }
 
