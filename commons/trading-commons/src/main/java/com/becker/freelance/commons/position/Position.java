@@ -8,6 +8,7 @@ import com.becker.freelance.commons.timeseries.TimeSeriesEntry;
 import com.becker.freelance.math.Decimal;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public interface Position extends Cloneable {
 
@@ -44,6 +45,26 @@ public interface Position extends Cloneable {
     public String getId();
 
     public TradeableMarketRegime getOpenMarketRegime();
+
+    public boolean isForceClosed();
+
+    public void forceClose(TimeSeriesEntry closePrice);
+
+    public Optional<Decimal> forceClosePrice();
+
+    public Optional<LocalDateTime> forceCloseTime();
+
+    public default LocalDateTime getCloseTime() {
+        return getStopOrder().executionTime().orElseGet(() -> // Either closed by Stop
+                getLimitOrder().executionTime().orElseGet(() -> // Or by Limit
+                        forceCloseTime().orElseThrow(() -> new IllegalStateException("Position not closed yet")))); // Or force closed by strategy
+    }
+
+    public default Decimal getClosePrice() {
+        return getStopOrder().executionPrice().orElseGet(() -> // Either closed by Stop
+                getLimitOrder().executionPrice().orElseGet(() -> // Or by Limit
+                        forceClosePrice().orElseThrow(() -> new IllegalStateException("Position not closed yet")))); // Or force closed by strategy
+    }
 
     public default Position cloneWithSize(Decimal size) {
         Position clone = clone();

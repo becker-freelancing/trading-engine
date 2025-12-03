@@ -63,7 +63,7 @@ final class DefaultMarketOrder implements MarketOrder {
             throw new IllegalStateException("Order is already executed");
         }
         this.executionPrice = currentPrice.getClosePriceForDirection(direction());
-        this.executionTime = currentPrice.time();
+        this.executionTime = currentPrice.closeTime();
     }
 
     @Override

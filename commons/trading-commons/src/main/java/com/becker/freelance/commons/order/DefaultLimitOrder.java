@@ -82,7 +82,7 @@ final class DefaultLimitOrder implements LimitOrder {
         }
         if (canBeExecuted(currentPrice)) {
             this.executionPrice = orderPrice;
-            this.executionTime = currentPrice.time();
+            this.executionTime = currentPrice.closeTime();
         }
     }
 

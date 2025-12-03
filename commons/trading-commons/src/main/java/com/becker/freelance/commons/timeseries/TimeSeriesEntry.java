@@ -10,6 +10,10 @@ public record TimeSeriesEntry(LocalDateTime time, Decimal openBid, Decimal openA
                               Decimal lowBid, Decimal lowAsk, Decimal closeBid, Decimal closeAsk, Decimal volume,
                               Decimal trades, Pair pair) {
 
+    public LocalDateTime closeTime() {
+        return time.plus(pair.toDuration()).minusMinutes(1);
+    }
+
     public Decimal getCloseMid() {
         return closeAsk().add(closeBid()).divide(Decimal.TWO);
     }

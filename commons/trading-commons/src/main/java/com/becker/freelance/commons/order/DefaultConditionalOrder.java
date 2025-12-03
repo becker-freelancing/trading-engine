@@ -54,6 +54,10 @@ final class DefaultConditionalOrder implements ConditionalOrder {
 
     @Override
     public Optional<Decimal> executionPrice() {
+        if (delegate instanceof MarketOrder && delegate.executionPrice().isPresent()) {
+            // If delegate was a market order it was executed on the threshold price not on the close price of the current candle
+            return Optional.of(thresholdPrice);
+        }
         return delegate.executionPrice();
     }
 

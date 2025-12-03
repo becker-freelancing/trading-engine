@@ -159,6 +159,7 @@ public class BacktestEngine {
 
     private void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.warn("!!!! Stopping the Application. DO NOT FORCE STOP !!!!");
             onBacktestFinishedCallback.onAllFinished();
             executor.shutdownNow();
         }, "Shutdown-BacktestApp-0"));

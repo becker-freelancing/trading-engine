@@ -19,6 +19,9 @@ public class Trade implements Comparable<Trade> {
     private Decimal closeLevel;
     private Decimal openFee;
     private Decimal closeFee;
+    private boolean forceClosed;
+
+    private Decimal totalFee;
     private Decimal size;
     private Direction direction;
     private Decimal conversionRate;
@@ -36,11 +39,13 @@ public class Trade implements Comparable<Trade> {
                  Decimal closeLevel,
                  Decimal openFee,
                  Decimal closeFee,
+                 Decimal totalFee,
                  Decimal size,
                  Direction direction,
                  Decimal conversionRate,
                  PositionBehaviour positionBehaviour,
-                 TradeableMarketRegime openMarketRegime) {
+                 TradeableMarketRegime openMarketRegime,
+                 boolean forceClosed) {
         this.relatedPositionId = relatedPositionId;
         this.openTime = openTime;
         this.closeTime = closeTime;
@@ -48,6 +53,7 @@ public class Trade implements Comparable<Trade> {
         this.profitInEuroWithFees = profitInEuroWithFees;
         this.openLevel = openLevel;
         this.closeLevel = closeLevel;
+        this.totalFee = totalFee;
         this.size = size;
         this.direction = direction;
         this.conversionRate = conversionRate;
@@ -55,6 +61,7 @@ public class Trade implements Comparable<Trade> {
         this.openMarketRegime = openMarketRegime;
         this.openFee = openFee;
         this.closeFee = closeFee;
+        this.forceClosed = forceClosed;
     }
 
     public LocalDateTime getOpenTime() {
@@ -89,11 +96,15 @@ public class Trade implements Comparable<Trade> {
         return direction;
     }
 
+    public boolean isForceClosed() {
+        return forceClosed;
+    }
+
     public Decimal getConversionRate() {
         return conversionRate;
     }
 
-    public PositionBehaviour getPositionType() {
+    public PositionBehaviour getPositionBehaviour() {
         return positionBehaviour;
     }
 
@@ -111,6 +122,10 @@ public class Trade implements Comparable<Trade> {
 
     public String getRelatedPositionId() {
         return relatedPositionId;
+    }
+
+    public Decimal getTotalFee() {
+        return totalFee;
     }
 
     @Override
